@@ -229,6 +229,7 @@
 </div>
 
 <div class="m-4">
+	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 	{@html htmlString}
 </div>
 
