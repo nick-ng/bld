@@ -1,0 +1,11 @@
+{
+	"[plaintext]": {
+		"editor.formatOnSave": false,
+		"editor.formatOnPaste": false,
+		"editor.unicodeHighlight.ambiguousCharacters": false,
+		"editor.unicodeHighlight.invisibleCharacters": false,
+		"files.trimTrailingWhitespace": false,
+		"editor.trimAutoWhitespace": false
+	},
+	"eslint.validate": ["*"]
+}
