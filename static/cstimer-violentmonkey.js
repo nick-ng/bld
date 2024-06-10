@@ -139,7 +139,7 @@
 			return false;
 		}
 
-		displayElements.sessionCount = makeElement('div', displayElements.displayRoot, 'Session: 0', {
+		displayElements.sessionCount = makeElement('div', displayElements.displayRoot, 'Today: 0', {
 			id: `session_count_${ID}`,
 			role: 'button'
 		});
@@ -167,6 +167,10 @@
 				width: max-content;
 				text-align: left;
 				}
+
+				#display_root_${ID} *[role=button] {
+					cursor: pointer;
+				}
 			`,
 			{ id: `style_${ID}` }
 		);
@@ -178,7 +182,7 @@
 		stats.session.count = getCurrentNumber() - stats.session.countAdjustment;
 		updateLastNSolves();
 
-		displayElements.sessionCount.textContent = `Session: ${stats.session.count}`;
+		displayElements.sessionCount.textContent = `Today: ${stats.session.count}`;
 
 		if (stats.lastNSolves.count === 0) {
 			displayElements.dnfRate.textContent = '0/0';
