@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.13
+// @version     1.14
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -74,8 +74,9 @@
 		}
 	};
 
-	stats.session.countAdjustment = getCurrentNumber();
 	const makeEventHandlers = () => {
+		stats.session.countAdjustment = getCurrentNumber();
+
 		displayElements.sessionCount.addEventListener('click', (event) => {
 			if (event.shiftKey) {
 				const newValue = prompt('Enter new value');
@@ -130,7 +131,7 @@
 		stats.lastNSolves.dnfs = dnfs;
 	};
 
-	function createDisplay() {
+	const createDisplay = () => {
 		displayElements.displayRoot = makeElement('div', 'stats', null, {
 			id: `display_root_${ID}`
 		});
@@ -171,21 +172,9 @@
 		);
 
 		return true;
-	}
+	};
 
-	const createDisplayIntervalIdKey = `${ID}-create-display-interval`;
-	if (window[createDisplayIntervalIdKey]) {
-		clearInterval(window[createDisplayIntervalIdKey]);
-	}
-
-	window[createDisplayIntervalIdKey] = setInterval(() => {
-		if (createDisplay()) {
-			clearInterval(window[createDisplayIntervalIdKey]);
-			makeEventHandlers();
-		}
-	}, 100);
-
-	function updateDisplay() {
+	const updateDisplay = () => {
 		stats.session.count = getCurrentNumber() - stats.session.countAdjustment;
 		updateLastNSolves();
 
@@ -196,12 +185,24 @@
 		} else {
 			displayElements.dnfRate.textContent = `${stats.lastNSolves.count - stats.lastNSolves.dnfs}/${stats.lastNSolves.count} (${((1 - stats.lastNSolves.dnfs / stats.lastNSolves.count) * 100).toFixed(0)}%)`;
 		}
+	};
+
+	setTimeout(updateDisplay, 2000);
+
+	const createDisplayIntervalIdKey = `${ID}-create-display-interval`;
+	if (window[createDisplayIntervalIdKey]) {
+		clearInterval(window[createDisplayIntervalIdKey]);
 	}
 
-	const displayUpdateIntervalIdKey = `${ID}-update-display-interval`;
-	if (window[displayUpdateIntervalIdKey]) {
-		clearInterval(window[displayUpdateIntervalIdKey]);
-	}
+	window[createDisplayIntervalIdKey] = setInterval(() => {
+		if (createDisplay()) {
+			clearInterval(window[createDisplayIntervalIdKey]);
+			makeEventHandlers();
+			updateDisplay();
+		}
+	}, 100);
 
-	window[displayUpdateIntervalIdKey] = setInterval(updateDisplay, 397);
+	window.addEventListener('keyup', () => {
+		setTimeout(updateDisplay, 500);
+	});
 })();
