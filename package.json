@@ -1,5 +1,5 @@
 {
-	"name": "add-cat",
+	"name": "bld",
 	"version": "0.0.1",
 	"private": true,
 	"scripts": {
@@ -35,8 +35,5 @@
 		"vite": "^5.2.13"
 	},
 	"type": "module",
-	"dependencies": {
-		"markdown-it": "^14.1.0",
-		"zod": "^3.23.8"
-	}
+	"dependencies": {}
 }
