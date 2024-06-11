@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.15
+// @version     1.16
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -256,6 +256,9 @@
 	}, 100);
 
 	window.addEventListener('keyup', () => {
+		setTimeout(updateDisplay, 500);
+	});
+	window.addEventListener('mouseup', () => {
 		setTimeout(updateDisplay, 500);
 	});
 })();
