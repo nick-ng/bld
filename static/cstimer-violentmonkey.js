@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.14
+// @version     1.15
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -12,6 +12,95 @@
 // ==/UserScript==
 (() => {
 	const ID = '32bc11b3-3759-4192-8ae1-cae4a4043685';
+	const oneDayMs = 86_400_000;
+	const localStorageKey = `local-storage-${ID}`;
+	const displayElements = {};
+	const stats = {
+		lastNSolves: {
+			count: 0,
+			dnfs: 0
+		}
+	};
+
+	const getDevData = () => {
+		try {
+			return JSON.parse(localStorage.getItem('devData')) || {};
+		} catch (e) {
+			console.warn('invalid saved data', e);
+		}
+
+		return {};
+	};
+
+	const savedData = getDevData()[localStorageKey] || {
+		sessions: {},
+		lastNSolvesMax: 50
+	};
+
+	const getCurrentSolveIndex = () => {
+		const a = [...document.querySelectorAll('div#stats tbody tr')];
+		const b = a.map((aa) => {
+			const d = aa.getAttribute('data');
+			return d ? parseInt(d, 10) : -1;
+		});
+
+		return Math.max(...b);
+	};
+
+	const getCurrentSessionName = () => {
+		const tempEl = document.querySelector('#stats select');
+		return tempEl.options[tempEl.selectedIndex].textContent;
+	};
+
+	const getStartOfTodayMs = () => {
+		const today = new Date();
+		today.setHours(4, 0, 0, 0); // 4 AM
+
+		return today.valueOf();
+	};
+
+	const updateSaveData = (newSaveData) => {
+		const nowMinusOneDayMs = Date.now() - oneDayMs;
+		Object.keys(newSaveData).reduce((prev, key) => {
+			// remove all expired session data before saving
+			if (nowMinusOneDayMs <= newSaveData[key].startOfDay) {
+				prev[key] = newSaveData[key];
+			}
+
+			return prev;
+		}, {});
+
+		const prevDevData = getDevData();
+		localStorage.setItem(
+			'devData',
+			JSON.stringify({
+				...prevDevData,
+				[localStorageKey]: newSaveData
+			})
+		);
+	};
+
+	const getSessionStats = (inputSessionName = null) => {
+		const sessionName = inputSessionName || getCurrentSessionName();
+
+		if (!savedData.sessions[sessionName]) {
+			savedData.sessions[sessionName] = {
+				countAdjustment: getCurrentSolveIndex(),
+				startOfDay: 0
+			};
+		}
+
+		if (Date.now() - oneDayMs > savedData.sessions[sessionName].startOfDay) {
+			savedData.sessions[sessionName] = {
+				countAdjustment: getCurrentSolveIndex(),
+				startOfDay: getStartOfTodayMs()
+			};
+
+			updateSaveData(savedData);
+		}
+
+		return savedData.sessions[sessionName];
+	};
 
 	/**
 	 * @returns {HTMLElement | null}
@@ -51,48 +140,7 @@
 		return tempElement;
 	};
 
-	const getCurrentNumber = () => {
-		const a = [...document.querySelectorAll('div#stats tbody tr')];
-		const b = a.map((aa) => {
-			const d = aa.getAttribute('data');
-			return d ? parseInt(d, 10) : -1;
-		});
-
-		return Math.max(...b);
-	};
-
-	const displayElements = {};
-	const stats = {
-		session: {
-			countAdjustment: 0,
-			count: 0
-		},
-		lastNSolves: {
-			max: 50,
-			count: 0,
-			dnfs: 0
-		}
-	};
-
-	const makeEventHandlers = () => {
-		stats.session.countAdjustment = getCurrentNumber();
-
-		displayElements.sessionCount.addEventListener('click', (event) => {
-			if (event.shiftKey) {
-				const newValue = prompt('Enter new value');
-
-				stats.session.countAdjustment = getCurrentNumber() - newValue;
-			} else {
-				stats.session.countAdjustment = getCurrentNumber();
-			}
-
-			updateDisplay();
-		});
-
-		window.setCount = (newValue = -12) => {
-			stats.session.countAdjustment = getCurrentNumber() - newValue;
-		};
-	};
+	const makeEventHandlers = () => {};
 
 	const updateLastNSolves = () => {
 		const statsTable = document.querySelector('#stats .stattl table');
@@ -121,7 +169,7 @@
 				}
 
 				counter++;
-				if (counter >= stats.lastNSolves.max) {
+				if (counter >= savedData.lastNSolvesMax) {
 					break;
 				}
 			}
@@ -139,8 +187,8 @@
 			return false;
 		}
 
-		displayElements.sessionCount = makeElement('div', displayElements.displayRoot, 'Today: 0', {
-			id: `session_count_${ID}`,
+		displayElements.todayCount = makeElement('div', displayElements.displayRoot, 'Today: 0', {
+			id: `today_count_${ID}`,
 			role: 'button'
 		});
 
@@ -155,6 +203,7 @@
 				#display_root_${ID} {
 				position: absolute;
 				bottom: 0;
+				background-color: #00000088;
 				left: calc(100%);
 				border: solid 1px #333333;
 				padding: 5px;
@@ -179,10 +228,10 @@
 	};
 
 	const updateDisplay = () => {
-		stats.session.count = getCurrentNumber() - stats.session.countAdjustment;
+		const todayCount = getCurrentSolveIndex() - getSessionStats().countAdjustment;
 		updateLastNSolves();
 
-		displayElements.sessionCount.textContent = `Today: ${stats.session.count}`;
+		displayElements.todayCount.textContent = `Today: ${todayCount}`;
 
 		if (stats.lastNSolves.count === 0) {
 			displayElements.dnfRate.textContent = '0/0';
