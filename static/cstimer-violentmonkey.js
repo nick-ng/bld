@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.16
+// @version     1.17
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -187,9 +187,16 @@
 			return false;
 		}
 
-		displayElements.todayCount = makeElement('div', displayElements.displayRoot, 'Today: 0', {
-			id: `today_count_${ID}`,
-			role: 'button'
+		displayElements.todayRow = makeElement('div', displayElements.displayRoot, null, {
+			id: `today_row_${ID}`
+		});
+
+		displayElements.todayToday = makeElement('div', displayElements.todayRow, 'Today:', {
+			id: `today_today_${ID}`
+		});
+
+		displayElements.todayCount = makeElement('div', displayElements.todayRow, '0', {
+			id: `today_count_${ID}`
 		});
 
 		displayElements.dnfRate = makeElement('div', displayElements.displayRoot, '', {
@@ -220,6 +227,13 @@
 				#display_root_${ID} *[role=button] {
 					cursor: pointer;
 				}
+
+				#today_row_${ID} {
+					display: flex;
+					flex-direction: row;
+					gap: 5px;
+					justify-content: space-between;
+				}
 			`,
 			{ id: `style_${ID}` }
 		);
@@ -231,7 +245,7 @@
 		const todayCount = getCurrentSolveIndex() - getSessionStats().countAdjustment;
 		updateLastNSolves();
 
-		displayElements.todayCount.textContent = `Today: ${todayCount}`;
+		displayElements.todayCount.textContent = `${todayCount}`;
 
 		if (stats.lastNSolves.count === 0) {
 			displayElements.dnfRate.textContent = '0/0';
