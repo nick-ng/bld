@@ -1,243 +1,277 @@
 <script lang="ts">
-	function rgbToHex(r: number, g: number, b: number): string {
-		return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+	import { onMount } from 'svelte';
+	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from './corner-colour';
+
+	const colours = Object.values(COLOURS);
+
+	let pieceAsticker1 = COLOURS.COLOUR_GREY;
+	let pieceAsticker2 = COLOURS.COLOUR_GREY;
+	let pieceAsticker3 = COLOURS.COLOUR_GREY;
+
+	let pieceBsticker1 = COLOURS.COLOUR_GREY;
+	let pieceBsticker2 = COLOURS.COLOUR_GREY;
+	let pieceBsticker3 = COLOURS.COLOUR_GREY;
+
+	let letterPairInput: HTMLInputElement | null = null;
+	let letterPair = '';
+	let message = 'a';
+	let messageTimeStamp = 0;
+
+	function getHtmlStringForLetterPair(lp: string): string {
+		const letters = lp.split('');
+
+		pieceAsticker1 = COLOURS.COLOUR_GREY;
+		pieceAsticker2 = COLOURS.COLOUR_GREY;
+		pieceAsticker3 = COLOURS.COLOUR_GREY;
+
+		pieceBsticker1 = COLOURS.COLOUR_GREY;
+		pieceBsticker2 = COLOURS.COLOUR_GREY;
+		pieceBsticker3 = COLOURS.COLOUR_GREY;
+
+		if (letters.length >= 1) {
+			const temp = getSpeffzCornerColour(letters[0]);
+
+			pieceAsticker1 = temp.a;
+			pieceAsticker2 = temp.b;
+			pieceAsticker3 = temp.c;
+		}
+
+		if (letters.length >= 2) {
+			const temp = getSpeffzCornerColour(letters[1]);
+
+			pieceBsticker1 = temp.a;
+			pieceBsticker2 = temp.b;
+			pieceBsticker3 = temp.c;
+		}
+
+		return makeHtmlString({
+			pieceAsticker1,
+			pieceAsticker2,
+			pieceAsticker3,
+			pieceBsticker1,
+			pieceBsticker2,
+			pieceBsticker3
+		});
 	}
 
-	const colourBlue = rgbToHex(0, 0, 255);
-	const colourOrange = rgbToHex(255, 153, 51);
-	const colourGreen = rgbToHex(0, 220, 0);
-	const colourRed = rgbToHex(255, 0, 0);
-	const colourWhite = rgbToHex(255, 255, 255);
-	const colourYellow = rgbToHex(255, 255, 0);
-	const colours = [colourBlue, colourGreen, colourOrange, colourRed, colourWhite, colourYellow];
+	$: htmlString = getHtmlStringForLetterPair(letterPair);
 
-	let pieceAsticker1 = colourWhite;
-	let pieceAsticker2 = colourWhite;
-	let pieceAsticker3 = colourWhite;
+	function focusLetterPairInput(event?: KeyboardEvent): void {
+		if (event && event.key !== 'Enter') {
+			return;
+		}
 
-	let pieceBsticker1 = colourWhite;
-	let pieceBsticker2 = colourWhite;
-	let pieceBsticker3 = colourWhite;
-
-	let htmlString = '';
-
-	const mainPx = 50;
-	const edgePx = mainPx / 2;
-	const betweenPx = 10;
-
-	function makeHtmlString({
-		pieceAsticker1,
-		pieceAsticker2,
-		pieceAsticker3,
-		pieceBsticker1,
-		pieceBsticker2,
-		pieceBsticker3
-	}: {
-		pieceAsticker1: string;
-		pieceAsticker2: string;
-		pieceAsticker3: string;
-		pieceBsticker1: string;
-		pieceBsticker2: string;
-		pieceBsticker3: string;
-	}): string {
-		return `
-		<div>
-			<div style="line-height: 0">
-				<div style="margin: 0;padding: 0;">
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceAsticker2};
-					width:${edgePx}px;
-					height:${mainPx}px;"></div>
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceAsticker1};
-					width:${mainPx}px;
-					height:${mainPx}px;
-					"></div>
-					<div style="display: inline-block; width:${betweenPx}px"></div>
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceBsticker1};
-					width:${mainPx}px;
-					height:${mainPx}px;
-					"></div>
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceBsticker3};
-					width:${edgePx}px;
-					height:${mainPx}px;"></div>
-				</div>
-				<div style="">
-					<div style="display: inline-block;width:${edgePx}px;"></div>
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceAsticker3};
-					width:${mainPx}px;
-					height:${edgePx}px;"></div>
-					<div style="display: inline-block; width:${betweenPx}px"></div>
-					<div style="display: inline-block;
-					box-sizing: border-box;border: solid 1px black;
-					background-color:${pieceBsticker2};
-					width:${mainPx}px;
-					height:${edgePx}px;"></div>
-					<div style="display:inline-block;width:${edgePx}px;"></div>
-				</div>
-		</div>
-		`
-			.replaceAll(/[\t\n]/g, '')
-			.replaceAll(/: +/g, ':');
+		if (letterPairInput) {
+			letterPairInput.select();
+		}
 	}
 
-	htmlString = makeHtmlString({
-		pieceAsticker1,
-		pieceAsticker2,
-		pieceAsticker3,
-		pieceBsticker1,
-		pieceBsticker2,
-		pieceBsticker3
+	onMount(() => {
+		focusLetterPairInput();
+
+		document.addEventListener('keyup', focusLetterPairInput);
+
+		return () => {
+			document.removeEventListener('keyup', focusLetterPairInput);
+		};
 	});
 </script>
 
-<div class="flex flex-row gap-4">
-	<div class="border-default p-2">
-		<h3>Piece A</h3>
-		<div>
-			<h4>Sticker 1</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceAsticker1 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
-		<div>
-			<h4>Sticker 2</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceAsticker2 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
-		<div>
-			<h4>Sticker 3</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceAsticker3 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
+<div class="corner-drawer w-prose mx-auto">
+	<div class="mx-4 text-center uppercase">
+		<span>{letterPair}</span>
+		<br />
+		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
+		{@html htmlString}
 	</div>
-	<div class="border-default p-2">
-		<h3>Piece B</h3>
-		<div>
-			<h4>Sticker 1</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceBsticker1 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
-		<div>
-			<h4>Sticker 2</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceBsticker2 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
-		<div>
-			<h4>Sticker 3</h4>
-			{#each colours as colour}
-				<button
-					class="button-default"
-					style={`background-color: ${colour}`}
-					on:click={() => {
-						pieceBsticker3 = colour;
-						htmlString = makeHtmlString({
-							pieceAsticker1,
-							pieceAsticker2,
-							pieceAsticker3,
-							pieceBsticker1,
-							pieceBsticker2,
-							pieceBsticker3
-						});
-					}}>{colour}</button
-				>
-			{/each}
-		</div>
-	</div>
-</div>
+	<form
+		on:submit={(event) => {
+			event.preventDefault();
 
-<div class="m-4">
-	<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-	{@html htmlString}
-</div>
+			navigator.clipboard.writeText(`${letterPair.toUpperCase()}<br />${htmlString}`);
 
-<div>
-	<textarea value={`<br />${htmlString}`} />
-	<button
-		on:click={() => {
-			navigator.clipboard.writeText(`<br />${htmlString}`);
-		}}>Copy</button
+			message = 'HTML coppied to clipboard';
+			messageTimeStamp = Date.now();
+		}}
 	>
+		<label>
+			<span>Corner Letter Pair</span>
+			<input class="uppercase" type="text" bind:this={letterPairInput} bind:value={letterPair} />
+		</label>
+		<button type="submit"
+			>Copy{letterPair.length >= 2 ? ` ${letterPair.slice(0, 2).toUpperCase()} + HTML` : ''}</button
+		>
+	</form>
+	{#key messageTimeStamp}
+		<div class={`message ${messageTimeStamp ? '' : 'opacity-0'}`}>{message}</div>
+	{/key}
+	<details>
+		<summary>Piece Colour Picker</summary>
+		<div class="flex flex-col gap-1">
+			<div class="border-default p-2">
+				<h3>Piece A</h3>
+				<div>
+					<h4>Sticker 1</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceAsticker1 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+				<div>
+					<h4>Sticker 2</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceAsticker2 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+				<div>
+					<h4>Sticker 3</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceAsticker3 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+			</div>
+			<div class="border-default p-2">
+				<h3>Piece B</h3>
+				<div>
+					<h4>Sticker 1</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceBsticker1 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+				<div>
+					<h4>Sticker 2</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceBsticker2 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+				<div>
+					<h4>Sticker 3</h4>
+					{#each colours as colour}
+						<button
+							class="button-default"
+							style={`background-color: ${colour}`}
+							on:click={() => {
+								pieceBsticker3 = colour;
+								htmlString = makeHtmlString({
+									pieceAsticker1,
+									pieceAsticker2,
+									pieceAsticker3,
+									pieceBsticker1,
+									pieceBsticker2,
+									pieceBsticker3
+								});
+							}}>{colour}</button
+						>
+					{/each}
+				</div>
+			</div>
+		</div>
+	</details>
+	<div>
+		<button
+			on:click={() => {
+				navigator.clipboard.writeText(`${htmlString}`);
+				message = 'HTML coppied to clipboard';
+				messageTimeStamp = Date.now();
+			}}>Copy HTML</button
+		>
+		<details>
+			<summary>Show HTML</summary>
+			<textarea value={`${htmlString}`} />
+		</details>
+	</div>
 </div>
+
+<style>
+	.corner-drawer > * {
+		margin-top: 1rem;
+		margin-bottom: 1rem;
+	}
+
+	@keyframes message {
+		0%,
+		80% {
+			color: #000000ff;
+		}
+
+		100% {
+			color: #00000000;
+		}
+	}
+
+	.message {
+		color: #00000000;
+		animation-duration: 5s;
+		animation-name: message;
+		animation-iteration-count: 1;
+	}
+</style>
