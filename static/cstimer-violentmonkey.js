@@ -17,6 +17,10 @@
 	const displayElements = {};
 
 	const formatHundredths = (hundredths) => {
+		if (typeof hundredths !== 'number') {
+			return '-';
+		}
+
 		// 10 days in hundredths
 		if (hundredths > oneDayMs) {
 			return 'DNF';
@@ -238,6 +242,10 @@
 		return tempElement;
 	};
 
+	const getElement = (partialId) => {
+		return document.getElementById(`${partialId}_${ID}`);
+	};
+
 	const getRecentSolvesStats = () => {
 		const todayStartId = getSessionStats().countAdjustment;
 		const solvesStats = getSolveStats({
@@ -247,15 +255,15 @@
 
 		const lastNSolves = solvesStats.slice(0, savedData.lastNSolvesMax);
 
-		const todaySolves = solvesStats.filter((s) => s.id >= todayStartId);
+		const todaySolves = solvesStats.filter((s) => s.id > todayStartId);
 
-		let bestAo5 = Infinity;
-		let bestAo12 = Infinity;
+		let bestAo5 = null;
+		let bestAo12 = null;
 		for (let i = 0; i < todaySolves.length; i++) {
 			if (i >= 4) {
 				const fiveSolves = todaySolves.slice(i - 4, i + 1);
 				const ao5 = calculateAoN(fiveSolves);
-				if (ao5 < bestAo5) {
+				if (ao5 < bestAo5 || typeof bestAo5 !== 'number') {
 					bestAo5 = ao5;
 				}
 			}
@@ -263,7 +271,7 @@
 			if (i >= 11) {
 				const fiveSolves = todaySolves.slice(i - 11, i + 1);
 				const ao12 = calculateAoN(fiveSolves);
-				if (ao12 < bestAo12) {
+				if (ao12 < bestAo12 || typeof bestAo12 !== 'number') {
 					bestAo12 = ao12;
 				}
 			}
@@ -275,8 +283,8 @@
 				dnfs: lastNSolves.filter((s) => s.dnf).length
 			},
 			todaySolves: {
-				maxHundredths: Math.max(...todaySolves.map((s) => s.hundredths)),
-				minHundredths: Math.min(...todaySolves.map((s) => s.hundredths)),
+				maxHundredths: todaySolves.length > 0 && Math.max(...todaySolves.map((s) => s.hundredths)),
+				minHundredths: todaySolves.length > 0 && Math.min(...todaySolves.map((s) => s.hundredths)),
 				aoToday: calculateAoN(todaySolves.filter((s) => !s.dnf)),
 				bestAo5,
 				bestAo12
@@ -299,6 +307,18 @@
 					<div>AoToday</div>
 					<div id="aotoday_${ID}"></div>
 				</div>
+				<div id="best_today_row_${ID}">
+					<div>Best</div>
+					<div id="best_today_${ID}"></div>
+				</div>
+				<div id="best_ao5_today_row_${ID}">
+					<div>Best Ao5</div>
+					<div id="best_ao5_today_${ID}"></div>
+				</div>
+				<div id="best_ao12_today_row_${ID}">
+					<div>Best Ao12</div>
+					<div id="best_ao12_today_${ID}"></div>
+				</div>
 			</div>
 			<div id="last_n_root_${ID}">
 				<div id="dnf_rate_${ID}"></div>
@@ -311,11 +331,6 @@
 		if (!displayElements.displayRoot) {
 			return false;
 		}
-
-		displayElements.todayCount = document.getElementById(`today_count_${ID}`);
-		displayElements.aoTodayRow = document.getElementById(`aotoday_row_${ID}`);
-		displayElements.todayAoToday = document.getElementById(`aotoday_${ID}`);
-		displayElements.dnfRate = document.getElementById(`dnf_rate_${ID}`);
 
 		displayElements.style = makeElement(
 			'style',
@@ -373,18 +388,22 @@
 		const todayCount = getCurrentSolveIndex() - getSessionStats().countAdjustment;
 		const stats = getRecentSolvesStats();
 
-		displayElements.todayCount.textContent = todayCount;
+		getElement('today_count').textContent = todayCount;
 		if (typeof stats.todaySolves.aoToday === 'number') {
-			displayElements.aoTodayRow.setAttribute('style', '');
-			displayElements.todayAoToday.textContent = formatHundredths(stats.todaySolves.aoToday);
+			getElement('aotoday_row').setAttribute('style', '');
+			getElement('aotoday').textContent = formatHundredths(stats.todaySolves.aoToday);
 		} else {
-			displayElements.aoTodayRow.setAttribute('style', 'display: none;');
+			getElement('aotoday_row').setAttribute('style', 'display: none;');
 		}
+		getElement('best_today').textContent = formatHundredths(stats.todaySolves.minHundredths);
+		getElement('best_ao5_today').textContent = formatHundredths(stats.todaySolves.bestAo5);
+		getElement('best_ao12_today').textContent = formatHundredths(stats.todaySolves.bestAo12);
 
 		if (stats.lastNSolves.count === 0) {
-			displayElements.dnfRate.textContent = '0/0';
+			getElement('dnf_rate').textContent = '0/0';
 		} else {
-			displayElements.dnfRate.textContent = `${stats.lastNSolves.count - stats.lastNSolves.dnfs}/${stats.lastNSolves.count} (${((1 - stats.lastNSolves.dnfs / stats.lastNSolves.count) * 100).toFixed(0)}%)`;
+			getElement('dnf_rate').textContent =
+				`${stats.lastNSolves.count - stats.lastNSolves.dnfs}/${stats.lastNSolves.count} (${((1 - stats.lastNSolves.dnfs / stats.lastNSolves.count) * 100).toFixed(0)}%)`;
 		}
 	};
 
