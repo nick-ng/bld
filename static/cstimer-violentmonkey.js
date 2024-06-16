@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.17
+// @version     1.18
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -12,14 +12,39 @@
 // ==/UserScript==
 (() => {
 	const ID = '32bc11b3-3759-4192-8ae1-cae4a4043685';
-	const oneDayMs = 86_400_000;
+	const oneDayMs = 1000 * 60 * 60 * 24;
 	const localStorageKey = `local-storage-${ID}`;
 	const displayElements = {};
-	const stats = {
-		lastNSolves: {
-			count: 0,
-			dnfs: 0
+
+	const formatHundredths = (hundredths) => {
+		// 10 days in hundredths
+		if (hundredths > oneDayMs) {
+			return 'DNF';
 		}
+
+		if (hundredths > 6000) {
+			const minutes = Math.floor(hundredths / 6000);
+			const seconds = (hundredths % 6000) / 100;
+
+			return `${minutes}:${seconds.toFixed(2).padStart(5, '0')}`;
+		}
+
+		const seconds = hundredths / 100;
+		return seconds.toFixed(2);
+	};
+
+	const calculateAoN = (unsortedSolves) => {
+		const sortedSolves = [...unsortedSolves].sort((a, b) => a.hundredths - b.hundredths);
+		if (sortedSolves.length >= 3) {
+			return (
+				sortedSolves.slice(1, sortedSolves.length - 1).reduce((prev, curr) => {
+					return prev + curr.hundredths;
+				}, 0) /
+				(sortedSolves.length - 2)
+			);
+		}
+
+		return null;
 	};
 
 	const getDevData = () => {
@@ -80,6 +105,74 @@
 		);
 	};
 
+	/**
+	 * most recent solve at the start of the array
+	 */
+	const getSolveStats = ({ minId, maxCount }) => {
+		const statsTable = document.querySelector('#stats .stattl table');
+
+		const statsRows = [...statsTable.querySelectorAll('tr')];
+		const solvesStats = [];
+		let counter = 0;
+		for (let i = 0; i < statsRows.length; i++) {
+			const rowDataAttr = statsRows[i].getAttribute('data');
+			if (rowDataAttr) {
+				const solveId = parseInt(rowDataAttr, 10);
+
+				const solveStats = {
+					id: solveId,
+					dnf: false,
+					plus2: false,
+					hundredths: -1
+				};
+
+				const cellsContents = [...statsRows[i].children].map((el) => el.textContent);
+
+				if (cellsContents.length === 1) {
+					continue;
+				}
+
+				const [solveNumberString, time] = cellsContents;
+
+				if (!solveNumberString.match(/^\*?\d/)) {
+					continue;
+				}
+
+				if (time.toUpperCase() === 'DNF') {
+					solveStats.dnf = true;
+					solveStats.hundredths = Infinity;
+				} else {
+					const parts = time.split(/[:+]/g);
+					if (time.includes(':')) {
+						const minutes = parseInt(parts[0], 10);
+						const seconds = parseFloat(parts[1]);
+						solveStats.hundredths = minutes * 6000 + Math.floor(seconds * 100);
+					} else {
+						const seconds = parseFloat(parts[0]);
+						solveStats.hundredths = Math.floor(seconds * 100);
+					}
+
+					if (time.includes('+')) {
+						solveStats.plus2 = true;
+					}
+				}
+
+				solvesStats.push(solveStats);
+
+				counter++;
+
+				const enoughCounter = typeof maxCount !== 'number' || counter >= maxCount;
+				// I think this gets an extra solve
+				const enoughId = typeof minId !== 'number' || minId < solveId;
+				if (enoughCounter && enoughId) {
+					break;
+				}
+			}
+		}
+
+		return solvesStats.sort((a, b) => b.id - a.id);
+	};
+
 	const getSessionStats = (inputSessionName = null) => {
 		const sessionName = inputSessionName || getCurrentSessionName();
 
@@ -99,13 +192,18 @@
 			updateSaveData(savedData);
 		}
 
-		return savedData.sessions[sessionName];
+		const solveCount = getCurrentSolveIndex() - savedData.sessions[sessionName].countAdjustment;
+
+		return {
+			...savedData.sessions[sessionName],
+			solveCount
+		};
 	};
 
 	/**
 	 * @returns {HTMLElement | null}
 	 */
-	const makeElement = (tag, parent, text, attributes) => {
+	const makeElement = (tag, parent, innerHTML, attributes) => {
 		if (attributes?.id) {
 			const el = document.getElementById(attributes.id);
 
@@ -126,8 +224,8 @@
 		}
 
 		const tempElement = document.createElement(tag);
-		if (text) {
-			tempElement.textContent = text;
+		if (innerHTML) {
+			tempElement.innerHTML = innerHTML;
 		}
 
 		parentEl.appendChild(tempElement);
@@ -140,98 +238,128 @@
 		return tempElement;
 	};
 
-	const makeEventHandlers = () => {};
+	const getRecentSolvesStats = () => {
+		const todayStartId = getSessionStats().countAdjustment;
+		const solvesStats = getSolveStats({
+			maxCount: savedData.lastNSolvesMax,
+			minId: todayStartId
+		});
 
-	const updateLastNSolves = () => {
-		const statsTable = document.querySelector('#stats .stattl table');
+		const lastNSolves = solvesStats.slice(0, savedData.lastNSolvesMax);
 
-		const statsRows = [...statsTable.querySelectorAll('tr')];
-		let counter = 0;
-		let dnfs = 0;
-		let attempts = 0;
-		for (let i = 0; i < statsRows.length; i++) {
-			if (statsRows[i]?.children) {
-				const cellsContents = [...statsRows[i].children].map((el) => el.textContent);
+		const todaySolves = solvesStats.filter((s) => s.id >= todayStartId);
 
-				if (cellsContents.length === 1) {
-					continue;
+		let bestAo5 = Infinity;
+		let bestAo12 = Infinity;
+		for (let i = 0; i < todaySolves.length; i++) {
+			if (i >= 4) {
+				const fiveSolves = todaySolves.slice(i - 4, i + 1);
+				const ao5 = calculateAoN(fiveSolves);
+				if (ao5 < bestAo5) {
+					bestAo5 = ao5;
 				}
+			}
 
-				const [solveNumberString, time] = cellsContents;
-
-				if (!solveNumberString.match(/^\*?\d/)) {
-					continue;
-				}
-
-				attempts++;
-				if (time.toUpperCase() === 'DNF') {
-					dnfs++;
-				}
-
-				counter++;
-				if (counter >= savedData.lastNSolvesMax) {
-					break;
+			if (i >= 11) {
+				const fiveSolves = todaySolves.slice(i - 11, i + 1);
+				const ao12 = calculateAoN(fiveSolves);
+				if (ao12 < bestAo12) {
+					bestAo12 = ao12;
 				}
 			}
 		}
 
-		stats.lastNSolves.count = attempts;
-		stats.lastNSolves.dnfs = dnfs;
+		return {
+			lastNSolves: {
+				count: lastNSolves.length,
+				dnfs: lastNSolves.filter((s) => s.dnf).length
+			},
+			todaySolves: {
+				maxHundredths: Math.max(...todaySolves.map((s) => s.hundredths)),
+				minHundredths: Math.min(...todaySolves.map((s) => s.hundredths)),
+				aoToday: calculateAoN(todaySolves.filter((s) => !s.dnf)),
+				bestAo5,
+				bestAo12
+			}
+		};
 	};
 
 	const createDisplay = () => {
-		displayElements.displayRoot = makeElement('div', 'stats', null, {
-			id: `display_root_${ID}`
-		});
+		displayElements.displayRoot = makeElement(
+			'div',
+			'stats',
+			`
+			<div id="today_root_${ID}">
+				<div style="text-align:center;">Today</div>
+				<div>
+					<div>Solves</div>
+					<div id="today_count_${ID}">0</div>
+				</div>
+				<div id="aotoday_row_${ID}">
+					<div>AoToday</div>
+					<div id="aotoday_${ID}"></div>
+				</div>
+			</div>
+			<div id="last_n_root_${ID}">
+				<div id="dnf_rate_${ID}"></div>
+			</div>
+			`,
+			{
+				id: `display_root_${ID}`
+			}
+		);
 		if (!displayElements.displayRoot) {
 			return false;
 		}
 
-		displayElements.todayRow = makeElement('div', displayElements.displayRoot, null, {
-			id: `today_row_${ID}`
-		});
-
-		displayElements.todayToday = makeElement('div', displayElements.todayRow, 'Today:', {
-			id: `today_today_${ID}`
-		});
-
-		displayElements.todayCount = makeElement('div', displayElements.todayRow, '0', {
-			id: `today_count_${ID}`
-		});
-
-		displayElements.dnfRate = makeElement('div', displayElements.displayRoot, '', {
-			id: `dnf_rate_${ID}`
-		});
+		displayElements.todayCount = document.getElementById(`today_count_${ID}`);
+		displayElements.aoTodayRow = document.getElementById(`aotoday_row_${ID}`);
+		displayElements.todayAoToday = document.getElementById(`aotoday_${ID}`);
+		displayElements.dnfRate = document.getElementById(`dnf_rate_${ID}`);
 
 		displayElements.style = makeElement(
 			'style',
 			null,
 			`
 				#display_root_${ID} {
-				position: absolute;
-				bottom: 0;
-				background-color: #00000088;
-				left: calc(100%);
-				border: solid 1px #333333;
-				padding: 5px;
-				display: flex;
-				flex-direction: column;
-				align-items: stretch;
-				justify-content: flex-start;
-				gap: 5px;
-				font-size: 16pt;
-				width: max-content;
-				text-align: left;
+					position: absolute;
+					bottom: 0px;
+					background-color: #00000088;
+					left: calc(100%);
+					border: solid 1px #333333;
+					padding: 0;
+					display: flex;
+					flex-direction: column;
+					align-items: stretch;
+					justify-content: flex-start;
+					gap: 0;
+					font-size: 16pt;
+					width: max-content;
+					text-align: left;
+					box-sizing: border-box;
+				}
+
+				#display_root_${ID} > div {
+					padding: 5px;
+					box-sizing: content-box;
+				}
+
+				#display_root_${ID} > div:not(:last-child) {
+					border-bottom: solid 1px #333333;
 				}
 
 				#display_root_${ID} *[role=button] {
 					cursor: pointer;
 				}
 
-				#today_row_${ID} {
+				#display_root_${ID} hr {
+					border-color: #333333;
+				}
+
+				#today_root_${ID} > div:not(:first-child) {
 					display: flex;
 					flex-direction: row;
-					gap: 5px;
+					gap: 10px;
 					justify-content: space-between;
 				}
 			`,
@@ -243,9 +371,15 @@
 
 	const updateDisplay = () => {
 		const todayCount = getCurrentSolveIndex() - getSessionStats().countAdjustment;
-		updateLastNSolves();
+		const stats = getRecentSolvesStats();
 
-		displayElements.todayCount.textContent = `${todayCount}`;
+		displayElements.todayCount.textContent = todayCount;
+		if (typeof stats.todaySolves.aoToday === 'number') {
+			displayElements.aoTodayRow.setAttribute('style', '');
+			displayElements.todayAoToday.textContent = formatHundredths(stats.todaySolves.aoToday);
+		} else {
+			displayElements.aoTodayRow.setAttribute('style', 'display: none;');
+		}
 
 		if (stats.lastNSolves.count === 0) {
 			displayElements.dnfRate.textContent = '0/0';
@@ -264,7 +398,6 @@
 	window[createDisplayIntervalIdKey] = setInterval(() => {
 		if (createDisplay()) {
 			clearInterval(window[createDisplayIntervalIdKey]);
-			makeEventHandlers();
 			updateDisplay();
 		}
 	}, 100);
