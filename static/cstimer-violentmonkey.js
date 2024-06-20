@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.18
+// @version     1.19
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -150,10 +150,10 @@
 					if (time.includes(':')) {
 						const minutes = parseInt(parts[0], 10);
 						const seconds = parseFloat(parts[1]);
-						solveStats.hundredths = minutes * 6000 + Math.floor(seconds * 100);
+						solveStats.hundredths = minutes * 6000 + Math.round(seconds * 100);
 					} else {
 						const seconds = parseFloat(parts[0]);
-						solveStats.hundredths = Math.floor(seconds * 100);
+						solveStats.hundredths = Math.round(seconds * 100);
 					}
 
 					if (time.includes('+')) {
