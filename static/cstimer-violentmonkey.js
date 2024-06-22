@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.19
+// @version     1.20
 // @author      https://github.com/nick-ng
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -253,9 +253,8 @@
 			minId: todayStartId
 		});
 
-		const lastNSolves = solvesStats.slice(0, savedData.lastNSolvesMax);
-
 		const todaySolves = solvesStats.filter((s) => s.id > todayStartId);
+		const lastNSolves = solvesStats.slice(0, savedData.lastNSolvesMax);
 
 		let bestAo5 = null;
 		let bestAo12 = null;
@@ -280,14 +279,16 @@
 		return {
 			lastNSolves: {
 				count: lastNSolves.length,
-				dnfs: lastNSolves.filter((s) => s.dnf).length
+				dnfs: lastNSolves.filter((s) => s.dnf).length,
+				solves: lastNSolves
 			},
 			todaySolves: {
 				maxHundredths: todaySolves.length > 0 && Math.max(...todaySolves.map((s) => s.hundredths)),
 				minHundredths: todaySolves.length > 0 && Math.min(...todaySolves.map((s) => s.hundredths)),
 				aoToday: calculateAoN(todaySolves.filter((s) => !s.dnf)),
 				bestAo5,
-				bestAo12
+				bestAo12,
+				solves: todaySolves
 			}
 		};
 	};
@@ -381,6 +382,8 @@
 			{ id: `style_${ID}` }
 		);
 
+		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
+
 		return true;
 	};
 
@@ -404,6 +407,19 @@
 		} else {
 			getElement('dnf_rate').textContent =
 				`${stats.lastNSolves.count - stats.lastNSolves.dnfs}/${stats.lastNSolves.count} (${((1 - stats.lastNSolves.dnfs / stats.lastNSolves.count) * 100).toFixed(0)}%)`;
+
+			const lastNSolvesSelector = stats.lastNSolves.solves
+				.map((s) => `tr[data="${s.id}"] td`)
+				.join(', ');
+
+			displayElements.lastNStyle.textContent = `
+				tr[data] td {
+					opacity: 0.7;
+				}
+
+				${lastNSolvesSelector} {
+					opacity: 1;
+				}`;
 		}
 	};
 
