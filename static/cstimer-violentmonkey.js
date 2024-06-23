@@ -362,7 +362,7 @@
 				<div style="text-align:center;">Today</div>
 				<div class="grid_${ID}">
 					<div>Solves:</div><div id="today_count_${ID}" class="number">0</div>
-					<div>AoNonDNF:</div><div id="today_aonondnf_${ID}" class="number"></div>
+					<div>Average:</div><div id="today_aonondnf_${ID}" class="number"></div>
 					<div>Best:</div><div id="today_best_${ID}" class="number"></div>
 					<div>Best Ao5:</div><div id="today_best_ao5_${ID}" class="number"></div>
 					<div>Best Ao12:</div><div id="today_best_ao12_${ID}" class="number"></div>
@@ -372,7 +372,7 @@
 				<div id="last_n_max_button_${ID}" style="text-align:center;" role="button">Last <span id="last_n_max_${ID}">1</span> Solves</div>
 				<div class="grid_${ID}">
 					<div>Solves:</div><div id="last_n_count_${ID}" class="number"></div>
-					<div>AoNonDNF:</div><div id="last_n_aonondnf_${ID}" class="number"></div>
+					<div>Average:</div><div id="last_n_aonondnf_${ID}" class="number"></div>
 						<div>Best:</div><div id="last_n_best_${ID}" class="number"></div>
 						<div>Best Ao5:</div><div id="last_n_best_ao5_${ID}" class="number"></div>
 						<div>Best Ao12:</div><div id="last_n_best_ao12_${ID}" class="number"></div>
