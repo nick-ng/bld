@@ -3,8 +3,8 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.20
-// @author      https://github.com/nick-ng
+// @version     1.21
+// @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
 // @run-at      document-idle
@@ -61,10 +61,20 @@
 		return {};
 	};
 
-	const savedData = getDevData()[localStorageKey] || {
-		sessions: {},
-		lastNSolvesMax: 50
+	const getSavedData = () => {
+		const temp = getDevData()[localStorageKey];
+
+		if (!temp.sessions) {
+			return {
+				sessions: {},
+				lastNSolvesMax: 50
+			};
+		}
+
+		return temp;
 	};
+
+	let savedData = getSavedData();
 
 	const getCurrentSolveIndex = () => {
 		const a = [...document.querySelectorAll('div#stats tbody tr')];
@@ -88,12 +98,17 @@
 		return today.valueOf();
 	};
 
-	const updateSaveData = (newSaveData) => {
+	const updateSavedData = (partialData) => {
+		const newData = {
+			...getSavedData(),
+			...partialData
+		};
+
 		const nowMinusOneDayMs = Date.now() - oneDayMs;
-		Object.keys(newSaveData).reduce((prev, key) => {
-			// remove all expired session data before saving
-			if (nowMinusOneDayMs <= newSaveData[key].startOfDay) {
-				prev[key] = newSaveData[key];
+		newData.sessions = Object.keys(newData.sessions).reduce((prev, key) => {
+			// add all unexpired expired session back
+			if (nowMinusOneDayMs <= newData.sessions[key].startOfDay) {
+				prev[key] = newData.sessions[key];
 			}
 
 			return prev;
@@ -104,9 +119,11 @@
 			'devData',
 			JSON.stringify({
 				...prevDevData,
-				[localStorageKey]: newSaveData
+				[localStorageKey]: newData
 			})
 		);
+
+		savedData = newData;
 	};
 
 	/**
@@ -177,6 +194,7 @@
 		return solvesStats.sort((a, b) => b.id - a.id);
 	};
 
+	//@todo: this is a bit weird
 	const getSessionStats = (inputSessionName = null) => {
 		const sessionName = inputSessionName || getCurrentSessionName();
 
@@ -193,7 +211,7 @@
 				startOfDay: getStartOfTodayMs()
 			};
 
-			updateSaveData(savedData);
+			updateSavedData(savedData);
 		}
 
 		const solveCount = getCurrentSolveIndex() - savedData.sessions[sessionName].countAdjustment;
@@ -246,15 +264,60 @@
 		return document.getElementById(`${partialId}_${ID}`);
 	};
 
+	const updateElement = (partialId, value, isInnerHTML = false) => {
+		const el = getElement(partialId);
+
+		if (!el) {
+			return;
+		}
+
+		if (isInnerHTML) {
+			el.innerHTML = value;
+		} else {
+			el.textContent = value;
+		}
+	};
+
+	const getAgregateStats = (solves) => {
+		let bestAo5 = null;
+		let bestAo12 = null;
+
+		for (let i = 0; i < solves.length; i++) {
+			if (i >= 4) {
+				const fiveSolves = solves.slice(i - 4, i + 1);
+				const ao5 = calculateAoN(fiveSolves);
+				if (ao5 < bestAo5 || typeof bestAo5 !== 'number') {
+					bestAo5 = ao5;
+				}
+			}
+
+			if (i >= 11) {
+				const fiveSolves = solves.slice(i - 11, i + 1);
+				const ao12 = calculateAoN(fiveSolves);
+				if (ao12 < bestAo12 || typeof bestAo12 !== 'number') {
+					bestAo12 = ao12;
+				}
+			}
+		}
+
+		return {
+			maxHundredths: solves.length > 0 && Math.max(...solves.map((s) => s.hundredths)),
+			minHundredths: solves.length > 0 && Math.min(...solves.map((s) => s.hundredths)),
+			aoNonDNF: calculateAoN(solves.filter((s) => !s.dnf)),
+			bestAo5,
+			bestAo12
+		};
+	};
+
 	const getRecentSolvesStats = () => {
 		const todayStartId = getSessionStats().countAdjustment;
 		const solvesStats = getSolveStats({
-			maxCount: savedData.lastNSolvesMax,
+			maxCount: getSavedData().lastNSolvesMax,
 			minId: todayStartId
 		});
 
 		const todaySolves = solvesStats.filter((s) => s.id > todayStartId);
-		const lastNSolves = solvesStats.slice(0, savedData.lastNSolvesMax);
+		const lastNSolves = solvesStats.slice(0, getSavedData().lastNSolvesMax);
 
 		let bestAo5 = null;
 		let bestAo12 = null;
@@ -278,16 +341,13 @@
 
 		return {
 			lastNSolves: {
-				count: lastNSolves.length,
+				...getAgregateStats(lastNSolves),
 				dnfs: lastNSolves.filter((s) => s.dnf).length,
 				solves: lastNSolves
 			},
 			todaySolves: {
-				maxHundredths: todaySolves.length > 0 && Math.max(...todaySolves.map((s) => s.hundredths)),
-				minHundredths: todaySolves.length > 0 && Math.min(...todaySolves.map((s) => s.hundredths)),
-				aoToday: calculateAoN(todaySolves.filter((s) => !s.dnf)),
-				bestAo5,
-				bestAo12,
+				...getAgregateStats(todaySolves),
+				dnfs: todaySolves.filter((s) => s.dnf).length,
 				solves: todaySolves
 			}
 		};
@@ -300,29 +360,23 @@
 			`
 			<div id="today_root_${ID}">
 				<div style="text-align:center;">Today</div>
-				<div>
-					<div>Solves</div>
-					<div id="today_count_${ID}">0</div>
-				</div>
-				<div id="aotoday_row_${ID}">
-					<div>AoToday</div>
-					<div id="aotoday_${ID}"></div>
-				</div>
-				<div id="best_today_row_${ID}">
-					<div>Best</div>
-					<div id="best_today_${ID}"></div>
-				</div>
-				<div id="best_ao5_today_row_${ID}">
-					<div>Best Ao5</div>
-					<div id="best_ao5_today_${ID}"></div>
-				</div>
-				<div id="best_ao12_today_row_${ID}">
-					<div>Best Ao12</div>
-					<div id="best_ao12_today_${ID}"></div>
+				<div class="grid_${ID}">
+					<div>Solves:</div><div id="today_count_${ID}" class="number">0</div>
+					<div>AoNonDNF:</div><div id="today_aonondnf_${ID}" class="number"></div>
+					<div>Best:</div><div id="today_best_${ID}" class="number"></div>
+					<div>Best Ao5:</div><div id="today_best_ao5_${ID}" class="number"></div>
+					<div>Best Ao12:</div><div id="today_best_ao12_${ID}" class="number"></div>
 				</div>
 			</div>
 			<div id="last_n_root_${ID}">
-				<div id="dnf_rate_${ID}"></div>
+				<div id="last_n_max_button_${ID}" style="text-align:center;" role="button">Last <span id="last_n_max_${ID}">1</span> Solves</div>
+				<div class="grid_${ID}">
+					<div>Solves:</div><div id="last_n_count_${ID}" class="number"></div>
+					<div>AoNonDNF:</div><div id="last_n_aonondnf_${ID}" class="number"></div>
+						<div>Best:</div><div id="last_n_best_${ID}" class="number"></div>
+						<div>Best Ao5:</div><div id="last_n_best_ao5_${ID}" class="number"></div>
+						<div>Best Ao12:</div><div id="last_n_best_ao12_${ID}" class="number"></div>
+				</div>
 			</div>
 			`,
 			{
@@ -372,11 +426,14 @@
 					border-color: #333333;
 				}
 
-				#today_root_${ID} > div:not(:first-child) {
-					display: flex;
-					flex-direction: row;
-					gap: 10px;
-					justify-content: space-between;
+				.grid_${ID} {
+					display: grid;
+					grid-template-columns: auto auto;
+					gap: 0 8px;
+				}
+
+				.grid_${ID} .number {
+					text-align: right;
 				}
 			`,
 			{ id: `style_${ID}` }
@@ -384,30 +441,37 @@
 
 		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
 
+		if (!getElement('last_n_max_button')) {
+			return false;
+		}
+
 		return true;
 	};
 
+	const updateAgregateStats = (prefix, groupStats) => {
+		if (groupStats.solves.length === 0) {
+			updateElement(`${prefix}_count`, '0/0');
+		} else {
+			updateElement(
+				`${prefix}_count`,
+				`${groupStats.solves.length - groupStats.dnfs}/${groupStats.solves.length} (${((1 - groupStats.dnfs / groupStats.solves.length) * 100).toFixed(0)}%)`
+			);
+		}
+		groupStats.solves.length;
+		updateElement(`${prefix}_aonondnf`, formatHundredths(groupStats.aoNonDNF));
+		updateElement(`${prefix}_best`, formatHundredths(groupStats.minHundredths));
+		updateElement(`${prefix}_best_ao5`, formatHundredths(groupStats.bestAo5));
+		updateElement(`${prefix}_best_ao12`, formatHundredths(groupStats.bestAo12));
+	};
+
 	const updateDisplay = () => {
-		const todayCount = getCurrentSolveIndex() - getSessionStats().countAdjustment;
 		const stats = getRecentSolvesStats();
 
-		getElement('today_count').textContent = todayCount;
-		if (typeof stats.todaySolves.aoToday === 'number') {
-			getElement('aotoday_row').setAttribute('style', '');
-			getElement('aotoday').textContent = formatHundredths(stats.todaySolves.aoToday);
-		} else {
-			getElement('aotoday_row').setAttribute('style', 'display: none;');
-		}
-		getElement('best_today').textContent = formatHundredths(stats.todaySolves.minHundredths);
-		getElement('best_ao5_today').textContent = formatHundredths(stats.todaySolves.bestAo5);
-		getElement('best_ao12_today').textContent = formatHundredths(stats.todaySolves.bestAo12);
+		updateAgregateStats('today', stats.todaySolves);
+		updateAgregateStats('last_n', stats.lastNSolves);
 
-		if (stats.lastNSolves.count === 0) {
-			getElement('dnf_rate').textContent = '0/0';
-		} else {
-			getElement('dnf_rate').textContent =
-				`${stats.lastNSolves.count - stats.lastNSolves.dnfs}/${stats.lastNSolves.count} (${((1 - stats.lastNSolves.dnfs / stats.lastNSolves.count) * 100).toFixed(0)}%)`;
-
+		getElement('last_n_max').textContent = getSavedData().lastNSolvesMax;
+		if (stats.lastNSolves.solves.length > 0) {
 			const lastNSolvesSelector = stats.lastNSolves.solves
 				.map((s) => `tr[data="${s.id}"] td`)
 				.join(', ');
@@ -434,6 +498,21 @@
 		if (createDisplay()) {
 			clearInterval(window[createDisplayIntervalIdKey]);
 			updateDisplay();
+
+			const lastNButton = getElement('last_n_max_button');
+
+			lastNButton.addEventListener('click', () => {
+				const newValue = parseInt(prompt('Enter the number of solves.'));
+
+				console.log('newValue', newValue);
+				if (!isNaN(newValue)) {
+					updateSavedData({
+						lastNSolvesMax: newValue
+					});
+
+					setTimeout(updateDisplay, 500);
+				}
+			});
 		}
 	}, 100);
 
