@@ -360,8 +360,10 @@
 			`
 			<div id="today_root_${ID}">
 				<div style="text-align:center;">Today</div>
-				<div class="grid_${ID}">
+				<div class="solves_row_${ID}">
 					<div>Solves:</div><div id="today_count_${ID}" class="number">0</div>
+				</div>
+				<div class="grid_${ID}">
 					<div>Average:</div><div id="today_aonondnf_${ID}" class="number"></div>
 					<div>Best:</div><div id="today_best_${ID}" class="number"></div>
 					<div>Best Ao5:</div><div id="today_best_ao5_${ID}" class="number"></div>
@@ -370,8 +372,10 @@
 			</div>
 			<div id="last_n_root_${ID}">
 				<div id="last_n_max_button_${ID}" style="text-align:center;" role="button">Last <span id="last_n_max_${ID}">1</span> Solves</div>
-				<div class="grid_${ID}">
+				<div class="solves_row_${ID}">
 					<div>Solves:</div><div id="last_n_count_${ID}" class="number"></div>
+				</div>
+				<div class="grid_${ID}">
 					<div>Average:</div><div id="last_n_aonondnf_${ID}" class="number"></div>
 						<div>Best:</div><div id="last_n_best_${ID}" class="number"></div>
 						<div>Best Ao5:</div><div id="last_n_best_ao5_${ID}" class="number"></div>
@@ -434,6 +438,13 @@
 
 				.grid_${ID} .number {
 					text-align: right;
+				}
+
+				.solves_row_${ID} {
+					display: flex;
+					gap: 8px;
+					flex-direction: row;
+					justify-content: space-between;
 				}
 			`,
 			{ id: `style_${ID}` }
@@ -504,7 +515,6 @@
 			lastNButton.addEventListener('click', () => {
 				const newValue = parseInt(prompt('Enter the number of solves.'));
 
-				console.log('newValue', newValue);
 				if (!isNaN(newValue)) {
 					updateSavedData({
 						lastNSolvesMax: newValue
