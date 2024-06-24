@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.22
+// @version     1.23
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -64,14 +64,14 @@
 	const getSavedData = () => {
 		const temp = getDevData()[localStorageKey];
 
-		if (!temp.sessions) {
-			return {
-				sessions: {},
-				lastNSolvesMax: 50
-			};
+		if (temp?.sessions) {
+			return temp;
 		}
 
-		return temp;
+		return {
+			sessions: {},
+			lastNSolvesMax: 50
+		};
 	};
 
 	let savedData = getSavedData();
@@ -323,16 +323,16 @@
 		let bestAo12 = null;
 		for (let i = 0; i < todaySolves.length; i++) {
 			if (i >= 4) {
-				const fiveSolves = todaySolves.slice(i - 4, i + 1);
-				const ao5 = calculateAoN(fiveSolves);
+				const tempSolves = todaySolves.slice(i - 4, i + 1);
+				const ao5 = calculateAoN(tempSolves);
 				if (ao5 < bestAo5 || typeof bestAo5 !== 'number') {
 					bestAo5 = ao5;
 				}
 			}
 
 			if (i >= 11) {
-				const fiveSolves = todaySolves.slice(i - 11, i + 1);
-				const ao12 = calculateAoN(fiveSolves);
+				const tempSolves = todaySolves.slice(i - 11, i + 1);
+				const ao12 = calculateAoN(tempSolves);
 				if (ao12 < bestAo12 || typeof bestAo12 !== 'number') {
 					bestAo12 = ao12;
 				}
@@ -468,7 +468,7 @@
 				`${groupStats.solves.length - groupStats.dnfs}/${groupStats.solves.length} (${((1 - groupStats.dnfs / groupStats.solves.length) * 100).toFixed(0)}%)`
 			);
 		}
-		groupStats.solves.length;
+
 		updateElement(`${prefix}_aonondnf`, formatHundredths(groupStats.aoNonDNF));
 		updateElement(`${prefix}_best`, formatHundredths(groupStats.minHundredths));
 		updateElement(`${prefix}_best_ao5`, formatHundredths(groupStats.bestAo5));
@@ -482,6 +482,7 @@
 		updateAgregateStats('last_n', stats.lastNSolves);
 
 		getElement('last_n_max').textContent = getSavedData().lastNSolvesMax;
+
 		if (stats.lastNSolves.solves.length > 0) {
 			const lastNSolvesSelector = stats.lastNSolves.solves
 				.map((s) => `tr[data="${s.id}"] td`)
@@ -497,8 +498,6 @@
 				}`;
 		}
 	};
-
-	setTimeout(updateDisplay, 2000);
 
 	const createDisplayIntervalIdKey = `${ID}-create-display-interval`;
 	if (window[createDisplayIntervalIdKey]) {
@@ -526,10 +525,11 @@
 		}
 	}, 100);
 
-	window.addEventListener('keyup', () => {
-		setTimeout(updateDisplay, 500);
+	const mutationObserver = new MutationObserver(updateDisplay);
+	mutationObserver.observe(document.querySelector('#stats table'), {
+		childList: true,
+		subtree: true
 	});
-	window.addEventListener('mouseup', () => {
-		setTimeout(updateDisplay, 500);
-	});
+
+	setTimeout(updateDisplay, 2000);
 })();
