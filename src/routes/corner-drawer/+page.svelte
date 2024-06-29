@@ -88,7 +88,7 @@
 		on:submit={(event) => {
 			event.preventDefault();
 
-			navigator.clipboard.writeText(`${letterPair.toUpperCase()}<br />${htmlString}`);
+			navigator.clipboard.writeText(`${letterPair.slice(0, 2).toUpperCase()}<br />${htmlString}`);
 
 			message = 'HTML coppied to clipboard';
 			messageTimeStamp = Date.now();
