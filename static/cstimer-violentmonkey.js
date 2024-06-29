@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.23
+// @version     1.24
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -264,6 +264,14 @@
 		return document.getElementById(`${partialId}_${ID}`);
 	};
 
+	const resolveValue = (value) => {
+		if (typeof value === 'function') {
+			return value();
+		}
+
+		return value;
+	};
+
 	const updateElement = (partialId, value, isInnerHTML = false) => {
 		const el = getElement(partialId);
 
@@ -272,9 +280,9 @@
 		}
 
 		if (isInnerHTML) {
-			el.innerHTML = value;
+			el.innerHTML = resolveValue(value);
 		} else {
-			el.textContent = value;
+			el.textContent = resolveValue(value);
 		}
 	};
 
@@ -356,7 +364,7 @@
 	const createDisplay = () => {
 		displayElements.displayRoot = makeElement(
 			'div',
-			'stats',
+			null,
 			`
 			<div id="today_root_${ID}">
 				<div style="text-align:center;">Today</div>
@@ -397,17 +405,20 @@
 			`
 				#display_root_${ID} {
 					position: absolute;
-					bottom: 0px;
+					bottom: 5px;
+					left: 0;
+					right: 0;
+					margin-left: auto;
+					margin-right: auto;
 					background-color: #00000088;
-					left: calc(100%);
 					border: solid 1px #333333;
 					padding: 0;
 					display: flex;
-					flex-direction: column;
+					flex-direction: row;
 					align-items: stretch;
 					justify-content: flex-start;
 					gap: 0;
-					font-size: 16pt;
+					font-size: 14pt;
 					width: max-content;
 					text-align: left;
 					box-sizing: border-box;
@@ -419,7 +430,7 @@
 				}
 
 				#display_root_${ID} > div:not(:last-child) {
-					border-bottom: solid 1px #333333;
+					border-right: solid 1px #333333;
 				}
 
 				#display_root_${ID} *[role=button] {
@@ -481,7 +492,7 @@
 		updateAgregateStats('today', stats.todaySolves);
 		updateAgregateStats('last_n', stats.lastNSolves);
 
-		getElement('last_n_max').textContent = getSavedData().lastNSolvesMax;
+		updateElement('last_n_max', () => getSavedData().lastNSolvesMax);
 
 		if (stats.lastNSolves.solves.length > 0) {
 			const lastNSolvesSelector = stats.lastNSolves.solves
