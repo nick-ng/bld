@@ -12,7 +12,7 @@
 						class="opaque"
 						on:click={() => {
 							navigator.clipboard.writeText(
-								`front:c* OR front:*c OR front:j* OR front:*j OR front:m* OR front:*m`
+								`front:c* OR front:_c* OR front:j* OR front:_j* OR front:m* OR front:_m*`
 							);
 						}}>Clipboard</button
 					></td
@@ -25,7 +25,7 @@
 						class="opaque"
 						on:click={() => {
 							navigator.clipboard.writeText(
-								`-front:c* AND -front:*c AND -front:j* AND -front:*j AND -front:m* AND -front:*m`
+								`-front:c* -front:_c* -front:j* -front:_j* -front:m* -front:_m*`
 							);
 						}}>Clipboard</button
 					></td
@@ -44,7 +44,7 @@
 						class="opaque"
 						on:click={() => {
 							navigator.clipboard.writeText(
-								`front:a* OR front:*a OR front:e* OR front:*e OR front:r* OR front:*r`
+								`front:a* OR front:_a* OR front:e* OR front:_e* OR front:r* OR front:_r*`
 							);
 						}}>Clipboard</button
 					></td
@@ -57,7 +57,7 @@
 						class="opaque"
 						on:click={() => {
 							navigator.clipboard.writeText(
-								`-front:a* AND -front:*a AND -front:e* AND -front:*e AND -front:r* AND -front:*r`
+								`-front:a* -front:_a* -front:e* -front:_e* -front:r* -front:_r*`
 							);
 						}}>Clipboard</button
 					></td
