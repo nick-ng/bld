@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" href="./favicon.png" />
+		<meta name="viewport" content="width=device-width" />
+		<title>Blind Solving Resources</title>
+		
+		<link rel="modulepreload" href="./_app/immutable/entry/start.B0ijTjya.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/entry.Dkd6C5ER.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/scheduler.C0-zce7Q.js">
+		<link rel="modulepreload" href="./_app/immutable/entry/app.tkuWKZVU.js">
+		<link rel="modulepreload" href="./_app/immutable/chunks/index.xwmrEipJ.js">
+	</head>
+
+	<body data-sveltekit-preload-data="hover">
+		<div style="display: contents">
+			<script>
+				{
+					__sveltekit_1rdwlh3 = {
+						base: new URL(".", location).pathname.slice(0, -1)
+					};
+
+					const element = document.currentScript.parentElement;
+
+					Promise.all([
+						import("./_app/immutable/entry/start.B0ijTjya.js"),
+						import("./_app/immutable/entry/app.tkuWKZVU.js")
+					]).then(([kit, app]) => {
+						kit.start(app, element);
+					});
+				}
+			</script>
+		</div>
+	</body>
+</html>
