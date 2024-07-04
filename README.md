@@ -46,3 +46,4 @@ You can preview the production build with `npm run preview`.
 
 ### ToDo Comments
 
+- static/cstimer-violentmonkey.js:404: @todo: make size adjustable

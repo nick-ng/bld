@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.24
+// @version     1.25
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -377,6 +377,7 @@
 					<div>Best Ao5:</div><div id="today_best_ao5_${ID}" class="number"></div>
 					<div>Best Ao12:</div><div id="today_best_ao12_${ID}" class="number"></div>
 				</div>
+				<div id="big_scramble_${ID}">Test</div>
 			</div>
 			<div id="last_n_root_${ID}">
 				<div id="last_n_max_button_${ID}" style="text-align:center;" role="button">Last <span id="last_n_max_${ID}">1</span> Solves</div>
@@ -399,6 +400,9 @@
 			return false;
 		}
 
+		const textOutlineWidthPx = 2;
+		// @todo: make size adjustable
+		const bigScrambleSizeRem = 6;
 		displayElements.style = makeElement(
 			'style',
 			null,
@@ -422,6 +426,7 @@
 					width: max-content;
 					text-align: left;
 					box-sizing: border-box;
+					z-index: 100;
 				}
 
 				#display_root_${ID} > div {
@@ -457,6 +462,76 @@
 					flex-direction: row;
 					justify-content: space-between;
 				}
+
+				#big_scramble_${ID} {
+					display: none;
+					position: absolute;
+					bottom: calc(100% + 5px);
+					left: -350px;
+					width: 60vw;
+					gap: 5px;
+					background-color: black;
+				}
+
+				#today_root_${ID}:hover #big_scramble_${ID} {
+					display: flex;
+					flex-wrap: wrap
+				}
+
+				#big_scramble_${ID} div {
+					flex-basis: ${bigScrambleSizeRem * 1.35}rem;
+					text-align: center;
+					color: white;
+					text-shadow:
+						-${textOutlineWidthPx}px -${textOutlineWidthPx}px 0 #000,
+						${textOutlineWidthPx}px -${textOutlineWidthPx}px 0 #000,
+						-${textOutlineWidthPx}px ${textOutlineWidthPx}px 0 #000,
+						${textOutlineWidthPx}px ${textOutlineWidthPx}px 0 #000;
+					border: 1px solid white;
+					font-weight: bold;
+					font-size: ${bigScrambleSizeRem}rem;
+				}
+
+				#big_scramble_${ID} .b {
+					background-color: #0000ff;
+				}
+
+				#big_scramble_${ID} .d {
+					background-color: #ffff00;
+				}
+
+				#big_scramble_${ID} .f {
+					background-color: #00dc00;
+				}
+
+				#big_scramble_${ID} .l {
+					background-color: #ff9933;
+				}
+
+				#big_scramble_${ID} .r {
+					background-color: #ff0000;
+				}
+
+				#big_scramble_${ID} .u {
+					background-color: #ffffff;
+				}
+
+				#big_scramble_${ID} .is_prime {
+					text-decoration: underline;
+				}
+
+				#big_scramble_${ID} .is_prime, #big_scramble_${ID} div .two {
+					color: black;
+					text-shadow:
+						-${textOutlineWidthPx * 2}px -${textOutlineWidthPx * 2}px 0 #fff,
+						${textOutlineWidthPx * 2}px -${textOutlineWidthPx * 2}px 0 #fff,
+						-${textOutlineWidthPx * 2}px ${textOutlineWidthPx * 2}px 0 #fff,
+						${textOutlineWidthPx * 2}px ${textOutlineWidthPx * 2}px 0 #fff;
+				}
+
+				#big_scramble_${ID} div .two {
+					font-size: ${bigScrambleSizeRem * 0.7}rem;
+				}
 			`,
 			{ id: `style_${ID}` }
 		);
@@ -486,7 +561,33 @@
 		updateElement(`${prefix}_best_ao12`, formatHundredths(groupStats.bestAo12));
 	};
 
-	const updateDisplay = () => {
+	const updateBigScramble = () => {
+		const scramble = document.querySelector('#scrambleTxt div')?.textContent;
+
+		if (typeof scramble !== 'string' || scramble === 'Scrambling...') {
+			updateElement('big_scramble', '');
+			return;
+		}
+
+		const moves = scramble.split(/ +/);
+
+		updateElement(
+			'big_scramble',
+			moves
+				.map((m) => {
+					const move = m.toLowerCase();
+					const isPrime = move.includes("'");
+
+					const classes = [move[0], isPrime && 'is_prime'];
+
+					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
+				})
+				.join(''),
+			true
+		);
+	};
+
+	const updateDisplay = (full = false) => {
 		const stats = getRecentSolvesStats();
 
 		updateAgregateStats('today', stats.todaySolves);
@@ -499,14 +600,21 @@
 				.map((s) => `tr[data="${s.id}"] td`)
 				.join(', ');
 
-			displayElements.lastNStyle.textContent = `
+			updateElement(
+				'last_n_style',
+				`
 				tr[data] td {
 					opacity: 0.7;
 				}
 
 				${lastNSolvesSelector} {
 					opacity: 1;
-				}`;
+				}`
+			);
+		}
+
+		if (full) {
+			updateBigScramble();
 		}
 	};
 
@@ -518,7 +626,7 @@
 	window[createDisplayIntervalIdKey] = setInterval(() => {
 		if (createDisplay()) {
 			clearInterval(window[createDisplayIntervalIdKey]);
-			updateDisplay();
+			updateDisplay(true);
 
 			const lastNButton = getElement('last_n_max_button');
 
@@ -538,6 +646,12 @@
 
 	const mutationObserver = new MutationObserver(updateDisplay);
 	mutationObserver.observe(document.querySelector('#stats table'), {
+		childList: true,
+		subtree: true
+	});
+
+	const bigScrambleObserver = new MutationObserver(updateBigScramble);
+	bigScrambleObserver.observe(document.querySelector('#scrambleDiv'), {
 		childList: true,
 		subtree: true
 	});
