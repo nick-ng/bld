@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.25
+// @version     1.26
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -531,6 +531,22 @@
 
 				#big_scramble_${ID} div .two {
 					font-size: ${bigScrambleSizeRem * 0.7}rem;
+				}
+
+				#toolsDiv:hover div div {
+					height: 165px;
+					overflow: hidden;
+					position: relative;
+					width: 90px;
+					scale: 3;
+					margin-bottom: 150px;
+					margin-left: 40px;
+				}
+
+				#toolsDiv:hover canvas {
+					position: absolute;
+					top: 0px;
+					left: -80px;
 				}
 			`,
 			{ id: `style_${ID}` }
