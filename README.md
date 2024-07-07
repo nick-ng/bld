@@ -37,6 +37,24 @@ You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
 
+## Clock
+
+html:
+```html
+<iframe class="myframe" src="https://bld.pux.one/clock"/>
+<iframe class="myframe" src="https://bld.pux.one/clock?quartermarkers=true"/>
+```
+
+css:
+```css
+.myframe {
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+  border: none;
+}
+```
+
 ## ToDos
 
 - make "ctrl + s" keyboard shortcut not bring up the save menu
@@ -46,4 +64,4 @@ You can preview the production build with `npm run preview`.
 
 ### ToDo Comments
 
-- static/cstimer-violentmonkey.js:404: @todo: make size adjustable
+- static/cstimer-violentmonkey.js:405: @todo: make size adjustable
