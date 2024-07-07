@@ -22,6 +22,8 @@ f22::
 
 	if (WinExist("csTimer - Professional Rubik")) {
 		WinActivate
+		Sleep, 50
+		MouseMove 870, 970
 	}
 return
 
