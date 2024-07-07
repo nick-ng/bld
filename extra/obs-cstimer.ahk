@@ -4,21 +4,41 @@ SendMode, Input
 SetBatchLines, -1
 SetWorkingDir, %A_ScriptDir%
 
-; Switch to OBS, toggle recording, switch back
+; ! = Alt, + = Shift, ^ = Ctrl
+; https://autohotkey.com/docs/Hotkeys.htm
+
+#If WinExist("csTimer - Professional Rubik") and WinExist("ahk_exe obs64.exe")
+
+; Switch to OBS, stop recording, switch back
 f22::
 	SetTitleMatchMode, 1 ; start with string
-	if (WinActive("csTimer - Professional Rubik") && WinExist("ahk_exe obs64.exe")) {
-		MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
-		if (WinExist("ahk_exe obs64.exe")) {
-			; just to find the window
-		}
+
+	if (WinExist("ahk_exe obs64.exe")) {
+		WinActivate
+		Sleep, 150
+		Send !+^{r}
+		Sleep, 150
+	}
+
+	if (WinExist("csTimer - Professional Rubik")) {
+		WinActivate
+	}
+return
+
+; Switch to OBS, start recording, switch back
+f23::
+	SetTitleMatchMode, 1 ; start with string
+
+	if (WinExist("ahk_exe obs64.exe")) {
 		WinActivate
 		Sleep, 150
 		Send !^{r}
 		Sleep, 150
-		if (WinExist("csTimer - Professional Rubik")) {
-			; just to find the window
-		}
+	}
+
+	if (WinExist("csTimer - Professional Rubik")) {
 		WinActivate
+		Sleep, 50
+		MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
 	}
 return
