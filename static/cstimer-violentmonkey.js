@@ -547,7 +547,7 @@
 			return false;
 		}
 
-		const todayRootEl = document.getElementById(`today_root`);
+		const todayRootEl = getElement(`today_root`);
 
 		if (!todayRootEl || !displayElements.bigPreviewStyle) {
 			return false;
