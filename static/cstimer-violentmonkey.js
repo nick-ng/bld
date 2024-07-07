@@ -533,6 +533,13 @@
 				#big_scramble_${ID} div .two {
 					font-size: ${bigScrambleSizeRem * 0.7}rem;
 				}
+
+				.clock_frame_${ID} {
+					display: block;
+					flex-basis: ${bigScrambleSizeRem * 1.35}rem;
+					overflow: hidden;
+					border: none;
+				}
 			`,
 			{ id: `style_${ID}` }
 		);
@@ -611,16 +618,17 @@
 
 		updateElement(
 			'big_scramble',
-			moves
-				.map((m) => {
+			[
+				...moves.map((m) => {
 					const move = m.toLowerCase();
 					const isPrime = move.includes("'");
 
 					const classes = [move[0], isPrime && 'is_prime'];
 
 					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
-				})
-				.join(''),
+				}),
+				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock" />`
+			].join(''),
 			true
 		);
 	};
