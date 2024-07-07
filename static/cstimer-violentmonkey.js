@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.27
+// @version     1.28
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -533,8 +533,31 @@
 				#big_scramble_${ID} div .two {
 					font-size: ${bigScrambleSizeRem * 0.7}rem;
 				}
+			`,
+			{ id: `style_${ID}` }
+		);
 
-				#toolsDiv:hover div div {
+		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
+
+		displayElements.bigPreviewStyle = makeElement('style', null, '', {
+			id: `big_preview_style_${ID}`
+		});
+
+		if (!getElement('last_n_max_button')) {
+			return false;
+		}
+
+		const todayRootEl = document.getElementById(`today_root`);
+
+		if (!todayRootEl || !displayElements.bigPreviewStyle) {
+			return false;
+		}
+
+		todayRootEl.addEventListener('mouseenter', () => {
+			updateElement(
+				'big_preview_style',
+				`
+				#toolsDiv div div {
 					height: 165px;
 					overflow: hidden;
 					position: relative;
@@ -544,20 +567,18 @@
 					margin-left: 40px;
 				}
 
-				#toolsDiv:hover canvas {
+				#toolsDiv canvas {
 					position: absolute;
 					top: 0px;
 					left: -80px;
 				}
-			`,
-			{ id: `style_${ID}` }
-		);
+				`
+			);
+		});
 
-		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
-
-		if (!getElement('last_n_max_button')) {
-			return false;
-		}
+		todayRootEl.addEventListener('mouseleave', () => {
+			updateElement('big_preview_style', '');
+		});
 
 		return true;
 	};
