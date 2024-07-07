@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.26
+// @version     1.27
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -471,6 +471,7 @@
 					width: 60vw;
 					gap: 5px;
 					background-color: black;
+					pointer-events: none;
 				}
 
 				#today_root_${ID}:hover #big_scramble_${ID} {
