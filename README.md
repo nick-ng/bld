@@ -43,6 +43,7 @@ html:
 ```html
 <iframe class="myframe" src="https://bld.pux.one/clock"/>
 <iframe class="myframe" src="https://bld.pux.one/clock?quartermarkers=true"/>
+<iframe class="myframe" src="https://bld.pux.one/clock?unit=minutes" />
 ```
 
 css:
