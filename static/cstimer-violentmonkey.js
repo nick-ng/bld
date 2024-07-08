@@ -627,7 +627,7 @@
 
 					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
 				}),
-				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock" />`
+				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock" /><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes" />`
 			].join(''),
 			true
 		);
