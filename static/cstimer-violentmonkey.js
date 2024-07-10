@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.30
+// @version     1.31
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -627,7 +627,8 @@
 
 					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
 				}),
-				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock" /><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes" />`
+				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe>`,
+				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe>`
 			].join(''),
 			true
 		);
