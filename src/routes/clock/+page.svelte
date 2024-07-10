@@ -11,14 +11,12 @@
 	const getMinutes = () => {
 		const now = new Date();
 
-		return now.getMinutes() / 60 + now.getSeconds() / 60;
+		return now.getMinutes() + now.getSeconds() / 60;
 	};
 
-	const handColour = '#bbb';
-	let timeFraction =
-		$page.url.searchParams.get('unit') === 'minutes'
-			? getMinutes() / 60
-			: get12HourTimeHours() / 12;
+	const isMinutes = $page.url.searchParams.get('unit') === 'minutes';
+	const handColour = '#ccc';
+	let timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
 	let intervalId: number | null = null;
 	let gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
 
@@ -27,13 +25,13 @@
 			clearInterval(intervalId);
 		}
 
-		intervalId = setInterval(() => {
-			timeFraction =
-				$page.url.searchParams.get('unit') === 'minutes'
-					? getMinutes() / 60
-					: get12HourTimeHours() / 12;
-			gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
-		}, 2003);
+		intervalId = setInterval(
+			() => {
+				timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
+				gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
+			},
+			isMinutes ? 997 : 9007
+		);
 
 		return () => {
 			if (intervalId) {
