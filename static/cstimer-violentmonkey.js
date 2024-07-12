@@ -15,6 +15,7 @@
 	const oneDayMs = 1000 * 60 * 60 * 24;
 	const localStorageKey = `local-storage-${ID}`;
 	const displayElements = {};
+	let isTimerRunning = false;
 
 	const formatHundredths = (hundredths) => {
 		if (typeof hundredths !== 'number') {
@@ -540,9 +541,18 @@
 					overflow: hidden;
 					border: none;
 				}
+
+				.green_${ID} {
+					background-color: #00ff00;
+				}
 			`,
 			{ id: `style_${ID}` }
 		);
+
+		displayElements.autoRecordHelper = makeElement('div', null, null, {
+			id: `auto_record_helper_${ID}`,
+			style: `${['position: absolute', 'top: 95px', 'right: 0', 'z-index: 100', 'width: 10px', 'height: 10px'].join(';')};`
+		});
 
 		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
 
@@ -699,6 +709,28 @@
 
 	const bigScrambleObserver = new MutationObserver(updateBigScramble);
 	bigScrambleObserver.observe(document.querySelector('#scrambleDiv'), {
+		childList: true,
+		subtree: true
+	});
+
+	const timerRunningObserver = new MutationObserver((mutationList) => {
+		if (!mutationList[0]?.target) {
+			return;
+		}
+
+		const timerString = mutationList[0]?.target?.textContent?.slice(0, 4);
+
+		if (isTimerRunning && timerString === '0.00') {
+			isTimerRunning = false;
+			console.log('timer reset');
+			displayElements?.autoRecordHelper?.classList?.remove(`green_${ID}`);
+		} else if (!isTimerRunning && timerString !== '0.00') {
+			isTimerRunning = true;
+			console.log('timer running');
+			displayElements?.autoRecordHelper?.classList?.add(`green_${ID}`);
+		}
+	});
+	timerRunningObserver.observe(document.getElementById('lcd'), {
 		childList: true,
 		subtree: true
 	});
