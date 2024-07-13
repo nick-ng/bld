@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.31
+// @version     1.32
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -479,7 +479,12 @@
 					flex-wrap: wrap
 				}
 
-				#big_scramble_${ID} div {
+				#big_scramble_${ID} .b,
+				#big_scramble_${ID} .d,
+				#big_scramble_${ID} .f,
+				#big_scramble_${ID} .l,
+				#big_scramble_${ID} .r,
+				#big_scramble_${ID} .u {
 					flex-basis: ${bigScrambleSizeRem * 1.35}rem;
 					text-align: center;
 					color: white;
@@ -488,9 +493,9 @@
 						${textOutlineWidthPx}px -${textOutlineWidthPx}px 0 #000,
 						-${textOutlineWidthPx}px ${textOutlineWidthPx}px 0 #000,
 						${textOutlineWidthPx}px ${textOutlineWidthPx}px 0 #000;
-					border: 1px solid white;
 					font-weight: bold;
 					font-size: ${bigScrambleSizeRem}rem;
+					border: 1px solid white;
 				}
 
 				#big_scramble_${ID} .b {
@@ -532,6 +537,11 @@
 
 				#big_scramble_${ID} div .two {
 					font-size: ${bigScrambleSizeRem * 0.7}rem;
+				}
+
+				.clock_div_${ID} {
+					display: flex;
+					gap: 0;
 				}
 
 				.clock_frame_${ID} {
@@ -627,8 +637,7 @@
 
 					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
 				}),
-				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe>`,
-				`<iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe>`
+				`<div class="clock_div_${ID}"><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe></div>`
 			].join(''),
 			true
 		);
