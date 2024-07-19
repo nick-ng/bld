@@ -35,6 +35,9 @@
 	const getClockStyle = ({ size }: { size: number }) =>
 		[`height: ${size * 1.5}px`, `width: ${size * 1.5}px`].join(';');
 
+	const getCubeImageUrl = (scramble: string) =>
+		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(' ', '')}`;
+
 	let scramble = "D2 B' R2 U2 R2 D2 B F' D2 F' R2 L D' B R2 U' R2 F2 D2 F' L' Rw Uw";
 	let scrambleMoves: { move: string; isPrime: boolean; isDouble: boolean; side: string }[] =
 		scrambleToMoves(scramble);
@@ -92,6 +95,17 @@
 			<ClockHand isMinutes />
 		</div>
 	</div>
+	<a class="cube-preview" href="https://cube.rider.biz/visualcube.php" target="_blank">
+		<img src={getCubeImageUrl(scramble)} alt="U Face" />
+		<img src={getCubeImageUrl(`${scramble}x`)} alt="F Face" />
+	</a>
+	<div class="footer">
+		Scrambled cube images generated using Conrad Rider's <a
+			class="text-blue-500"
+			href="https://cube.rider.biz/visualcube.php"
+			target="_blank">VisualCube</a
+		>
+	</div>
 </div>
 
 <style lang="postcss">
@@ -112,6 +126,22 @@
 
 	.clock-hand {
 		border: 1px solid white;
+	}
+
+	.cube-preview {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+	}
+
+	.footer {
+		color: white;
+		position: absolute;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		text-align: center;
+		margin-bottom: 5px;
 	}
 
 	.scramble {

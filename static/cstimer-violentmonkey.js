@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.33
+// @version     1.34
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -405,7 +405,7 @@
 		getElement('today_root')?.addEventListener('click', () => {
 			windows.bigScramble = window.open(`${targetOrigin}/big-scramble`, `big_scramble_${ID}`);
 
-			setTimeout(() => {
+			const updateExternalBigScramble = () => {
 				const scramble = document.querySelector('#scrambleTxt div')?.textContent;
 
 				if (windows.bigScramble) {
@@ -413,7 +413,17 @@
 						targetOrigin: '*'
 					});
 				}
+			};
+
+			setTimeout(() => {
+				updateExternalBigScramble;
 			}, 1000);
+			setTimeout(() => {
+				updateExternalBigScramble;
+			}, 2000);
+			setTimeout(() => {
+				updateExternalBigScramble;
+			}, 3000);
 		});
 
 		const textOutlineWidthPx = 2;
