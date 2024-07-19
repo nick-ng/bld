@@ -133,6 +133,10 @@
 		bottom: 0;
 	}
 
+	.cube-preview img {
+		max-width: 10vw;
+	}
+
 	.footer {
 		color: white;
 		position: absolute;
