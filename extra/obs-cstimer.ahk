@@ -47,7 +47,6 @@ StartRecording() {
 		Sleep, 150
 		Send !^{r}
 		Sleep, 150
-
 	}
 
 	if (WinExist("csTimer - Professional Rubik")) {
@@ -65,8 +64,8 @@ f22::
 	StopRecording()
 return
 
-; Switch to OBS, start recording, switch back
 f23::
+	StopRecording()
 	StartRecording()
 return
 

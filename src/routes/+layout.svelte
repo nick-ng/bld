@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import '../app.css';
 
-	$: showNav = ['big-scramble', 'clock'].every((a) => $page.route.id !== `/${a}`);
+	$: showNav = ['big-scramble', 'big-scramble-2', 'clock'].every((a) => $page.route.id !== `/${a}`);
 </script>
 
 {#if showNav}
