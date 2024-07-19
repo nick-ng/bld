@@ -38,7 +38,7 @@
 	const getCubeImageUrl = (scramble: string) =>
 		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(' ', '')}`;
 
-	let scramble = "D2 B' R2 U2 R2 D2 B F' D2 F' R2 L D' B R2 U' R2 F2 D2 F' L' Rw Uw";
+	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
 	let scrambleMoves: { move: string; isPrime: boolean; isDouble: boolean; side: string }[] =
 		scrambleToMoves(scramble);
 	let size: number = 120;
@@ -116,12 +116,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		gap: 5px;
 	}
 
 	.clock {
 		display: flex;
 		flex-direction: row;
 		justify-content: center;
+		gap: 5px;
 	}
 
 	.clock-hand {
