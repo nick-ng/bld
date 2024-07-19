@@ -61,6 +61,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>Blindfolded Cube Resources - Big Scramble</title>
+</svelte:head>
+
 <div class="big-scramble-root">
 	<div class="scramble">
 		{#each scrambleToMoves(scramble) as scrambleMove}
