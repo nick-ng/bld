@@ -2,7 +2,9 @@
 	import ClockHand from '$lib/components/clock-hand.svelte';
 	import { onMount } from 'svelte';
 
-	const scrambleToMoves = (scramble: string) => {
+	const scrambleToMoves = (
+		scramble: string
+	): { move: string; isPrime: boolean; isDouble: boolean; side: string }[] => {
 		return scramble
 			.split(' ')
 			.filter((m) => m)
@@ -38,22 +40,17 @@
 	const getCubeImageUrl = (scramble: string) =>
 		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(' ', '')}`;
 
-	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
-	let scrambleMoves: { move: string; isPrime: boolean; isDouble: boolean; side: string }[] =
-		scrambleToMoves(scramble);
 	let size: number = 120;
 	let fontOutline: number = 2;
+	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
 
 	onMount(() => {
 		const handleEvent = (event: MessageEvent) => {
-			const scramble = event.data;
-
-			if (typeof scramble !== 'string') {
-				scrambleMoves = [];
+			if (typeof event.data !== 'string') {
 				return;
 			}
 
-			scrambleMoves = scrambleToMoves(scramble);
+			scramble = event.data;
 		};
 
 		window.addEventListener('message', handleEvent, false);
@@ -66,7 +63,7 @@
 
 <div class="big-scramble-root">
 	<div class="scramble">
-		{#each scrambleMoves as scrambleMove}
+		{#each scrambleToMoves(scramble) as scrambleMove}
 			{@const fontColor = scrambleMove.isDouble || scrambleMove.isPrime ? '#fff' : '#000'}
 			<div
 				class={[
