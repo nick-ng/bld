@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import '../app.css';
 
-	$: isClock = $page.route.id === '/clock';
 	$: showNav = ['big-scramble', 'clock'].every((a) => $page.route.id !== `/${a}`);
 </script>
 
