@@ -1,63 +1,13 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-
-	const get12HourTimeHours = () => {
-		const now = new Date();
-
-		return (now.getHours() % 12) + now.getMinutes() / 60 + now.getSeconds() / 3600;
-	};
-
-	const getMinutes = () => {
-		const now = new Date();
-
-		return now.getMinutes() + now.getSeconds() / 60;
-	};
-
-	const isMinutes = $page.url.searchParams.get('unit') === 'minutes';
-	const handColour = '#ccc';
-	let timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
-	let intervalId: number | null = null;
-	let gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
-
-	onMount(() => {
-		if (intervalId) {
-			clearInterval(intervalId);
-		}
-
-		intervalId = setInterval(
-			() => {
-				timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
-				gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
-			},
-			isMinutes ? 997 : 9007
-		);
-
-		return () => {
-			if (intervalId) {
-				clearInterval(intervalId);
-			}
-		};
-	});
+	import ClockHand from '$lib/components/clock-hand.svelte';
 </script>
 
 <div class="clock">
-	<div class="hand" style={gradientStyle}>
-		{#if $page.url.searchParams.has('quartermarkers')}
-			<table>
-				<tbody>
-					<tr>
-						<td></td>
-						<td></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td></td>
-					</tr>
-				</tbody>
-			</table>
-		{/if}
-	</div>
+	<ClockHand
+		isMinutes={$page.url.searchParams.get('unit') === 'minutes'}
+		showQuartermarkers={$page.url.searchParams.has('quartermarkers')}
+	/>
 </div>
 
 <style lang="postcss">
@@ -66,19 +16,5 @@
 		height: 100vh;
 		color: white;
 		background-color: black;
-	}
-
-	.hand {
-		border-radius: 50%;
-		background-color: black;
-		height: 100%;
-		width: 100%;
-		position: relative;
-		display: grid;
-		grid-template-columns: 1fr;
-	}
-
-	.hand td {
-		border: 1px solid black;
 	}
 </style>

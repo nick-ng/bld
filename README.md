@@ -65,4 +65,4 @@ css:
 
 ### ToDo Comments
 
-- static/cstimer-violentmonkey.js:404: @todo: make size adjustable
+- static/cstimer-violentmonkey.js:420: @todo: make size adjustable

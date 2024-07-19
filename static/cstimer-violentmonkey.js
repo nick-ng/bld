@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.32
+// @version     1.33
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -15,6 +15,8 @@
 	const oneDayMs = 1000 * 60 * 60 * 24;
 	const localStorageKey = `local-storage-${ID}`;
 	const displayElements = {};
+	const windows = {};
+	const targetOrigin = 'https://bld.pux.one';
 
 	const formatHundredths = (hundredths) => {
 		if (typeof hundredths !== 'number') {
@@ -400,6 +402,20 @@
 			return false;
 		}
 
+		getElement('today_root')?.addEventListener('click', () => {
+			windows.bigScramble = window.open(`${targetOrigin}/big-scramble`, `big_scramble_${ID}`);
+
+			setTimeout(() => {
+				const scramble = document.querySelector('#scrambleTxt div')?.textContent;
+
+				if (windows.bigScramble) {
+					windows.bigScramble.postMessage(scramble, {
+						targetOrigin: '*'
+					});
+				}
+			}, 1000);
+		});
+
 		const textOutlineWidthPx = 2;
 		// @todo: make size adjustable
 		const bigScrambleSizeRem = 6;
@@ -622,6 +638,12 @@
 		if (typeof scramble !== 'string' || scramble === 'Scrambling...') {
 			updateElement('big_scramble', '');
 			return;
+		}
+
+		if (windows.bigScramble) {
+			windows.bigScramble.postMessage(scramble, {
+				targetOrigin: '*'
+			});
 		}
 
 		const moves = scramble.split(/ +/);

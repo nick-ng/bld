@@ -9,11 +9,12 @@ SetWorkingDir, %A_ScriptDir%
 
 #If WinExist("csTimer - Professional Rubik") and WinExist("ahk_exe obs64.exe")
 
-; check if obs is running, send stop recording hotkey
+; Switch to OBS, stop recording, switch back
 StopRecording() {
 	SetTitleMatchMode, 1 ; start with string
 
-	if (WinExist("ahk_exe obs64.exe") and WinExist("csTimer - Professional Rubik")) {
+	if (WinExist("ahk_exe obs64.exe")) {
+		WinActivate
 		Sleep, 150
 		Send !+^{r}
 		Sleep, 150
@@ -21,22 +22,8 @@ StopRecording() {
 
 	if (WinExist("csTimer - Professional Rubik")) {
 		WinActivate
-	}
-
-	return
-}
-
-StartRecording() {
-	; move mouse to the middle so the big scramble isn't visible
-	MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2, 1
-
-	SetTitleMatchMode, 1 ; start with string
-
-	if (WinExist("ahk_exe obs64.exe") and WinExist("csTimer - Professional Rubik")) {
-		Sleep, 150
-		Send !^{r}
-		Sleep, 150
-		MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2, 1
+		Sleep, 50
+		MouseMove 870, 970
 	}
 
 	return
@@ -44,12 +31,26 @@ StartRecording() {
 
 f22::
 	StopRecording()
-	StartRecording()
 return
 
 ; Switch to OBS, start recording, switch back
 f23::
-	StartRecording()
+	MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2, 1
+
+	SetTitleMatchMode, 1 ; start with string
+
+	if (WinExist("ahk_exe obs64.exe")) {
+		WinActivate
+		Sleep, 150
+		Send !^{r}
+		Sleep, 150
+	}
+
+	if (WinExist("csTimer - Professional Rubik")) {
+		WinActivate
+		Sleep, 50
+		MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2, 1
+	}
 return
 
 ; apply OK and stop recording
@@ -59,7 +60,6 @@ return
 	Sleep, 3000
 
 	StopRecording()
-	StartRecording()
 return
 
 ; apply +2 and stop recording
@@ -69,7 +69,6 @@ return
 	Sleep, 3000
 
 	StopRecording()
-	StartRecording()
 return
 
 
@@ -80,5 +79,4 @@ return
 	Sleep, 3000
 
 	StopRecording()
-	StartRecording()
 return
