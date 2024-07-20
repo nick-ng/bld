@@ -71,7 +71,13 @@ f23::
 return
 
 ; apply OK and stop recording
-~^1::
+^1::
+	if (WinExist("csTimer - Professional Rubik")) {
+		WinActivate
+		Sleep, 100
+		Send ^{1}
+	}
+
 	CoordMode, Mouse, Window
 	MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
 	; sleep a bit so the OK is in the recording
@@ -82,7 +88,13 @@ return
 return
 
 ; apply +2 and stop recording
-~^2::
+^2::
+	if (WinExist("csTimer - Professional Rubik")) {
+		WinActivate
+		Sleep, 100
+		Send ^{2}
+	}
+
 	CoordMode, Mouse, Window
 	MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
 	; sleep a bit so the +2 is in the recording
@@ -94,7 +106,13 @@ return
 
 
 ; apply DNF and stop recording
-~^3::
+^3::
+	if (WinExist("csTimer - Professional Rubik")) {
+		WinActivate
+		Sleep, 100
+		Send ^{3}
+	}
+
 	CoordMode, Mouse, Window
 	MouseMove A_ScreenWidth / 2, A_ScreenHeight / 2
 	; sleep a bit so the DNF is in the recording
