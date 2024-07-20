@@ -1,6 +1,7 @@
 <script lang="ts">
-	import ClockHand from '$lib/components/clock-hand.svelte';
 	import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import ClockHand from '$lib/components/clock-hand.svelte';
 
 	const scrambleToMoves = (
 		scramble: string
@@ -45,6 +46,12 @@
 	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
 
 	onMount(() => {
+		const startingScramble = $page.url.searchParams.get('scramble');
+
+		if (typeof startingScramble === 'string') {
+			scramble = startingScramble;
+		}
+
 		const handleEvent = (event: MessageEvent) => {
 			if (typeof event.data !== 'string') {
 				return;
