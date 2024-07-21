@@ -67,6 +67,7 @@ return
 
 ; Switch to OBS, start recording, switch back
 f23::
+	StopRecording()
 	StartRecording()
 return
 

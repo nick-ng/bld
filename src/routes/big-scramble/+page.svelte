@@ -5,34 +5,37 @@
 
 	const scrambleToMoves = (
 		scramble: string
-	): { move: string; isPrime: boolean; isDouble: boolean; side: string }[] => {
+	): { move: string; isPrime: boolean; isDouble: boolean; isWide: boolean; side: string }[] => {
 		return scramble
 			.split(' ')
 			.filter((m) => m)
 			.map((move) => {
+				const isDouble = move.includes('2');
+				const isWide = move.includes('w');
 				return {
 					move,
-					isDouble: move.includes('2'),
-					isPrime: move.includes("'"),
-					side: move[0].toLowerCase()
+					isDouble,
+					isPrime: move.includes("'") && !isDouble,
+					isWide,
+					side: move[0]
 				};
 			});
 	};
 
 	const getMoveStyle = ({
 		fontOutline,
-		fontColor,
+		outlineColor,
 		size
 	}: {
 		fontOutline: number;
-		fontColor: string;
+		outlineColor: string;
 		size: number;
 	}) =>
 		[
 			`flex-basis: ${size * 1.7}px`,
 			`font-size:${size}px`,
 			`height: ${size * 1.25}px`,
-			`text-shadow: -${fontOutline}px -${fontOutline}px 0 ${fontColor}, ${fontOutline}px -${fontOutline}px 0 ${fontColor}, -${fontOutline}px ${fontOutline}px 0 ${fontColor}, ${fontOutline}px ${fontOutline}px 0 ${fontColor}`
+			`text-shadow: -${fontOutline}px -${fontOutline}px 0 ${outlineColor}, ${fontOutline}px -${fontOutline}px 0 ${outlineColor}, -${fontOutline}px ${fontOutline}px 0 ${outlineColor}, ${fontOutline}px ${fontOutline}px 0 ${outlineColor}`
 		].join(';');
 
 	const getClockStyle = ({ size }: { size: number }) =>
@@ -75,23 +78,28 @@
 <div class="big-scramble-root">
 	<div class="scramble">
 		{#each scrambleToMoves(scramble) as scrambleMove}
-			{@const fontColor = scrambleMove.isDouble || scrambleMove.isPrime ? '#fff' : '#000'}
 			<div
-				class={[
-					'move',
-					scrambleMove.side,
-					scrambleMove.isPrime && 'is_prime',
-					scrambleMove.isDouble && 'two'
-				]
+				class={['move', scrambleMove.side.toLowerCase(), scrambleMove.isPrime && 'is_prime']
 					.filter((c) => c)
 					.join(' ')}
 				style={getMoveStyle({
-					fontColor,
+					outlineColor: scrambleMove.isPrime ? '#fff' : '#000',
 					fontOutline,
 					size
 				})}
 			>
-				{scrambleMove.move}
+				{#if scrambleMove.isDouble}
+					<span>{scrambleMove.side}{scrambleMove.isWide ? 'w' : ''}</span><span
+						class="two"
+						style={getMoveStyle({
+							outlineColor: '#FFF',
+							fontOutline,
+							size
+						})}>2</span
+					>
+				{:else}
+					{scrambleMove.move}
+				{/if}
 			</div>
 		{/each}
 	</div>
