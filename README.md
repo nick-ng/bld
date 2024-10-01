@@ -58,11 +58,16 @@ css:
 
 ## ToDos
 
-- make "ctrl + s" keyboard shortcut not bring up the save menu
-- export lists
-- import lists
-- delete lists
+- use basic auth
+- use environment variables to specify server url
+- post pictures to server
+- store letter pair information
+  - letter pair
+  - user id
+  - text answer
+  - filename/uri
 
 ### ToDo Comments
 
+- server/main.go:23: @todo(nick-ng): figure out how to read images in form data
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
