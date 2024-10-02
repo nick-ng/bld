@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bld-server/routes"
 	"fmt"
 	"io"
 	"net/http"
@@ -42,7 +43,8 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	http.HandleFunc("/flash-cards", routes.FlashCardsHandler)
 	http.HandleFunc("/", rootHandler)
 
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":27945", nil)
 }
