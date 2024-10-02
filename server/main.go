@@ -42,8 +42,15 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(writer, req.Method)
 }
 
+func corsHandler(writer http.ResponseWriter, req *http.Request) {
+	fmt.Println("Hi")
+}
+
 func main() {
+	http.HandleFunc("OPTIONS ", corsHandler)
 	http.HandleFunc("/flash-cards", routes.FlashCardsHandler)
+	http.HandleFunc("/images/{filename}", routes.ImagesCardsHandler)
+	http.HandleFunc("/images/", routes.ImagesCardsHandler)
 	http.HandleFunc("/", rootHandler)
 
 	http.ListenAndServe(":27945", nil)
