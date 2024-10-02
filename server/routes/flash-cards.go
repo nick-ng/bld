@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"bld-server/utils"
 	"bytes"
 	"errors"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 
 const USER_IMAGES_DIRECTORY = "user-images"
 
-func getImageFullPath(filename string) (string, error) {
+func GetImageFullPath(filename string) (string, error) {
 	err := os.Mkdir(USER_IMAGES_DIRECTORY, 0755)
 
 	if err != nil && !errors.Is(err, fs.ErrExist) {
@@ -34,41 +35,43 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 		}
 	}
 
+	// @todo(nick-ng): authenticate request
+
+	writer.Header().Add("Access-Control-Allow-Origin", "*")
+
 	switch req.Method {
+	case "OPTIONS":
+		{
+			writer.WriteHeader(http.StatusOK)
+		}
 	case "POST":
 		{
-			// @todo(nick-ng): figure out how to read images in form data
-			// body, err := io.ReadAll(req.Body)
-
-			// if err != nil {
-			// 	fmt.Println("error when processing request", err)
-			// 	return
-			// }
-
 			file, fileHeader, err := req.FormFile("image")
 
 			if err != nil {
-				fmt.Println("error when getting file", err)
+				writer.WriteHeader(http.StatusBadRequest)
+				fmt.Fprintf(writer, "no file provided: %s", err.Error())
 				return
 			}
 
-			pants := req.FormValue("pants")
+			// letterPair := req.FormValue("letterPair")
 
 			contentType := strings.ToLower(fileHeader.Header.Get("Content-Type"))
-			fmt.Println(fileHeader.Header.Get("Content-Type"))
-
 			if !strings.HasPrefix(contentType, "image/") {
+				writer.WriteHeader(http.StatusBadRequest)
+				fmt.Fprint(writer, "invalid file type")
 				return
 			}
 
 			extension := strings.Replace(contentType, "image/", "", 1)
 
-			fmt.Println(pants)
+			filename := fmt.Sprintf("%s.%s", utils.RandomId(), extension)
 
-			filePath, err := getImageFullPath(fmt.Sprintf("%s.%s", pants, extension))
+			filePath, err := GetImageFullPath(filename)
 
 			if err != nil {
-				fmt.Println("error getting images directory", err)
+				writer.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(writer, "error getting images directory: %s", err.Error())
 				return
 			}
 
@@ -81,12 +84,15 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 			}
 
 			os.WriteFile(filePath, buffer.Bytes(), 0666)
+
+			writer.WriteHeader(http.StatusOK)
 		}
 	case "GET":
 		fallthrough
 	default:
 		{
 			fmt.Fprintf(writer, "henlo")
+			writer.WriteHeader(http.StatusMethodNotAllowed)
 		}
 	}
 

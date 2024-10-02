@@ -3,7 +3,18 @@
 	import { joinUrl } from '$lib/utils';
 
 	let serverUrl = '';
-	let formData = new FormData();
+
+	let letterPair = '';
+	let fileInputEl: HTMLInputElement | null = null;
+
+	let imageFilename = '2r5xdh26x4yljepuua6exy36xab9ttr.png';
+
+	const resetForm = () => {
+		if (fileInputEl) {
+			fileInputEl.value = '';
+		}
+		letterPair = '';
+	};
 
 	onMount(() => {
 		serverUrl = import.meta.env.VITE_SERVER_URL;
@@ -13,7 +24,6 @@
 <div class="max-w-[130ch] mx-auto">
 	<h1>Flash Cards</h1>
 	<p>{serverUrl}</p>
-	<p>{joinUrl(serverUrl, 'pants')}</p>
 	<form
 		action={joinUrl(serverUrl, 'flash-cards')}
 		method="post"
@@ -64,14 +74,18 @@
 			});
 
 			console.log('response', response);
+
+			if (response.ok) {
+				resetForm();
+			}
 		}}
 	>
 		<table>
 			<tbody>
 				<tr>
-					<td>Pants</td>
+					<td>Letter Pair</td>
 					<td>
-						<input name="pants" type="text" />
+						<input name="letterPair" type="text" bind:value={letterPair} />
 					</td>
 				</tr>
 				<tr>
@@ -82,20 +96,7 @@
 							alt="Choose Image"
 							type="file"
 							accept="image/*"
-							on:change={(event) => {
-								const fileList = event.currentTarget.files;
-								if (!fileList) {
-									return;
-								}
-
-								const file = fileList[fileList.length - 1];
-
-								if (!file) {
-									return;
-								}
-
-								formData.set('image', file);
-							}}
+							bind:this={fileInputEl}
 						/>
 					</td>
 				</tr>
@@ -103,4 +104,12 @@
 		</table>
 		<button>Submit</button>
 	</form>
+	<div>
+		<input type="text" bind:value={imageFilename} />
+		<img
+			crossorigin="anonymous"
+			src={joinUrl(serverUrl, 'images', imageFilename)}
+			alt={imageFilename}
+		/>
+	</div>
 </div>
