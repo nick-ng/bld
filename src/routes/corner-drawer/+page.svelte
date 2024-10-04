@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from './corner-colour';
+	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from '$lib/components/corner-colour';
+	import Corners from '$lib/components/corners.svelte';
 
 	const colours = Object.values(COLOURS);
 
@@ -81,8 +82,7 @@
 	<div class="mx-4 text-center uppercase">
 		<span>{letterPair}</span>
 		<br />
-		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
-		{@html htmlString}
+		<Corners {letterPair} />
 	</div>
 	<form
 		on:submit={(event) => {

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { joinUrl } from '$lib/utils';
+	import Corners from '$lib/components/corners.svelte';
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
 
@@ -27,6 +28,9 @@
 <div class="max-w-prose mx-auto">
 	<a href="/flash-cards/edit">Back</a>
 	<h2 class="uppercase text-center">{letterPair}</h2>
+	<div class="text-center mb-1">
+		<Corners {letterPair} />
+	</div>
 	<form
 		action={joinUrl(serverUrl, 'flash-cards')}
 		method="post"
