@@ -12,16 +12,16 @@
 	}
 
 	body,
-	input[type='text'],
-	input[type='number'],
+	input[type="text"],
+	input[type="number"],
 	select,
 	textarea,
 	.opaque {
 		@apply bg-white dark:bg-gray-800;
 	}
 
-	input[type='text'],
-	input[type='number'],
+	input[type="text"],
+	input[type="number"],
 	select,
 	textarea {
 		@apply rounded border border-gray-300 px-0.5 dark:border-gray-500;

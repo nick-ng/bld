@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from './corner-colour';
+	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from "./corner-colour";
 
 	let pieceAsticker1 = COLOURS.COLOUR_GREY;
 	let pieceAsticker2 = COLOURS.COLOUR_GREY;
@@ -9,10 +9,10 @@
 	let pieceBsticker2 = COLOURS.COLOUR_GREY;
 	let pieceBsticker3 = COLOURS.COLOUR_GREY;
 
-	export let letterPair = '';
+	export let letterPair = "";
 
 	function getHtmlStringForLetterPair(lp: string): string {
-		const letters = lp.split('');
+		const letters = lp.split("");
 
 		pieceAsticker1 = COLOURS.COLOUR_GREY;
 		pieceAsticker2 = COLOURS.COLOUR_GREY;

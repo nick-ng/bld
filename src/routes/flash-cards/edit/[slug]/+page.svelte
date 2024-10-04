@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import { joinUrl } from '$lib/utils';
-	import Corners from '$lib/components/corners.svelte';
+	import { page } from "$app/stores";
+	import { joinUrl } from "$lib/utils";
+	import Corners from "$lib/components/corners.svelte";
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
 
@@ -15,12 +15,12 @@
 			return window.URL.createObjectURL(f[0]);
 		}
 
-		return '';
+		return "";
 	};
 
 	const resetForm = () => {
 		if (fileInputEl) {
-			fileInputEl.value = '';
+			fileInputEl.value = "";
 		}
 	};
 </script>
@@ -32,7 +32,7 @@
 		<Corners {letterPair} />
 	</div>
 	<form
-		action={joinUrl(serverUrl, 'flash-cards')}
+		action={joinUrl(serverUrl, "flash-cards")}
 		method="post"
 		on:submit={async (event) => {
 			event.preventDefault();
@@ -45,15 +45,15 @@
 				const formInput = children[i];
 
 				if (formInput instanceof HTMLInputElement) {
-					const formInputName = formInput.getAttribute('name');
-					const formInputType = formInput.getAttribute('type');
+					const formInputName = formInput.getAttribute("name");
+					const formInputType = formInput.getAttribute("type");
 
 					if (!formInputName || !formInputType) {
 						continue;
 					}
 
-					switch (formInput.getAttribute('type')) {
-						case 'file': {
+					switch (formInput.getAttribute("type")) {
+						case "file": {
 							const fileList = formInput.files;
 							if (!fileList) {
 								break;
@@ -75,12 +75,12 @@
 				}
 			}
 
-			const response = await fetch(joinUrl(serverUrl, 'flash-cards', letterPair), {
-				method: 'PUT',
+			const response = await fetch(joinUrl(serverUrl, "flash-cards", letterPair), {
+				method: "PUT",
 				body: formData
 			});
 
-			console.log('response', response);
+			console.log("response", response);
 		}}
 	>
 		<table class="flash-card-editor border-separate border-spacing-x-4">

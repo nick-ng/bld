@@ -1,17 +1,17 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { page } from '$app/stores';
-	import ClockHand from '$lib/components/clock-hand.svelte';
+	import { onMount } from "svelte";
+	import { page } from "$app/stores";
+	import ClockHand from "$lib/components/clock-hand.svelte";
 
 	const scrambleToMoves = (
 		scramble: string
 	): { move: string; isPrime: boolean; isDouble: boolean; isWide: boolean; side: string }[] => {
 		return scramble
-			.split(' ')
+			.split(" ")
 			.filter((m) => m)
 			.map((move) => {
-				const isDouble = move.includes('2');
-				const isWide = move.includes('w');
+				const isDouble = move.includes("2");
+				const isWide = move.includes("w");
 				return {
 					move,
 					isDouble,
@@ -36,37 +36,37 @@
 			`font-size:${size}px`,
 			`height: ${size * 1.25}px`,
 			`text-shadow: -${fontOutline}px -${fontOutline}px 0 ${outlineColor}, ${fontOutline}px -${fontOutline}px 0 ${outlineColor}, -${fontOutline}px ${fontOutline}px 0 ${outlineColor}, ${fontOutline}px ${fontOutline}px 0 ${outlineColor}`
-		].join(';');
+		].join(";");
 
 	const getClockStyle = ({ size }: { size: number }) =>
-		[`height: ${size * 1.5}px`, `width: ${size * 1.5}px`].join(';');
+		[`height: ${size * 1.5}px`, `width: ${size * 1.5}px`].join(";");
 
 	const getCubeImageUrl = (scramble: string) =>
-		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(' ', '')}`;
+		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(" ", "")}`;
 
 	let size: number = 120;
 	let fontOutline: number = 2;
 	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
 
 	onMount(() => {
-		const startingScramble = $page.url.searchParams.get('scramble');
+		const startingScramble = $page.url.searchParams.get("scramble");
 
-		if (typeof startingScramble === 'string') {
+		if (typeof startingScramble === "string") {
 			scramble = startingScramble;
 		}
 
 		const handleEvent = (event: MessageEvent) => {
-			if (typeof event.data !== 'string') {
+			if (typeof event.data !== "string") {
 				return;
 			}
 
 			scramble = event.data;
 		};
 
-		window.addEventListener('message', handleEvent, false);
+		window.addEventListener("message", handleEvent, false);
 
 		return () => {
-			window.removeEventListener('message', handleEvent);
+			window.removeEventListener("message", handleEvent);
 		};
 	});
 </script>
@@ -79,20 +79,20 @@
 	<div class="scramble">
 		{#each scrambleToMoves(scramble) as scrambleMove}
 			<div
-				class={['move', scrambleMove.side.toLowerCase(), scrambleMove.isPrime && 'is_prime']
+				class={["move", scrambleMove.side.toLowerCase(), scrambleMove.isPrime && "is_prime"]
 					.filter((c) => c)
-					.join(' ')}
+					.join(" ")}
 				style={getMoveStyle({
-					outlineColor: scrambleMove.isPrime ? '#fff' : '#000',
+					outlineColor: scrambleMove.isPrime ? "#fff" : "#000",
 					fontOutline,
 					size
 				})}
 			>
 				{#if scrambleMove.isDouble}
-					<span>{scrambleMove.side}{scrambleMove.isWide ? 'w' : ''}</span><span
+					<span>{scrambleMove.side}{scrambleMove.isWide ? "w" : ""}</span><span
 						class="two"
 						style={getMoveStyle({
-							outlineColor: '#FFF',
+							outlineColor: "#FFF",
 							fontOutline,
 							size
 						})}>2</span

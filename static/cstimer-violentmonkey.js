@@ -11,28 +11,28 @@
 
 // ==/UserScript==
 (() => {
-	const ID = '32bc11b3-3759-4192-8ae1-cae4a4043685';
+	const ID = "32bc11b3-3759-4192-8ae1-cae4a4043685";
 	const oneDayMs = 1000 * 60 * 60 * 24;
 	const localStorageKey = `local-storage-${ID}`;
 	const displayElements = {};
 	const windows = {};
-	const targetOrigin = 'https://bld.pux.one';
+	const targetOrigin = "https://bld.pux.one";
 
 	const formatHundredths = (hundredths) => {
-		if (typeof hundredths !== 'number') {
-			return '-';
+		if (typeof hundredths !== "number") {
+			return "-";
 		}
 
 		// 10 days in hundredths
 		if (hundredths > oneDayMs) {
-			return 'DNF';
+			return "DNF";
 		}
 
 		if (hundredths > 6000) {
 			const minutes = Math.floor(hundredths / 6000);
 			const seconds = (hundredths % 6000) / 100;
 
-			return `${minutes}:${seconds.toFixed(2).padStart(5, '0')}`;
+			return `${minutes}:${seconds.toFixed(2).padStart(5, "0")}`;
 		}
 
 		const seconds = hundredths / 100;
@@ -55,9 +55,9 @@
 
 	const getDevData = () => {
 		try {
-			return JSON.parse(localStorage.getItem('devData')) || {};
+			return JSON.parse(localStorage.getItem("devData")) || {};
 		} catch (e) {
-			console.warn('invalid saved data', e);
+			console.warn("invalid saved data", e);
 		}
 
 		return {};
@@ -79,9 +79,9 @@
 	let savedData = getSavedData();
 
 	const getCurrentSolveIndex = () => {
-		const a = [...document.querySelectorAll('div#stats tbody tr')];
+		const a = [...document.querySelectorAll("div#stats tbody tr")];
 		const b = a.map((aa) => {
-			const d = aa.getAttribute('data');
+			const d = aa.getAttribute("data");
 			return d ? parseInt(d, 10) : -1;
 		});
 
@@ -89,7 +89,7 @@
 	};
 
 	const getCurrentSessionName = () => {
-		const tempEl = document.querySelector('#stats select');
+		const tempEl = document.querySelector("#stats select");
 		return tempEl.options[tempEl.selectedIndex].textContent;
 	};
 
@@ -118,7 +118,7 @@
 
 		const prevDevData = getDevData();
 		localStorage.setItem(
-			'devData',
+			"devData",
 			JSON.stringify({
 				...prevDevData,
 				[localStorageKey]: newData
@@ -132,13 +132,13 @@
 	 * most recent solve at the start of the array
 	 */
 	const getSolveStats = ({ minId, maxCount }) => {
-		const statsTable = document.querySelector('#stats .stattl table');
+		const statsTable = document.querySelector("#stats .stattl table");
 
-		const statsRows = [...statsTable.querySelectorAll('tr')];
+		const statsRows = [...statsTable.querySelectorAll("tr")];
 		const solvesStats = [];
 		let counter = 0;
 		for (let i = 0; i < statsRows.length; i++) {
-			const rowDataAttr = statsRows[i].getAttribute('data');
+			const rowDataAttr = statsRows[i].getAttribute("data");
 			if (rowDataAttr) {
 				const solveId = parseInt(rowDataAttr, 10);
 
@@ -161,12 +161,12 @@
 					continue;
 				}
 
-				if (time.toUpperCase() === 'DNF') {
+				if (time.toUpperCase() === "DNF") {
 					solveStats.dnf = true;
 					solveStats.hundredths = Infinity;
 				} else {
 					const parts = time.split(/[:+]/g);
-					if (time.includes(':')) {
+					if (time.includes(":")) {
 						const minutes = parseInt(parts[0], 10);
 						const seconds = parseFloat(parts[1]);
 						solveStats.hundredths = minutes * 6000 + Math.round(seconds * 100);
@@ -175,7 +175,7 @@
 						solveStats.hundredths = Math.round(seconds * 100);
 					}
 
-					if (time.includes('+')) {
+					if (time.includes("+")) {
 						solveStats.plus2 = true;
 					}
 				}
@@ -184,9 +184,9 @@
 
 				counter++;
 
-				const enoughCounter = typeof maxCount !== 'number' || counter >= maxCount;
+				const enoughCounter = typeof maxCount !== "number" || counter >= maxCount;
 				// I think this gets an extra solve
-				const enoughId = typeof minId !== 'number' || minId < solveId;
+				const enoughId = typeof minId !== "number" || minId < solveId;
 				if (enoughCounter && enoughId) {
 					break;
 				}
@@ -238,8 +238,8 @@
 
 		let parentEl = parent;
 		if (!parent) {
-			parentEl = document.querySelector('body');
-		} else if (typeof parent === 'string') {
+			parentEl = document.querySelector("body");
+		} else if (typeof parent === "string") {
 			parentEl = document.getElementById(parent);
 		}
 
@@ -267,7 +267,7 @@
 	};
 
 	const resolveValue = (value) => {
-		if (typeof value === 'function') {
+		if (typeof value === "function") {
 			return value();
 		}
 
@@ -296,7 +296,7 @@
 			if (i >= 4) {
 				const fiveSolves = solves.slice(i - 4, i + 1);
 				const ao5 = calculateAoN(fiveSolves);
-				if (ao5 < bestAo5 || typeof bestAo5 !== 'number') {
+				if (ao5 < bestAo5 || typeof bestAo5 !== "number") {
 					bestAo5 = ao5;
 				}
 			}
@@ -304,7 +304,7 @@
 			if (i >= 11) {
 				const fiveSolves = solves.slice(i - 11, i + 1);
 				const ao12 = calculateAoN(fiveSolves);
-				if (ao12 < bestAo12 || typeof bestAo12 !== 'number') {
+				if (ao12 < bestAo12 || typeof bestAo12 !== "number") {
 					bestAo12 = ao12;
 				}
 			}
@@ -335,7 +335,7 @@
 			if (i >= 4) {
 				const tempSolves = todaySolves.slice(i - 4, i + 1);
 				const ao5 = calculateAoN(tempSolves);
-				if (ao5 < bestAo5 || typeof bestAo5 !== 'number') {
+				if (ao5 < bestAo5 || typeof bestAo5 !== "number") {
 					bestAo5 = ao5;
 				}
 			}
@@ -343,7 +343,7 @@
 			if (i >= 11) {
 				const tempSolves = todaySolves.slice(i - 11, i + 1);
 				const ao12 = calculateAoN(tempSolves);
-				if (ao12 < bestAo12 || typeof bestAo12 !== 'number') {
+				if (ao12 < bestAo12 || typeof bestAo12 !== "number") {
 					bestAo12 = ao12;
 				}
 			}
@@ -365,7 +365,7 @@
 
 	const createDisplay = () => {
 		displayElements.displayRoot = makeElement(
-			'div',
+			"div",
 			null,
 			`
 			<div id="today_root_${ID}">
@@ -402,8 +402,8 @@
 			return false;
 		}
 
-		getElement('today_root')?.addEventListener('click', () => {
-			const scramble = document.querySelector('#scrambleTxt div')?.textContent;
+		getElement("today_root")?.addEventListener("click", () => {
+			const scramble = document.querySelector("#scrambleTxt div")?.textContent;
 
 			windows.bigScramble = window.open(
 				`${targetOrigin}/big-scramble?scramble=${encodeURIComponent(scramble)}`,
@@ -415,7 +415,7 @@
 		// @todo: make size adjustable
 		const bigScrambleSizeRem = 6;
 		displayElements.style = makeElement(
-			'style',
+			"style",
 			null,
 			`
 				#display_root_${ID} {
@@ -565,13 +565,13 @@
 			{ id: `style_${ID}` }
 		);
 
-		displayElements.lastNStyle = makeElement('style', null, '', { id: `last_n_style_${ID}` });
+		displayElements.lastNStyle = makeElement("style", null, "", { id: `last_n_style_${ID}` });
 
-		displayElements.bigPreviewStyle = makeElement('style', null, '', {
+		displayElements.bigPreviewStyle = makeElement("style", null, "", {
 			id: `big_preview_style_${ID}`
 		});
 
-		if (!getElement('last_n_max_button')) {
+		if (!getElement("last_n_max_button")) {
 			return false;
 		}
 
@@ -581,9 +581,9 @@
 			return false;
 		}
 
-		todayRootEl.addEventListener('mouseenter', () => {
+		todayRootEl.addEventListener("mouseenter", () => {
 			updateElement(
-				'big_preview_style',
+				"big_preview_style",
 				`
 				#toolsDiv div div {
 					height: 165px;
@@ -604,8 +604,8 @@
 			);
 		});
 
-		todayRootEl.addEventListener('mouseleave', () => {
-			updateElement('big_preview_style', '');
+		todayRootEl.addEventListener("mouseleave", () => {
+			updateElement("big_preview_style", "");
 		});
 
 		return true;
@@ -613,7 +613,7 @@
 
 	const updateAgregateStats = (prefix, groupStats) => {
 		if (groupStats.solves.length === 0) {
-			updateElement(`${prefix}_count`, '0/0');
+			updateElement(`${prefix}_count`, "0/0");
 		} else {
 			updateElement(
 				`${prefix}_count`,
@@ -628,34 +628,34 @@
 	};
 
 	const updateBigScramble = () => {
-		const scramble = document.querySelector('#scrambleTxt div')?.textContent;
+		const scramble = document.querySelector("#scrambleTxt div")?.textContent;
 
-		if (typeof scramble !== 'string' || scramble === 'Scrambling...') {
-			updateElement('big_scramble', '');
+		if (typeof scramble !== "string" || scramble === "Scrambling...") {
+			updateElement("big_scramble", "");
 			return;
 		}
 
 		if (windows.bigScramble) {
 			windows.bigScramble.postMessage(scramble, {
-				targetOrigin: '*'
+				targetOrigin: "*"
 			});
 		}
 
 		const moves = scramble.split(/ +/);
 
 		updateElement(
-			'big_scramble',
+			"big_scramble",
 			[
 				...moves.map((m) => {
 					const move = m.toLowerCase();
 					const isPrime = move.includes("'");
 
-					const classes = [move[0], isPrime && 'is_prime'];
+					const classes = [move[0], isPrime && "is_prime"];
 
-					return `<div class="${classes.join(' ')}">${m.replace('2', '<span class="two">2</span>')}</div>`;
+					return `<div class="${classes.join(" ")}">${m.replace("2", '<span class="two">2</span>')}</div>`;
 				}),
 				`<div class="clock_div_${ID}"><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe></div>`
-			].join(''),
+			].join(""),
 			true
 		);
 	};
@@ -663,18 +663,18 @@
 	const updateDisplay = (full = false) => {
 		const stats = getRecentSolvesStats();
 
-		updateAgregateStats('today', stats.todaySolves);
-		updateAgregateStats('last_n', stats.lastNSolves);
+		updateAgregateStats("today", stats.todaySolves);
+		updateAgregateStats("last_n", stats.lastNSolves);
 
-		updateElement('last_n_max', () => getSavedData().lastNSolvesMax);
+		updateElement("last_n_max", () => getSavedData().lastNSolvesMax);
 
 		if (stats.lastNSolves.solves.length > 0) {
 			const lastNSolvesSelector = stats.lastNSolves.solves
 				.map((s) => `tr[data="${s.id}"] td`)
-				.join(', ');
+				.join(", ");
 
 			updateElement(
-				'last_n_style',
+				"last_n_style",
 				`
 				tr[data] td {
 					opacity: 0.7;
@@ -701,10 +701,10 @@
 			clearInterval(window[createDisplayIntervalIdKey]);
 			updateDisplay(true);
 
-			const lastNButton = getElement('last_n_max_button');
+			const lastNButton = getElement("last_n_max_button");
 
-			lastNButton.addEventListener('click', () => {
-				const newValue = parseInt(prompt('Enter the number of solves.'));
+			lastNButton.addEventListener("click", () => {
+				const newValue = parseInt(prompt("Enter the number of solves."));
 
 				if (!isNaN(newValue)) {
 					updateSavedData({
@@ -718,13 +718,13 @@
 	}, 100);
 
 	const mutationObserver = new MutationObserver(updateDisplay);
-	mutationObserver.observe(document.querySelector('#stats table'), {
+	mutationObserver.observe(document.querySelector("#stats table"), {
 		childList: true,
 		subtree: true
 	});
 
 	const bigScrambleObserver = new MutationObserver(updateBigScramble);
-	bigScrambleObserver.observe(document.querySelector('#scrambleDiv'), {
+	bigScrambleObserver.observe(document.querySelector("#scrambleDiv"), {
 		childList: true,
 		subtree: true
 	});

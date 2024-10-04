@@ -6,7 +6,7 @@ const COLOUR_GREEN = rgbToHex(0, 220, 0);
 const COLOUR_RED = rgbToHex(255, 0, 0);
 const COLOUR_WHITE = rgbToHex(255, 255, 255);
 const COLOUR_YELLOW = rgbToHex(255, 255, 0);
-const COLOUR_GREY = '#555555';
+const COLOUR_GREY = "#555555";
 
 const mainPx = 50;
 const edgePx = mainPx / 2;
@@ -28,15 +28,15 @@ export const UNKNOWN_CORNER = {
 	c: COLOUR_GREY
 };
 
-const u = 'u';
-const l = 'l';
-const f = 'f';
-const r = 'r';
-const b = 'b';
-const d = 'd';
+const u = "u";
+const l = "l";
+const f = "f";
+const r = "r";
+const b = "b";
+const d = "d";
 
 function rgbToHex(r: number, g: number, b: number): string {
-	return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+	return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
 export function getFaceColour(face?: string): string {
@@ -59,26 +59,26 @@ export function getFaceColour(face?: string): string {
 }
 
 function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[] {
-	const invalidResult = [mainFace || '?', '?', '?'];
+	const invalidResult = [mainFace || "?", "?", "?"];
 	if (!mainFace || otherFaces.length !== 2) {
 		return invalidResult;
 	}
 
-	const otherFacesString = otherFaces.sort().join('').toLowerCase();
+	const otherFacesString = otherFaces.sort().join("").toLowerCase();
 
 	switch (mainFace.toLowerCase()) {
 		case u: {
 			switch (otherFacesString) {
-				case 'fl': {
+				case "fl": {
 					return [u, l, f];
 				}
-				case 'fr': {
+				case "fr": {
 					return [u, f, r];
 				}
-				case 'br': {
+				case "br": {
 					return [u, r, b];
 				}
-				case 'bl': {
+				case "bl": {
 					return [u, b, l];
 				}
 				default: {
@@ -88,16 +88,16 @@ function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[
 		}
 		case l: {
 			switch (otherFacesString) {
-				case 'fu': {
+				case "fu": {
 					return [l, f, u];
 				}
-				case 'df': {
+				case "df": {
 					return [l, d, f];
 				}
-				case 'bd': {
+				case "bd": {
 					return [l, b, d];
 				}
-				case 'bu': {
+				case "bu": {
 					return [l, u, b];
 				}
 				default: {
@@ -107,16 +107,16 @@ function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[
 		}
 		case f: {
 			switch (otherFacesString) {
-				case 'lu': {
+				case "lu": {
 					return [f, u, l];
 				}
-				case 'ru': {
+				case "ru": {
 					return [f, r, u];
 				}
-				case 'dr': {
+				case "dr": {
 					return [f, d, r];
 				}
-				case 'dl': {
+				case "dl": {
 					return [f, l, d];
 				}
 				default: {
@@ -126,16 +126,16 @@ function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[
 		}
 		case r: {
 			switch (otherFacesString) {
-				case 'fu': {
+				case "fu": {
 					return [r, u, f];
 				}
-				case 'bu': {
+				case "bu": {
 					return [r, b, u];
 				}
-				case 'bd': {
+				case "bd": {
 					return [r, d, b];
 				}
-				case 'df': {
+				case "df": {
 					return [r, f, d];
 				}
 				default: {
@@ -145,16 +145,16 @@ function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[
 		}
 		case b: {
 			switch (otherFacesString) {
-				case 'ru': {
+				case "ru": {
 					return [b, u, r];
 				}
-				case 'lu': {
+				case "lu": {
 					return [b, l, u];
 				}
-				case 'dl': {
+				case "dl": {
 					return [b, d, l];
 				}
-				case 'dr': {
+				case "dr": {
 					return [b, r, d];
 				}
 				default: {
@@ -164,16 +164,16 @@ function getAntiClockwiseFaceOrder([mainFace, ...otherFaces]: string[]): string[
 		}
 		case d: {
 			switch (otherFacesString) {
-				case 'fl': {
+				case "fl": {
 					return [d, f, l];
 				}
-				case 'fr': {
+				case "fr": {
 					return [d, r, f];
 				}
-				case 'br': {
+				case "br": {
 					return [d, b, r];
 				}
-				case 'bl': {
+				case "bl": {
 					return [d, l, b];
 				}
 				default: {
@@ -202,76 +202,76 @@ function getCornerColour(faces: string[]): CornerColours {
  */
 export function getSpeffzCornerColour(letter: string): CornerColours {
 	switch (letter?.toLowerCase()) {
-		case 'a': {
+		case "a": {
 			return getCornerColour([u, b, l]);
 		}
-		case 'b': {
+		case "b": {
 			return getCornerColour([u, b, r]);
 		}
-		case 'c': {
+		case "c": {
 			return getCornerColour([u, f, r]);
 		}
-		case 'd': {
+		case "d": {
 			return getCornerColour([u, l, f]);
 		}
-		case 'e': {
+		case "e": {
 			return getCornerColour([l, u, b]);
 		}
-		case 'f': {
+		case "f": {
 			return getCornerColour([l, f, u]);
 		}
-		case 'g': {
+		case "g": {
 			return getCornerColour([l, d, f]);
 		}
-		case 'h': {
+		case "h": {
 			return getCornerColour([l, d, b]);
 		}
-		case 'i': {
+		case "i": {
 			return getCornerColour([f, u, l]);
 		}
-		case 'j': {
+		case "j": {
 			return getCornerColour([f, r, u]);
 		}
-		case 'k': {
+		case "k": {
 			return getCornerColour([f, d, r]);
 		}
-		case 'l': {
+		case "l": {
 			return getCornerColour([f, l, d]);
 		}
-		case 'm': {
+		case "m": {
 			return getCornerColour([r, u, f]);
 		}
-		case 'n': {
+		case "n": {
 			return getCornerColour([r, b, u]);
 		}
-		case 'o': {
+		case "o": {
 			return getCornerColour([r, d, b]);
 		}
-		case 'p': {
+		case "p": {
 			return getCornerColour([r, f, d]);
 		}
-		case 'q': {
+		case "q": {
 			return getCornerColour([b, u, r]);
 		}
-		case 'r': {
+		case "r": {
 			return getCornerColour([b, l, u]);
 		}
-		case 's': {
+		case "s": {
 			return getCornerColour([b, d, l]);
 		}
-		case 't': {
+		case "t": {
 			return getCornerColour([b, r, d]);
 		}
-		case 'u': {
+		case "u": {
 			return getCornerColour([d, f, l]);
 		}
-		case 'v': {
+		case "v": {
 			return getCornerColour([d, r, f]);
 		}
-		case 'w': {
+		case "w": {
 			return getCornerColour([d, b, r]);
 		}
-		case 'x': {
+		case "x": {
 			return getCornerColour([d, l, b]);
 		}
 		default: {
@@ -340,6 +340,6 @@ export function makeHtmlString({
 			</div>
 	</div>
 	`
-		.replaceAll(/[\t\n]/g, '')
-		.replaceAll(/: +/g, ':');
+		.replaceAll(/[\t\n]/g, "")
+		.replaceAll(/: +/g, ":");
 }

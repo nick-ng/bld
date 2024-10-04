@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount } from "svelte";
 
 	export let isMinutes: boolean = false;
 	export let showQuartermarkers: boolean = false;
@@ -16,7 +16,7 @@
 		return now.getMinutes() + now.getSeconds() / 60;
 	};
 
-	const handColour = '#ccc';
+	const handColour = "#ccc";
 	let timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
 	let intervalId: number | null = null;
 	let gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
