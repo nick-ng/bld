@@ -1,20 +1,20 @@
 <script lang="ts">
-	import { letterPairStore } from '$lib/stores/letter-pairs';
-	export let letterPair = '';
+	import { letterPairStore } from "$lib/stores/letter-pairs";
+	export let letterPair = "";
 
 	const samePieces = [
-		['a', 'e', 'r'],
-		['b', 'n', 'q'],
-		['c', 'j', 'm'],
-		['d', 'f', 'i'],
-		['g', 'l', 'u'],
-		['h', 's', 'x'],
-		['k', 'p', 'v'],
-		['o', 't', 'w']
+		["a", "e", "r"],
+		["b", "n", "q"],
+		["c", "j", "m"],
+		["d", "f", "i"],
+		["g", "l", "u"],
+		["h", "s", "x"],
+		["k", "p", "v"],
+		["o", "t", "w"]
 	];
 
 	const isSamePiece = (letterPair: string) => {
-		const letters = letterPair.split('');
+		const letters = letterPair.split("");
 		if (letters.length !== 2) {
 			return false;
 		}
@@ -36,15 +36,15 @@
 	};
 
 	const getIndicators = (letterPair: string) => {
-		if (typeof $letterPairStore === 'string') {
-			return ['#ff0000ff', '#00aa00ff', '#0000ffff'];
+		if (typeof $letterPairStore === "string") {
+			return ["#ff0000ff", "#00aa00ff", "#0000ffff"];
 		}
 
 		const letterPairObject = $letterPairStore[letterPair];
 		return [
-			!letterPairObject?.memo && '#ff0000ff',
-			!letterPairObject?.commutator && '#00aa00ff',
-			!letterPairObject?.image && '#0000ffff'
+			!letterPairObject?.memo && "#ff0000ff",
+			!letterPairObject?.commutator && "#00aa00ff",
+			!letterPairObject?.image && "#0000ffff"
 		];
 	};
 </script>
@@ -59,7 +59,7 @@
 			{#each getIndicators(letterPair) as colorHex}
 				<div
 					class="rounded-full block flex-1"
-					style={`background-color: ${colorHex || '#ffffff00'};}`}
+					style={`background-color: ${colorHex || "#ffffff00"};}`}
 				></div>
 			{/each}
 		</div>

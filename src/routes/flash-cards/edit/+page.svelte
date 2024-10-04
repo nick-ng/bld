@@ -1,9 +1,9 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
-	import LetterPair from './letter-pair.svelte';
+	import { goto } from "$app/navigation";
+	import LetterPair from "./letter-pair.svelte";
 
 	let allLetterPairs = [];
-	let letterPairFilter = '';
+	let letterPairFilter = "";
 
 	const codePointOffset = 97;
 	for (let j = 0; j < 24; j++) {

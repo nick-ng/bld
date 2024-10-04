@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from '$lib/components/corner-colour';
-	import Corners from '$lib/components/corners.svelte';
+	import { onMount } from "svelte";
+	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from "$lib/components/corner-colour";
+	import Corners from "$lib/components/corners.svelte";
 
 	const colours = Object.values(COLOURS);
 
@@ -14,12 +14,12 @@
 	let pieceBsticker3 = COLOURS.COLOUR_GREY;
 
 	let letterPairInput: HTMLInputElement | null = null;
-	let letterPair = '';
-	let message = 'a';
+	let letterPair = "";
+	let message = "a";
 	let messageTimeStamp = 0;
 
 	function getHtmlStringForLetterPair(lp: string): string {
-		const letters = lp.split('');
+		const letters = lp.split("");
 
 		pieceAsticker1 = COLOURS.COLOUR_GREY;
 		pieceAsticker2 = COLOURS.COLOUR_GREY;
@@ -58,7 +58,7 @@
 	$: htmlString = getHtmlStringForLetterPair(letterPair);
 
 	function focusLetterPairInput(event?: KeyboardEvent): void {
-		if (event && event.key !== 'Enter') {
+		if (event && event.key !== "Enter") {
 			return;
 		}
 
@@ -70,10 +70,10 @@
 	onMount(() => {
 		focusLetterPairInput();
 
-		document.addEventListener('keyup', focusLetterPairInput);
+		document.addEventListener("keyup", focusLetterPairInput);
 
 		return () => {
-			document.removeEventListener('keyup', focusLetterPairInput);
+			document.removeEventListener("keyup", focusLetterPairInput);
 		};
 	});
 </script>
@@ -90,7 +90,7 @@
 
 			navigator.clipboard.writeText(`${letterPair.slice(0, 2).toUpperCase()}<br />${htmlString}`);
 
-			message = 'HTML coppied to clipboard';
+			message = "HTML coppied to clipboard";
 			messageTimeStamp = Date.now();
 		}}
 	>
@@ -99,11 +99,11 @@
 			<input class="uppercase" type="text" bind:this={letterPairInput} bind:value={letterPair} />
 		</label>
 		<button type="submit"
-			>Copy{letterPair.length >= 2 ? ` ${letterPair.slice(0, 2).toUpperCase()} + HTML` : ''}</button
+			>Copy{letterPair.length >= 2 ? ` ${letterPair.slice(0, 2).toUpperCase()} + HTML` : ""}</button
 		>
 	</form>
 	{#key messageTimeStamp}
-		<div class={`message ${messageTimeStamp ? '' : 'opacity-0'}`}>{message}</div>
+		<div class={`message ${messageTimeStamp ? "" : "opacity-0"}`}>{message}</div>
 	{/key}
 	<details>
 		<summary>Piece Colour Picker</summary>
@@ -240,7 +240,7 @@
 		<button
 			on:click={() => {
 				navigator.clipboard.writeText(`${htmlString}`);
-				message = 'HTML coppied to clipboard';
+				message = "HTML coppied to clipboard";
 				messageTimeStamp = Date.now();
 			}}>Copy HTML</button
 		>

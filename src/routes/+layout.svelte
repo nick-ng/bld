@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { page } from '$app/stores';
-	import '../app.css';
+	import { page } from "$app/stores";
+	import "../app.css";
 
-	$: showNav = ['big-scramble', 'clock'].every((a) => $page.route.id !== `/${a}`);
+	$: showNav = ["big-scramble", "clock"].every((a) => $page.route.id !== `/${a}`);
 </script>
 
 <svelte:head>
@@ -16,6 +16,6 @@
 		<a class="button-default" href="/anki-stuff">Anki Stuff</a>
 	</div>
 {/if}
-<div class={showNav ? 'mx-1' : ''}>
+<div class={showNav ? "mx-1" : ""}>
 	<slot />
 </div>

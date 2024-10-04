@@ -12,7 +12,7 @@ export type LetterPair = {
 export const getPropertyOrDefault =
 	(unknown: unknown) =>
 	<T>(propertyName: string, defaultValue: T): T => {
-		if (!unknown || typeof unknown !== 'object' || !(propertyName in unknown)) {
+		if (!unknown || typeof unknown !== "object" || !(propertyName in unknown)) {
 			return defaultValue;
 		}
 
@@ -27,25 +27,25 @@ export const getPropertyOrDefault =
 export const parseLetterPair = (
 	unknown: unknown
 ): { isValid: true; data: LetterPair } | { isValid: false } => {
-	if (!unknown || typeof unknown !== 'object') {
+	if (!unknown || typeof unknown !== "object") {
 		return {
 			isValid: false
 		};
 	}
 
-	if (!('letterPair' in unknown && typeof unknown.letterPair === 'string')) {
+	if (!("letterPair" in unknown && typeof unknown.letterPair === "string")) {
 		return {
 			isValid: false
 		};
 	}
 
-	if (!('type' in unknown && typeof unknown.type === 'string')) {
+	if (!("type" in unknown && typeof unknown.type === "string")) {
 		return {
 			isValid: false
 		};
 	}
 
-	if (!('lastQuizUnix' in unknown && typeof unknown.lastQuizUnix === 'number')) {
+	if (!("lastQuizUnix" in unknown && typeof unknown.lastQuizUnix === "number")) {
 		return {
 			isValid: false
 		};
@@ -58,11 +58,11 @@ export const parseLetterPair = (
 		data: {
 			letterPair: unknown.letterPair,
 			type: unknown.type,
-			memo: getFromUnknown('memo', ''),
-			image: getFromUnknown('image', ''),
-			commutator: getFromUnknown('commutator', ''),
-			confidence: getFromUnknown('confidence', 0),
-			tags: getFromUnknown('tags', ''),
+			memo: getFromUnknown("memo", ""),
+			image: getFromUnknown("image", ""),
+			commutator: getFromUnknown("commutator", ""),
+			confidence: getFromUnknown("confidence", 0),
+			tags: getFromUnknown("tags", ""),
 			lastQuizUnix: unknown.lastQuizUnix
 		}
 	};
