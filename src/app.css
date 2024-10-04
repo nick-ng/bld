@@ -73,7 +73,7 @@
 
 	button,
 	.button-default {
-		@apply rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2;
+		@apply rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block;
 	}
 
 	.border-default {

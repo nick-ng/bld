@@ -1,7 +1,3 @@
-<svelte:head>
-	<title>Blindfolded Cube Resources</title>
-</svelte:head>
-
 <div class="w-prose mx-auto markdown">
 	<h1 class="mt-1">Blindfolded Cube Resources</h1>
 	<ul>
