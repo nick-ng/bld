@@ -1,8 +1,10 @@
 package routes
 
 import (
+	"bld-server/database"
 	"bld-server/utils"
 	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -12,16 +14,12 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"time"
 )
 
 const USER_IMAGES_DIRECTORY = "user-images"
 
-func slowRoll() {
-	for i := 0; i < 10; i++ {
-		time.Sleep(5 * time.Second)
-		fmt.Println(i)
-	}
+func cleanUpImages() {
+	// go through database and delete any unreferenced photos
 }
 
 func GetImageFullPath(filename string) (string, error) {
@@ -49,6 +47,9 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Add("Access-Control-Allow-Origin", "*")
 	writer.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT, OPTIONS")
 
+	myRe := regexp.MustCompile(`^\/flash-cards\/?`)
+	letterPair := myRe.ReplaceAllString(req.RequestURI, "")
+
 	switch req.Method {
 	case "OPTIONS":
 		{
@@ -59,8 +60,6 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 	case "PUT":
 		{
 			{
-				myRe := regexp.MustCompile(`\/flash-cards\/?`)
-				letterPair := myRe.ReplaceAllString(req.RequestURI, "")
 				if len(letterPair) == 0 {
 					letterPair = req.FormValue("letterPair")
 				}
@@ -69,60 +68,80 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 					writer.Write([]byte("no letter pair provided"))
 					return
 				}
-
 				fmt.Println("requested letterPair", letterPair)
 
+				memo := req.FormValue("memo")
+				commutator := req.FormValue("commutator")
+				tags := req.FormValue("tags")
+
+				fmt.Println("memo", memo)
+				fmt.Println("commutator", commutator)
+				fmt.Println("tags", tags)
+
 				file, fileHeader, err := req.FormFile("image")
+				fmt.Println(file)
+				if err == nil {
+					contentType := strings.ToLower(fileHeader.Header.Get("Content-Type"))
+					if !strings.HasPrefix(contentType, "image/") {
+						writer.WriteHeader(http.StatusBadRequest)
+						fmt.Fprint(writer, "invalid file type")
+						return
+					}
 
-				if err != nil {
-					writer.WriteHeader(http.StatusBadRequest)
-					fmt.Fprintf(writer, "no file provided: %s", err.Error())
-					return
-				}
+					extension := strings.Replace(contentType, "image/", "", 1)
+					filename := fmt.Sprintf("%s.%s", utils.RandomId(), extension)
+					filePath, err := GetImageFullPath(filename)
+					if err != nil {
+						writer.WriteHeader(http.StatusInternalServerError)
+						fmt.Fprintf(writer, "error getting images directory: %s", err.Error())
+						return
+					}
 
-				contentType := strings.ToLower(fileHeader.Header.Get("Content-Type"))
-				if !strings.HasPrefix(contentType, "image/") {
-					writer.WriteHeader(http.StatusBadRequest)
-					fmt.Fprint(writer, "invalid file type")
-					return
-				}
+					buffer := bytes.NewBuffer(nil)
+					_, err = io.Copy(buffer, file)
+					if err != nil {
+						return
+					}
 
-				extension := strings.Replace(contentType, "image/", "", 1)
-
-				filename := fmt.Sprintf("%s.%s", utils.RandomId(), extension)
-
-				filePath, err := GetImageFullPath(filename)
-
-				if err != nil {
-					writer.WriteHeader(http.StatusInternalServerError)
-					fmt.Fprintf(writer, "error getting images directory: %s", err.Error())
-					return
-				}
-
-				buffer := bytes.NewBuffer(nil)
-
-				_, err = io.Copy(buffer, file)
-
-				if err != nil {
-					return
+					os.WriteFile(filePath, buffer.Bytes(), 0666)
 				}
 
 				// write file name to database before trying to clean up files
 
-				os.WriteFile(filePath, buffer.Bytes(), 0666)
-
 				writer.WriteHeader(http.StatusOK)
 				writer.Write([]byte("henlo"))
 
-				go slowRoll()
+				go cleanUpImages()
 			}
 		}
 	case "GET":
-		fallthrough
+		{
+			if len(letterPair) == 0 {
+				allFlashCards, err := database.ReadAllFlashCards("me")
+
+				if err != nil {
+					fmt.Fprintf(writer, "%s", err)
+					writer.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				jsonBytes, err := json.Marshal(allFlashCards)
+
+				if err != nil {
+					fmt.Fprintf(writer, "%s", err)
+					writer.WriteHeader(http.StatusInternalServerError)
+					return
+				}
+
+				writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+				writer.WriteHeader(http.StatusOK)
+				writer.Write(jsonBytes)
+			}
+		}
 	default:
 		{
-			fmt.Fprintf(writer, "henlo")
 			writer.WriteHeader(http.StatusMethodNotAllowed)
+			fmt.Fprintf(writer, "henlo")
 		}
 	}
 }

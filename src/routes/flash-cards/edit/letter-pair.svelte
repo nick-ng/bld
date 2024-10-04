@@ -36,6 +36,10 @@
 	};
 
 	const getIndicators = (letterPair: string) => {
+		if (typeof $letterPairStore === 'string') {
+			return ['#ff0000ff', '#00aa00ff', '#0000ffff'];
+		}
+
 		const letterPairObject = $letterPairStore[letterPair];
 		return [
 			!letterPairObject?.memo && '#ff0000ff',
