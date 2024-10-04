@@ -9,13 +9,18 @@ import (
 
 func ImagesCardsHandler(writer http.ResponseWriter, req *http.Request) {
 	writer.Header().Add("Access-Control-Allow-Origin", "*")
+	writer.Header().Add("Access-Control-Allow-Methods", "GET, OPTIONS")
 
 	switch req.Method {
+	case "OPTIONS":
+		{
+			writer.WriteHeader(http.StatusOK)
+		}
 	case "GET":
 		fallthrough
 	default:
 		{
-			// @todo(nick-ng): pre-signed urls for retrieving images
+			// @todo(nick-ng): pre-signed urls for retrieving images?
 			requestUri := strings.Replace(req.RequestURI, "/images/", "", 1)
 			fullPath, err := GetImageFullPath(requestUri)
 

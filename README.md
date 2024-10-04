@@ -70,6 +70,6 @@ css:
 ### ToDo Comments
 
 - server/main.go:24: @todo(nick-ng): figure out how to read images in form data
-- server/routes/flash-cards.go:38: @todo(nick-ng): authenticate request
-- server/routes/images.go:18: @todo(nick-ng): pre-signed urls for retrieving images
+- server/routes/flash-cards.go:47: @todo(nick-ng): authenticate request
+- server/routes/images.go:23: @todo(nick-ng): pre-signed urls for retrieving images?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
