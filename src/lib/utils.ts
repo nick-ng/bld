@@ -16,3 +16,7 @@ export const joinUrl = (...args: string[]) => {
 		.filter((f) => f.length > 0)
 		.join('/');
 };
+
+export const joinServerPath = (...args: string[]) => {
+	return joinUrl(import.meta.env.VITE_SERVER_URL, ...args);
+};

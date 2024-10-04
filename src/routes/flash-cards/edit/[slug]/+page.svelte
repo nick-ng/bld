@@ -91,7 +91,7 @@
 				</tr>
 				<tr>
 					<td>Commutator</td>
-					<td><input class="w-full" type="text" name="memo" /></td>
+					<td><input class="w-full" type="text" name="commutator" /></td>
 				</tr>
 				<tr>
 					<td>Image</td>
