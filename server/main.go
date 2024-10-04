@@ -3,7 +3,6 @@ package main
 import (
 	"bld-server/routes"
 	"fmt"
-	"io"
 	"net/http"
 )
 
@@ -21,15 +20,16 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 	switch req.Method {
 	case "POST":
 		{
+			fmt.Println("root, post")
 			// @todo(nick-ng): figure out how to read images in form data
-			body, err := io.ReadAll(req.Body)
+			// body, err := io.ReadAll(req.Body)
 
-			if err != nil {
-				fmt.Println("error when processing request", err)
-				return
-			}
+			// if err != nil {
+			// 	fmt.Println("error when processing request", err)
+			// 	return
+			// }
 
-			fmt.Println(string(body))
+			// fmt.Println(string(body))
 		}
 	case "GET":
 		fallthrough
@@ -49,6 +49,7 @@ func corsHandler(writer http.ResponseWriter, req *http.Request) {
 func main() {
 	http.HandleFunc("OPTIONS ", corsHandler)
 	http.HandleFunc("/flash-cards", routes.FlashCardsHandler)
+	http.HandleFunc("/flash-cards/", routes.FlashCardsHandler)
 	http.HandleFunc("/images/{filename}", routes.ImagesCardsHandler)
 	http.HandleFunc("/images/", routes.ImagesCardsHandler)
 	http.HandleFunc("/", rootHandler)
