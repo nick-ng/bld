@@ -58,14 +58,8 @@ css:
 
 ## ToDos
 
-- use basic auth
+- use ~~basic~~ some kind of auth
 - use environment variables to specify server url
-- post pictures to server
-- store letter pair information
-  - letter pair
-  - user id
-  - text answer
-  - filename/uri
 
 ### ToDo Comments
 
