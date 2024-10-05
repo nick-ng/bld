@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { FlashCard } from "$lib/types";
 
-	import { onMount } from "svelte";
+	import { parseFlashCard } from "$lib/types";
 	import { page } from "$app/stores";
-	import { joinUrl, upperCaseFirst } from "$lib/utils";
+	import { joinUrl, joinServerPath, upperCaseFirst } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 
@@ -18,6 +18,7 @@
 	let currentMemo = "";
 	let currentCommutator = "";
 	let currentTags = "";
+	let imageUrl = "";
 
 	const onFlashCardStoreUpdate = (store: typeof $flashCardStore) => {
 		if (typeof store === "string") {
@@ -27,6 +28,11 @@
 			flashCards = store;
 
 			if (!formDirty) {
+				const flashCard = store[letterPair];
+				currentMemo = flashCard.memo;
+				currentCommutator = flashCard.commutator;
+				currentTags = flashCard.tags;
+				imageUrl = flashCard.image;
 			}
 		}
 	};
@@ -34,9 +40,13 @@
 	$: letterPair = $page.params.slug;
 	$: onFlashCardStoreUpdate($flashCardStore);
 
-	const getImageUrl = (f: FileList | null) => {
+	const getImageUrl = (f: FileList | null, imageUrl: string) => {
 		if (f && f.length > 0) {
 			return window.URL.createObjectURL(f[0]);
+		}
+
+		if (imageUrl) {
+			return joinServerPath("images", imageUrl);
 		}
 
 		return "";
@@ -64,6 +74,10 @@
 			method="post"
 			on:submit={async (event) => {
 				event.preventDefault();
+
+				if (typeof $flashCardStore === "string") {
+					return;
+				}
 
 				formDirty = false;
 
@@ -110,7 +124,16 @@
 					body: formData
 				});
 
-				console.log("response", response);
+				const responseJson = await response.json();
+
+				const parseResponse = parseFlashCard(responseJson);
+
+				if (parseResponse.isValid) {
+					console.log("flashCard", parseResponse.data);
+					$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
+				} else {
+					console.log("wrong", responseJson);
+				}
 			}}
 		>
 			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
@@ -147,10 +170,10 @@
 								for={`${letterPair}-image`}
 								class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500"
 							>
-								{#if getImageUrl(files)}
+								{#if getImageUrl(files, imageUrl)}
 									<img
 										class="object-contain"
-										src={getImageUrl(files)}
+										src={getImageUrl(files, imageUrl)}
 										alt={`${letterPair.toUpperCase()} visualisation`}
 									/>
 								{:else}

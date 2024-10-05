@@ -78,6 +78,8 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 				fmt.Println("commutator", commutator)
 				fmt.Println("tags", tags)
 
+				filename := ""
+
 				file, fileHeader, err := req.FormFile("image")
 				fmt.Println(file)
 				if err == nil {
@@ -89,17 +91,19 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 					}
 
 					extension := strings.Replace(contentType, "image/", "", 1)
-					filename := fmt.Sprintf("%s.%s", utils.RandomId(), extension)
+					filename = fmt.Sprintf("%s.%s", utils.RandomId(), extension)
 					filePath, err := GetImageFullPath(filename)
 					if err != nil {
 						writer.WriteHeader(http.StatusInternalServerError)
-						fmt.Fprintf(writer, "error getting images directory: %s", err.Error())
+						fmt.Fprintf(writer, "error getting images directory: %s", err)
 						return
 					}
 
 					buffer := bytes.NewBuffer(nil)
 					_, err = io.Copy(buffer, file)
 					if err != nil {
+						writer.WriteHeader(http.StatusBadRequest)
+						fmt.Fprintf(writer, "error reading file: %s", err)
 						return
 					}
 
@@ -107,9 +111,26 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 				}
 
 				// write file name to database before trying to clean up files
+				flashCard := database.FlashCard{
+					Type:       "spefz-corners",
+					Owner:      "me",
+					LetterPair: letterPair,
+					Memo:       memo,
+					Image:      filename,
+					Commutator: commutator,
+					Tags:       tags,
+				}
+
+				database.WriteFlashCard(flashCard)
+
+				flashCardJsonBytes, err := json.Marshal(flashCard)
+
+				if err != nil {
+					fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
+				}
 
 				writer.WriteHeader(http.StatusOK)
-				writer.Write([]byte("henlo"))
+				writer.Write(flashCardJsonBytes)
 
 				go cleanUpImages()
 			}

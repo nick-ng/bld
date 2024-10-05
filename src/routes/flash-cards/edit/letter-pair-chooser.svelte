@@ -35,12 +35,12 @@
 		return false;
 	};
 
-	const getIndicators = (letterPair: string) => {
-		if (typeof $flashCardStore === "string") {
+	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
+		if (typeof store === "string") {
 			return ["#ff0000ff", "#00aa00ff", "#0000ffff"];
 		}
 
-		const letterPairObject = $flashCardStore[letterPair];
+		const letterPairObject = store[letterPair];
 		return [
 			!letterPairObject?.memo && "#ff0000ff",
 			!letterPairObject?.commutator && "#00aa00ff",
@@ -56,7 +56,7 @@
 	>
 		<div class="uppercase p-0 mb-1 leading-none">{letterPair}</div>
 		<div class="h-2 flex flex-row justify-center gap-0.5 px-0.5 pb-0.5">
-			{#each getIndicators(letterPair) as colorHex}
+			{#each getIndicators(letterPair, $flashCardStore) as colorHex}
 				<div
 					class="rounded-full block flex-1"
 					style={`background-color: ${colorHex || "#ffffff00"};}`}

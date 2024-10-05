@@ -28,7 +28,6 @@ if (browser) {
 				}
 			}
 
-			console.log("flashCards", flashCards);
 			flashCardStore.set(flashCards);
 		} catch (e) {
 			console.error("error when fetching letter pairs", e);
