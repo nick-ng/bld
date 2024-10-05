@@ -3,15 +3,15 @@ package database
 import "time"
 
 type FlashCard struct {
-	Type         string
-	Owner        string
-	LetterPair   string
-	Memo         string
-	Image        string
-	Commutator   string
-	Tags         string
-	LastQuizUnix int64
-	Confidence   int
+	Type         string `json:"type"`
+	Owner        string `json:"owner"`
+	LetterPair   string `json:"letterPair"`
+	Memo         string `json:"memo"`
+	Image        string `json:"image"`
+	Commutator   string `json:"commutator"`
+	Tags         string `json:"tags"`
+	LastQuizUnix int64  `json:"lastQuizUnix"`
+	Confidence   int    `json:"confidence"`
 }
 
 type cacheItem struct {
@@ -24,10 +24,15 @@ var flashCardCache []cacheItem
 func WriteFlashCard(flashCard FlashCard) error {
 	now := time.Now()
 
+	// 10. check if flash card is already in cache
+
+	// 20. update flash card in cache
 	flashCardCache = append(flashCardCache, cacheItem{
 		FlashCard:    flashCard,
 		LastAccessed: now.Unix(),
 	})
+
+	// 30. write updated flash card to drive
 
 	return nil
 }
