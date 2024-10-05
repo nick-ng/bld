@@ -18,24 +18,14 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 	fmt.Println(headerMap["X-Pants"])
 
 	switch req.Method {
-	case "POST":
-		{
-			fmt.Println("root, post")
-			// @todo(nick-ng): figure out how to read images in form data
-			// body, err := io.ReadAll(req.Body)
-
-			// if err != nil {
-			// 	fmt.Println("error when processing request", err)
-			// 	return
-			// }
-
-			// fmt.Println(string(body))
-		}
 	case "GET":
-		fallthrough
+		{
+			writer.Write([]byte("nothing here"))
+		}
 	default:
 		{
-			fmt.Fprintf(writer, "henlo")
+			writer.WriteHeader(http.StatusMethodNotAllowed)
+			writer.Write([]byte("nothing here"))
 		}
 	}
 
@@ -43,7 +33,7 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 }
 
 func corsHandler(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println("Hi")
+	fmt.Println("hi cors")
 }
 
 func main() {

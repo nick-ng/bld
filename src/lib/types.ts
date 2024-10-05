@@ -67,3 +67,16 @@ export const parseFlashCard = (
 		}
 	};
 };
+
+export const defaultFlashCard = (letterPair: string): FlashCard => {
+	return {
+		letterPair,
+		type: "spefz-corners",
+		memo: "",
+		image: "",
+		commutator: "",
+		confidence: 0,
+		tags: "",
+		lastQuizUnix: 0
+	};
+};
