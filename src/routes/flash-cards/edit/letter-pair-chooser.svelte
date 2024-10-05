@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { letterPairStore } from "$lib/stores/letter-pairs";
+	import { flashCardStore } from "$lib/stores/flash-cards";
 	export let letterPair = "";
 
 	const samePieces = [
@@ -36,11 +36,11 @@
 	};
 
 	const getIndicators = (letterPair: string) => {
-		if (typeof $letterPairStore === "string") {
+		if (typeof $flashCardStore === "string") {
 			return ["#ff0000ff", "#00aa00ff", "#0000ffff"];
 		}
 
-		const letterPairObject = $letterPairStore[letterPair];
+		const letterPairObject = $flashCardStore[letterPair];
 		return [
 			!letterPairObject?.memo && "#ff0000ff",
 			!letterPairObject?.commutator && "#00aa00ff",
@@ -54,7 +54,7 @@
 		class="block bg-white text-center no-underline border p-0 border-gray-800"
 		href={`/flash-cards/edit/${letterPair}`}
 	>
-		<div class="uppercase p-0">{letterPair}</div>
+		<div class="uppercase p-0 mb-1 leading-none">{letterPair}</div>
 		<div class="h-2 flex flex-row justify-center gap-0.5 px-0.5 pb-0.5">
 			{#each getIndicators(letterPair) as colorHex}
 				<div
@@ -65,5 +65,5 @@
 		</div>
 	</a>
 {:else}
-	<div class="bg-gray-800"></div>
+	<div class="bg-gray-500"></div>
 {/if}

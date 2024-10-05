@@ -1,4 +1,4 @@
-export type LetterPair = {
+export type FlashCard = {
 	letterPair: string;
 	type: string; // spefz-corners, chinese-edges, custom-edges, etc.
 	memo: string;
@@ -24,9 +24,9 @@ export const getPropertyOrDefault =
 		return value as typeof defaultValue;
 	};
 
-export const parseLetterPair = (
+export const parseFlashCard = (
 	unknown: unknown
-): { isValid: true; data: LetterPair } | { isValid: false } => {
+): { isValid: true; data: FlashCard } | { isValid: false } => {
 	if (!unknown || typeof unknown !== "object") {
 		return {
 			isValid: false

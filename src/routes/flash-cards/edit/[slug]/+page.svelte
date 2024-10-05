@@ -1,14 +1,38 @@
 <script lang="ts">
+	import type { FlashCard } from "$lib/types";
+
+	import { onMount } from "svelte";
 	import { page } from "$app/stores";
-	import { joinUrl } from "$lib/utils";
+	import { joinUrl, upperCaseFirst } from "$lib/utils";
+	import { flashCardStore } from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
 
 	let files: FileList;
 	let fileInputEl: HTMLInputElement | null = null;
+	let status = "stand-by";
+	let flashCards: { [letterPair: string]: FlashCard } = {};
+	let formDirty = false;
+
+	let currentMemo = "";
+	let currentCommutator = "";
+	let currentTags = "";
+
+	const onFlashCardStoreUpdate = (store: typeof $flashCardStore) => {
+		if (typeof store === "string") {
+			status = store;
+		} else {
+			status = "loaded";
+			flashCards = store;
+
+			if (!formDirty) {
+			}
+		}
+	};
 
 	$: letterPair = $page.params.slug;
+	$: onFlashCardStoreUpdate($flashCardStore);
 
 	const getImageUrl = (f: FileList | null) => {
 		if (f && f.length > 0) {
@@ -21,6 +45,7 @@
 	const resetForm = () => {
 		if (fileInputEl) {
 			fileInputEl.value = "";
+			formDirty = false;
 		}
 	};
 </script>
@@ -31,101 +56,123 @@
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
 	</div>
-	<form
-		action={joinUrl(serverUrl, "flash-cards")}
-		method="post"
-		on:submit={async (event) => {
-			event.preventDefault();
+	{#if status !== "loaded"}
+		<div class="text-center">{upperCaseFirst(status)}...</div>
+	{:else}
+		<form
+			action={joinUrl(serverUrl, "flash-cards")}
+			method="post"
+			on:submit={async (event) => {
+				event.preventDefault();
 
-			const children = [...event.currentTarget];
+				formDirty = false;
 
-			const formData = new FormData();
+				const children = [...event.currentTarget];
 
-			for (let i = 0; i < children.length; i++) {
-				const formInput = children[i];
+				const formData = new FormData();
 
-				if (formInput instanceof HTMLInputElement) {
-					const formInputName = formInput.getAttribute("name");
-					const formInputType = formInput.getAttribute("type");
+				for (let i = 0; i < children.length; i++) {
+					const formInput = children[i];
 
-					if (!formInputName || !formInputType) {
-						continue;
-					}
+					if (formInput instanceof HTMLInputElement) {
+						const formInputName = formInput.getAttribute("name");
+						const formInputType = formInput.getAttribute("type");
 
-					switch (formInput.getAttribute("type")) {
-						case "file": {
-							const fileList = formInput.files;
-							if (!fileList) {
-								break;
-							}
-
-							const file = fileList[fileList.length - 1];
-
-							if (!file) {
-								break;
-							}
-
-							formData.set(formInputName, file);
-							break;
+						if (!formInputName || !formInputType) {
+							continue;
 						}
-						default: {
-							formData.set(formInputName, formInput.value);
+
+						switch (formInput.getAttribute("type")) {
+							case "file": {
+								const fileList = formInput.files;
+								if (!fileList) {
+									break;
+								}
+
+								const file = fileList[fileList.length - 1];
+
+								if (!file) {
+									break;
+								}
+
+								formData.set(formInputName, file);
+								break;
+							}
+							default: {
+								formData.set(formInputName, formInput.value);
+							}
 						}
 					}
 				}
-			}
 
-			const response = await fetch(joinUrl(serverUrl, "flash-cards", letterPair), {
-				method: "PUT",
-				body: formData
-			});
+				const response = await fetch(joinUrl(serverUrl, "flash-cards", letterPair), {
+					method: "PUT",
+					body: formData
+				});
 
-			console.log("response", response);
-		}}
-	>
-		<table class="flash-card-editor border-separate border-spacing-x-4">
-			<tbody>
-				<tr>
-					<td>Memo</td>
-					<td><input class="w-full" type="text" name="memo" /></td>
-				</tr>
-				<tr>
-					<td>Commutator</td>
-					<td><input class="w-full" type="text" name="commutator" /></td>
-				</tr>
-				<tr>
-					<td>Image</td>
-					<td>
-						<input
-							class="w-full"
-							type="file"
-							id={`${letterPair}-image`}
-							name="image"
-							alt="Choose Image"
-							accept="image/*"
-							bind:this={fileInputEl}
-							bind:files
-						/>
-						<label for={`${letterPair}-image`} class="block h-64 w-64 border border-gray-500">
-							{#if getImageUrl(files)}
-								<img
-									class="object-contain"
-									src={getImageUrl(files)}
-									alt={`${letterPair.toUpperCase()} visualisation`}
-								/>
-							{:else}
-								<div class="h-full w-full flex items-center justify-center text-3xl">No Image</div>
-							{/if}
-						</label>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<div class="w-full flex flex-row justify-between">
-			<button type="button">Reset</button>
-			<button class="button-default">Submit</button>
-		</div>
-	</form>
+				console.log("response", response);
+			}}
+		>
+			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
+				<tbody>
+					<tr>
+						<td class="text-right">Memo</td>
+						<td><input class="w-full" type="text" name="memo" bind:value={currentMemo} /></td>
+					</tr>
+					<tr>
+						<td class="text-right">Commutator</td>
+						<td
+							><input
+								class="w-full"
+								type="text"
+								name="commutator"
+								bind:value={currentCommutator}
+							/></td
+						>
+					</tr>
+					<tr>
+						<td class="text-right">Image</td>
+						<td>
+							<input
+								class="w-full"
+								type="file"
+								id={`${letterPair}-image`}
+								name="image"
+								alt="Choose Image"
+								accept="image/*"
+								bind:this={fileInputEl}
+								bind:files
+							/>
+							<label
+								for={`${letterPair}-image`}
+								class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500"
+							>
+								{#if getImageUrl(files)}
+									<img
+										class="object-contain"
+										src={getImageUrl(files)}
+										alt={`${letterPair.toUpperCase()} visualisation`}
+									/>
+								{:else}
+									<div class="h-full w-full flex items-center justify-center text-3xl">
+										No Image
+									</div>
+								{/if}
+							</label>
+						</td>
+					</tr>
+					<tr>
+						<td class="text-right">Tags</td>
+						<td><input class="w-full" type="text" name="tags" bind:value={currentTags} /></td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="w-full flex flex-row justify-between">
+				<button type="button">Reset</button>
+				<button class="button-default">Submit</button>
+			</div>
+		</form>
+	{/if}
 </div>
 
 <style>

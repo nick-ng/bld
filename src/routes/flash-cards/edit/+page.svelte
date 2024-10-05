@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import LetterPair from "./letter-pair.svelte";
+	import LetterPairChooser from "./letter-pair-chooser.svelte";
 
 	let allLetterPairs = [];
 	let letterPairFilter = "";
@@ -46,7 +46,7 @@
 
 			return lp.startsWith(letterPairFilter);
 		}) as letterPair}
-			<LetterPair {letterPair} />
+			<LetterPairChooser {letterPair} />
 		{/each}
 	</div>
 </div>
