@@ -20,3 +20,9 @@ export const joinUrl = (...args: string[]) => {
 export const joinServerPath = (...args: string[]) => {
 	return joinUrl(import.meta.env.VITE_SERVER_URL, ...args);
 };
+
+export const upperCaseFirst = (str: string) => {
+	const [first, ...rest] = str.split("");
+
+	return [first.toLocaleUpperCase(), ...rest].join("");
+};
