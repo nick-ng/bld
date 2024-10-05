@@ -13,13 +13,39 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 )
 
 const USER_IMAGES_DIRECTORY = "user-images"
 
 func cleanUpImages() {
-	// go through database and delete any unreferenced photos
+	dirEntries, err := os.ReadDir(USER_IMAGES_DIRECTORY)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	var imagesInDb []string
+	for _, flashCard := range database.FlashCardData {
+		if len(flashCard.Image) > 0 {
+			imagesInDb = append(imagesInDb, flashCard.Image)
+		}
+	}
+
+	for _, dirEntry := range dirEntries {
+		filename := dirEntry.Name()
+
+		if !slices.Contains(imagesInDb, filename) {
+			fullPath := filepath.Join(USER_IMAGES_DIRECTORY, filename)
+			err := os.Remove(fullPath)
+
+			if err != nil {
+				fmt.Println("error when deleting unnecessary image:", err)
+			}
+		}
+	}
 }
 
 func GetImageFullPath(filename string) (string, error) {
@@ -72,10 +98,11 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 				memo := req.FormValue("memo")
 				commutator := req.FormValue("commutator")
 				tags := req.FormValue("tags")
+				imageUrl := req.FormValue("imageUrl")
 
-				filename := ""
+				imageChanged := false
+				filename := imageUrl
 				file, fileHeader, err := req.FormFile("image")
-				fmt.Println(file)
 				if err == nil {
 					contentType := strings.ToLower(fileHeader.Header.Get("Content-Type"))
 					if !strings.HasPrefix(contentType, "image/") {
@@ -86,6 +113,7 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 
 					extension := strings.Replace(contentType, "image/", "", 1)
 					filename = fmt.Sprintf("%s.%s", utils.RandomId(), extension)
+					imageChanged = true
 					filePath, err := GetImageFullPath(filename)
 					if err != nil {
 						writer.WriteHeader(http.StatusInternalServerError)
@@ -104,7 +132,6 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 					os.WriteFile(filePath, buffer.Bytes(), 0666)
 				}
 
-				// write file name to database before trying to clean up files
 				flashCard := database.FlashCard{
 					Type:       "spefz-corners",
 					Owner:      "me",
@@ -126,7 +153,9 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 				writer.WriteHeader(http.StatusOK)
 				writer.Write(flashCardJsonBytes)
 
-				go cleanUpImages()
+				if imageChanged {
+					go cleanUpImages()
+				}
 			}
 		}
 	case "GET":

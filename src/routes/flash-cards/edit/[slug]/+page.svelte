@@ -135,6 +135,7 @@
 				}
 			}}
 		>
+			<input type="hidden" name="imageUrl" value={imageUrl} />
 			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
 				<tbody>
 					<tr>
