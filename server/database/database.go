@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -82,11 +83,12 @@ func loadData() error {
 			tempLine := string(tempBytes)
 
 			if err != nil {
-				if err.Error() != "EOF" {
+				keepGoing = false
+
+				if !errors.Is(err, io.EOF) {
 					fmt.Println("error:", err)
 				}
 
-				keepGoing = false
 				continue
 			}
 
