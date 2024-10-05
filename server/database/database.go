@@ -26,14 +26,15 @@ type FlashCard struct {
 }
 
 const VERSION_PREFIX = "v1"
+const USER_DATA_DIRECTORY = "user-data"
 
-var flashCardData map[string]FlashCard = map[string]FlashCard{}
+var FlashCardData map[string]FlashCard = map[string]FlashCard{}
 
 // @todo(nick-ng): update snapshot file size
 var lastSnapshotFileSize = 1000
 
 func init() {
-	err := os.Mkdir("user-data", 0755)
+	err := os.Mkdir(USER_DATA_DIRECTORY, 0755)
 
 	if err != nil && !errors.Is(err, fs.ErrExist) {
 		fmt.Println(err)
@@ -44,7 +45,7 @@ func init() {
 }
 
 func loadData() error {
-	dirEntries, err := os.ReadDir("user-data")
+	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
 
 	if err != nil {
 		return err
@@ -63,7 +64,7 @@ func loadData() error {
 
 	slices.Sort(filenames)
 	for _, filename := range filenames {
-		fullPath := filepath.Join("user-data", filename)
+		fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
 		f, err := os.OpenFile(fullPath, os.O_RDONLY, 0666)
 		if err != nil {
 			f.Close()
@@ -98,7 +99,7 @@ func loadData() error {
 				continue
 			}
 
-			flashCardData[primaryKey] = flashCard
+			FlashCardData[primaryKey] = flashCard
 		}
 
 	}
@@ -107,7 +108,7 @@ func loadData() error {
 }
 
 func getCurrentChangeLogFullPath() string {
-	dirEntries, err := os.ReadDir("user-data")
+	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
 
 	if err != nil {
 		fmt.Println(err)
@@ -125,7 +126,7 @@ func getCurrentChangeLogFullPath() string {
 	if len(actualLogFilenames) > 0 {
 		slices.Sort(actualLogFilenames)
 		newestLogFilename := actualLogFilenames[len(actualLogFilenames)-1]
-		fullPath := filepath.Join("user-data", newestLogFilename)
+		fullPath := filepath.Join(USER_DATA_DIRECTORY, newestLogFilename)
 		f, err := os.OpenFile(fullPath, os.O_RDONLY, 0666)
 		if err != nil {
 			fmt.Println(err)
@@ -141,12 +142,14 @@ func getCurrentChangeLogFullPath() string {
 		fileSize := fileStats.Size()
 		if fileSize < int64(lastSnapshotFileSize*5) {
 			return fullPath
+		} else {
+			// @todo(nick-ng): convert log to snapshot
 		}
 	}
 
 	now := time.Now()
 
-	fullPath := filepath.Join("user-data", fmt.Sprintf("%s-%s-%d-log.csv", VERSION_PREFIX, now.Format("20060102-150405"), len(dirEntries)))
+	fullPath := filepath.Join(USER_DATA_DIRECTORY, fmt.Sprintf("%s-%s-%d-log.csv", VERSION_PREFIX, now.Format("20060102-150405"), len(dirEntries)))
 
 	return fullPath
 }
@@ -277,7 +280,7 @@ func WriteFlashCard(flashCard FlashCard) error {
 		return err
 	}
 
-	flashCardData[primaryKey] = flashCard
+	FlashCardData[primaryKey] = flashCard
 
 	changeLogPath := getCurrentChangeLogFullPath()
 	f, err := os.OpenFile(changeLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -303,7 +306,7 @@ func WriteFlashCard(flashCard FlashCard) error {
 func ReadAllFlashCards(owner string) ([]FlashCard, error) {
 	allFlashCards := []FlashCard{}
 
-	for _, flashCard := range flashCardData {
+	for _, flashCard := range FlashCardData {
 		if flashCard.Owner == owner {
 			allFlashCards = append(allFlashCards, flashCard)
 		}

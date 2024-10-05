@@ -69,8 +69,9 @@ css:
 
 ### ToDo Comments
 
-- server/database/database.go:32: @todo(nick-ng): update snapshot file size
-- server/database/database.go:274: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
-- server/routes/flash-cards.go:45: @todo(nick-ng): authenticate request
+- server/database/database.go:33: @todo(nick-ng): update snapshot file size
+- server/database/database.go:146: @todo(nick-ng): convert log to snapshot
+- server/database/database.go:277: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/routes/flash-cards.go:71: @todo(nick-ng): authenticate request
 - server/routes/images.go:23: @todo(nick-ng): pre-signed urls for retrieving images?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
