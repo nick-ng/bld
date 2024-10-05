@@ -27,6 +27,7 @@ type FlashCard struct {
 
 const VERSION_PREFIX = "v1"
 const USER_DATA_DIRECTORY = "user-data"
+const SYNC_ALL_WRITES = false
 
 var FlashCardData map[string]FlashCard = map[string]FlashCard{}
 
@@ -298,6 +299,12 @@ func WriteFlashCard(flashCard FlashCard) error {
 	_, err = f.Write([]byte(row))
 	if err != nil {
 		return err
+	}
+	if SYNC_ALL_WRITES {
+		err = f.Sync()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
