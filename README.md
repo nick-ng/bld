@@ -69,7 +69,8 @@ css:
 
 ### ToDo Comments
 
-- server/main.go:24: @todo(nick-ng): figure out how to read images in form data
+- server/database/database.go:32: @todo(nick-ng): update snapshot file size
+- server/database/database.go:274: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/flash-cards.go:45: @todo(nick-ng): authenticate request
 - server/routes/images.go:23: @todo(nick-ng): pre-signed urls for retrieving images?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

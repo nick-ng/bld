@@ -68,18 +68,12 @@ func FlashCardsHandler(writer http.ResponseWriter, req *http.Request) {
 					writer.Write([]byte("no letter pair provided"))
 					return
 				}
-				fmt.Println("requested letterPair", letterPair)
 
 				memo := req.FormValue("memo")
 				commutator := req.FormValue("commutator")
 				tags := req.FormValue("tags")
 
-				fmt.Println("memo", memo)
-				fmt.Println("commutator", commutator)
-				fmt.Println("tags", tags)
-
 				filename := ""
-
 				file, fileHeader, err := req.FormFile("image")
 				fmt.Println(file)
 				if err == nil {

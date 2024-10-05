@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { FlashCard } from "$lib/types";
 
-	import { parseFlashCard } from "$lib/types";
+	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { page } from "$app/stores";
 	import { joinUrl, joinServerPath, upperCaseFirst } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
@@ -28,7 +28,7 @@
 			flashCards = store;
 
 			if (!formDirty) {
-				const flashCard = store[letterPair];
+				const flashCard = store[letterPair] || defaultFlashCard(letterPair);
 				currentMemo = flashCard.memo;
 				currentCommutator = flashCard.commutator;
 				currentTags = flashCard.tags;
@@ -129,10 +129,9 @@
 				const parseResponse = parseFlashCard(responseJson);
 
 				if (parseResponse.isValid) {
-					console.log("flashCard", parseResponse.data);
 					$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
 				} else {
-					console.log("wrong", responseJson);
+					console.error("wrong", responseJson);
 				}
 			}}
 		>

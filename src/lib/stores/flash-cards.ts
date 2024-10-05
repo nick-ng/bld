@@ -14,7 +14,6 @@ if (browser) {
 		try {
 			const res = await fetch(joinServerPath("flash-cards"));
 			const flashCardsArray = await res.json();
-
 			if (!Array.isArray(flashCardsArray)) {
 				flashCardStore.set("error: unexpected response");
 				return;
