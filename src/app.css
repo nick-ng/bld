@@ -13,6 +13,7 @@
 
 	body,
 	input[type="text"],
+	input[type="password"],
 	input[type="number"],
 	select,
 	textarea,
@@ -21,6 +22,7 @@
 	}
 
 	input[type="text"],
+	input[type="password"],
 	input[type="number"],
 	select,
 	textarea {
