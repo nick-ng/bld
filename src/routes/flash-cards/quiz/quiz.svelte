@@ -56,11 +56,11 @@
 <div class="max-w-prose mx-auto">
 	{#if $quizStore.length > 0 && typeof $flashCardStore !== "string"}
 		{@const flashCard = $flashCardStore[$quizStore[0]]}
-		<div class="flex flex-col items-center min-h-[450px] gap-1">
+		<div class="flex flex-col items-center min-h-[455px] gap-1">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<Corners letterPair={flashCard.letterPair} />
 			{#if showAnswer}
-				<div>{flashCard.memo}</div>
+				<div class="text-lg">{flashCard.memo}</div>
 				<div class="h-64 w-64 border border-gray-500">
 					{#if flashCard.image}
 						<img
@@ -78,6 +78,7 @@
 			{/if}
 		</div>
 		<div class="absolute bottom-2 left-0 px-2 w-full lg:w-full lg:relative lg:px-0">
+			<div class="text-left">{$quizStore.length} left</div>
 			{#if showAnswer}
 				<div class="flex flex-row gap-1">
 					<a
