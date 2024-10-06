@@ -1,17 +1,17 @@
 <script lang="ts">
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
-	import { joinUrl, joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
+	import { joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
+	import { goto } from "$app/navigation";
 
-	const serverUrl = import.meta.env.VITE_SERVER_URL;
 	export let letterPair: string = "";
 
 	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
 	let status = "stand-by";
 	let formDirty = false;
-
 	let currentMemo = "";
 	let currentCommutator = "";
 	let currentTags = "";
@@ -57,7 +57,7 @@
 </script>
 
 <div class="max-w-prose mx-auto">
-	<a href="/flash-cards/edit">Back</a>
+	<a href={$quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit"}>Back</a>
 	<h2 class="uppercase text-center">{letterPair}</h2>
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
@@ -66,8 +66,6 @@
 		<div class="text-center">{upperCaseFirst(status)}...</div>
 	{:else}
 		<form
-			action={joinUrl(serverUrl, "flash-cards")}
-			method="post"
 			on:submit={async (event) => {
 				event.preventDefault();
 
@@ -77,6 +75,7 @@
 
 				formDirty = false;
 
+				// @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 				const formData = new FormData();
 				const children = [...event.currentTarget];
 				for (let i = 0; i < children.length; i++) {
@@ -116,7 +115,7 @@
 					return;
 				}
 
-				const response = await fetch(joinUrl(serverUrl, "flash-cards", letterPair), {
+				const response = await fetch(joinServerPath("flash-cards", letterPair), {
 					method: "PUT",
 					headers,
 					body: formData
@@ -125,12 +124,24 @@
 				const parseResponse = parseFlashCard(responseJson);
 				if (parseResponse.isValid) {
 					$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
+
+					const backUrl = $quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit";
+					$quizStore = $quizStore.filter((lp) => lp != letterPair);
+
+					goto(backUrl);
 				} else {
 					console.error("wrong", responseJson);
 				}
 			}}
 		>
 			<input type="hidden" name="imageUrl" value={imageUrl} />
+			{#if typeof $flashCardStore !== "string" && currentMemo === $flashCardStore[letterPair].memo && currentCommutator === $flashCardStore[letterPair].commutator}
+				<input type="hidden" name="lastQuizUnix" value={$flashCardStore[letterPair].lastQuizUnix} />
+				<input type="hidden" name="confidence" value={$flashCardStore[letterPair].confidence} />
+			{:else}
+				<input type="hidden" name="lastQuizUnix" value={0} />
+				<input type="hidden" name="confidence" value={0} />
+			{/if}
 			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
 				<tbody>
 					<tr>
