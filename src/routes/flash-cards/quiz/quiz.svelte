@@ -61,15 +61,17 @@
 			<Corners letterPair={flashCard.letterPair} />
 			{#if showAnswer}
 				<div>{flashCard.memo}</div>
-				{#if flashCard.image}
-					<div class="h-64 w-64 border border-gray-500">
+				<div class="h-64 w-64 border border-gray-500">
+					{#if flashCard.image}
 						<img
 							class="object-contain"
 							src={joinServerPath("images", flashCard.image)}
 							alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
 						/>
-					</div>
-				{/if}
+					{:else}
+						<div class="h-full w-full flex items-center justify-center text-3xl">No Image</div>
+					{/if}
+				</div>
 				{#if flashCard.commutator}
 					<div class="text-lg">{flashCard.commutator}</div>
 				{/if}
