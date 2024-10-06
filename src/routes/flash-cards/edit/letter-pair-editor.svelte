@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
-	import { page } from "$app/stores";
 	import { joinUrl, joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
+	export let letterPair: string;
 
 	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
@@ -33,7 +33,6 @@
 		}
 	};
 
-	$: letterPair = $page.params.slug;
 	$: onFlashCardStoreUpdate($flashCardStore);
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
