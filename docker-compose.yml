@@ -1,0 +1,10 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:27945"
+    volumes:
+      - ./volumes/user-images:/app/user-images
+      - ./volumes/user-data:/app/user-data

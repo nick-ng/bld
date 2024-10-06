@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import { USERNAME_STORE_KEY, PASSWORD_STORE_KEY } from "$lib/constants";
 	import "../app.css";
@@ -9,28 +8,6 @@
 	let password = "";
 
 	$: showNav = ["big-scramble", "clock"].every((a) => $page.route.id !== `/${a}`);
-
-	const checkLogin = () => {
-		const tempUsername = localStorage.getItem(USERNAME_STORE_KEY);
-		if (!tempUsername) {
-			showLogin = true;
-			return;
-		}
-		username = tempUsername;
-
-		const tempPassword = localStorage.getItem(PASSWORD_STORE_KEY);
-		if (!tempPassword) {
-			showLogin = true;
-			return;
-		}
-		password = tempPassword;
-
-		showLogin = false;
-	};
-
-	onMount(() => {
-		checkLogin();
-	});
 </script>
 
 <svelte:head>
@@ -57,7 +34,7 @@
 			localStorage.setItem(USERNAME_STORE_KEY, username);
 			localStorage.setItem(PASSWORD_STORE_KEY, password);
 
-			checkLogin();
+			showLogin = false;
 		}}
 	>
 		<tabel>

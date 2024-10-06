@@ -2,7 +2,7 @@ import type { FlashCard } from "$lib/types";
 
 import { writable } from "svelte/store";
 import { browser } from "$app/environment";
-import { joinServerPath } from "$lib/utils";
+import { addCredentialsToHeaders, joinServerPath } from "$lib/utils";
 import { parseFlashCard } from "$lib/types";
 
 export const flashCardStore = writable<{ [letterPair: string]: FlashCard } | string>("stand-by");
@@ -12,7 +12,20 @@ if (browser) {
 		flashCardStore.set("loading");
 
 		try {
-			const res = await fetch(joinServerPath("flash-cards"));
+			const { headers, isValid } = addCredentialsToHeaders();
+			if (!isValid) {
+				return;
+			}
+
+			const res = await fetch(joinServerPath("flash-cards"), {
+				headers
+			});
+
+			if (!res.ok) {
+				console.warn("couldn't get flash cards because:", res.status, res.statusText);
+				return;
+			}
+
 			const flashCardsArray = await res.json();
 			if (!Array.isArray(flashCardsArray)) {
 				flashCardStore.set("error: unexpected response");

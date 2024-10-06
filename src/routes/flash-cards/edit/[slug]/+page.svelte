@@ -3,13 +3,13 @@
 
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { page } from "$app/stores";
-	import { joinUrl, joinServerPath, upperCaseFirst } from "$lib/utils";
+	import { joinUrl, joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
 
-	let files: FileList;
+	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
 	let status = "stand-by";
 	let flashCards: { [letterPair: string]: FlashCard } = {};
@@ -53,9 +53,10 @@
 	};
 
 	const resetForm = () => {
+		onFlashCardStoreUpdate($flashCardStore);
 		if (fileInputEl) {
 			fileInputEl.value = "";
-			formDirty = false;
+			files = null;
 		}
 	};
 </script>
@@ -81,17 +82,14 @@
 
 				formDirty = false;
 
-				const children = [...event.currentTarget];
-
 				const formData = new FormData();
-
+				const children = [...event.currentTarget];
 				for (let i = 0; i < children.length; i++) {
 					const formInput = children[i];
 
 					if (formInput instanceof HTMLInputElement) {
 						const formInputName = formInput.getAttribute("name");
 						const formInputType = formInput.getAttribute("type");
-
 						if (!formInputName || !formInputType) {
 							continue;
 						}
@@ -104,7 +102,6 @@
 								}
 
 								const file = fileList[fileList.length - 1];
-
 								if (!file) {
 									break;
 								}
@@ -119,15 +116,18 @@
 					}
 				}
 
+				const { headers, isValid } = addCredentialsToHeaders();
+				if (!isValid) {
+					return;
+				}
+
 				const response = await fetch(joinUrl(serverUrl, "flash-cards", letterPair), {
 					method: "PUT",
+					headers,
 					body: formData
 				});
-
 				const responseJson = await response.json();
-
 				const parseResponse = parseFlashCard(responseJson);
-
 				if (parseResponse.isValid) {
 					$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
 				} else {
@@ -140,7 +140,17 @@
 				<tbody>
 					<tr>
 						<td class="text-right">Memo</td>
-						<td><input class="w-full" type="text" name="memo" bind:value={currentMemo} /></td>
+						<td
+							><input
+								class="w-full"
+								type="text"
+								name="memo"
+								bind:value={currentMemo}
+								on:change={() => {
+									formDirty = true;
+								}}
+							/></td
+						>
 					</tr>
 					<tr>
 						<td class="text-right">Commutator</td>
@@ -150,6 +160,9 @@
 								type="text"
 								name="commutator"
 								bind:value={currentCommutator}
+								on:change={() => {
+									formDirty = true;
+								}}
 							/></td
 						>
 					</tr>
@@ -165,6 +178,9 @@
 								accept="image/*"
 								bind:this={fileInputEl}
 								bind:files
+								on:change={() => {
+									formDirty = true;
+								}}
 							/>
 							<label
 								for={`${letterPair}-image`}
@@ -186,12 +202,30 @@
 					</tr>
 					<tr>
 						<td class="text-right">Tags</td>
-						<td><input class="w-full" type="text" name="tags" bind:value={currentTags} /></td>
+						<td
+							><input
+								class="w-full"
+								type="text"
+								name="tags"
+								bind:value={currentTags}
+								on:change={() => {
+									formDirty = true;
+								}}
+							/></td
+						>
 					</tr>
 				</tbody>
 			</table>
 			<div class="w-full flex flex-row justify-between">
-				<button type="button">Reset</button>
+				<button
+					type="button"
+					on:click={() => {
+						if (formDirty) {
+							formDirty = false;
+							resetForm();
+						}
+					}}>Reset</button
+				>
 				<button class="button-default">Submit</button>
 			</div>
 		</form>
