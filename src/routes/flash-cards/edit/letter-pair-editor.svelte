@@ -5,7 +5,7 @@
 	import Corners from "$lib/components/corners.svelte";
 
 	const serverUrl = import.meta.env.VITE_SERVER_URL;
-	export let letterPair: string;
+	export let letterPair: string = "";
 
 	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
