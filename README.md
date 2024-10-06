@@ -56,8 +56,6 @@ css:
 - server/database/database.go:35: @todo(nick-ng): update snapshot file size as you make snapshots
 - server/database/database.go:149: @todo(nick-ng): convert log to snapshot
 - server/database/database.go:280: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
-- server/main.go:40: @todo(nick-ng): change handlers to use "METHOD /route/{param}"
-- server/routes/flash-cards.go:204:// @todo(nick-ng): authenticate request
-- server/routes/images.go:23: @todo(nick-ng): pre-signed urls for retrieving images?
+- server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:25: @todo(nick-ng): does this actually help?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

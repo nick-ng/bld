@@ -37,12 +37,9 @@ func optionsHandler(writer http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-	// @todo(nick-ng): change handlers to use "METHOD /route/{param}"
-	// see: https://go.dev/blog/routing-enhancements
 	routes.AddMiscRoutes()
 	routes.AddFlashCardsRoutes()
-	http.HandleFunc("GET /images/{filename}", routes.ImagesCardsHandler)
-	http.HandleFunc("GET /images/", routes.ImagesCardsHandler)
+	routes.AddImageRoutes()
 	http.HandleFunc("OPTIONS /", optionsHandler)
 	http.HandleFunc("/", rootHandler)
 
