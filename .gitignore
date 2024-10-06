@@ -42,6 +42,8 @@ go.work
 
 notes/*
 server/user-images
+server/user-data/*
+!server/user-data/users.json
 
 user-images
 user-data

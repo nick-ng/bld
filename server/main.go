@@ -2,6 +2,7 @@ package main
 
 import (
 	"bld-server/routes"
+	"bld-server/utils"
 	"fmt"
 	"net/http"
 )
@@ -28,20 +29,21 @@ func rootHandler(writer http.ResponseWriter, req *http.Request) {
 			writer.Write([]byte("nothing here"))
 		}
 	}
-
-	fmt.Fprintf(writer, req.Method)
 }
 
-func corsHandler(writer http.ResponseWriter, req *http.Request) {
-	fmt.Println("hi cors")
+func optionsHandler(writer http.ResponseWriter, _ *http.Request) {
+	utils.AddCorsHeaders(writer)
+	writer.WriteHeader(http.StatusOK)
 }
 
 func main() {
-	http.HandleFunc("OPTIONS ", corsHandler)
-	http.HandleFunc("/flash-cards", routes.FlashCardsHandler)
-	http.HandleFunc("/flash-cards/", routes.FlashCardsHandler)
-	http.HandleFunc("/images/{filename}", routes.ImagesCardsHandler)
-	http.HandleFunc("/images/", routes.ImagesCardsHandler)
+	// @todo(nick-ng): change handlers to use "METHOD /route/{param}"
+	// see: https://go.dev/blog/routing-enhancements
+	routes.AddMiscRoutes()
+	routes.AddFlashCardsRoutes()
+	http.HandleFunc("GET /images/{filename}", routes.ImagesCardsHandler)
+	http.HandleFunc("GET /images/", routes.ImagesCardsHandler)
+	http.HandleFunc("OPTIONS /", optionsHandler)
 	http.HandleFunc("/", rootHandler)
 
 	http.ListenAndServe(":27945", nil)
