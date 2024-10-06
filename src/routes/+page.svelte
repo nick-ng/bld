@@ -1,4 +1,4 @@
-<div class="w-prose mx-auto">
+<div class="max-w-prose mx-auto">
 	<h1 class="mt-1 text-center">Blindfolded Cube Resources</h1>
 	<ul>
 		<li class="my-2">

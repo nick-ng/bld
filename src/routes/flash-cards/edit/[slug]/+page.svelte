@@ -1,6 +1,4 @@
 <script lang="ts">
-	import type { FlashCard } from "$lib/types";
-
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { page } from "$app/stores";
 	import { joinUrl, joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
@@ -12,7 +10,6 @@
 	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
 	let status = "stand-by";
-	let flashCards: { [letterPair: string]: FlashCard } = {};
 	let formDirty = false;
 
 	let currentMemo = "";
@@ -25,7 +22,6 @@
 			status = store;
 		} else {
 			status = "loaded";
-			flashCards = store;
 
 			if (!formDirty) {
 				const flashCard = store[letterPair] || defaultFlashCard(letterPair);
