@@ -52,7 +52,7 @@
 {#if !isSamePiece(letterPair)}
 	<a
 		class="block bg-white text-center no-underline border p-0 border-gray-800"
-		href={`/flash-cards/edit/${letterPair}`}
+		href={`/flash-cards/edit?lp=${letterPair}`}
 	>
 		<div class="uppercase p-0 mb-1 leading-none">{letterPair}</div>
 		<div class="h-2 flex flex-row justify-center gap-0.5 px-0.5 pb-0.5">
