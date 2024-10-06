@@ -3,17 +3,32 @@
 
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
+	import { is3Style, isOP } from "$lib/utils";
 
 	const makeQuiz = (
 		flashCards: FlashCard[],
 		oldest: number,
 		lowConfidence: number,
-		random: number
+		random: number,
+		include3Style: boolean,
+		includeOP: boolean
 	): string[] => {
-		const remainingFlashCards = flashCards.map((c) => ({
-			...c,
-			random: Math.random()
-		}));
+		const remainingFlashCards = flashCards
+			.filter((c) => {
+				if (include3Style && is3Style(c.letterPair)) {
+					return true;
+				}
+
+				if (includeOP && isOP(c.letterPair)) {
+					return true;
+				}
+
+				return is3Style(c.letterPair) && isOP(c.letterPair);
+			})
+			.map((c) => ({
+				...c,
+				random: Math.random()
+			}));
 		const quizCards: typeof remainingFlashCards = [];
 
 		// oldest
@@ -53,12 +68,28 @@
 				>
 			</p>
 			<ul>
-				<li>
+				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5);
-						}}>10 Oldest + 5 Lowest Confidence + 5 Random</button
+							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, true);
+						}}>All: 10 Oldest + 5 Lowest Confidence + 5 Random</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 button-default text-center"
+						on:click={() => {
+							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, false);
+						}}>3-Style: 10 Oldest + 5 Lowest Confidence + 5 Random</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 button-default text-center"
+						on:click={() => {
+							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, false, true);
+						}}>OP: 10 Oldest + 5 Lowest Confidence + 5 Random</button
 					>
 				</li>
 			</ul>

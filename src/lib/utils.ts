@@ -54,3 +54,62 @@ export const addCredentialsToHeaders = (
 		isValid: true
 	};
 };
+
+const UBL = ["a", "e", "r"];
+const UFR = ["c", "j", "m"];
+const SAME_PIECES = [
+	UBL,
+	["b", "n", "q"],
+	UFR,
+	["d", "f", "i"],
+	["g", "l", "u"],
+	["h", "s", "x"],
+	["k", "p", "v"],
+	["o", "t", "w"]
+];
+
+export const isTwist = (letterPair: string) => {
+	const letters = letterPair.split("");
+	if (letters.length !== 2) {
+		return false;
+	}
+
+	if (letters[0] === letters[1]) {
+		// repeated letter means odd number of swaps
+		return false;
+	}
+
+	for (let i = 0; i < SAME_PIECES.length; i++) {
+		if (SAME_PIECES[i].includes(letters[0])) {
+			if (SAME_PIECES[i].includes(letters[1])) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+};
+
+export const isOP = (letterPair: string) => {
+	const letters = letterPair.split("");
+
+	for (let i = 0; i < letters.length; i++) {
+		if (UBL.includes(letters[i])) {
+			return false;
+		}
+	}
+
+	return true;
+};
+
+export const is3Style = (letterPair: string) => {
+	const letters = letterPair.split("");
+
+	for (let i = 0; i < letters.length; i++) {
+		if (UFR.includes(letters[i])) {
+			return false;
+		}
+	}
+
+	return true;
+};
