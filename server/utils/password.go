@@ -32,13 +32,13 @@ func ShortenPassword(passwordBytes []byte) []byte {
 	return newPasswordBytes
 }
 
-func CheckCredentials(username string, password string) bool {
+func CheckCredentials(username string, password string) (bool, string) {
 	userListPath := filepath.Join(database.USER_DATA_DIRECTORY, "users.json")
 	userListBytes, err := os.ReadFile(userListPath)
 
 	if err != nil {
 		fmt.Println("error when reading users.json", err)
-		return false
+		return false, ""
 	}
 
 	userList := []UserLogin{}
@@ -47,7 +47,7 @@ func CheckCredentials(username string, password string) bool {
 
 	if err != nil {
 		fmt.Println("error when parsing users.json")
-		return false
+		return false, ""
 	}
 
 	for _, user := range userList {
@@ -57,8 +57,12 @@ func CheckCredentials(username string, password string) bool {
 
 		err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
 
-		return err == nil
+		if err != nil {
+			return false, ""
+		}
+
+		return true, username
 	}
 
-	return false
+	return false, ""
 }
