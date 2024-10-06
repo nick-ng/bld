@@ -2,7 +2,6 @@ package routes
 
 import (
 	"bld-server/utils"
-	"fmt"
 	"io"
 	"net/http"
 
@@ -22,14 +21,11 @@ func hashPasswordRoute(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	fmt.Println(len(passwordBytes))
-
 	if len(passwordBytes) > 71 {
 		passwordBytes = utils.ShortenPassword(passwordBytes)
 	}
 
 	hashedPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, 10)
-
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("could not hash password"))

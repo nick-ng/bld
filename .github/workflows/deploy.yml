@@ -24,6 +24,9 @@ jobs:
           npm i --ignore-scripts
           npm run build
           cp ./build/index.html ./build/404.html
+          mkdir ./build/flash-cards/edit
+          cp ./build/flash-cards/edit.html ./build/flash-cards/edit/404.html
+          cp ./build/flash-cards/edit.html ./build/flash-cards/edit/index.html
           if [[ $BASE_URL ]]; then
             echo $BASE_URL > ./build/CNAME
           else
