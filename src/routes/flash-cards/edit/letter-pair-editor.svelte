@@ -10,26 +10,27 @@
 
 	let files: FileList | null;
 	let fileInputEl: HTMLInputElement | null = null;
-	let status = "stand-by";
 	let formDirty = false;
 	let currentMemo = "";
 	let currentCommutator = "";
 	let currentTags = "";
 	let imageUrl = "";
 
-	const onFlashCardStoreUpdate = (store: typeof $flashCardStore) => {
+	const flashCardOrDefault = (store: typeof $flashCardStore, letterPair: string) => {
 		if (typeof store === "string") {
-			status = store;
-		} else {
-			status = "loaded";
+			return defaultFlashCard(letterPair);
+		}
 
-			if (!formDirty) {
-				const flashCard = store[letterPair] || defaultFlashCard(letterPair);
-				currentMemo = flashCard.memo;
-				currentCommutator = flashCard.commutator;
-				currentTags = flashCard.tags;
-				imageUrl = flashCard.image;
-			}
+		return store[letterPair] || defaultFlashCard(letterPair);
+	};
+
+	const onFlashCardStoreUpdate = (store: typeof $flashCardStore) => {
+		if (!formDirty) {
+			const flashCard = flashCardOrDefault(store, letterPair);
+			currentMemo = flashCard.memo;
+			currentCommutator = flashCard.commutator;
+			currentTags = flashCard.tags;
+			imageUrl = flashCard.image;
 		}
 	};
 
@@ -62,8 +63,8 @@
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
 	</div>
-	{#if status !== "loaded"}
-		<div class="text-center">{upperCaseFirst(status)}...</div>
+	{#if typeof $flashCardStore === "string"}
+		<div class="text-center">{upperCaseFirst($flashCardStore)}...</div>
 	{:else}
 		<form
 			on:submit={async (event) => {
@@ -135,13 +136,16 @@
 			}}
 		>
 			<input type="hidden" name="imageUrl" value={imageUrl} />
-			{#if typeof $flashCardStore !== "string" && currentMemo === $flashCardStore[letterPair].memo && currentCommutator === $flashCardStore[letterPair].commutator}
-				<input type="hidden" name="lastQuizUnix" value={$flashCardStore[letterPair].lastQuizUnix} />
-				<input type="hidden" name="confidence" value={$flashCardStore[letterPair].confidence} />
-			{:else}
-				<input type="hidden" name="lastQuizUnix" value={0} />
-				<input type="hidden" name="confidence" value={0} />
-			{/if}
+			<input
+				type="hidden"
+				name="lastQuizUnix"
+				value={flashCardOrDefault($flashCardStore, letterPair).lastQuizUnix}
+			/>
+			<input
+				type="hidden"
+				name="confidence"
+				value={flashCardOrDefault($flashCardStore, letterPair).confidence}
+			/>
 			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
 				<tbody>
 					<tr>
