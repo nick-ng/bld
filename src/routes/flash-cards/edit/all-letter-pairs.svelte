@@ -4,6 +4,8 @@
 
 	let allLetterPairs = [];
 	let letterPairFilter = "";
+	let hideNonOP = false;
+	let hideNon3Style = false;
 
 	const codePointOffset = 97;
 	for (let j = 0; j < 24; j++) {
@@ -21,23 +23,27 @@
 		<h1>Edit Flash Cards</h1>
 		<div />
 	</div>
-	<form
-		class="mb-1"
-		on:submit={(event) => {
-			event.preventDefault();
+	<div class="flex flex-row gap-2">
+		<form
+			class="mb-1"
+			on:submit={(event) => {
+				event.preventDefault();
 
-			const trimmedLetterPair = letterPairFilter.trim().toLowerCase();
+				const trimmedLetterPair = letterPairFilter.trim().toLowerCase();
 
-			if (trimmedLetterPair.length === 2 && allLetterPairs.includes(trimmedLetterPair)) {
-				goto(`/flash-cards/edit/${trimmedLetterPair}`);
-			}
-		}}
-	>
-		<label class="block"
-			>Filter:
-			<input type="text" bind:value={letterPairFilter} />
-		</label>
-	</form>
+				if (trimmedLetterPair.length === 2 && allLetterPairs.includes(trimmedLetterPair)) {
+					goto(`/flash-cards/edit/${trimmedLetterPair}`);
+				}
+			}}
+		>
+			<label class="block"
+				>Filter:
+				<input type="text" bind:value={letterPairFilter} />
+			</label>
+		</form>
+		<label>Hide Non-3-Style Pairs: <input type="checkbox" bind:checked={hideNon3Style} /></label>
+		<label>Hide Non-OP Pairs: <input type="checkbox" bind:checked={hideNonOP} /></label>
+	</div>
 	<div class="letterPairGrid">
 		{#each allLetterPairs.filter((lp) => {
 			if (!letterPairFilter.trim()) {
@@ -46,7 +52,7 @@
 
 			return lp.startsWith(letterPairFilter);
 		}) as letterPair}
-			<LetterPairChooser {letterPair} />
+			<LetterPairChooser {letterPair} {hideNon3Style} {hideNonOP} />
 		{/each}
 	</div>
 </div>

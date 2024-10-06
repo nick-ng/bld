@@ -1,39 +1,9 @@
 <script lang="ts">
 	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { isTwist, is3Style, isOP } from "$lib/utils";
 	export let letterPair = "";
-
-	const samePieces = [
-		["a", "e", "r"],
-		["b", "n", "q"],
-		["c", "j", "m"],
-		["d", "f", "i"],
-		["g", "l", "u"],
-		["h", "s", "x"],
-		["k", "p", "v"],
-		["o", "t", "w"]
-	];
-
-	const isSamePiece = (letterPair: string) => {
-		const letters = letterPair.split("");
-		if (letters.length !== 2) {
-			return false;
-		}
-
-		if (letters[0] === letters[1]) {
-			// repeated letter means odd number of swaps
-			return false;
-		}
-
-		for (let i = 0; i < samePieces.length; i++) {
-			if (samePieces[i].includes(letters[0])) {
-				if (samePieces[i].includes(letters[1])) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	};
+	export let hideNonOP = true;
+	export let hideNon3Style = true;
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
 		if (typeof store === "string") {
@@ -47,11 +17,20 @@
 			!letterPairObject?.image && "#0000ffff"
 		];
 	};
+
+	$: isNotEitherMethod = !isOP(letterPair) && !is3Style(letterPair);
 </script>
 
-{#if !isSamePiece(letterPair)}
+{#if isTwist(letterPair) || isNotEitherMethod || (hideNon3Style && !is3Style(letterPair)) || (hideNonOP && !isOP(letterPair))}
+	<div
+		class="bg-gray-500 block text-center no-underline p-0 border border-gray-500 cursor-not-allowed"
+	>
+		<div class="text-gray-500 uppercase p-0 mb-1 leading-none">{letterPair}</div>
+		<div class="h-2 px-0.5 pb-0.5" />
+	</div>
+{:else}
 	<a
-		class="block bg-white text-center no-underline border p-0 border-gray-800"
+		class="relative block bg-white text-center no-underline border p-0 border-gray-800"
 		href={`/flash-cards/edit?lp=${letterPair}`}
 	>
 		<div class="uppercase p-0 mb-1 leading-none">{letterPair}</div>
@@ -64,6 +43,4 @@
 			{/each}
 		</div>
 	</a>
-{:else}
-	<div class="bg-gray-500"></div>
 {/if}
