@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 )
 
@@ -128,6 +129,18 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	commutator := req.FormValue("commutator")
 	tags := req.FormValue("tags")
 	imageUrl := req.FormValue("imageUrl")
+	lastQuizUnixString := req.FormValue("lastQuizUnix")
+	confidenceString := req.FormValue("confidence")
+
+	lastQuizUnix, err := strconv.ParseInt(lastQuizUnixString, 10, 64)
+	if err != nil {
+		lastQuizUnix = 0
+	}
+
+	confidence, err := strconv.ParseInt(confidenceString, 10, 0)
+	if err != nil {
+		confidence = 0
+	}
 
 	imageChanged := false
 	filename := imageUrl
@@ -162,13 +175,15 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	flashCard := database.FlashCard{
-		Type:       "spefz-corners",
-		Owner:      authenticatedUsername,
-		LetterPair: letterPair,
-		Memo:       memo,
-		Image:      filename,
-		Commutator: commutator,
-		Tags:       tags,
+		Type:         "spefz-corners",
+		Owner:        authenticatedUsername,
+		LetterPair:   letterPair,
+		Memo:         memo,
+		Image:        filename,
+		Commutator:   commutator,
+		Tags:         tags,
+		LastQuizUnix: lastQuizUnix,
+		Confidence:   int(confidence),
 	}
 
 	database.WriteFlashCard(flashCard)
