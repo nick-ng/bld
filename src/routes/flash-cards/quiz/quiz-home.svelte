@@ -68,12 +68,13 @@
 				>
 			</p>
 			<ul>
+				<li class="mt-1">10 Oldest + 5 Lowest Confidence + 5 Random</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, true);
-						}}>All: 10 Oldest + 5 Lowest Confidence + 5 Random</button
+						}}>All</button
 					>
 				</li>
 				<li class="mt-1">
@@ -81,7 +82,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, false);
-						}}>3-Style: 10 Oldest + 5 Lowest Confidence + 5 Random</button
+						}}>3-Style</button
 					>
 				</li>
 				<li class="mt-1">
@@ -89,7 +90,32 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, false, true);
-						}}>OP: 10 Oldest + 5 Lowest Confidence + 5 Random</button
+						}}>OP</button
+					>
+				</li>
+				<li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 button-default text-center"
+						on:click={() => {
+							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, true, true);
+						}}>All</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 button-default text-center"
+						on:click={() => {
+							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, true, false);
+						}}>3-Style</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 button-default text-center"
+						on:click={() => {
+							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, false, true);
+						}}>OP</button
 					>
 				</li>
 			</ul>
