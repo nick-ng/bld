@@ -61,7 +61,51 @@ func GetImageFullPath(filename string) (string, error) {
 
 func AddFlashCardsRoutes() {
 	http.HandleFunc("GET /flash-cards", handleGetFlashCards)
+	http.HandleFunc("GET /flash-cards/{letterPair}", handleGetFlashCard)
 	http.HandleFunc("PUT /flash-cards/{letterPair}", handlePutFlashCard)
+}
+
+func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	headerMap := map[string]string{}
+
+	for name, headers := range req.Header {
+		if len(headers) > 0 {
+			headerMap[name] = headers[len(headers)-1]
+		}
+	}
+
+	haveAccess, authenticatedUsername := utils.CheckCredentials(headerMap["X-Username"], headerMap["X-Password"])
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+
+	letterPair := req.PathValue("letterPair")
+	flashCardType := req.URL.Query().Get("type")
+
+	if len(flashCardType) == 0 {
+		flashCardType = "corner"
+	}
+
+	flashCard, err := database.ReadFlashCard(authenticatedUsername, flashCardType, letterPair)
+	if err != nil {
+		fmt.Fprintf(writer, "%s", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonBytes, err := json.Marshal(flashCard)
+	if err != nil {
+		fmt.Fprintf(writer, "%s", err)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(jsonBytes)
 }
 
 func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {

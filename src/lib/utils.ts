@@ -30,18 +30,15 @@ export const upperCaseFirst = (str: string) => {
 };
 
 export const addCredentialsToHeaders = (
-	originalHeaders?: Headers
+	originalHeaders?: HeadersInit
 ): { headers: Headers; isValid: boolean } => {
-	let headers = originalHeaders;
-	if (!headers) {
-		headers = new Headers();
-	}
+	const headers = originalHeaders ? new Headers(originalHeaders) : new Headers();
 
 	const username = localStorage.getItem(USERNAME_STORE_KEY);
 	const password = localStorage.getItem(PASSWORD_STORE_KEY);
 	if (!username || !password) {
 		return {
-			headers: headers,
+			headers,
 			isValid: false
 		};
 	}
@@ -53,6 +50,19 @@ export const addCredentialsToHeaders = (
 		headers: headers,
 		isValid: true
 	};
+};
+
+export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean = false) => {
+	const newInit = { ...init };
+	const { headers, isValid } = addCredentialsToHeaders(init?.headers);
+
+	if (isValid) {
+		newInit.headers = headers;
+	} else if (!alwaysSend) {
+		return Promise.resolve();
+	}
+
+	return fetch(url, newInit);
 };
 
 const UBL = ["a", "e", "r"];
