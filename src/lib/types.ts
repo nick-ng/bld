@@ -7,6 +7,7 @@ export type FlashCard = {
 	confidence: number; // 0 - 5. 0 = don't know, 5 = fully remember
 	tags: string;
 	lastQuizUnix: number;
+	fetchedAtMs?: number;
 };
 
 export const getPropertyOrDefault =

@@ -1,18 +1,17 @@
 <script lang="ts">
-	import type { FlashCard } from "$lib/types";
-
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { fetchFlashCards, flashCardStore } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import { is3Style, isOP } from "$lib/utils";
 
-	const makeQuiz = (
-		flashCards: FlashCard[],
+	const makeQuiz = async (
 		oldest: number,
 		lowConfidence: number,
 		random: number,
 		include3Style: boolean,
 		includeOP: boolean
-	): string[] => {
+	) => {
+		const flashCardsMap = await fetchFlashCards();
+		const flashCards = Object.values(flashCardsMap);
 		const remainingFlashCards = flashCards
 			.filter((c) => {
 				if (include3Style && is3Style(c.letterPair)) {
@@ -47,7 +46,7 @@
 
 		const quizLetterPairs = quizCards.sort((a, b) => a.random - b.random).map((c) => c.letterPair);
 
-		return quizLetterPairs;
+		$quizStore = quizLetterPairs;
 	};
 </script>
 
@@ -73,7 +72,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, true);
+							makeQuiz(10, 5, 5, true, true);
 						}}>All</button
 					>
 				</li>
@@ -81,7 +80,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, true, false);
+							makeQuiz(10, 5, 5, true, false);
 						}}>3-Style</button
 					>
 				</li>
@@ -89,7 +88,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 10, 5, 5, false, true);
+							makeQuiz(10, 5, 5, false, true);
 						}}>OP</button
 					>
 				</li>
@@ -98,7 +97,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, true, true);
+							makeQuiz(5, 3, 2, true, true);
 						}}>All</button
 					>
 				</li>
@@ -106,7 +105,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, true, false);
+							makeQuiz(5, 3, 2, true, false);
 						}}>3-Style</button
 					>
 				</li>
@@ -114,7 +113,7 @@
 					<button
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
-							$quizStore = makeQuiz(flatFlashCards, 5, 3, 2, false, true);
+							makeQuiz(5, 3, 2, false, true);
 						}}>OP</button
 					>
 				</li>

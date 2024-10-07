@@ -11,7 +11,8 @@ Front-end:
 
 Back-end:
 
-Go something
+1. copy `./server/user-data/users.sample.json` to `./server/user-data/users.json`
+2. Go something
 
 Credentials are:
 - Username: `username`
@@ -55,7 +56,7 @@ css:
 
 - server/database/database.go:35: @todo(nick-ng): update snapshot file size as you make snapshots
 - server/database/database.go:149: @todo(nick-ng): convert log to snapshot
-- server/database/database.go:280: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/database/database.go:305: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:25: @todo(nick-ng): does this actually help?
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:79: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?

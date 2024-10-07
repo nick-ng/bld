@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
-	import { joinServerPath, upperCaseFirst, addCredentialsToHeaders } from "$lib/utils";
+	import { joinServerPath, upperCaseFirst, authFetch } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
@@ -111,16 +111,14 @@
 					}
 				}
 
-				const { headers, isValid } = addCredentialsToHeaders();
-				if (!isValid) {
+				const response = await authFetch(joinServerPath("flash-cards", letterPair), {
+					method: "PUT",
+					body: formData
+				});
+				if (!response) {
 					return;
 				}
 
-				const response = await fetch(joinServerPath("flash-cards", letterPair), {
-					method: "PUT",
-					headers,
-					body: formData
-				});
 				const responseJson = await response.json();
 				const parseResponse = parseFlashCard(responseJson);
 				if (parseResponse.isValid) {

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { quizStore } from "$lib/stores/quiz";
 	import { flashCardStore } from "$lib/stores/flash-cards";
-	import { addCredentialsToHeaders, joinServerPath } from "$lib/utils";
+	import { authFetch, joinServerPath } from "$lib/utils";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
 
@@ -28,16 +28,14 @@
 		formData.set("lastQuizUnix", Math.floor(Date.now() / 1000).toString(10));
 		formData.set("confidence", newConfidence.toString(10));
 
-		const { headers, isValid } = addCredentialsToHeaders();
-		if (!isValid) {
+		const response = await authFetch(joinServerPath("flash-cards", letterPair), {
+			method: "PUT",
+			body: formData
+		});
+		if (!response) {
 			return;
 		}
 
-		const response = await fetch(joinServerPath("flash-cards", letterPair), {
-			method: "PUT",
-			headers,
-			body: formData
-		});
 		const responseJson = await response.json();
 		const parseResponse = parseFlashCard(responseJson);
 		if (parseResponse.isValid) {

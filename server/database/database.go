@@ -157,19 +157,43 @@ func getCurrentChangeLogFullPath() string {
 	return fullPath
 }
 
-func flashCardToPrimaryKey(flashCard FlashCard) (string, error) {
-	if len(flashCard.Owner) == 0 {
+func getPrimaryKey(owner string, flashCardType string, letterPair string) (string, error) {
+	if len(owner) == 0 {
 		return "", errors.New("flash card has no owner")
 	}
 
-	if len(flashCard.LetterPair) == 0 {
+	if len(flashCardType) == 0 {
+		return "", errors.New("flash card has no type")
+	}
+
+	if len(letterPair) == 0 {
 		return "", errors.New("flash card has no letter pair")
 	}
 
-	return fmt.Sprintf("%s:%s", flashCard.Owner, flashCard.LetterPair), nil
+	return fmt.Sprintf("%s:%s:%s", owner, flashCardType, letterPair), nil
+}
+
+func flashCardToPrimaryKey(flashCard FlashCard) (string, error) {
+	return getPrimaryKey(flashCard.Owner, flashCard.Type, flashCard.LetterPair)
+}
+
+// you're not realistically going to learn two lettering schemes
+func normaliseFlashCardType(flashCardType string) string {
+	if flashCardType == "edge" || strings.Contains(flashCardType, "edge") {
+		return "edge"
+	}
+
+	if flashCardType == "corner" || strings.Contains(flashCardType, "corner") {
+		return "corner"
+	}
+
+	// wings and centres or something
+	return flashCardType
 }
 
 func flashCardToRow(flashCard FlashCard) (string, error) {
+	flashCardType := normaliseFlashCardType(flashCard.Type)
+
 	row := []string{
 		flashCard.Owner,
 		flashCard.LetterPair,
@@ -177,7 +201,7 @@ func flashCardToRow(flashCard FlashCard) (string, error) {
 		flashCard.Image,
 		flashCard.Commutator,
 		flashCard.Tags,
-		flashCard.Type,
+		flashCardType,
 		fmt.Sprintf("%d", flashCard.Confidence),
 		fmt.Sprintf("%d", flashCard.LastQuizUnix),
 	}
@@ -261,6 +285,7 @@ func rowToFlashCard(row string) (FlashCard, error) {
 		lastQuizUnix = 0
 	}
 
+	flashCardType := normaliseFlashCardType(items[6])
 	flashCard := FlashCard{
 		Owner:        items[0],
 		LetterPair:   items[1],
@@ -268,7 +293,7 @@ func rowToFlashCard(row string) (FlashCard, error) {
 		Image:        items[3],
 		Commutator:   items[4],
 		Tags:         items[5],
-		Type:         items[6],
+		Type:         flashCardType,
 		Confidence:   int(confidence),
 		LastQuizUnix: lastQuizUnix,
 	}
@@ -324,21 +349,21 @@ func ReadAllFlashCards(owner string) ([]FlashCard, error) {
 	return allFlashCards, nil
 }
 
-func ReadFlashCard(owner string, letterPair string) (FlashCard, error) {
-	allFlashCards, err := ReadAllFlashCards(owner)
+func ReadFlashCard(owner string, flashCardType string, letterPair string) (FlashCard, error) {
+	primaryKey, err := getPrimaryKey(owner, flashCardType, letterPair)
 
 	if err != nil {
 		return FlashCard{}, err
 	}
 
-	for _, flashCard := range allFlashCards {
-		if flashCard.LetterPair == letterPair {
-			return flashCard, nil
-		}
+	flashCard, ok := FlashCardData[primaryKey]
+
+	if ok {
+		return flashCard, nil
 	}
 
 	return FlashCard{
-		Type:         "spefz-corners",
+		Type:         "corners",
 		Owner:        owner,
 		LetterPair:   letterPair,
 		Memo:         "",
