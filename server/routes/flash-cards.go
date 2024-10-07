@@ -7,14 +7,20 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
+	"image"
+	"image/color"
+	_ "image/gif"
+	"image/jpeg"
+	_ "image/png"
 	"io/fs"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
 	"slices"
 	"strconv"
-	"strings"
+
+	"golang.org/x/image/draw"
 )
 
 const USER_IMAGES_DIRECTORY = "user-images"
@@ -162,7 +168,6 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	letterPair := req.PathValue("letterPair")
-
 	if len(letterPair) == 0 {
 		writer.WriteHeader(400)
 		writer.Write([]byte("no letter pair provided"))
@@ -190,15 +195,20 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	filename := imageUrl
 	file, fileHeader, err := req.FormFile("image")
 	if err == nil {
-		contentType := strings.ToLower(fileHeader.Header.Get("Content-Type"))
-		if !strings.HasPrefix(contentType, "image/") {
+		mediaType, _, err := mime.ParseMediaType(fileHeader.Header.Get("Content-Type"))
+		if err != nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(writer, "error reading media type: %s", err)
+			return
+		}
+
+		if mediaType != "image/jpeg" && mediaType != "image/png" && mediaType != "media/gif" {
 			writer.WriteHeader(http.StatusBadRequest)
 			fmt.Fprint(writer, "invalid file type")
 			return
 		}
 
-		extension := strings.Replace(contentType, "image/", "", 1)
-		filename = fmt.Sprintf("%s.%s", utils.RandomId(), extension)
+		filename = fmt.Sprintf("%s.jpg", utils.RandomId())
 		imageChanged = true
 		filePath, err := GetImageFullPath(filename)
 		if err != nil {
@@ -207,19 +217,46 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		buffer := bytes.NewBuffer(nil)
-		_, err = io.Copy(buffer, file)
+		originalImage, _, err := image.Decode(file)
 		if err != nil {
-			writer.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(writer, "error reading file: %s", err)
+			writer.WriteHeader(http.StatusInternalServerError)
+			fmt.Fprintf(writer, "error decoding image: %s", err)
 			return
 		}
 
-		os.WriteFile(filePath, buffer.Bytes(), 0666)
+		// this is replacing any transparency in a png with grey not just resize
+		originalBounds := originalImage.Bounds()
+		if originalBounds.Dx() > 0 && originalBounds.Dy() > 0 {
+			originalDx := float64(originalBounds.Dx())
+			originalDy := float64(originalBounds.Dy())
+			xScale := float64(256) / originalDx
+			yScale := float64(256) / originalDy
+			scale := max(xScale, yScale)
+
+			newMaxX := originalBounds.Min.X + int(originalDx*scale)
+			newMaxY := originalBounds.Min.Y + int(originalDy*scale)
+			resizedImage := image.NewRGBA(image.Rect(originalBounds.Min.X, originalBounds.Min.Y, newMaxX, newMaxY))
+
+			grey := color.RGBA{180, 180, 180, 255}
+
+			draw.Draw(resizedImage, resizedImage.Bounds(), &image.Uniform{grey}, image.Point{resizedImage.Bounds().Min.X, resizedImage.Bounds().Min.Y}, draw.Src)
+
+			draw.BiLinear.Scale(resizedImage, resizedImage.Rect, originalImage, originalBounds, draw.Over, nil)
+
+			jpegBuffer := bytes.NewBuffer(nil)
+			err = jpeg.Encode(jpegBuffer, resizedImage, nil)
+			if err != nil {
+				writer.WriteHeader(http.StatusInternalServerError)
+				fmt.Fprintf(writer, "error encoding jpeg: %s", err)
+				return
+			}
+
+			os.WriteFile(filePath, jpegBuffer.Bytes(), 0666)
+		}
 	}
 
 	flashCard := database.FlashCard{
-		Type:         "spefz-corners",
+		Type:         "corners",
 		Owner:        authenticatedUsername,
 		LetterPair:   letterPair,
 		Memo:         memo,
