@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
-	import { joinServerPath, upperCaseFirst, authFetch } from "$lib/utils";
+	import { joinServerPath, upperCaseFirst, authFetch, getOperatingSystem } from "$lib/utils";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
 	import { goto } from "$app/navigation";
+	import Image from "$lib/components/image.svelte";
 
 	export let letterPair: string = "";
 
@@ -14,7 +15,24 @@
 	let currentMemo = "";
 	let currentCommutator = "";
 	let currentTags = "";
+	let currentEmoji = "";
+	let currentImageUrl = "";
 	let imageUrl = "";
+	let isImageEmoji = false;
+
+	const getEmojiShortcut = () => {
+		switch (getOperatingSystem()) {
+			case "win": {
+				return "Win + . or Win + ;";
+			}
+			case "mac": {
+				return "Control + Command + Space";
+			}
+			default: {
+				return "Enter an Emoji";
+			}
+		}
+	};
 
 	const flashCardOrDefault = (store: typeof $flashCardStore, letterPair: string) => {
 		if (typeof store === "string") {
@@ -31,6 +49,12 @@
 			currentCommutator = flashCard.commutator;
 			currentTags = flashCard.tags;
 			imageUrl = flashCard.image;
+			if (flashCard.image.endsWith(".emoji")) {
+				isImageEmoji = true;
+				currentEmoji = flashCard.image.replace(/\.emoji$/, "");
+			} else {
+				currentImageUrl = flashCard.image;
+			}
 		}
 	};
 
@@ -41,11 +65,7 @@
 			return window.URL.createObjectURL(f[0]);
 		}
 
-		if (imageUrl) {
-			return joinServerPath("images", imageUrl);
-		}
-
-		return "";
+		return imageUrl;
 	};
 
 	const resetForm = () => {
@@ -133,7 +153,6 @@
 				}
 			}}
 		>
-			<input type="hidden" name="imageUrl" value={imageUrl} />
 			<input
 				type="hidden"
 				name="lastQuizUnix"
@@ -175,37 +194,67 @@
 						>
 					</tr>
 					<tr>
-						<td class="text-right">Image</td>
-						<td>
-							<input
-								class="w-full"
-								type="file"
-								id={`${letterPair}-image`}
-								name="image"
-								alt="Choose Image"
-								accept="image/*"
-								bind:this={fileInputEl}
-								bind:files
-								on:change={() => {
+						<td class="text-right"
+							><button
+								type="button"
+								class="button-default ml-auto"
+								on:click={() => {
 									formDirty = true;
+									if (isImageEmoji) {
+										isImageEmoji = false;
+										imageUrl = currentImageUrl;
+									} else {
+										isImageEmoji = true;
+										imageUrl = `${currentEmoji}.emoji`;
+									}
 								}}
-							/>
-							<label
-								for={`${letterPair}-image`}
-								class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500"
 							>
-								{#if getImageUrl(files, imageUrl)}
-									<img
-										class="object-contain"
-										src={getImageUrl(files, imageUrl)}
+								{#if isImageEmoji}
+									<div>Emoji</div>
+									<div class="line-through">Image</div>
+								{:else}
+									<div>Image</div>
+									<div class="line-through">Emoji</div>
+								{/if}
+							</button>
+						</td>
+						<td>
+							<input type="hidden" name="imageUrl" value={imageUrl} />
+							{#if isImageEmoji}
+								<div>{getEmojiShortcut()}</div>
+								<input
+									class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500 text-center text-9xl"
+									type="text"
+									name="emoji"
+									value={currentEmoji}
+									on:change={(event) => {
+										formDirty = true;
+
+										currentEmoji = event.currentTarget.value;
+										imageUrl = `${currentEmoji}.emoji`;
+									}}
+								/>
+							{:else}
+								<input
+									class="max-w-64"
+									type="file"
+									id={`${letterPair}-image`}
+									name="image"
+									alt="Choose Image"
+									accept="image/*"
+									bind:this={fileInputEl}
+									bind:files
+									on:change={() => {
+										formDirty = true;
+									}}
+								/>
+								<label for={`${letterPair}-image`} class="mx-auto mt-0.5 block">
+									<Image
+										imageUri={getImageUrl(files, imageUrl)}
 										alt={`${letterPair.toUpperCase()} visualisation`}
 									/>
-								{:else}
-									<div class="h-full w-full flex items-center justify-center text-3xl">
-										No Image
-									</div>
-								{/if}
-							</label>
+								</label>
+							{/if}
 						</td>
 					</tr>
 					<tr>
