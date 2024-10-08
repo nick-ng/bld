@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
+	import { onMount } from "svelte";
 	import LetterPairChooser from "./letter-pair-chooser.svelte";
+	import { FLASH_CARD_FILTER_STORE_KEY } from "$lib/constants";
 
 	let allLetterPairs = [];
 	let letterPairFilter = "";
-	let hideNonOP = false;
 	let hideNon3Style = false;
+	let hideNonOP = false;
+	let loaded = false;
 
 	const codePointOffset = 97;
 	for (let j = 0; j < 24; j++) {
@@ -15,6 +18,26 @@
 			allLetterPairs.push(`${firstLetter}${secondLetter}`);
 		}
 	}
+
+	const updateFilterStore = (loaded: boolean, ...args: boolean[]) => {
+		if (!loaded) {
+			return;
+		}
+
+		const stored = args.map((a) => (a ? "t" : "f")).join("");
+		localStorage.setItem(FLASH_CARD_FILTER_STORE_KEY, stored);
+	};
+
+	$: updateFilterStore(loaded, hideNon3Style, hideNonOP);
+
+	onMount(() => {
+		const stored = localStorage.getItem(FLASH_CARD_FILTER_STORE_KEY);
+		if (stored) {
+			hideNon3Style = stored[0] === "t";
+			hideNonOP = stored[1] === "t";
+		}
+		loaded = true;
+	});
 </script>
 
 <div class="lg:w-min m-auto">

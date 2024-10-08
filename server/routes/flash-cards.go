@@ -74,19 +74,12 @@ func AddFlashCardsRoutes() {
 func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
-	headerMap := map[string]string{}
-
-	for name, headers := range req.Header {
-		if len(headers) > 0 {
-			headerMap[name] = headers[len(headers)-1]
-		}
-	}
-
-	haveAccess, authenticatedUsername := utils.CheckCredentials(headerMap["X-Username"], headerMap["X-Password"])
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
 		writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	writer.Header().Add("X-Access-Token", accessToken)
 
 	letterPair := req.PathValue("letterPair")
 	flashCardType := req.URL.Query().Get("type")
@@ -117,19 +110,12 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
-	headerMap := map[string]string{}
-
-	for name, headers := range req.Header {
-		if len(headers) > 0 {
-			headerMap[name] = headers[len(headers)-1]
-		}
-	}
-
-	haveAccess, authenticatedUsername := utils.CheckCredentials(headerMap["X-Username"], headerMap["X-Password"])
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
 		writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	writer.Header().Add("X-Access-Token", accessToken)
 
 	allFlashCards, err := database.ReadAllFlashCards(authenticatedUsername)
 	if err != nil {
@@ -153,19 +139,12 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
-	headerMap := map[string]string{}
-
-	for name, headers := range req.Header {
-		if len(headers) > 0 {
-			headerMap[name] = headers[len(headers)-1]
-		}
-	}
-
-	haveAccess, authenticatedUsername := utils.CheckCredentials(headerMap["X-Username"], headerMap["X-Password"])
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
 		writer.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	writer.Header().Add("X-Access-Token", accessToken)
 
 	letterPair := req.PathValue("letterPair")
 	if len(letterPair) == 0 {
@@ -237,7 +216,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 			newMaxY := originalBounds.Min.Y + int(originalDy*scale)
 			resizedImage := image.NewRGBA(image.Rect(originalBounds.Min.X, originalBounds.Min.Y, newMaxX, newMaxY))
 
-			grey := color.RGBA{180, 180, 180, 255}
+			grey := color.RGBA{255, 255, 255, 255}
 
 			draw.Draw(resizedImage, resizedImage.Bounds(), &image.Uniform{grey}, image.Point{resizedImage.Bounds().Min.X, resizedImage.Bounds().Min.Y}, draw.Src)
 

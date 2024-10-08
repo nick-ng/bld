@@ -56,8 +56,9 @@ css:
 
 - server/database/database.go:35: @todo(nick-ng): update snapshot file size as you make snapshots
 - server/database/database.go:149: @todo(nick-ng): convert log to snapshot
-- server/database/database.go:305: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/database/database.go:227: @todo(nick-ng): handle new lines?
+- server/database/database.go:308: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
-- server/utils/password.go:25: @todo(nick-ng): does this actually help?
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:79: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- server/utils/password.go:37: @todo(nick-ng): does this actually help?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:99: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
