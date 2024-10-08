@@ -218,10 +218,13 @@ func flashCardToRow(flashCard FlashCard) (string, error) {
 	}
 
 	rowString := strings.Join(row2, ",")
+	rowString = strings.ReplaceAll(rowString, "\n", " ")
+	rowString = strings.ReplaceAll(rowString, "\r", "")
 	return fmt.Sprintf("%s\n", rowString), nil
 }
 
 func rowToFlashCard(row string) (FlashCard, error) {
+	// @todo(nick-ng): handle new lines?
 	var items []string
 
 	characters := strings.Split(row, "")
