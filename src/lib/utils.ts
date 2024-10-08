@@ -1,4 +1,4 @@
-import { PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
+import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
 
 export const joinUrl = (...args: string[]) => {
 	return args
@@ -31,30 +31,36 @@ export const upperCaseFirst = (str: string) => {
 
 export const addCredentialsToHeaders = (
 	originalHeaders?: HeadersInit
-): { headers: Headers; isValid: boolean } => {
+): { headers: Headers; isValid: boolean; previousAccessToken: string | null } => {
 	const headers = originalHeaders ? new Headers(originalHeaders) : new Headers();
 
+	const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY);
 	const username = localStorage.getItem(USERNAME_STORE_KEY);
 	const password = localStorage.getItem(PASSWORD_STORE_KEY);
 	if (!username || !password) {
 		return {
 			headers,
-			isValid: false
+			isValid: false,
+			previousAccessToken: null
 		};
 	}
 
+	if (accessToken) {
+		headers.append("x-access-token", accessToken);
+	}
 	headers.append("x-username", username);
 	headers.append("x-password", password);
 
 	return {
 		headers: headers,
-		isValid: true
+		isValid: true,
+		previousAccessToken: accessToken
 	};
 };
 
 export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean = false) => {
 	const newInit = { ...init };
-	const { headers, isValid } = addCredentialsToHeaders(init?.headers);
+	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);
 
 	if (isValid) {
 		newInit.headers = headers;
@@ -62,7 +68,18 @@ export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean =
 		return Promise.resolve();
 	}
 
-	return fetch(url, newInit);
+	const response = fetch(url, { mode: "cors", ...newInit });
+
+	response.then((r) => {
+		if (r.ok) {
+			const newAccessToken = r.headers.get("X-Access-Token");
+			if (newAccessToken && previousAccessToken !== newAccessToken) {
+				localStorage.setItem(ACCESS_TOKEN_STORE_KEY, newAccessToken);
+			}
+		}
+	});
+
+	return response;
 };
 
 const UBL = ["a", "e", "r"];
@@ -122,4 +139,14 @@ export const is3Style = (letterPair: string) => {
 	}
 
 	return true;
+};
+
+export const getOperatingSystem = () => {
+	if (navigator.userAgent.includes("Win")) {
+		return "win";
+	}
+	if (navigator.userAgent.includes("Mac")) {
+		return "mac";
+	}
+	return "";
 };

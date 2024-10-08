@@ -4,6 +4,7 @@
 	import { authFetch, joinServerPath } from "$lib/utils";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
+	import Image from "$lib/components/image.svelte";
 
 	let showAnswer = false;
 	let handlingConfidence = false;
@@ -59,17 +60,10 @@
 			<Corners letterPair={flashCard.letterPair} />
 			{#if showAnswer}
 				<div class="text-lg">{flashCard.memo}</div>
-				<div class="h-64 w-64 border border-gray-500">
-					{#if flashCard.image}
-						<img
-							class="object-contain"
-							src={joinServerPath("images", flashCard.image)}
-							alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
-						/>
-					{:else}
-						<div class="h-full w-full flex items-center justify-center text-3xl">No Image</div>
-					{/if}
-				</div>
+				<Image
+					imageUri={flashCard.image}
+					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
+				/>
 				{#if flashCard.commutator}
 					<div class="text-lg">{flashCard.commutator}</div>
 				{/if}

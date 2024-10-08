@@ -30,7 +30,7 @@ const VERSION_PREFIX = "v1"
 const USER_DATA_DIRECTORY = "user-data"
 const SYNC_ALL_WRITES = false
 
-var FlashCardData map[string]FlashCard = map[string]FlashCard{}
+var FlashCardData = map[string]FlashCard{}
 
 // @todo(nick-ng): update snapshot file size as you make snapshots
 var lastSnapshotFileSize = 1000
