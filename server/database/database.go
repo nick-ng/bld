@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -29,11 +30,10 @@ type FlashCard struct {
 const VERSION_PREFIX = "v1"
 const USER_DATA_DIRECTORY = "user-data"
 const SYNC_ALL_WRITES = false
+const LOG_SIZE_FACTOR = 5
 
 var FlashCardData = map[string]FlashCard{}
-
-// @todo(nick-ng): update snapshot file size as you make snapshots
-var lastSnapshotFileSize = 1000
+var lastSnapshotFileSize int64 = 1000
 
 func init() {
 	err := os.Mkdir(USER_DATA_DIRECTORY, 0755)
@@ -43,41 +43,57 @@ func init() {
 		os.Exit(1)
 	}
 
-	loadData()
+	FlashCardData, err = loadData("")
+	if err != nil {
+		fmt.Println("couldn't load data")
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
 }
 
-func loadData() error {
+func loadData(finalFilename string) (map[string]FlashCard, error) {
+	newFlashCardData := map[string]FlashCard{}
 	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
-
 	if err != nil {
-		return err
+		return newFlashCardData, err
 	}
 
 	var filenames []string
-	hasSnapshot := false
+	var lastSnapshot string
 	for _, dirEntry := range dirEntries {
 		filename := dirEntry.Name()
-		if !hasSnapshot && strings.HasSuffix(filename, "-snap.csv") {
-			filenames = []string{filename}
-		} else {
-			filenames = append(filenames, filename)
+		filenames = append(filenames, filename)
+		if strings.HasSuffix(filename, "-snap.csv") {
+			lastSnapshot = filename
 		}
 	}
 
 	slices.Sort(filenames)
 	for _, filename := range filenames {
+		if len(finalFilename) > 0 && filename == finalFilename {
+			return newFlashCardData, nil
+		}
+
 		fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
 		f, err := os.OpenFile(fullPath, os.O_RDONLY, 0666)
 		if err != nil {
 			f.Close()
-			return err
+			return newFlashCardData, err
 		}
 		defer f.Close()
 
+		if filename == lastSnapshot {
+			fileStats, err := f.Stat()
+			if err != nil {
+				fmt.Println("error when getting snapshot stats", err)
+			} else {
+				lastSnapshotFileSize = fileStats.Size()
+			}
+		}
+
 		reader := bufio.NewReader(f)
-
 		keepGoing := true
-
 		for keepGoing {
 			tempBytes, _, err := reader.ReadLine()
 			tempLine := string(tempBytes)
@@ -92,6 +108,7 @@ func loadData() error {
 				continue
 			}
 
+			// @todo: use correct version of rowToFlashCard
 			flashCard, err := rowToFlashCard(tempLine)
 			if err != nil {
 				continue
@@ -102,17 +119,83 @@ func loadData() error {
 				continue
 			}
 
-			FlashCardData[primaryKey] = flashCard
+			newFlashCardData[primaryKey] = flashCard
 		}
-
 	}
 
-	return nil
+	return newFlashCardData, nil
+}
+
+var snapshotRe = regexp.MustCompile(`-\d+-log\.csv$`)
+
+func logsToSnapshot(finalFilename string) {
+	snapshotFilename := snapshotRe.ReplaceAllString(finalFilename, "-snap.csv")
+	fmt.Println(finalFilename, snapshotFilename)
+	snapshotFullPath := filepath.Join(USER_DATA_DIRECTORY, snapshotFilename)
+
+	newFlashCards, err := loadData(finalFilename)
+	if err != nil {
+		fmt.Println("error when making snapshot", err)
+		return
+	}
+
+	var snapshotRows []string
+	for _, flashCard := range newFlashCards {
+		flashCardRow, err := flashCardToRow(flashCard)
+		if err != nil {
+			fmt.Println("error when making snapshot", err)
+			return
+		}
+
+		snapshotRows = append(snapshotRows, flashCardRow)
+	}
+
+	snapshotString := strings.Join(snapshotRows, "")
+	err = os.WriteFile(snapshotFullPath, []byte(snapshotString), 0666)
+	if err != nil {
+		fmt.Println("error when making snapshot", err)
+		return
+	}
+
+	f, err := os.OpenFile(snapshotFullPath, os.O_RDONLY, 0666)
+	if err != nil {
+		fmt.Println("error when opening snapshot", err)
+		return
+	}
+	defer f.Close()
+	fileStats, err := f.Stat()
+	if err != nil {
+		fmt.Println("error when getting snapshot stats", err)
+	}
+
+	lastSnapshotFileSize = fileStats.Size()
+
+	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	for _, dirEntry := range dirEntries {
+		filename := dirEntry.Name()
+		if snapshotFilename == filename {
+			return
+		}
+
+		if !strings.HasSuffix(filename, ".csv") {
+			continue
+		}
+
+		fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
+		err := os.Remove(fullPath)
+		if err != nil {
+			fmt.Println("error when deleting old database log files:", err)
+		}
+	}
 }
 
 func getCurrentChangeLogFullPath() string {
 	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
-
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -143,10 +226,10 @@ func getCurrentChangeLogFullPath() string {
 		}
 
 		fileSize := fileStats.Size()
-		if fileSize < int64(lastSnapshotFileSize*5) {
+		if fileSize < int64(lastSnapshotFileSize*LOG_SIZE_FACTOR) {
 			return fullPath
 		} else {
-			// @todo(nick-ng): convert log to snapshot
+			go logsToSnapshot(newestLogFilename)
 		}
 	}
 

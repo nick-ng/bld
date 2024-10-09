@@ -47,7 +47,6 @@ func cleanUpImages() {
 		if !slices.Contains(imagesInDb, filename) {
 			fullPath := filepath.Join(USER_IMAGES_DIRECTORY, filename)
 			err := os.Remove(fullPath)
-
 			if err != nil {
 				fmt.Println("error when deleting unnecessary image:", err)
 			}
@@ -105,6 +104,7 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(jsonBytes)
 }
@@ -134,6 +134,7 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(jsonBytes)
 }
@@ -212,7 +213,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 			originalDy := float64(originalBounds.Dy())
 			xScale := float64(256) / originalDx
 			yScale := float64(256) / originalDy
-			scale := max(xScale, yScale)
+			scale := min(1, max(xScale, yScale))
 
 			newMaxX := originalBounds.Min.X + int(originalDx*scale)
 			newMaxY := originalBounds.Min.Y + int(originalDy*scale)
@@ -225,7 +226,9 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 			draw.BiLinear.Scale(resizedImage, resizedImage.Rect, originalImage, originalBounds, draw.Over, nil)
 
 			jpegBuffer := bytes.NewBuffer(nil)
-			err = jpeg.Encode(jpegBuffer, resizedImage, nil)
+			err = jpeg.Encode(jpegBuffer, resizedImage, &jpeg.Options{
+				Quality: 95,
+			})
 			if err != nil {
 				writer.WriteHeader(http.StatusInternalServerError)
 				fmt.Fprintf(writer, "error encoding jpeg: %s", err)
@@ -255,6 +258,8 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
 	}
 
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(flashCardJsonBytes)
 
@@ -307,6 +312,8 @@ func handlePutQuizAnswer(writer http.ResponseWriter, req *http.Request) {
 		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
 	}
 
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(flashCardJsonBytes)
 }
