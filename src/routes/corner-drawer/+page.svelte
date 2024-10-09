@@ -96,7 +96,13 @@
 	>
 		<label>
 			<span>Corner Letter Pair</span>
-			<input class="uppercase" type="text" bind:this={letterPairInput} bind:value={letterPair} />
+			<input
+				class="uppercase"
+				type="text"
+				autocomplete="off"
+				bind:this={letterPairInput}
+				bind:value={letterPair}
+			/>
 		</label>
 		<button type="submit"
 			>Copy{letterPair.length >= 2 ? ` ${letterPair.slice(0, 2).toUpperCase()} + HTML` : ""}</button
