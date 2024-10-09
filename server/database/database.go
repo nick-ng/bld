@@ -130,7 +130,6 @@ var snapshotRe = regexp.MustCompile(`-\d+-log\.csv$`)
 
 func logsToSnapshot(finalFilename string) {
 	snapshotFilename := snapshotRe.ReplaceAllString(finalFilename, "-snap.csv")
-	fmt.Println(finalFilename, snapshotFilename)
 	snapshotFullPath := filepath.Join(USER_DATA_DIRECTORY, snapshotFilename)
 
 	newFlashCards, err := loadData(finalFilename)
