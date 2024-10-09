@@ -40,7 +40,13 @@
 							<label for="homepageUsername">Username:</label>
 						</td>
 						<td>
-							<input type="text" id="homepageUsername" name="username" bind:value={username} />
+							<input
+								type="text"
+								autocomplete="off"
+								id="homepageUsername"
+								name="username"
+								bind:value={username}
+							/>
 						</td>
 					</tr>
 					<tr>

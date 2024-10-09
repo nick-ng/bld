@@ -151,7 +151,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 
 	letterPair := req.PathValue("letterPair")
 	if len(letterPair) == 0 {
-		writer.WriteHeader(400)
+		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("no letter pair provided"))
 		return
 	}
@@ -175,6 +175,12 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 
 	imageChanged := false
 	filename := imageUrl
+	err = req.ParseMultipartForm(32 << 20)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte(err.Error()))
+		return
+	}
 	file, fileHeader, err := req.FormFile("image")
 	if err == nil {
 		mediaType, _, err := mime.ParseMediaType(fileHeader.Header.Get("Content-Type"))
@@ -281,7 +287,7 @@ func handlePutQuizAnswer(writer http.ResponseWriter, req *http.Request) {
 
 	letterPair := req.PathValue("letterPair")
 	if len(letterPair) == 0 {
-		writer.WriteHeader(400)
+		writer.WriteHeader(http.StatusBadRequest)
 		writer.Write([]byte("no letter pair provided"))
 		return
 	}

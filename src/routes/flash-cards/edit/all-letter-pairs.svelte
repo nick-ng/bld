@@ -61,7 +61,7 @@
 		>
 			<label class="block"
 				>Filter:
-				<input type="text" bind:value={letterPairFilter} />
+				<input type="text" autocomplete="off" bind:value={letterPairFilter} />
 			</label>
 		</form>
 		<label>Hide Non-3-Style Pairs: <input type="checkbox" bind:checked={hideNon3Style} /></label>

@@ -55,7 +55,6 @@
 	};
 
 	$: loadFlashCard(letterPair, (loadedFlashCard) => {
-		console.log("hi", Date.now());
 		$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
 	});
 	$: onFlashCardStoreUpdate($flashCardStore);
@@ -167,6 +166,7 @@
 							><input
 								class="w-full"
 								type="text"
+								autocomplete="off"
 								name="memo"
 								bind:value={currentMemo}
 								on:change={() => {
@@ -181,6 +181,7 @@
 							><input
 								class="w-full"
 								type="text"
+								autocomplete="off"
 								name="commutator"
 								bind:value={currentCommutator}
 								on:change={() => {
@@ -221,6 +222,7 @@
 								<input
 									class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500 text-center text-9xl"
 									type="text"
+									autocomplete="off"
 									name="emoji"
 									value={currentEmoji}
 									on:change={(event) => {
@@ -259,6 +261,7 @@
 							><input
 								class="w-full"
 								type="text"
+								autocomplete="off"
 								name="tags"
 								bind:value={currentTags}
 								on:change={() => {
