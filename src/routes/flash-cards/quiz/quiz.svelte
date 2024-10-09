@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { quizStore } from "$lib/stores/quiz";
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
 	import { authFetch, joinServerPath } from "$lib/utils";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
@@ -9,11 +9,11 @@
 	let showAnswer = false;
 	let handlingConfidence = false;
 
-	const handleConfidence = async (letterPair: string, newConfidence: number) => {
-		if (typeof $flashCardStore === "string") {
-			return;
-		}
+	$: loadFlashCard($quizStore[0], (loadedFlashCard) => {
+		$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
+	});
 
+	const handleConfidence = async (letterPair: string, newConfidence: number) => {
 		const flashCard = $flashCardStore[letterPair];
 		if (!flashCard) {
 			return;
@@ -22,14 +22,17 @@
 		handlingConfidence = true;
 
 		const formData = new FormData();
-		formData.set("imageUrl", flashCard.image);
-		formData.set("memo", flashCard.memo);
-		formData.set("commutator", flashCard.commutator);
-		formData.set("tags", flashCard.tags);
-		formData.set("lastQuizUnix", Math.floor(Date.now() / 1000).toString(10));
+		formData.set("type", flashCard.type);
 		formData.set("confidence", newConfidence.toString(10));
 
-		const response = await authFetch(joinServerPath("flash-cards", letterPair), {
+		// go to the next question before updating
+		showAnswer = false;
+		// wait for next frame before going to the next question
+		setTimeout(() => {
+			$quizStore = $quizStore.filter((lp) => lp != letterPair);
+		}, 0);
+
+		const response = await authFetch(joinServerPath("quiz", letterPair), {
 			method: "PUT",
 			body: formData
 		});
@@ -45,15 +48,12 @@
 			console.error("wrong", responseJson);
 		}
 
-		// finish the quiz anyway even if you the response fails
-		showAnswer = false;
-		$quizStore = $quizStore.filter((lp) => lp != letterPair);
 		handlingConfidence = false;
 	};
 </script>
 
 <div class="max-w-prose mx-auto">
-	{#if $quizStore.length > 0 && typeof $flashCardStore !== "string"}
+	{#if $quizStore.length > 0 && $flashCardStoreStatus === "loaded"}
 		{@const flashCard = $flashCardStore[$quizStore[0]]}
 		<div class="flex flex-col items-center min-h-[455px] gap-1">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
@@ -82,16 +82,17 @@
 					{#each [0, 1, 2, 3, 4, 5] as confidence}
 						<button
 							style="flex-grow: 2"
+							disabled={handlingConfidence}
 							on:click={() => {
 								handleConfidence(flashCard.letterPair, confidence);
-							}}
-							disabled={handlingConfidence}>{confidence}</button
+							}}>{confidence}</button
 						>
 					{/each}
 				</div>
 			{:else}
 				<button
 					class="button-default w-full"
+					disabled={handlingConfidence}
 					on:click={() => {
 						showAnswer = true;
 					}}>Show Answer</button

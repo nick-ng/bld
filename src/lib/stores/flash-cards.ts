@@ -5,10 +5,12 @@ import { browser } from "$app/environment";
 import { authFetch, joinServerPath } from "$lib/utils";
 import { parseFlashCard } from "$lib/types";
 
-export const flashCardStore = writable<{ [letterPair: string]: FlashCard } | string>("stand-by");
+export const flashCardStore = writable<{ [letterPair: string]: FlashCard }>({});
+export const flashCardStoreStatus = writable<string>("stand-by");
 
 export const fetchFlashCards = async () => {
 	try {
+		flashCardStoreStatus.set("loading");
 		const res = await authFetch(joinServerPath("flash-cards"));
 		if (!res) {
 			return {};
@@ -16,12 +18,13 @@ export const fetchFlashCards = async () => {
 
 		if (!res.ok) {
 			console.warn("couldn't get flash cards because:", res.status, res.statusText);
+			flashCardStoreStatus.set(`couldn't get flash cards because:${res.status}, ${res.statusText}`);
 			return {};
 		}
 
 		const flashCardsArray = await res.json();
 		if (!Array.isArray(flashCardsArray)) {
-			flashCardStore.set("error: unexpected response");
+			flashCardStoreStatus.set("error: unexpected response");
 			return {};
 		}
 
@@ -35,17 +38,39 @@ export const fetchFlashCards = async () => {
 		}
 
 		flashCardStore.set(flashCards);
+		flashCardStoreStatus.set("loaded");
 
 		return flashCards;
 	} catch (e) {
 		console.error("error when fetching letter pairs", e);
-		flashCardStore.set(`error: ${e}`);
+		flashCardStoreStatus.set(`error: ${e}`);
 	}
 
 	return {};
 };
 
 if (browser) {
-	flashCardStore.set("loading");
 	fetchFlashCards();
 }
+
+export const loadFlashCard = async (
+	letterPair: string,
+	afterLoad: (flashCard: FlashCard) => void | Promise<void>
+) => {
+	if (!letterPair) {
+		return;
+	}
+
+	const res = await authFetch(joinServerPath("flash-cards", letterPair));
+	if (!res || !res.ok) {
+		return;
+	}
+
+	const resJson = await res.json();
+	const parseResult = parseFlashCard(resJson);
+	if (parseResult.isValid) {
+		afterLoad(parseResult.data);
+
+		return parseResult.data;
+	}
+};
