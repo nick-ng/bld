@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { joinServerPath, upperCaseFirst, authFetch, getOperatingSystem } from "$lib/utils";
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
 	import { goto } from "$app/navigation";
@@ -35,10 +35,6 @@
 	};
 
 	const flashCardOrDefault = (store: typeof $flashCardStore, letterPair: string) => {
-		if (typeof store === "string") {
-			return defaultFlashCard(letterPair);
-		}
-
 		return store[letterPair] || defaultFlashCard(letterPair);
 	};
 
@@ -58,6 +54,10 @@
 		}
 	};
 
+	$: loadFlashCard(letterPair, (loadedFlashCard) => {
+		console.log("hi", Date.now());
+		$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
+	});
 	$: onFlashCardStoreUpdate($flashCardStore);
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
@@ -83,16 +83,12 @@
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
 	</div>
-	{#if typeof $flashCardStore === "string"}
-		<div class="text-center">{upperCaseFirst($flashCardStore)}...</div>
+	{#if $flashCardStoreStatus !== "loaded"}
+		<div class="text-center">{upperCaseFirst($flashCardStoreStatus)}...</div>
 	{:else}
 		<form
 			on:submit={async (event) => {
 				event.preventDefault();
-
-				if (typeof $flashCardStore === "string") {
-					return;
-				}
 
 				formDirty = false;
 

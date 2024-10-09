@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"slices"
 	"strconv"
+	"time"
 
 	"golang.org/x/image/draw"
 )
@@ -69,6 +70,7 @@ func AddFlashCardsRoutes() {
 	http.HandleFunc("GET /flash-cards", handleGetFlashCards)
 	http.HandleFunc("GET /flash-cards/{letterPair}", handleGetFlashCard)
 	http.HandleFunc("PUT /flash-cards/{letterPair}", handlePutFlashCard)
+	http.HandleFunc("PUT /quiz/{letterPair}", handlePutQuizAnswer)
 }
 
 func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
@@ -249,7 +251,6 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	database.WriteFlashCard(flashCard)
 
 	flashCardJsonBytes, err := json.Marshal(flashCard)
-
 	if err != nil {
 		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
 	}
@@ -261,4 +262,51 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 		go cleanUpImages()
 	}
 
+}
+
+func handlePutQuizAnswer(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	writer.Header().Add("X-Access-Token", accessToken)
+
+	letterPair := req.PathValue("letterPair")
+	if len(letterPair) == 0 {
+		writer.WriteHeader(400)
+		writer.Write([]byte("no letter pair provided"))
+		return
+	}
+
+	confidenceString := req.FormValue("confidence")
+	confidence, err := strconv.ParseInt(confidenceString, 10, 0)
+	if err != nil {
+		confidence = 0
+	}
+
+	lastQuizUnix := time.Now().Unix()
+
+	flashCard, err := database.ReadFlashCard(authenticatedUsername, "corner", letterPair)
+
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte(err.Error()))
+		return
+	}
+
+	flashCard.LastQuizUnix = lastQuizUnix
+	flashCard.Confidence = int(confidence)
+
+	database.WriteFlashCard(flashCard)
+
+	flashCardJsonBytes, err := json.Marshal(flashCard)
+	if err != nil {
+		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
+	}
+
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(flashCardJsonBytes)
 }

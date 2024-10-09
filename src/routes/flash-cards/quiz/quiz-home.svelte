@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { fetchFlashCards, flashCardStore } from "$lib/stores/flash-cards";
+	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import { is3Style, isOP } from "$lib/utils";
 
@@ -11,7 +11,7 @@
 		includeOP: boolean
 	) => {
 		const flashCardsMap = await fetchFlashCards();
-		const flashCards = Object.values(flashCardsMap);
+		const flashCards = Object.values(flashCardsMap).filter((f) => f.memo);
 		const remainingFlashCards = flashCards
 			.filter((c) => {
 				if (include3Style && is3Style(c.letterPair)) {
@@ -56,10 +56,10 @@
 		<h1>Quiz</h1>
 		<div />
 	</div>
-	{#if typeof $flashCardStore === "string"}
-		<div class="">{$flashCardStore}</div>
+	{#if $flashCardStoreStatus !== "loaded"}
+		<div class="">{$flashCardStoreStatus}</div>
 	{:else}
-		{@const flatFlashCards = Object.values($flashCardStore)}
+		{@const flatFlashCards = Object.values($flashCardStore).filter((f) => f.memo)}
 		<div>
 			<p>
 				<a href="/flash-cards/edit"

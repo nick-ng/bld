@@ -6,10 +6,6 @@
 	export let hideNon3Style = true;
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
-		if (typeof store === "string") {
-			return ["#ff0000ff", "#00aa00ff", "#0000ffff"];
-		}
-
 		const letterPairObject = store[letterPair];
 		return [
 			!letterPairObject?.memo && "#ff0000ff",
