@@ -8,10 +8,12 @@ import { parseFlashCard } from "$lib/types";
 export const flashCardStore = writable<{ [letterPair: string]: FlashCard }>({});
 export const flashCardStoreStatus = writable<string>("stand-by");
 
-export const fetchFlashCards = async () => {
+export const fetchFlashCards = async (cache: RequestCache = "default") => {
 	try {
 		flashCardStoreStatus.set("loading");
-		const res = await authFetch(joinServerPath("flash-cards"));
+		const res = await authFetch(joinServerPath("flash-cards"), {
+			cache
+		});
 		if (!res) {
 			return {};
 		}
@@ -50,27 +52,35 @@ export const fetchFlashCards = async () => {
 };
 
 if (browser) {
-	fetchFlashCards();
+	fetchFlashCards("no-store");
 }
 
 export const loadFlashCard = async (
 	letterPair: string,
-	afterLoad: (flashCard: FlashCard) => void | Promise<void>
+	afterLoad: (flashCard: FlashCard) => void | Promise<void>,
+	abortSignal?: AbortSignal
 ) => {
 	if (!letterPair) {
 		return;
 	}
 
-	const res = await authFetch(joinServerPath("flash-cards", letterPair));
-	if (!res || !res.ok) {
-		return;
-	}
+	try {
+		const res = await authFetch(joinServerPath("flash-cards", letterPair), {
+			cache: "no-store",
+			signal: abortSignal
+		});
+		if (!res || !res.ok) {
+			return;
+		}
 
-	const resJson = await res.json();
-	const parseResult = parseFlashCard(resJson);
-	if (parseResult.isValid) {
-		afterLoad(parseResult.data);
+		const resJson = await res.json();
+		const parseResult = parseFlashCard(resJson);
+		if (parseResult.isValid) {
+			afterLoad(parseResult.data);
 
-		return parseResult.data;
+			return parseResult.data;
+		}
+	} catch (e) {
+		console.error("e", e);
 	}
 };

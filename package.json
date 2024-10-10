@@ -5,7 +5,7 @@
 	"scripts": {
 		"start": "vite dev --host --open",
 		"dev": "vite dev",
-		"dev:server": "PORT=27945 docker compose build && PORT=27945 docker compose up",
+		"dev:server": "echo \"Run ./dev-server.sh\"",
 		"build": "vite build",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",

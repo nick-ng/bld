@@ -6,6 +6,7 @@
 	import Corners from "$lib/components/corners.svelte";
 	import { goto } from "$app/navigation";
 	import Image from "$lib/components/image.svelte";
+	import { onMount } from "svelte";
 
 	export let letterPair: string = "";
 
@@ -19,6 +20,7 @@
 	let currentImageUrl = "";
 	let imageUrl = "";
 	let isImageEmoji = false;
+	let abortControllers: (AbortController | null)[] = [];
 
 	const getEmojiShortcut = () => {
 		switch (getOperatingSystem()) {
@@ -54,9 +56,6 @@
 		}
 	};
 
-	$: loadFlashCard(letterPair, (loadedFlashCard) => {
-		$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
-	});
 	$: onFlashCardStoreUpdate($flashCardStore);
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
@@ -74,6 +73,25 @@
 			files = null;
 		}
 	};
+
+	onMount(() => {
+		const myAc = new AbortController();
+		let fetchComplete = false;
+		loadFlashCard(
+			letterPair,
+			(loadedFlashCard) => {
+				fetchComplete = true;
+				$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
+			},
+			myAc.signal
+		);
+
+		return () => {
+			if (!fetchComplete) {
+				myAc.abort();
+			}
+		};
+	});
 </script>
 
 <div class="max-w-prose mx-auto">

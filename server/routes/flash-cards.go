@@ -246,7 +246,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	flashCard := database.FlashCard{
-		Type:         "corners",
+		Type:         "corner",
 		Owner:        authenticatedUsername,
 		LetterPair:   letterPair,
 		Memo:         memo,
