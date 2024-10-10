@@ -1,6 +1,6 @@
 export type FlashCard = {
 	letterPair: string;
-	type: string; // spefz-corners, chinese-edges, custom-edges, etc.
+	type: string; // corner, edge
 	memo: string;
 	image: string;
 	commutator: string;
@@ -72,7 +72,7 @@ export const parseFlashCard = (
 export const defaultFlashCard = (letterPair: string): FlashCard => {
 	return {
 		letterPair,
-		type: "spefz-corners",
+		type: "corner",
 		memo: "",
 		image: "",
 		commutator: "",

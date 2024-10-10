@@ -448,7 +448,7 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 	}
 
 	return FlashCard{
-		Type:         "corners",
+		Type:         "corner",
 		Owner:        owner,
 		LetterPair:   letterPair,
 		Memo:         "",

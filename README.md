@@ -1,6 +1,6 @@
 # Blindfolded Rubik's Cube Solving Stuff
 
-Some things I use to prepare to prepare for s
+Some things I use to prepare to prepare for blindfolded solving
 
 ## Developing
 
@@ -49,8 +49,7 @@ css:
 
 ## ToDos
 
-- use ~~basic~~ some kind of auth
-- use environment variables to specify server url
+- edges, mainly for commutators
 
 ### ToDo Comments
 
@@ -59,5 +58,5 @@ css:
 - server/database/database.go:390: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:94: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:112: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
