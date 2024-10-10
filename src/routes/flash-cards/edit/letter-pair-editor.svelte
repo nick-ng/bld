@@ -58,6 +58,10 @@
 	$: onFlashCardStoreUpdate($flashCardStore);
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
+		if (imageUrl.endsWith(".emoji")) {
+			return imageUrl;
+		}
+
 		if (f && f.length > 0) {
 			return window.URL.createObjectURL(f[0]);
 		}
@@ -235,14 +239,15 @@
 						<td>
 							<input type="hidden" name="imageUrl" value={imageUrl} />
 							{#if isImageEmoji}
-								<div>{getEmojiShortcut()}</div>
 								<input
-									class="mx-auto mt-0.5 block h-64 w-64 border border-gray-500 text-center text-9xl"
+									class="w-full"
 									type="text"
+									id={`${letterPair}-image`}
+									placeholder={getEmojiShortcut()}
 									autocomplete="off"
 									name="emoji"
 									value={currentEmoji}
-									on:change={(event) => {
+									on:input={(event) => {
 										formDirty = true;
 
 										currentEmoji = event.currentTarget.value;
@@ -263,13 +268,13 @@
 										formDirty = true;
 									}}
 								/>
-								<label for={`${letterPair}-image`} class="mx-auto mt-0.5 block">
-									<Image
-										imageUri={getImageUrl(files, imageUrl)}
-										alt={`${letterPair.toUpperCase()} visualisation`}
-									/>
-								</label>
 							{/if}
+							<label for={`${letterPair}-image`} class="mx-auto mt-0.5 block">
+								<Image
+									imageUri={getImageUrl(files, imageUrl)}
+									alt={`${letterPair.toUpperCase()} visualisation`}
+								/>
+							</label>
 						</td>
 					</tr>
 					<tr>
@@ -289,8 +294,13 @@
 					</tr>
 				</tbody>
 			</table>
-			<div class="w-full flex flex-row justify-between">
+			<div class="w-full flex flex-row justify-between mt-1 gap-8">
+				<a
+					class="button-default flex-grow text-center"
+					href={$quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit"}>Back</a
+				>
 				<button
+					class="flex-grow"
 					type="button"
 					on:click={() => {
 						if (formDirty) {
@@ -299,7 +309,7 @@
 						}
 					}}>Reset</button
 				>
-				<button class="button-default">Submit</button>
+				<button class="flex-grow">Save</button>
 			</div>
 		</form>
 	{/if}
