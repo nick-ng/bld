@@ -8,10 +8,25 @@
 
 	let showAnswer = false;
 	let handlingConfidence = false;
+	let abortController: AbortController | null = null;
 
-	$: loadFlashCard($quizStore[0], (loadedFlashCard) => {
-		$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
-	});
+	const handleLetterPair = (newLetterPair: string) => {
+		if (abortController) {
+			abortController.abort();
+		}
+
+		abortController = new AbortController();
+		loadFlashCard(
+			newLetterPair,
+			(loadedFlashCard) => {
+				abortController = null;
+				$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
+			},
+			abortController.signal
+		);
+	};
+
+	$: handleLetterPair($quizStore[0]);
 
 	const handleConfidence = async (letterPair: string, newConfidence: number) => {
 		const flashCard = $flashCardStore[letterPair];

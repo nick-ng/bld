@@ -20,7 +20,6 @@
 	let currentImageUrl = "";
 	let imageUrl = "";
 	let isImageEmoji = false;
-	let abortControllers: (AbortController | null)[] = [];
 
 	const getEmojiShortcut = () => {
 		switch (getOperatingSystem()) {
