@@ -73,7 +73,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(10, 5, 5, true, true);
-						}}>All</button
+						}}>All: 10/5/5</button
 					>
 				</li>
 				<li class="mt-1">
@@ -81,7 +81,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(10, 5, 5, true, false);
-						}}>3-Style</button
+						}}>3-Style: 10/5/5</button
 					>
 				</li>
 				<li class="mt-1">
@@ -89,7 +89,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(10, 5, 5, false, true);
-						}}>OP</button
+						}}>OP: 10/5/5</button
 					>
 				</li>
 				<li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
@@ -98,7 +98,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(5, 3, 2, true, true);
-						}}>All</button
+						}}>All: 5/3/2</button
 					>
 				</li>
 				<li class="mt-1">
@@ -106,7 +106,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(5, 3, 2, true, false);
-						}}>3-Style</button
+						}}>3-Style: 5/3/2</button
 					>
 				</li>
 				<li class="mt-1">
@@ -114,7 +114,7 @@
 						class="w-full block text-xl leading-none py-2 button-default text-center"
 						on:click={() => {
 							makeQuiz(5, 3, 2, false, true);
-						}}>OP</button
+						}}>OP: 5/3/2</button
 					>
 				</li>
 			</ul>
