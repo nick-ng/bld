@@ -14,8 +14,6 @@
 		<a class="button-default" href="/flash-cards">Flash Cards</a>
 		<a class="button-default" href="/corner-drawer">Corner Drawer</a>
 		<a class="button-default" href="/anki-stuff">Anki Stuff</a>
-		<div class="flex-grow" />
-		<div class="text-xs">v0.5</div>
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>

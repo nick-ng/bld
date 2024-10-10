@@ -70,17 +70,17 @@
 <div class="max-w-prose mx-auto">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus === "loaded"}
 		{@const flashCard = $flashCardStore[$quizStore[0]]}
-		<div class="flex flex-col items-center min-h-[455px] gap-1">
+		<div class="flex flex-col items-center min-h-[460px] gap-1">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<Corners letterPair={flashCard.letterPair} />
 			{#if showAnswer}
-				<div class="text-lg">{flashCard.memo}</div>
+				<div class="text-2xl">{flashCard.memo}</div>
 				<Image
 					imageUri={flashCard.image}
 					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
 				/>
 				{#if flashCard.commutator}
-					<div class="text-lg">{flashCard.commutator}</div>
+					<div class="text-xl font-mono">{flashCard.commutator}</div>
 				{/if}
 			{/if}
 		</div>
@@ -94,7 +94,7 @@
 						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
 					>
 					<div style="flex-grow: 1" />
-					{#each [0, 1, 2, 3, 4, 5] as confidence}
+					{#each [0, 1, 2, 3] as confidence}
 						<button
 							style="flex-grow: 2"
 							disabled={handlingConfidence}
