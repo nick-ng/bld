@@ -198,7 +198,7 @@ export const commutatorDetails = (rawCommutator: string) => {
 		.map((a) => a.trim());
 	let insert = temp[0];
 	let interchange = temp[1];
-	if (temp[0].match(/^[ufrdlb][2']?$/i)) {
+	if (temp[0].match(/^[ufrdlb][2']*$/i)) {
 		interchange = temp[0];
 		insert = temp[1];
 	}
