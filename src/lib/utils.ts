@@ -141,7 +141,7 @@ export const is3Style = (letterPair: string) => {
 	return true;
 };
 
-export const getOperatingSystem = () => {
+export const getOperatingSystem = (): string => {
 	if (navigator.userAgent.includes("Win")) {
 		return "win";
 	}
@@ -149,4 +149,78 @@ export const getOperatingSystem = () => {
 		return "mac";
 	}
 	return "";
+};
+
+export const normaliseCommutator = (rawCommutator: string): string => {
+	return rawCommutator
+		.replaceAll(" ", "")
+		.replace(/([ufrdlb])/gi, " $1")
+		.replaceAll("[ ", "[")
+		.replaceAll(", ", ",")
+		.replaceAll(": ", ":")
+		.trim();
+};
+
+export const commutatorDetails = (rawCommutator: string) => {
+	const commutatorResult = rawCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
+
+	if (!commutatorResult) {
+		// if there isn't a commutator, return the original string
+		return {
+			rawCommutator,
+			normalisedCommutator: rawCommutator,
+			commutator: "",
+			conjugatePlusCommutator: "",
+			setup: "",
+			insert: "",
+			interchange: ""
+		};
+	}
+
+	const commutator = normaliseCommutator(commutatorResult[0]);
+	// there is at least a commutator
+	let conjugatePlusCommutator = commutator;
+	// check if there is a conjugate as well
+	const conjugatePlusCommutatorResult = rawCommutator.match(
+		/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
+	);
+	let setup = "";
+	if (conjugatePlusCommutatorResult) {
+		conjugatePlusCommutator = normaliseCommutator(conjugatePlusCommutatorResult[0]);
+		const temp = conjugatePlusCommutator.split(":");
+		setup = temp[0].trim();
+	}
+
+	const temp = commutator
+		.replaceAll("[", "")
+		.replaceAll("]", "")
+		.split(",")
+		.map((a) => a.trim());
+	let insert = temp[0];
+	let interchange = temp[1];
+	if (temp[0].match(/^[ufrdlb][2']?$/i)) {
+		interchange = temp[0];
+		insert = temp[1];
+	}
+
+	return {
+		rawCommutator,
+		normalisedCommutator: commutator ? normaliseCommutator(conjugatePlusCommutator) : rawCommutator,
+		commutator,
+		conjugatePlusCommutator,
+		setup,
+		insert,
+		interchange
+	};
+};
+
+export const sortAlgs = (a: string, b: string): number => {
+	const aMoves = a.split(" ");
+	const bMoves = b.split(" ");
+
+	if (aMoves.length != bMoves.length) {
+		return aMoves.length - bMoves.length;
+	}
+
+	return a.localeCompare(b);
 };

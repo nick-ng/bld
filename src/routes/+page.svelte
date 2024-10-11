@@ -8,6 +8,10 @@
 			<p>Flash Cards to learn letter pairs and commutators</p>
 		</li>
 		<li class="my-2">
+			<a class="text-xl leading-none py-2 button-default text-center" href="/quiz">Quiz</a>
+			<p>Test your knowledge of letter pairs and commutators</p>
+		</li>
+		<li class="my-2">
 			<a class="text-xl leading-none py-2 button-default text-center" href="/corner-drawer"
 				>Corner Drawer</a
 			>
