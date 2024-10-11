@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { quizStore } from "$lib/stores/quiz";
 	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
-	import { authFetch, joinServerPath } from "$lib/utils";
+	import { authFetch, joinServerPath, commutatorDetails } from "$lib/utils";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
 	import Image from "$lib/components/image.svelte";
@@ -16,14 +16,10 @@
 		}
 
 		abortController = new AbortController();
-		loadFlashCard(
-			newLetterPair,
-			(loadedFlashCard) => {
-				abortController = null;
-				$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
-			},
-			abortController.signal
-		);
+		(async () => {
+			await loadFlashCard(newLetterPair, abortController.signal);
+			abortController = null;
+		})();
 	};
 
 	$: handleLetterPair($quizStore[0]);
@@ -58,7 +54,8 @@
 		const responseJson = await response.json();
 		const parseResponse = parseFlashCard(responseJson);
 		if (parseResponse.isValid) {
-			$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
+			const { data } = parseResponse;
+			$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
 		} else {
 			console.error("wrong", responseJson);
 		}
@@ -68,7 +65,7 @@
 </script>
 
 <div class="max-w-prose mx-auto">
-	{#if $quizStore.length > 0 && $flashCardStoreStatus === "loaded"}
+	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
 		{@const flashCard = $flashCardStore[$quizStore[0]]}
 		<div class="flex flex-col items-center min-h-[460px] gap-1">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
@@ -80,7 +77,9 @@
 					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
 				/>
 				{#if flashCard.commutator}
-					<div class="text-xl font-mono">{flashCard.commutator}</div>
+					<div class="text-xl font-mono">
+						{commutatorDetails(flashCard.commutator).normalisedCommutator}
+					</div>
 				{/if}
 			{/if}
 		</div>

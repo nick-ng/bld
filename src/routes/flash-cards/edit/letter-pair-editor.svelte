@@ -80,14 +80,10 @@
 	onMount(() => {
 		const myAc = new AbortController();
 		let fetchComplete = false;
-		loadFlashCard(
-			letterPair,
-			(loadedFlashCard) => {
-				fetchComplete = true;
-				$flashCardStore[loadedFlashCard.letterPair] = loadedFlashCard;
-			},
-			myAc.signal
-		);
+		(async () => {
+			await loadFlashCard(letterPair, myAc.signal);
+			fetchComplete = true;
+		})();
 
 		return () => {
 			if (!fetchComplete) {
@@ -98,13 +94,13 @@
 </script>
 
 <div class="max-w-prose mx-auto">
-	<a href={$quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit"}>Back</a>
+	<a href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a>
 	<h2 class="uppercase text-center">{letterPair}</h2>
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
 	</div>
-	{#if $flashCardStoreStatus !== "loaded"}
-		<div class="text-center">{upperCaseFirst($flashCardStoreStatus)}...</div>
+	{#if $flashCardStoreStatus.status !== "loaded"}
+		<div class="text-center">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
 		<form
 			on:submit={async (event) => {
@@ -158,9 +154,10 @@
 				const responseJson = await response.json();
 				const parseResponse = parseFlashCard(responseJson);
 				if (parseResponse.isValid) {
-					$flashCardStore[parseResponse.data.letterPair] = parseResponse.data;
+					const { data } = parseResponse;
+					$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
 
-					const backUrl = $quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit";
+					const backUrl = $quizStore.length > 0 ? "/quiz" : "/flash-cards/edit";
 					$quizStore = $quizStore.filter((lp) => lp != letterPair);
 
 					goto(backUrl);
@@ -197,7 +194,7 @@
 						>
 					</tr>
 					<tr>
-						<td class="text-right">Commutator</td>
+						<td class="text-right"><a href="https://blddb.net/" target="_blank">Commutator</a> </td>
 						<td
 							><input
 								class="w-full"
@@ -297,7 +294,7 @@
 			<div class="w-full flex flex-row justify-between mt-1 gap-8">
 				<a
 					class="button-default flex-grow text-center"
-					href={$quizStore.length > 0 ? "/flash-cards/quiz" : "/flash-cards/edit"}>Back</a
+					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a
 				>
 				<button
 					class="flex-grow"

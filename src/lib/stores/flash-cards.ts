@@ -3,14 +3,33 @@ import type { FlashCard } from "$lib/types";
 import { writable } from "svelte/store";
 import { browser } from "$app/environment";
 import { authFetch, joinServerPath } from "$lib/utils";
-import { parseFlashCard } from "$lib/types";
+import { defaultFlashCard, parseFlashCard } from "$lib/types";
 
-export const flashCardStore = writable<{ [letterPair: string]: FlashCard }>({});
-export const flashCardStoreStatus = writable<string>("stand-by");
+const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
-export const fetchFlashCards = async (cache: RequestCache = "default") => {
+type FlashCardStoreType = {
+	[letterPair: string]: FlashCard & { fetchedAtMs: number };
+};
+
+export const flashCardStore = writable<FlashCardStoreType>({});
+export const flashCardStoreStatus = writable<{
+	status: string;
+	message: string;
+	fetchStartMs: number;
+	fetchEndMs: number;
+}>({ status: "stand-by", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
+
+export const fetchFlashCards = async (
+	cache: RequestCache = "default"
+): Promise<FlashCardStoreType> => {
+	const fetchStartMs = Date.now();
 	try {
-		flashCardStoreStatus.set("loading");
+		flashCardStoreStatus.set({
+			status: "loading",
+			message: "loading",
+			fetchStartMs,
+			fetchEndMs: 0
+		});
 		const res = await authFetch(joinServerPath("flash-cards"), {
 			cache
 		});
@@ -20,17 +39,27 @@ export const fetchFlashCards = async (cache: RequestCache = "default") => {
 
 		if (!res.ok) {
 			console.warn("couldn't get flash cards because:", res.status, res.statusText);
-			flashCardStoreStatus.set(`couldn't get flash cards because:${res.status}, ${res.statusText}`);
+			flashCardStoreStatus.set({
+				status: `error`,
+				message: `couldn't get flash cards because ${res.status}, ${res.statusText}`,
+				fetchStartMs,
+				fetchEndMs: Date.now()
+			});
 			return {};
 		}
 
 		const flashCardsArray = await res.json();
 		if (!Array.isArray(flashCardsArray)) {
-			flashCardStoreStatus.set("error: unexpected response");
+			flashCardStoreStatus.set({
+				status: "error",
+				message: "didn't receive an array",
+				fetchStartMs,
+				fetchEndMs: Date.now()
+			});
 			return {};
 		}
 
-		const flashCards: { [letterPair: string]: FlashCard } = {};
+		const flashCards: FlashCardStoreType = {};
 		const nowMs = Date.now();
 		for (let i = 0; i < flashCardsArray.length; i++) {
 			const result = parseFlashCard(flashCardsArray[i]);
@@ -40,12 +69,22 @@ export const fetchFlashCards = async (cache: RequestCache = "default") => {
 		}
 
 		flashCardStore.set(flashCards);
-		flashCardStoreStatus.set("loaded");
+		flashCardStoreStatus.set({
+			status: "loaded",
+			message: "loaded",
+			fetchStartMs,
+			fetchEndMs: Date.now()
+		});
 
 		return flashCards;
 	} catch (e) {
 		console.error("error when fetching letter pairs", e);
-		flashCardStoreStatus.set(`error: ${e}`);
+		flashCardStoreStatus.set({
+			status: `error`,
+			message: `error when fetching letter pairs: ${e}`,
+			fetchStartMs,
+			fetchEndMs: Date.now()
+		});
 	}
 
 	return {};
@@ -55,13 +94,19 @@ if (browser) {
 	fetchFlashCards("no-store");
 }
 
-export const loadFlashCard = async (
-	letterPair: string,
-	afterLoad: (flashCard: FlashCard) => void | Promise<void>,
-	abortSignal?: AbortSignal
-) => {
+let currentFlashCards: FlashCardStoreType = {};
+flashCardStore.subscribe((newFlashCards) => {
+	currentFlashCards = newFlashCards;
+});
+
+export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSignal) => {
 	if (!letterPair) {
-		return;
+		return defaultFlashCard(letterPair);
+	}
+
+	const flashCard = currentFlashCards[letterPair];
+	if (flashCard && Date.now() - flashCard.fetchedAtMs < MAX_AGE_MS) {
+		return flashCard;
 	}
 
 	try {
@@ -70,13 +115,17 @@ export const loadFlashCard = async (
 			signal: abortSignal
 		});
 		if (!res || !res.ok) {
-			return;
+			return flashCard;
 		}
 
 		const resJson = await res.json();
 		const parseResult = parseFlashCard(resJson);
 		if (parseResult.isValid) {
-			afterLoad(parseResult.data);
+			const { data } = parseResult;
+			flashCardStore.update((previous) => {
+				previous[data.letterPair] = { ...data, fetchedAtMs: Date.now() };
+				return previous;
+			});
 
 			return parseResult.data;
 		}

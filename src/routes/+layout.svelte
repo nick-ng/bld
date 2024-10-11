@@ -12,8 +12,8 @@
 {#if showNav}
 	<div class="flex flex-row items-start mx-2 my-2 gap-2">
 		<a class="button-default" href="/flash-cards">Flash Cards</a>
+		<a class="button-default" href="/quiz">Quiz</a>
 		<a class="button-default" href="/corner-drawer">Corner Drawer</a>
-		<a class="button-default" href="/anki-stuff">Anki Stuff</a>
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>

@@ -58,5 +58,5 @@ css:
 - server/database/database.go:390: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:115: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:111: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

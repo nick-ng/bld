@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
-	import { is3Style, isOP } from "$lib/utils";
+	import { is3Style, isOP, upperCaseFirst } from "$lib/utils";
 
 	const makeQuiz = async (
 		oldest: number,
@@ -56,8 +56,8 @@
 		<h1>Quiz</h1>
 		<div />
 	</div>
-	{#if $flashCardStoreStatus !== "loaded"}
-		<div class="">{$flashCardStoreStatus}</div>
+	{#if $flashCardStoreStatus.status !== "loaded"}
+		<div class="">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
 		{@const flatFlashCards = Object.values($flashCardStore).filter((f) => f.memo)}
 		<div>
