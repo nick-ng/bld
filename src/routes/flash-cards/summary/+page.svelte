@@ -67,7 +67,7 @@
 				{#each Object.keys(summary.inserts).toSorted(sortAlgs) as insert}
 					{@const insertId = `insert-${insert}`}
 					<tr>
-						<td><label class="font-mono" for={insertId}>{insert}</label></td>
+						<td><label class="font-mono whitespace-nowrap" for={insertId}>{insert}</label></td>
 						<td>
 							{#each summary.inserts[insert].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
@@ -90,7 +90,7 @@
 				{#each Object.keys(summary.setups).toSorted(sortAlgs) as setup}
 					{@const setupId = `setup-${setup}`}
 					<tr>
-						<td><label class="font-mono" for={setupId}>{setup}</label></td>
+						<td><label class="font-mono whitespace-nowrap" for={setupId}>{setup}</label></td>
 						<td>
 							{#each summary.setups[setup].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
