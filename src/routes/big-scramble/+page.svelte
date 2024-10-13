@@ -2,6 +2,7 @@
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import ClockHand from "$lib/components/clock-hand.svelte";
+	import Timer from "./timer.svelte";
 
 	const scrambleToMoves = (
 		scramble: string
@@ -76,6 +77,9 @@
 </svelte:head>
 
 <div class="big-scramble-root">
+	<div class="timer">
+		<Timer />
+	</div>
 	<div class="scramble">
 		{#each scrambleToMoves(scramble) as scrambleMove}
 			<div
@@ -133,6 +137,7 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 5px;
+		position: relative;
 	}
 
 	.clock {
