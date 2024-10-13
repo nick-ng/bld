@@ -48,9 +48,12 @@
 			class="timer_bar_inner border-none {typeof intervalId !== 'number' ? 'timer_animation' : ''}"
 			style={`height: ${barHeightPercent}%;`}
 			on:click={() => {
-				intervalId = null;
+				barHeightPercent = 0;
 			}}
-		></button>
+			>{#if barHeightPercent > 0}<span
+					>{(barHeightPercent * 0.01 * parseFloat(minutes)).toFixed(1)} / {minutes}</span
+				>{/if}</button
+		>
 	</div>
 </div>
 
