@@ -11,8 +11,8 @@
 	let loaded = false;
 
 	const codePointOffset = 97;
-	for (let j = 0; j < 24; j++) {
-		for (let i = 0; i < 24; i++) {
+	for (let i = 0; i < 24; i++) {
+		for (let j = 0; j < 24; j++) {
 			const firstLetter = String.fromCodePoint(codePointOffset + i);
 			const secondLetter = String.fromCodePoint(codePointOffset + j);
 			allLetterPairs.push(`${firstLetter}${secondLetter}`);
@@ -89,7 +89,9 @@
 
 	@media (min-width: 1024px) {
 		.letterPairGrid {
+			grid-auto-flow: column dense;
 			grid-template-columns: repeat(24, 42px);
+			grid-template-rows: repeat(24, 1fr);
 		}
 	}
 </style>

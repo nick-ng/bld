@@ -215,11 +215,17 @@ export const commutatorDetails = (rawCommutator: string) => {
 };
 
 export const sortAlgs = (a: string, b: string): number => {
-	const aMoves = a.split(" ");
-	const bMoves = b.split(" ");
+	const aMoves = a
+		.trim()
+		.split(" ")
+		.filter((m) => m);
+	const bMoves = b
+		.trim()
+		.split(" ")
+		.filter((m) => m);
 
 	if (aMoves.length != bMoves.length) {
-		return aMoves.length - bMoves.length;
+		return bMoves.length - aMoves.length;
 	}
 
 	return a.localeCompare(b);

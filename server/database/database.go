@@ -108,7 +108,7 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 				continue
 			}
 
-			// @todo: use correct version of rowToFlashCard
+			// @todo: check filename and use appropriate version of rowToFlashCard
 			flashCard, err := rowToFlashCard(tempLine)
 			if err != nil {
 				continue

@@ -53,7 +53,7 @@ css:
 
 ### ToDo Comments
 
-- server/database/database.go:111: @todo: use correct version of rowToFlashCard
+- server/database/database.go:111: @todo: check filename and use appropriate version of rowToFlashCard
 - server/database/database.go:309: @todo(nick-ng): handle new lines?
 - server/database/database.go:390: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
