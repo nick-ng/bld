@@ -19,7 +19,7 @@
 
 {#if isTwist(letterPair) || isNotEitherMethod || (hideNon3Style && !is3Style(letterPair)) || (hideNonOP && !isOP(letterPair))}
 	<div
-		class="bg-gray-500 block text-center no-underline p-0 border border-gray-500 cursor-not-allowed"
+		class="bg-gray-500 text-center no-underline p-0 border border-gray-500 cursor-not-allowed hidden lg:block"
 	>
 		<div class="text-gray-500 uppercase p-0 mb-1 leading-none">{letterPair}</div>
 		<div class="h-2 px-0.5 pb-0.5" />
