@@ -81,7 +81,7 @@
 	<div class="flex flex-row justify-between items-end">
 		<a href="/flash-cards">Back</a>
 		<h1>Quiz</h1>
-		<div />
+		<div></div>
 	</div>
 	{#if $flashCardStoreStatus.status !== "loaded"}
 		<div class="">{upperCaseFirst($flashCardStoreStatus.message)}</div>

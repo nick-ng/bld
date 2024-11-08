@@ -252,7 +252,7 @@
 		>
 		<details>
 			<summary>Show HTML</summary>
-			<textarea value={`${htmlString}`} />
+			<textarea value={`${htmlString}`}></textarea>
 		</details>
 	</div>
 </div>

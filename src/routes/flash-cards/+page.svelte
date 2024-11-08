@@ -36,7 +36,7 @@
 				showLogin = false;
 			}}
 		>
-			<tabel>
+			<table>
 				<tbody>
 					<tr>
 						<td class="text-right">
@@ -64,7 +64,7 @@
 						<td colspan="2"><button class="w-full">Save</button></td>
 					</tr>
 				</tbody>
-			</tabel>
+			</table>
 		</form>
 	</details>
 </div>
