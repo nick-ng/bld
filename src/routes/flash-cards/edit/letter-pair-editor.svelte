@@ -194,7 +194,12 @@
 						>
 					</tr>
 					<tr>
-						<td class="text-right"><a href="https://blddb.net/" target="_blank">Commutator</a> </td>
+						<td class="text-right"
+							><a
+								href={`https://blddb.net/corner.html?letter-pair=c${letterPair}`}
+								target="pux_blddb_corner_comm">Commutator</a
+							>
+						</td>
 						<td
 							><input
 								class="w-full"
