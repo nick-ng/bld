@@ -44,7 +44,7 @@
 	<div class="flex flex-row justify-between items-end">
 		<a href="/flash-cards">Back</a>
 		<h1>Edit Flash Cards</h1>
-		<div />
+		<div></div>
 	</div>
 	<div class="flex flex-row gap-2">
 		<form

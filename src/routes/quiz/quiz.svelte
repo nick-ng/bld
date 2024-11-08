@@ -92,7 +92,7 @@
 						style="flex-grow: 2"
 						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
 					>
-					<div style="flex-grow: 1" />
+					<div style="flex-grow: 1"></div>
 					{#each [0, 1, 2, 3] as confidence}
 						<button
 							style="flex-grow: 2"
