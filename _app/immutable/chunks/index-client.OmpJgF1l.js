@@ -1,0 +1,1 @@
+import{_ as o,ar as t,Z as c,u}from"./runtime.ChD48HxL.js";function a(e){throw new Error("lifecycle_outside_component")}function i(e){o===null&&a(),t&&o.l!==null?l(o).m.push(e):c(()=>{const n=u(e);if(typeof n=="function")return n})}function l(e){var n=e.l;return n.u??(n.u={a:[],b:[],m:[]})}export{i as o};
