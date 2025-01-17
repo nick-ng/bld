@@ -7,8 +7,10 @@
 	import Image from "$lib/components/image.svelte";
 
 	let showAnswer = false;
-	let handlingConfidence = false;
+	let submittingConfidence = false;
 	let abortController: AbortController | null = null;
+	let memoConfidence = -1;
+	let commConfidence = -1;
 
 	const handleLetterPair = (newLetterPair: string) => {
 		if (abortController) {
@@ -24,17 +26,33 @@
 
 	$: handleLetterPair($quizStore[0]);
 
-	const handleConfidence = async (letterPair: string, newConfidence: number) => {
+	const handleConfidence = async (newConfidence: number, confidenceType = "memo") => {
+		switch (confidenceType) {
+			case "comm": {
+				commConfidence = newConfidence;
+				break;
+			}
+			case "memo":
+			default: {
+				memoConfidence = newConfidence;
+			}
+		}
+	};
+	const submitConfidence = async (letterPair: string) => {
 		const flashCard = $flashCardStore[letterPair];
 		if (!flashCard) {
 			return;
 		}
 
-		handlingConfidence = true;
+		submittingConfidence = true;
 
 		const formData = new FormData();
 		formData.set("type", flashCard.type);
-		formData.set("confidence", newConfidence.toString(10));
+
+		const packedConfidence = (commConfidence << 2) + memoConfidence;
+		formData.set("confidence", packedConfidence.toString(10));
+		commConfidence = -1;
+		memoConfidence = -1;
 
 		// go to the next question before updating
 		showAnswer = false;
@@ -60,7 +78,7 @@
 			console.error("wrong", responseJson);
 		}
 
-		handlingConfidence = false;
+		submittingConfidence = false;
 	};
 </script>
 
@@ -86,6 +104,36 @@
 		<div class="absolute bottom-2 left-0 px-2 w-full lg:w-full lg:relative lg:px-0">
 			<div class="text-left">{$quizStore.length} left</div>
 			{#if showAnswer}
+				<table class="w-full border-collapse mb-2">
+					<tbody>
+						<tr>
+							<td class="w-1">Memo</td>
+							{#each [0, 1, 2, 3] as confidence}
+								<td>
+									<button
+										class={`w-full ${memoConfidence == confidence ? "button-selected" : ""}`}
+										on:click={() => {
+											handleConfidence(confidence, "memo");
+										}}>{confidence}</button
+									>
+								</td>
+							{/each}
+						</tr>
+						<tr>
+							<td class="w-1">Comm</td>
+							{#each [0, 1, 2, 3] as confidence}
+								<td>
+									<button
+										class={`w-full ${commConfidence == confidence ? "button-selected" : ""}`}
+										on:click={() => {
+											handleConfidence(confidence, "comm");
+										}}>{confidence}</button
+									>
+								</td>
+							{/each}
+						</tr>
+					</tbody>
+				</table>
 				<div class="flex flex-row gap-1">
 					<a
 						class="button-default text-center"
@@ -93,20 +141,19 @@
 						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
 					>
 					<div style="flex-grow: 1"></div>
-					{#each [0, 1, 2, 3] as confidence}
-						<button
-							style="flex-grow: 2"
-							disabled={handlingConfidence}
-							on:click={() => {
-								handleConfidence(flashCard.letterPair, confidence);
-							}}>{confidence}</button
-						>
-					{/each}
+					<button
+						style="flex-grow: 2"
+						disabled={memoConfidence < 0 || commConfidence < 0}
+						on:click={(mouseEvent) => {
+							mouseEvent.preventDefault();
+							submitConfidence(flashCard.letterPair);
+						}}>Submit</button
+					>
 				</div>
 			{:else}
 				<button
 					class="button-default w-full"
-					disabled={handlingConfidence}
+					disabled={submittingConfidence}
 					on:click={() => {
 						showAnswer = true;
 					}}>Show Answer</button
