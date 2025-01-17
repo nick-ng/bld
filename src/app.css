@@ -78,6 +78,10 @@
 		@apply rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block;
 	}
 
+	.button-selected {
+		@apply bg-blue-300 dark:bg-blue-700;
+	}
+
 	.border-default {
 		@apply border border-gray-600 dark:border-gray-300;
 	}
