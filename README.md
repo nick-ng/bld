@@ -59,4 +59,6 @@ css:
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:111: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/summary/+page.svelte:90: @todo(nick-ng): remove this when all letter pairs have a commutator confidence.
+- src/routes/quiz/quiz-home.svelte:12: @todo(nick-ng): separate memo confidence and commutator confidence.
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

@@ -9,6 +9,7 @@
 	import { quizStore } from "$lib/stores/quiz";
 	import { is3Style, isOP, upperCaseFirst } from "$lib/utils";
 
+	// @todo(nick-ng): separate memo confidence and commutator confidence.
 	let customOldest = 2;
 	let customLowConfidence = 6;
 	let customRandom = 2;

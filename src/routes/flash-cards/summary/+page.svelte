@@ -55,7 +55,8 @@
 		const inserts: { [insert: string]: string[] } = {};
 		const interchanges: { [interchange: string]: string[] } = {};
 		const setups: { [setup: string]: string[] } = {};
-		const confidence: { [confidence: string]: string[] } = {};
+		const memoConfidences: { [confidence: number]: string[] } = {};
+		const commConfidences: { [confidence: number]: string[] } = {};
 		const ageRanges: { [ageRangeString: string]: string[] } = {};
 		for (let i = 0; i < flatFlashCards.length; i++) {
 			const flashCard = flatFlashCards[i];
@@ -84,10 +85,25 @@
 			}
 			setups[setup].push(flashCard.letterPair);
 
-			if (!confidence[flashCard.confidence]) {
-				confidence[flashCard.confidence] = [];
+			const memoConfidence = flashCard.confidence & 3;
+			let commConfidence = (flashCard.confidence >> 2) & 3;
+			// @todo(nick-ng): remove this when all letter pairs have a commutator confidence.
+			// commutator confidence was introduced more recently. confidence used
+			// to be between 0 and 5 and some letter pairs still have a confidence
+			// from this old range.
+			if (flashCard.lastQuizUnix < 1737104110) {
+				commConfidence = 0;
 			}
-			confidence[flashCard.confidence].push(flashCard.letterPair);
+
+			if (!memoConfidences[memoConfidence]) {
+				memoConfidences[memoConfidence] = [];
+			}
+			memoConfidences[memoConfidence].push(flashCard.letterPair);
+
+			if (!commConfidences[commConfidence]) {
+				commConfidences[commConfidence] = [];
+			}
+			commConfidences[commConfidence].push(flashCard.letterPair);
 
 			const ageRange = getAgeRange(flashCard.lastQuizUnix * 1000);
 			if (!ageRanges[ageRange]) {
@@ -100,7 +116,8 @@
 			inserts,
 			interchanges,
 			setups,
-			confidence,
+			memoConfidences,
+			commConfidences,
 			ageRanges
 		};
 	};
@@ -118,19 +135,46 @@
 	<div
 		class="grid summary-grid grid-cols-1 items-start justify-items-center content-center justify-center gap-2 lg:m-0 mx-auto"
 	>
+		<h2>Confidence</h2>
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-left">Confidence</th>
+					<th class="text-left">Memo</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.confidence).toSorted((a, b) => parseInt(a) - parseInt(b)) as confidence}
+				{#each Object.keys(summary.memoConfidences)
+					.toSorted((a, b) => parseInt(a) - parseInt(b))
+					.map((a) => parseInt(a)) as confidence}
 					<tr>
 						<td>{confidence}</td>
 						<td>
-							{#each summary.confidence[confidence].toSorted() as letterPair, i}
+							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i}
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+									>{letterPair}</a
+								>
+							{/each}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<table class="block summary-tables lg:max-w-lg">
+			<thead>
+				<tr>
+					<th class="text-left">Comm</th>
+					<th class="text-left">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each Object.keys(summary.commConfidences)
+					.toSorted((a, b) => parseInt(a) - parseInt(b))
+					.map((a) => parseInt(a)) as confidence}
+					<tr>
+						<td>{confidence}</td>
+						<td>
+							{#each summary.commConfidences[confidence].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
