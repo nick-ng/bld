@@ -107,7 +107,7 @@
 				<table class="w-full border-collapse mb-2">
 					<tbody>
 						<tr>
-							<td class="w-1">Memo</td>
+							<td class="w-1 pr-1">Memo</td>
 							{#each [0, 1, 2, 3] as confidence}
 								<td>
 									<button
@@ -120,7 +120,7 @@
 							{/each}
 						</tr>
 						<tr>
-							<td class="w-1">Comm</td>
+							<td class="w-1 pr-1">Comm</td>
 							{#each [0, 1, 2, 3] as confidence}
 								<td>
 									<button
