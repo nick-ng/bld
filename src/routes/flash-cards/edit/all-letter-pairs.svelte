@@ -1,43 +1,11 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { onMount } from "svelte";
 	import LetterPairChooser from "./letter-pair-chooser.svelte";
-	import { FLASH_CARD_FILTER_STORE_KEY } from "$lib/constants";
+	import { optionsStore } from "$lib/stores/options";
+	import { getAllLetterPairs } from "$lib/utils";
 
-	let allLetterPairs = [];
+	const allLetterPairs = getAllLetterPairs(true);
 	let letterPairFilter = "";
-	let hideNon3Style = false;
-	let hideNonOP = false;
-	let loaded = false;
-
-	const codePointOffset = 97;
-	for (let i = 0; i < 24; i++) {
-		for (let j = 0; j < 24; j++) {
-			const firstLetter = String.fromCodePoint(codePointOffset + i);
-			const secondLetter = String.fromCodePoint(codePointOffset + j);
-			allLetterPairs.push(`${firstLetter}${secondLetter}`);
-		}
-	}
-
-	const updateFilterStore = (loaded: boolean, ...args: boolean[]) => {
-		if (!loaded) {
-			return;
-		}
-
-		const stored = args.map((a) => (a ? "t" : "f")).join("");
-		localStorage.setItem(FLASH_CARD_FILTER_STORE_KEY, stored);
-	};
-
-	$: updateFilterStore(loaded, hideNon3Style, hideNonOP);
-
-	onMount(() => {
-		const stored = localStorage.getItem(FLASH_CARD_FILTER_STORE_KEY);
-		if (stored) {
-			hideNon3Style = stored[0] === "t";
-			hideNonOP = stored[1] === "t";
-		}
-		loaded = true;
-	});
 </script>
 
 <div class="lg:w-min m-auto">
@@ -64,8 +32,15 @@
 				<input type="text" autocomplete="off" bind:value={letterPairFilter} />
 			</label>
 		</form>
-		<label>Hide Non-3-Style Pairs: <input type="checkbox" bind:checked={hideNon3Style} /></label>
-		<label>Hide Non-OP Pairs: <input type="checkbox" bind:checked={hideNonOP} /></label>
+		<label
+			>Hide Non-3-Style Pairs: <input
+				type="checkbox"
+				bind:checked={$optionsStore.hideNon3Style}
+			/></label
+		>
+		<label
+			>Hide Non-OP Pairs: <input type="checkbox" bind:checked={$optionsStore.hideNonOP} /></label
+		>
 	</div>
 	<div class="letterPairGrid">
 		{#each allLetterPairs.filter((lp) => {
@@ -75,7 +50,11 @@
 
 			return lp.startsWith(letterPairFilter);
 		}) as letterPair}
-			<LetterPairChooser {letterPair} {hideNon3Style} {hideNonOP} />
+			<LetterPairChooser
+				{letterPair}
+				hideNon3Style={$optionsStore.hideNon3Style}
+				hideNonOP={$optionsStore.hideNonOP}
+			/>
 		{/each}
 	</div>
 </div>
