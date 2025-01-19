@@ -1,5 +1,18 @@
 import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
 
+const RANDOM_LIMIT = 1_000_000;
+
+export const getRandomSequence = (seed: number, count: number) => {
+	const randomNumbers: number[] = [];
+	for (let i = 0; i < count; i++) {
+		const temp = Math.floor(Math.abs((Math.sin(seed + i) * RANDOM_LIMIT) % RANDOM_LIMIT));
+
+		randomNumbers.push(temp);
+	}
+
+	return randomNumbers;
+};
+
 export const joinUrl = (...args: string[]) => {
 	return args
 		.map((fragment, i) => {
@@ -129,6 +142,18 @@ export const isOP = (letterPair: string) => {
 	return true;
 };
 
+export const hasOPBuffer = (letterPair: string) => {
+	const letters = letterPair.split("");
+
+	for (let i = 0; i < letters.length; i++) {
+		if (UBL.includes(letters[i])) {
+			return true;
+		}
+	}
+
+	return false;
+};
+
 export const is3Style = (letterPair: string) => {
 	const letters = letterPair.split("");
 
@@ -139,6 +164,18 @@ export const is3Style = (letterPair: string) => {
 	}
 
 	return true;
+};
+
+export const has3StyleBuffer = (letterPair: string) => {
+	const letters = letterPair.split("");
+
+	for (let i = 0; i < letters.length; i++) {
+		if (UFR.includes(letters[i])) {
+			return true;
+		}
+	}
+
+	return false;
 };
 
 export const getOperatingSystem = (): string => {
@@ -229,4 +266,91 @@ export const sortAlgs = (a: string, b: string): number => {
 	}
 
 	return a.localeCompare(b);
+};
+
+export const getAllLetterPairs = (includeTwists: boolean) => {
+	const allLetterPairs = [];
+
+	const codePointOffset = 97;
+	for (let i = 0; i < 24; i++) {
+		for (let j = 0; j < 24; j++) {
+			const firstLetter = String.fromCodePoint(codePointOffset + i);
+			const secondLetter = String.fromCodePoint(codePointOffset + j);
+			const letterPair = `${firstLetter}${secondLetter}`;
+			if (!includeTwists && isTwist(letterPair)) {
+				continue;
+			}
+
+			allLetterPairs.push(letterPair);
+		}
+	}
+
+	return allLetterPairs;
+};
+
+const bagRandomByDay = (itemSet: string[], startDate: Date, forDate: Date) => {
+	// 10: get number of days
+	const difference = forDate.valueOf() - startDate.valueOf();
+	// ms -> seconds -> minutes -> hours -> days
+	const differenceDays = Math.floor(difference / (1000 * 60 * 60 * 24));
+
+	console.log("differenceDays", differenceDays);
+
+	// @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
+	// @todo(nick-ng): remove items from bag and put into subsets
+	// @todo(nick-ng): when you have constructed the nth subset, return that subset
+	// @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
+
+	// 20: shuffle set
+	// let counter = 0;
+	// do {
+	// 	const seedDate = startDate;
+	// 	const seed =
+	// 		seedDate.getDate() * 100000 + (seedDate.getMonth() + 1) * 1000 + seedDate.getFullYear();
+	// 	console.log("seed", seed);
+	// 	const randomSequence = getRandomSequence(seed, itemSet.length);
+	// 	const temp = [...itemSet]
+	// 		.map((item, i) => ({
+	// 			item,
+	// 			shuffleValue: randomSequence[i]
+	// 		}))
+	// 		.sort((a, b) => {
+	// 			return a.shuffleValue - b.shuffleValue;
+	// 		});
+
+	// 	counter++;
+	// } while (counter < 10000);
+
+	// return tempSet;
+	return [];
+};
+
+export const getLettersOfTheDay = (
+	date: Date,
+	exclude3StyleBuffer: boolean,
+	excludeOPBuffer: boolean
+) => {
+	console.log(date, exclude3StyleBuffer, excludeOPBuffer);
+
+	const startDate = new Date("2025-01-19");
+
+	console.log("startDate", startDate);
+
+	const realLetterPairs = getAllLetterPairs(false).filter((lp) => {
+		if (lp[0] === lp[1]) {
+			return false;
+		}
+
+		if (exclude3StyleBuffer && has3StyleBuffer(lp)) {
+			return false;
+		}
+
+		if (excludeOPBuffer && hasOPBuffer(lp)) {
+			return false;
+		}
+
+		return true;
+	});
+
+	return bagRandomByDay(realLetterPairs, startDate, date);
 };
