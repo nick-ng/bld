@@ -135,11 +135,10 @@
 	<div
 		class="grid summary-grid grid-cols-1 items-start justify-items-center content-center justify-center gap-2 lg:m-0 mx-auto"
 	>
-		<h2>Confidence</h2>
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-left">Memo</th>
+					<th class="text-right">Memo. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
@@ -148,7 +147,7 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence}
 					<tr>
-						<td>{confidence}</td>
+						<td class="text-right">{confidence}</td>
 						<td>
 							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
@@ -163,7 +162,7 @@
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-left">Comm</th>
+					<th class="text-right">Comm. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
@@ -172,31 +171,9 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence}
 					<tr>
-						<td>{confidence}</td>
+						<td class="text-right">{confidence}</td>
 						<td>
 							{#each summary.commConfidences[confidence].toSorted() as letterPair, i}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
-									>{letterPair}</a
-								>
-							{/each}
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-		<table class="block summary-tables lg:max-w-lg">
-			<thead>
-				<tr>
-					<th class="text-left whitespace-nowrap">Last Reviewed</th>
-					<th class="text-left">Letter Pairs</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange}
-					<tr>
-						<td>{ageRange}</td>
-						<td>
-							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -241,6 +218,28 @@
 						<td class="font-mono whitespace-nowrap">{setup}</td>
 						<td>
 							{#each summary.setups[setup].toSorted() as letterPair, i}
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+									>{letterPair}</a
+								>
+							{/each}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<table class="block summary-tables lg:max-w-lg">
+			<thead>
+				<tr>
+					<th class="text-left whitespace-nowrap">Last Reviewed</th>
+					<th class="text-left">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange}
+					<tr>
+						<td>{ageRange}</td>
+						<td>
+							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
