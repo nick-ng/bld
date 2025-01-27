@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { page } from "$app/stores";
 	import {
 		QUIZ_LOW_CONFIDENCE_STORE_KEY,
 		QUIZ_OLDEST_STORE_KEY,
@@ -8,14 +9,7 @@
 	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
-	import {
-		is3Style,
-		isOP,
-		upperCaseFirst,
-		shuffleArray,
-		normaliseCommutator,
-		commutatorDetails
-	} from "$lib/utils";
+	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
 	import { commConfidenceQuiz, sortByLastQuiz } from "./make-quiz";
 
 	// @todo(nick-ng): separate memo confidence and commutator confidence.
@@ -84,6 +78,13 @@
 		const savedRandom = localStorage.getItem(QUIZ_RANDOM_STORE_KEY);
 		if (typeof savedRandom === "string" && !isNaN(parseInt(savedRandom, 10))) {
 			customRandom = parseInt(savedRandom, 10);
+		}
+
+		const fixedQuizParams = $page.url.searchParams.get("fq");
+		if (fixedQuizParams) {
+			const temp = fixedQuizParams.split(",").map((a) => a.trim());
+			fixedPairsString = temp.join(", ");
+			$optionsStore.fixedQuiz = temp;
 		}
 	});
 </script>
@@ -260,6 +261,20 @@
 					>
 				</li>
 				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 text-center"
+						on:click={async () => {
+							const fixedPairs = sortByLastQuiz(Object.values($flashCardStore))
+								.filter((a) => is3Style(a.letterPair) && a.letterPair[0] !== a.letterPair[1])
+								.slice(0, 10)
+								.map((f) => f.letterPair.toLocaleUpperCase())
+								.sort((a, b) => a.localeCompare(b));
+							$optionsStore.fixedQuiz = fixedPairs;
+							fixedPairsString = fixedPairs.join(", ");
+						}}>Old Any Pairs</button
+					>
+				</li>
+				<li class="mt-1 flex flex-row">
 					<input
 						class="w-full block text-xl leading-none lg:px-1 py-2 font-mono"
 						type="text"
@@ -272,6 +287,14 @@
 							$optionsStore.fixedQuiz = fixedPairs;
 						}}
 					/>
+					<button
+						on:click={() => {
+							console.log("location", location);
+							const query = $optionsStore.fixedQuiz.join(",");
+							const url = `${location.origin}/quiz?fq=${query}`;
+							navigator.clipboard.writeText(url);
+						}}>Copy</button
+					>
 				</li>
 				<li class="mt-1">
 					<button
