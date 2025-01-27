@@ -4,7 +4,9 @@ export type FlashCard = {
 	memo: string;
 	image: string;
 	commutator: string;
-	confidence: number; // 0 - 5. 0 = don't know, 5 = fully remember
+	confidence: number; // packed commutator and memo confidence. comm = high
+	commConfidence: number;
+	memoConfidence: number;
 	tags: string;
 	lastQuizUnix: number;
 	fetchedAtMs?: number;
@@ -54,6 +56,13 @@ export const parseFlashCard = (
 
 	const getFromUnknown = getPropertyOrDefault(unknown);
 
+	const confidence = getFromUnknown("confidence", 0);
+	const memoConfidence = confidence & 3;
+	let commConfidence = (confidence >> 2) & 3;
+	if (unknown.lastQuizUnix < 1737104110) {
+		commConfidence = 0;
+	}
+
 	return {
 		isValid: true,
 		data: {
@@ -62,7 +71,9 @@ export const parseFlashCard = (
 			memo: getFromUnknown("memo", ""),
 			image: getFromUnknown("image", ""),
 			commutator: getFromUnknown("commutator", ""),
-			confidence: getFromUnknown("confidence", 0),
+			confidence,
+			commConfidence,
+			memoConfidence,
 			tags: getFromUnknown("tags", ""),
 			lastQuizUnix: unknown.lastQuizUnix
 		}
@@ -77,6 +88,8 @@ export const defaultFlashCard = (letterPair: string): FlashCard => {
 		image: "",
 		commutator: "",
 		confidence: 0,
+		commConfidence: 0,
+		memoConfidence: 0,
 		tags: "",
 		lastQuizUnix: 0
 	};

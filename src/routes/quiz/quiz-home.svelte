@@ -7,12 +7,15 @@
 	} from "$lib/constants";
 	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
-	import { is3Style, isOP, upperCaseFirst } from "$lib/utils";
+	import { optionsStore } from "$lib/stores/options";
+	import { is3Style, isOP, upperCaseFirst, shuffleArray } from "$lib/utils";
+	import { commConfidenceQuiz, sortByLastQuiz } from "./make-quiz";
 
 	// @todo(nick-ng): separate memo confidence and commutator confidence.
 	let customOldest = 2;
 	let customLowConfidence = 6;
 	let customRandom = 2;
+	let fixedPairsString = $optionsStore.fixedQuiz.join(", ");
 
 	const makeQuiz = async (
 		oldest: number,
@@ -216,6 +219,62 @@
 						on:click={() => {
 							makeQuiz(5, 3, 2, false, true);
 						}}>OP: 5 + 3 + 2 = 10</button
+					>
+				</li>
+			</ul>
+			<p>Fixed Quiz</p>
+			<ul>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 text-center"
+						on:click={async () => {
+							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
+
+							const fixedPairs = shuffleArray(temp)
+								.slice(0, 10)
+								.map((f) => f.letterPair.toLocaleUpperCase())
+								.sort((a, b) => a.localeCompare(b));
+							$optionsStore.fixedQuiz = fixedPairs;
+							fixedPairsString = fixedPairs.join(", ");
+						}}>Random Low Confidence Pairs</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 text-center"
+						on:click={async () => {
+							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
+
+							const fixedPairs = sortByLastQuiz(temp)
+								.slice(0, 10)
+								.map((f) => f.letterPair.toLocaleUpperCase())
+								.sort((a, b) => a.localeCompare(b));
+							$optionsStore.fixedQuiz = fixedPairs;
+							fixedPairsString = fixedPairs.join(", ");
+						}}>Old Low Confidence Pairs</button
+					>
+				</li>
+				<li class="mt-1">
+					<input
+						class="w-full block text-xl leading-none lg:px-1 py-2 font-mono"
+						type="text"
+						bind:value={fixedPairsString}
+						on:blur={() => {
+							const fixedPairs = fixedPairsString
+								.split(",")
+								.map((a) => a.trim().toLocaleUpperCase())
+								.filter((a) => a);
+							$optionsStore.fixedQuiz = fixedPairs;
+						}}
+					/>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 text-center"
+						on:click={() => {
+							const temp = shuffleArray($optionsStore.fixedQuiz).map((a) => a.toLocaleLowerCase());
+							$quizStore = temp;
+						}}>Start Fixed Quiz</button
 					>
 				</li>
 			</ul>
