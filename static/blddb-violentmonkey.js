@@ -6,7 +6,7 @@
 // @include     https://blddb.net/edge.html
 // @include     https://blddb.net/edge.html?*
 // @grant       none
-// @version     1.2
+// @version     1.3
 // @author      https://bld.pux.one
 // @description Show move count of commutators and add a query parameter to search for a letter pair
 // @downloadURL https://bld.pux.one/blddb-violentmonkey.js
@@ -42,7 +42,7 @@
 				() => {
 					addMoveCount(counter + 1);
 				},
-				(counter + 1) * 20
+				(counter + 1) * 80
 			);
 
 			return;
@@ -103,6 +103,13 @@
 			addMoveCount(0);
 		}
 	});
+
+	const cornerStyleEl = document.getElementById("cornerstyle");
+	if (cornerStyleEl) {
+		cornerStyleEl.addEventListener("change", () => {
+			addMoveCount(0);
+		});
+	}
 
 	setTimeout(() => {
 		const params = new URLSearchParams(document.location.search);
