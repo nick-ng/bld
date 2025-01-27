@@ -1,4 +1,5 @@
 import type { FlashCard } from "$lib/types";
+import { is3Style } from "$lib/utils";
 
 export const sortByLastQuiz = (flashCards: FlashCard[]) => {
 	const temp = flashCards.sort((a, b) => {
@@ -18,6 +19,11 @@ export const commConfidenceQuiz = (
 		if (c.letterPair[0] === c.letterPair[1]) {
 			return false;
 		}
+
+		if (!is3Style(c.letterPair)) {
+			return false;
+		}
+
 		return c.commConfidence >= minCommConfidence && c.commConfidence <= maxCommConfidence;
 	});
 

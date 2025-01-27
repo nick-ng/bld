@@ -8,7 +8,14 @@
 	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
-	import { is3Style, isOP, upperCaseFirst, shuffleArray } from "$lib/utils";
+	import {
+		is3Style,
+		isOP,
+		upperCaseFirst,
+		shuffleArray,
+		normaliseCommutator,
+		commutatorDetails
+	} from "$lib/utils";
 	import { commConfidenceQuiz, sortByLastQuiz } from "./make-quiz";
 
 	// @todo(nick-ng): separate memo confidence and commutator confidence.
@@ -196,7 +203,7 @@
 							customRandom}</button
 					>
 				</li>
-				<li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
+				<!-- <li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
@@ -220,10 +227,8 @@
 							makeQuiz(5, 3, 2, false, true);
 						}}>OP: 5 + 3 + 2 = 10</button
 					>
-				</li>
-			</ul>
-			<p>Fixed Quiz</p>
-			<ul>
+				</li> -->
+				<li class="mt-1">Fixed Quiz</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
@@ -278,6 +283,30 @@
 					>
 				</li>
 			</ul>
+			<details>
+				<summary>Commutator Check</summary>
+				<table class="border-spacing-x-2 border-separate">
+					<thead>
+						<tr>
+							<th class=" text-center">Letter Pair</th>
+							<th class="text-left">Commutator</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each $optionsStore.fixedQuiz as letterPair}
+							{@const flashCard = $flashCardStore[letterPair.toLocaleLowerCase()]}
+							{#if flashCard}
+								<tr>
+									<td class="text-center">{letterPair}</td>
+									<td class="font-mono"
+										>{commutatorDetails(flashCard.commutator).normalisedCommutator}</td
+									>
+								</tr>
+							{/if}
+						{/each}
+					</tbody>
+				</table>
+			</details>
 		</div>
 	{/if}
 </div>
