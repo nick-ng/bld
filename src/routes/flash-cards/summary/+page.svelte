@@ -137,7 +137,10 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence}
 					<tr>
-						<td class="text-right">{confidence}</td>
+						<td class="text-right"
+							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
+								.length}/{Object.values($flashCardStore).length})</td
+						>
 						<td>
 							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
@@ -161,7 +164,10 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence}
 					<tr>
-						<td class="text-right">{confidence}</td>
+						<td class="text-right"
+							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
+								.length}/{Object.values($flashCardStore).length})</td
+						>
 						<td>
 							{#each summary.commConfidences[confidence].toSorted() as letterPair, i}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
