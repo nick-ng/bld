@@ -85,25 +85,15 @@
 			}
 			setups[setup].push(flashCard.letterPair);
 
-			const memoConfidence = flashCard.confidence & 3;
-			let commConfidence = (flashCard.confidence >> 2) & 3;
-			// @todo(nick-ng): remove this when all letter pairs have a commutator confidence.
-			// commutator confidence was introduced more recently. confidence used
-			// to be between 0 and 5 and some letter pairs still have a confidence
-			// from this old range.
-			if (flashCard.lastQuizUnix < 1737104110) {
-				commConfidence = 0;
+			if (!memoConfidences[flashCard.memoConfidence]) {
+				memoConfidences[flashCard.memoConfidence] = [];
 			}
+			memoConfidences[flashCard.memoConfidence].push(flashCard.letterPair);
 
-			if (!memoConfidences[memoConfidence]) {
-				memoConfidences[memoConfidence] = [];
+			if (!commConfidences[flashCard.commConfidence]) {
+				commConfidences[flashCard.commConfidence] = [];
 			}
-			memoConfidences[memoConfidence].push(flashCard.letterPair);
-
-			if (!commConfidences[commConfidence]) {
-				commConfidences[commConfidence] = [];
-			}
-			commConfidences[commConfidence].push(flashCard.letterPair);
+			commConfidences[flashCard.commConfidence].push(flashCard.letterPair);
 
 			const ageRange = getAgeRange(flashCard.lastQuizUnix * 1000);
 			if (!ageRanges[ageRange]) {

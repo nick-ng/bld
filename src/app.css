@@ -26,7 +26,7 @@
 	input[type="number"],
 	select,
 	textarea {
-		@apply rounded border border-gray-300 px-0.5 dark:border-gray-500;
+		@apply rounded border border-gray-300 dark:border-gray-500;
 	}
 
 	a {

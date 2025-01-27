@@ -59,12 +59,11 @@ css:
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:6: @todo(nick-ng): change filter criteria "direction"
-- src/lib/utils.ts:299: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
-- src/lib/utils.ts:300: @todo(nick-ng): remove items from bag and put into subsets
-- src/lib/utils.ts:301: @todo(nick-ng): when you have constructed the nth subset, return that subset
-- src/lib/utils.ts:302: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
+- src/lib/utils.ts:317: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
+- src/lib/utils.ts:318: @todo(nick-ng): remove items from bag and put into subsets
+- src/lib/utils.ts:319: @todo(nick-ng): when you have constructed the nth subset, return that subset
+- src/lib/utils.ts:320: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
 - src/routes/flash-cards/+page.svelte:10: @todo(nick-ng): get letter pairs of the day
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:111: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/flash-cards/summary/+page.svelte:90: @todo(nick-ng): remove this when all letter pairs have a commutator confidence.
-- src/routes/quiz/quiz-home.svelte:12: @todo(nick-ng): separate memo confidence and commutator confidence.
+- src/routes/quiz/quiz-home.svelte:14: @todo(nick-ng): separate memo confidence and commutator confidence.
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

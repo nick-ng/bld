@@ -288,6 +288,24 @@ export const getAllLetterPairs = (includeTwists: boolean) => {
 	return allLetterPairs;
 };
 
+export const shuffleArray = <T>(arr: T[]): T[] => {
+	const temp = arr
+		.map((v) => {
+			return {
+				sortValue: Math.random(),
+				v
+			};
+		})
+		.sort((a, b) => {
+			return a.sortValue - b.sortValue;
+		})
+		.map((t) => {
+			return t.v;
+		});
+
+	return temp;
+};
+
 const bagRandomByDay = (itemSet: string[], startDate: Date, forDate: Date) => {
 	// 10: get number of days
 	const difference = forDate.valueOf() - startDate.valueOf();

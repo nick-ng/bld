@@ -85,8 +85,14 @@
 <div class="max-w-prose mx-auto">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
 		{@const flashCard = $flashCardStore[$quizStore[0]]}
-		<div class="flex flex-col items-center min-h-[460px] gap-1">
+		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
+			<button
+				class="button-default absolute top-0 right-0"
+				on:click={() => {
+					$quizStore = [];
+				}}>End Quiz</button
+			>
 			<Corners letterPair={flashCard.letterPair} />
 			{#if showAnswer}
 				<div class="text-2xl">{flashCard.memo}</div>

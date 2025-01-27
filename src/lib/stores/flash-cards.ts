@@ -7,7 +7,7 @@ import { defaultFlashCard, parseFlashCard } from "$lib/types";
 
 const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
-type FlashCardStoreType = {
+export type FlashCardStoreType = {
 	[letterPair: string]: FlashCard & { fetchedAtMs: number };
 };
 
