@@ -38,11 +38,12 @@
 	const addMoveCount = (counter = 0) => {
 		const tbodyEl = document.querySelector("#table tbody");
 		if (!tbodyEl && counter < 100) {
+			console.log("no table. waiting", (counter + 1) * 200);
 			setTimeout(
 				() => {
 					addMoveCount(counter + 1);
 				},
-				(counter + 1) * 80
+				(counter + 1) * 200
 			);
 
 			return;
@@ -100,14 +101,18 @@
 
 	inputEl.addEventListener("input", (event) => {
 		if (event.currentTarget.value.length === 3) {
-			addMoveCount(0);
+			setTimeout(() => {
+				addMoveCount(0);
+			}, 300);
 		}
 	});
 
 	const cornerStyleEl = document.getElementById("cornerstyle");
 	if (cornerStyleEl) {
 		cornerStyleEl.addEventListener("change", () => {
-			addMoveCount(0);
+			setTimeout(() => {
+				addMoveCount(0);
+			}, 300);
 		});
 	}
 
@@ -119,7 +124,7 @@
 			window.algSearch();
 			setTimeout(() => {
 				addMoveCount(0);
-			}, 50);
+			}, 300);
 		}
 	}, 100);
 })();
