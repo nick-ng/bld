@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { quizStore } from "$lib/stores/quiz";
-	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
+	import {
+		flashCardStore,
+		flashCardStoreStatus,
+		getFlashCard,
+		loadFlashCard
+	} from "$lib/stores/flash-cards";
 	import { authFetch, joinServerPath, commutatorDetails } from "$lib/utils";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
@@ -39,7 +44,7 @@
 		}
 	};
 	const submitConfidence = async (letterPair: string) => {
-		const flashCard = $flashCardStore[letterPair];
+		const flashCard = getFlashCard(letterPair, $flashCardStore);
 		if (!flashCard) {
 			return;
 		}
@@ -73,7 +78,10 @@
 		const parseResponse = parseFlashCard(responseJson);
 		if (parseResponse.isValid) {
 			const { data } = parseResponse;
-			$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
+			$flashCardStore[parseResponse.data.letterPair.toLocaleLowerCase()] = {
+				...data,
+				fetchedAtMs: Date.now()
+			};
 		} else {
 			console.error("wrong", responseJson);
 		}
@@ -84,7 +92,7 @@
 
 <div class="max-w-prose mx-auto">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
-		{@const flashCard = $flashCardStore[$quizStore[0]]}
+		{@const flashCard = $flashCardStore[$quizStore[0].toLocaleLowerCase()]}
 		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<button
@@ -117,7 +125,7 @@
 							{#each [0, 1, 2, 3] as confidence}
 								<td>
 									<button
-										class={`w-full ${memoConfidence == confidence ? "button-selected" : ""}`}
+										class={`w-full ${memoConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
 										on:click={() => {
 											handleConfidence(confidence, "memo");
 										}}>{confidence}</button
@@ -130,7 +138,7 @@
 							{#each [0, 1, 2, 3] as confidence}
 								<td>
 									<button
-										class={`w-full ${commConfidence == confidence ? "button-selected" : ""}`}
+										class={`w-full ${commConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
 										on:click={() => {
 											handleConfidence(confidence, "comm");
 										}}>{confidence}</button
