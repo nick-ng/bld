@@ -88,7 +88,7 @@
 		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<button
-				class="button-default absolute top-0 right-0"
+				class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block absolute top-0 right-0"
 				on:click={() => {
 					$quizStore = [];
 				}}>End Quiz</button
@@ -142,7 +142,7 @@
 				</table>
 				<div class="flex flex-row gap-1">
 					<a
-						class="button-default text-center"
+						class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block text-center"
 						style="flex-grow: 2"
 						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
 					>
@@ -158,7 +158,7 @@
 				</div>
 			{:else}
 				<button
-					class="button-default w-full"
+					class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block w-full"
 					disabled={submittingConfidence}
 					on:click={() => {
 						showAnswer = true;

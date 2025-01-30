@@ -217,7 +217,7 @@
 						<td class="text-right"
 							><button
 								type="button"
-								class="button-default ml-auto"
+								class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block ml-auto"
 								on:click={() => {
 									formDirty = true;
 									if (isImageEmoji) {
@@ -298,7 +298,7 @@
 			</table>
 			<div class="w-full flex flex-row justify-between mt-1 gap-8">
 				<a
-					class="button-default flex-grow text-center"
+					class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block flex-grow text-center"
 					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a
 				>
 				<button

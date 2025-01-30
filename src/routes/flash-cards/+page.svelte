@@ -23,16 +23,21 @@
 	<h1 class="text-center">Flash Cards</h1>
 	<ul>
 		<li class="mt-1">
-			<a class="text-xl leading-none py-2 button-default text-center" href="/quiz">Quiz</a>
-		</li>
-		<li class="mt-1">
-			<a class="text-xl leading-none py-2 button-default text-center" href="/flash-cards/summary"
-				>Summary</a
+			<a
+				class="text-xl leading-none py-2 rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block text-center"
+				href="/quiz">Quiz</a
 			>
 		</li>
 		<li class="mt-1">
-			<a class="text-xl leading-none py-2 button-default text-center" href="/flash-cards/edit"
-				>Edit</a
+			<a
+				class="text-xl leading-none py-2 rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block text-center"
+				href="/flash-cards/summary">Summary</a
+			>
+		</li>
+		<li class="mt-1">
+			<a
+				class="text-xl leading-none py-2 rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block text-center"
+				href="/flash-cards/edit">Edit</a
 			>
 		</li>
 	</ul>
