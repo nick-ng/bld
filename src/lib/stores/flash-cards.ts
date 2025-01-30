@@ -133,3 +133,24 @@ export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSigna
 		console.error("e", e);
 	}
 };
+
+export const getFlashCard = (letterPair: string, flashCardMap: FlashCardStoreType): FlashCard => {
+	const temp = flashCardMap[letterPair.toLocaleLowerCase()];
+
+	if (temp) {
+		return temp;
+	}
+
+	return {
+		commConfidence: 0,
+		commutator: "",
+		confidence: 0,
+		image: "",
+		lastQuizUnix: 0,
+		letterPair,
+		memo: "",
+		memoConfidence: 0,
+		tags: "",
+		type: "corner"
+	};
+};

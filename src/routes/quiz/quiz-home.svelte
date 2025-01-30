@@ -6,7 +6,12 @@
 		QUIZ_OLDEST_STORE_KEY,
 		QUIZ_RANDOM_STORE_KEY
 	} from "$lib/constants";
-	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
+	import {
+		fetchFlashCards,
+		flashCardStore,
+		flashCardStoreStatus,
+		getFlashCard
+	} from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
 	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
@@ -300,8 +305,20 @@
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						on:click={() => {
-							const temp = shuffleArray($optionsStore.fixedQuiz).map((a) => a.toLocaleLowerCase());
-							$quizStore = temp;
+							const fixedQuiz = $optionsStore.fixedQuiz
+								.map((letterPair) => {
+									console.log(letterPair, $flashCardStore[letterPair.toLocaleLowerCase()]);
+									return {
+										letterPair,
+										flashCard: getFlashCard(letterPair, $flashCardStore)
+									};
+								})
+								.sort((a, b) => {
+									return a.flashCard.lastQuizUnix - b.flashCard.lastQuizUnix;
+								})
+								.map((a) => a.letterPair.toLocaleLowerCase());
+
+							$quizStore = fixedQuiz;
 						}}>Start Fixed Quiz</button
 					>
 				</li>
@@ -317,7 +334,7 @@
 					</thead>
 					<tbody>
 						{#each $optionsStore.fixedQuiz as letterPair}
-							{@const flashCard = $flashCardStore[letterPair.toLocaleLowerCase()]}
+							{@const flashCard = getFlashCard(letterPair, $flashCardStore)}
 							{#if flashCard}
 								<tr>
 									<td class="text-center">{letterPair}</td>
