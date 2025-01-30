@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@config "../tailwind.config.js";
 
 @layer base {
 	body,
@@ -57,61 +56,58 @@
 		@apply mt-0.5;
 	}
 
-	.odd-rows {
-		@apply odd:bg-gray-200 odd:dark:bg-gray-700;
-	}
+	@layer components {
+		.odd-rows {
+			@apply odd:bg-gray-200 odd:dark:bg-gray-700;
+		}
 
-	.even-rows {
-		@apply even:bg-gray-200 even:dark:bg-gray-700;
-	}
+		.even-rows {
+			@apply even:bg-gray-200 even:dark:bg-gray-700;
+		}
 
-	.odd-bg {
-		@apply bg-gray-200 dark:bg-gray-700;
+		.odd-bg {
+			@apply bg-gray-200 dark:bg-gray-700;
+		}
+
+		.button-selected {
+			@apply bg-blue-300 dark:bg-blue-700;
+		}
+
+		.markdown td,
+		.markdown th {
+			@apply border border-gray-600 dark:border-gray-300 p-2;
+		}
+
+		.markdown thead tr {
+			@apply bg-gray-200 dark:bg-gray-700;
+		}
+
+		.markdown tbody tr {
+			@apply even:bg-gray-200 even:dark:bg-gray-700;
+		}
+
+		.markdown hr {
+			@apply my-1;
+		}
+
+		.markdown ul {
+			@apply list-disc;
+		}
+
+		.markdown ol {
+			@apply list-decimal;
+		}
+
+		.markdown li {
+			@apply ml-4;
+		}
 	}
 
 	button:disabled {
 		@apply cursor-not-allowed opacity-70;
 	}
 
-	button,
-	.button-default {
+	button {
 		@apply rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block;
-	}
-
-	.button-selected {
-		@apply bg-blue-300 dark:bg-blue-700;
-	}
-
-	.border-default {
-		@apply border border-gray-600 dark:border-gray-300;
-	}
-
-	.markdown td,
-	.markdown th {
-		@apply border-default px-2;
-	}
-
-	.markdown thead tr {
-		@apply bg-gray-200 dark:bg-gray-700;
-	}
-
-	.markdown tbody tr {
-		@apply even-rows;
-	}
-
-	.markdown hr {
-		@apply my-1;
-	}
-
-	.markdown ul {
-		@apply list-disc;
-	}
-
-	.markdown ol {
-		@apply list-decimal;
-	}
-
-	.markdown li {
-		@apply ml-4;
 	}
 }

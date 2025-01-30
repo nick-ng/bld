@@ -11,9 +11,18 @@
 
 {#if showNav}
 	<div class="flex flex-row items-start mx-2 my-2 gap-2">
-		<a class="button-default" href="/flash-cards">Flash Cards</a>
-		<a class="button-default" href="/quiz">Quiz</a>
-		<a class="button-default" href="/corner-drawer">Corner Drawer</a>
+		<a
+			class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+			href="/flash-cards">Flash Cards</a
+		>
+		<a
+			class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+			href="/quiz">Quiz</a
+		>
+		<a
+			class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+			href="/corner-drawer">Corner Drawer</a
+		>
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>
