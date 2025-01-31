@@ -29,3 +29,23 @@ export const commConfidenceQuiz = (
 
 	return temp;
 };
+
+export const threeStyleCommutators = (
+	flashCards: FlashCard[],
+	maxCommConfidence: number,
+	minCommConfidence: number = 0
+) => {
+	const allThreeStyleComms = flashCards.filter((c) => {
+		// parity isn't a commutator
+		return c.letterPair[0] !== c.letterPair[1] && is3Style(c.letterPair);
+	});
+
+	const lowConfidence3StyleComms = allThreeStyleComms.filter((c) => {
+		return c.commConfidence >= minCommConfidence && c.commConfidence <= maxCommConfidence;
+	});
+
+	return {
+		all: allThreeStyleComms,
+		lowConfidence: lowConfidence3StyleComms
+	};
+};

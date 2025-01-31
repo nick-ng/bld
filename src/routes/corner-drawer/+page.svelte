@@ -57,7 +57,7 @@
 		});
 	}
 
-	let htmlString;
+	let htmlString = $state("");
 	run(() => {
 		htmlString = getHtmlStringForLetterPair(letterPair);
 	});
