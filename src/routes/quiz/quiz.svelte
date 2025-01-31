@@ -109,8 +109,14 @@
 					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
 				/>
 				{#if flashCard.commutator}
-					<div class="text-xl font-mono">
-						{commutatorDetails(flashCard.commutator).normalisedCommutator}
+					<div>
+						<span class="text-xl font-mono"
+							>{commutatorDetails(flashCard.commutator).normalisedCommutator}</span
+						>
+						<a
+							href={`https://blddb.net/corner.html?letter-pair=c${flashCard.letterPair}`}
+							target="pux_blddb_corner_comm">blddb.net</a
+						>
 					</div>
 				{/if}
 			{/if}

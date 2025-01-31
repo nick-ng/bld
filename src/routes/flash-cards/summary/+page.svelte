@@ -58,11 +58,14 @@
 		const memoConfidences: { [confidence: number]: string[] } = {};
 		const commConfidences: { [confidence: number]: string[] } = {};
 		const ageRanges: { [ageRangeString: string]: string[] } = {};
+		let total = 0;
 		for (let i = 0; i < flatFlashCards.length; i++) {
 			const flashCard = flatFlashCards[i];
 			if (flashCard.letterPair[0] === flashCard.letterPair[1] || !flashCard.commutator) {
 				continue;
 			}
+
+			total += 1;
 
 			const { insert, interchange, setup } = commutatorDetails(flashCard.commutator);
 
@@ -108,7 +111,8 @@
 			setups,
 			memoConfidences,
 			commConfidences,
-			ageRanges
+			ageRanges,
+			total
 		};
 	};
 
@@ -139,7 +143,7 @@
 					<tr>
 						<td class="text-right"
 							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
-								.length}/{Object.values($flashCardStore).length})</td
+								.length}/{summary.total})</td
 						>
 						<td>
 							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i}
@@ -166,7 +170,7 @@
 					<tr>
 						<td class="text-right"
 							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
-								.length}/{Object.values($flashCardStore).length})</td
+								.length}/{summary.total})</td
 						>
 						<td>
 							{#each summary.commConfidences[confidence].toSorted() as letterPair, i}
