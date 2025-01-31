@@ -6,7 +6,7 @@
 // @include     https://blddb.net/edge.html
 // @include     https://blddb.net/edge.html?*
 // @grant       none
-// @version     1.3
+// @version     1.4
 // @author      https://bld.pux.one
 // @description Show move count of commutators and add a query parameter to search for a letter pair
 // @downloadURL https://bld.pux.one/blddb-violentmonkey.js
@@ -38,7 +38,7 @@
 	const addMoveCount = (counter = 0) => {
 		const tbodyEl = document.querySelector("#table tbody");
 		if (!tbodyEl && counter < 100) {
-			console.log("no table. waiting", (counter + 1) * 200);
+			console.info("no table. waiting", (counter + 1) * 200);
 			setTimeout(
 				() => {
 					addMoveCount(counter + 1);

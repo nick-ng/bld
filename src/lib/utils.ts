@@ -1,6 +1,7 @@
 import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
 
 const RANDOM_LIMIT = 1_000_000;
+const regripEmojis = ["👍", "👎"];
 
 export const getRandomSequence = (seed: number, count: number) => {
 	const randomNumbers: number[] = [];
@@ -214,6 +215,14 @@ export const commutatorDetails = (rawCommutator: string) => {
 		};
 	}
 
+	let regripEmoji = "";
+	for (let i = 0; i < regripEmojis.length; i++) {
+		if (rawCommutator.includes(regripEmojis[i])) {
+			regripEmoji = `${regripEmojis[i]} `;
+			break;
+		}
+	}
+
 	const commutator = normaliseCommutator(commutatorResult[0]);
 	// there is at least a commutator
 	let conjugatePlusCommutator = commutator;
@@ -240,9 +249,13 @@ export const commutatorDetails = (rawCommutator: string) => {
 		insert = temp[1];
 	}
 
+	const normalisedCommutator = commutator
+		? `${regripEmoji}${normaliseCommutator(conjugatePlusCommutator)}`
+		: rawCommutator;
+
 	return {
 		rawCommutator,
-		normalisedCommutator: commutator ? normaliseCommutator(conjugatePlusCommutator) : rawCommutator,
+		normalisedCommutator,
 		commutator,
 		conjugatePlusCommutator,
 		setup,

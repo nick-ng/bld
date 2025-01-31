@@ -294,7 +294,6 @@
 					/>
 					<button
 						on:click={() => {
-							console.log("location", location);
 							const query = $optionsStore.fixedQuiz.join(",");
 							const url = `${location.origin}/quiz?fq=${query}`;
 							navigator.clipboard.writeText(url);
@@ -307,7 +306,6 @@
 						on:click={() => {
 							const fixedQuiz = $optionsStore.fixedQuiz
 								.map((letterPair) => {
-									console.log(letterPair, $flashCardStore[letterPair.toLocaleLowerCase()]);
 									return {
 										letterPair,
 										flashCard: getFlashCard(letterPair, $flashCardStore)
