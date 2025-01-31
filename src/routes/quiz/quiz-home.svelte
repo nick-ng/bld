@@ -15,13 +15,15 @@
 	import { quizStore } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
 	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
-	import { commConfidenceQuiz, sortByLastQuiz } from "./make-quiz";
+	import { sortByLastQuiz, threeStyleCommutators } from "./make-quiz";
 
-	// @todo(nick-ng): separate memo confidence and commutator confidence.
+	// @todo(nick-ng): separate memo confidence and commutator confidence
+	// @todo(nick-ng): move these to the options store
 	let customOldest = $state(2);
 	let customLowConfidence = $state(6);
 	let customRandom = $state(2);
 	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
+	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
 
 	const makeQuiz = async (
 		oldest: number,
@@ -239,30 +241,29 @@
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={async () => {
-							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
-
-							const fixedPairs = shuffleArray(temp)
+							const fixedPairs = shuffleArray(threeStyle.lowConfidence)
 								.slice(0, 10)
 								.map((f) => f.letterPair.toLocaleUpperCase())
 								.sort((a, b) => a.localeCompare(b));
 							$optionsStore.fixedQuiz = fixedPairs;
 							fixedPairsString = fixedPairs.join(", ");
-						}}>Random Low Confidence Pairs</button
+						}}
+						>Random Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all
+							.length})</button
 					>
 				</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={async () => {
-							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
-
-							const fixedPairs = sortByLastQuiz(temp)
+							const fixedPairs = sortByLastQuiz(threeStyle.lowConfidence)
 								.slice(0, 10)
 								.map((f) => f.letterPair.toLocaleUpperCase())
 								.sort((a, b) => a.localeCompare(b));
 							$optionsStore.fixedQuiz = fixedPairs;
 							fixedPairsString = fixedPairs.join(", ");
-						}}>Old Low Confidence Pairs</button
+						}}
+						>Old Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all.length})</button
 					>
 				</li>
 				<li class="mt-1">
