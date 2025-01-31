@@ -1,9 +1,14 @@
 <script lang="ts">
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { isTwist, is3Style, isOP } from "$lib/utils";
-	export let letterPair = "";
-	export let hideNonOP = true;
-	export let hideNon3Style = true;
+
+	interface Props {
+		letterPair?: string;
+		hideNonOP?: boolean;
+		hideNon3Style?: boolean;
+	}
+
+	let { letterPair = "", hideNonOP = true, hideNon3Style = true }: Props = $props();
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
 		const letterPairObject = store[letterPair];
@@ -14,7 +19,7 @@
 		];
 	};
 
-	$: isNotEitherMethod = !isOP(letterPair) && !is3Style(letterPair);
+	let isNotEitherMethod = $derived(!isOP(letterPair) && !is3Style(letterPair));
 </script>
 
 {#if isTwist(letterPair) || isNotEitherMethod || (hideNon3Style && !is3Style(letterPair)) || (hideNonOP && !isOP(letterPair))}

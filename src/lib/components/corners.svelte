@@ -1,6 +1,10 @@
 <script lang="ts">
 	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from "./corner-colour";
 
+	interface Props {
+		letterPair?: string;
+	}
+
 	let pieceAsticker1 = COLOURS.COLOUR_GREY;
 	let pieceAsticker2 = COLOURS.COLOUR_GREY;
 	let pieceAsticker3 = COLOURS.COLOUR_GREY;
@@ -9,7 +13,7 @@
 	let pieceBsticker2 = COLOURS.COLOUR_GREY;
 	let pieceBsticker3 = COLOURS.COLOUR_GREY;
 
-	export let letterPair = "";
+	let { letterPair = "" }: Props = $props();
 
 	function getHtmlStringForLetterPair(lp: string): string {
 		const letters = lp.split("");

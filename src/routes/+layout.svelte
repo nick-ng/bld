@@ -1,8 +1,14 @@
 <script lang="ts">
+	import type { Snippet } from "svelte";
 	import { page } from "$app/stores";
 	import "../app.css";
 
-	$: showNav = ["big-scramble", "clock"].every((a) => $page.route.id !== `/${a}`);
+	interface Props {
+		children?: Snippet;
+	}
+
+	let { children }: Props = $props();
+	let showNav = $derived(["big-scramble", "clock"].every((a) => $page.route.id !== `/${a}`));
 </script>
 
 <svelte:head>
@@ -26,5 +32,5 @@
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>
-	<slot />
+	{@render children?.()}
 </div>

@@ -47,7 +47,7 @@
 
 	let size: number = 120;
 	let fontOutline: number = 2;
-	let scramble = "L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'";
+	let scramble = $state("L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'");
 
 	onMount(() => {
 		const startingScramble = $page.url.searchParams.get("scramble");

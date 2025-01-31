@@ -3,7 +3,7 @@
 	import AllLetterPairs from "./all-letter-pairs.svelte";
 	import LetterPairEditor from "./letter-pair-editor.svelte";
 
-	$: letterPair = $page.url.searchParams.get("lp");
+	let letterPair = $derived($page.url.searchParams.get("lp"));
 </script>
 
 {#if letterPair?.length == 2}

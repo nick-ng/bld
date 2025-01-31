@@ -5,7 +5,7 @@
 	import { getAllLetterPairs } from "$lib/utils";
 
 	const allLetterPairs = getAllLetterPairs(true);
-	let letterPairFilter = "";
+	let letterPairFilter = $state("");
 </script>
 
 <div class="lg:w-min m-auto">
@@ -17,7 +17,7 @@
 	<div class="flex flex-row gap-2">
 		<form
 			class="mb-1"
-			on:submit={(event) => {
+			onsubmit={(event) => {
 				event.preventDefault();
 
 				const trimmedLetterPair = letterPairFilter.trim().toLowerCase();

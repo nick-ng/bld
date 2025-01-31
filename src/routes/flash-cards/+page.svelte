@@ -3,9 +3,9 @@
 	// import { optionsStore } from "$lib/stores/options";
 	// import { getAllLetterPairs, getLettersOfTheDay } from "$lib/utils";
 
-	let showLogin = false;
-	let username = "";
-	let password = "";
+	let showLogin = $state(false);
+	let username = $state("");
+	let password = $state("");
 
 	// @todo(nick-ng): get letter pairs of the day
 	// number of letter pairs
@@ -94,7 +94,7 @@
 		<summary>Login</summary>
 		<form
 			class="text-center"
-			on:submit={(event) => {
+			onsubmit={(event) => {
 				event.preventDefault();
 
 				localStorage.setItem(USERNAME_STORE_KEY, username);

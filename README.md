@@ -64,6 +64,6 @@ css:
 - src/lib/utils.ts:332: @todo(nick-ng): when you have constructed the nth subset, return that subset
 - src/lib/utils.ts:333: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
 - src/routes/flash-cards/+page.svelte:10: @todo(nick-ng): get letter pairs of the day
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:111: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:119: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:20: @todo(nick-ng): separate memo confidence and commutator confidence.
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
