@@ -18,10 +18,10 @@
 	import { commConfidenceQuiz, sortByLastQuiz } from "./make-quiz";
 
 	// @todo(nick-ng): separate memo confidence and commutator confidence.
-	let customOldest = 2;
-	let customLowConfidence = 6;
-	let customRandom = 2;
-	let fixedPairsString = $optionsStore.fixedQuiz.join(", ");
+	let customOldest = $state(2);
+	let customLowConfidence = $state(6);
+	let customRandom = $state(2);
+	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
 
 	const makeQuiz = async (
 		oldest: number,
@@ -116,7 +116,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customOldest = Math.max(0, customOldest + 1);
 								localStorage.setItem(QUIZ_OLDEST_STORE_KEY, `${customOldest}`);
 							}}>➕</button
@@ -127,7 +127,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customOldest = Math.max(0, customOldest - 1);
 								localStorage.setItem(QUIZ_OLDEST_STORE_KEY, `${customOldest}`);
 							}}>➖</button
@@ -137,7 +137,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customLowConfidence = Math.max(0, customLowConfidence + 1);
 								localStorage.setItem(QUIZ_LOW_CONFIDENCE_STORE_KEY, `${customLowConfidence}`);
 							}}>➕</button
@@ -148,7 +148,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customLowConfidence = Math.max(0, customLowConfidence - 1);
 								localStorage.setItem(QUIZ_LOW_CONFIDENCE_STORE_KEY, `${customLowConfidence}`);
 							}}>➖</button
@@ -158,7 +158,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customRandom = Math.max(0, customRandom + 1);
 								localStorage.setItem(QUIZ_RANDOM_STORE_KEY, `${customRandom}`);
 							}}>➕</button
@@ -169,7 +169,7 @@
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
-							on:click={() => {
+							onclick={() => {
 								customRandom = Math.max(0, customRandom - 1);
 								localStorage.setItem(QUIZ_RANDOM_STORE_KEY, `${customRandom}`);
 							}}>➖</button
@@ -179,7 +179,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
+						onclick={() => {
 							makeQuiz(customOldest, customLowConfidence, customRandom, true, true);
 						}}
 						>All: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
@@ -190,7 +190,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
+						onclick={() => {
 							makeQuiz(customOldest, customLowConfidence, customRandom, true, false);
 						}}
 						>3-Style: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
@@ -201,7 +201,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
+						onclick={() => {
 							makeQuiz(customOldest, customLowConfidence, customRandom, false, true);
 						}}
 						>OP: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
@@ -238,7 +238,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={async () => {
+						onclick={async () => {
 							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
 
 							const fixedPairs = shuffleArray(temp)
@@ -253,7 +253,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={async () => {
+						onclick={async () => {
 							const temp = commConfidenceQuiz(Object.values($flashCardStore), 1, 0);
 
 							const fixedPairs = sortByLastQuiz(temp)
@@ -268,7 +268,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={async () => {
+						onclick={async () => {
 							const fixedPairs = sortByLastQuiz(Object.values($flashCardStore))
 								.filter((a) => is3Style(a.letterPair) && a.letterPair[0] !== a.letterPair[1])
 								.slice(0, 10)
@@ -284,7 +284,7 @@
 						class="w-full block text-xl leading-none lg:px-1 py-2 font-mono"
 						type="text"
 						bind:value={fixedPairsString}
-						on:blur={() => {
+						onblur={() => {
 							const fixedPairs = fixedPairsString
 								.split(",")
 								.map((a) => a.trim().toLocaleUpperCase())
@@ -293,7 +293,7 @@
 						}}
 					/>
 					<button
-						on:click={() => {
+						onclick={() => {
 							const query = $optionsStore.fixedQuiz.join(",");
 							const url = `${location.origin}/quiz?fq=${query}`;
 							navigator.clipboard.writeText(url);
@@ -303,7 +303,7 @@
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
+						onclick={() => {
 							const fixedQuiz = $optionsStore.fixedQuiz
 								.map((letterPair) => {
 									return {

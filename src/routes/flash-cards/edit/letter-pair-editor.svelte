@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from "svelte/legacy";
+
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { joinServerPath, upperCaseFirst, authFetch, getOperatingSystem } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
@@ -8,18 +10,22 @@
 	import Image from "$lib/components/image.svelte";
 	import { onMount } from "svelte";
 
-	export let letterPair: string = "";
+	interface Props {
+		letterPair?: string;
+	}
 
-	let files: FileList | null;
-	let fileInputEl: HTMLInputElement | null = null;
-	let formDirty = false;
-	let currentMemo = "";
-	let currentCommutator = "";
-	let currentTags = "";
-	let currentEmoji = "";
-	let currentImageUrl = "";
-	let imageUrl = "";
-	let isImageEmoji = false;
+	let { letterPair = "" }: Props = $props();
+
+	let files: FileList | null = $state(null);
+	let fileInputEl: HTMLInputElement | null = $state(null);
+	let formDirty = $state(false);
+	let currentMemo = $state("");
+	let currentCommutator = $state("");
+	let currentTags = $state("");
+	let currentEmoji = $state("");
+	let currentImageUrl = $state("");
+	let imageUrl = $state("");
+	let isImageEmoji = $state(false);
 
 	const getEmojiShortcut = () => {
 		switch (getOperatingSystem()) {
@@ -55,7 +61,9 @@
 		}
 	};
 
-	$: onFlashCardStoreUpdate($flashCardStore);
+	run(() => {
+		onFlashCardStoreUpdate($flashCardStore);
+	});
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
 		if (imageUrl.endsWith(".emoji")) {
@@ -103,7 +111,7 @@
 		<div class="text-center">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
 		<form
-			on:submit={async (event) => {
+			onsubmit={async (event) => {
 				event.preventDefault();
 
 				formDirty = false;
@@ -187,7 +195,7 @@
 								autocomplete="off"
 								name="memo"
 								bind:value={currentMemo}
-								on:change={() => {
+								onchange={() => {
 									formDirty = true;
 								}}
 							/></td
@@ -207,7 +215,7 @@
 								autocomplete="off"
 								name="commutator"
 								bind:value={currentCommutator}
-								on:change={() => {
+								onchange={() => {
 									formDirty = true;
 								}}
 							/></td
@@ -218,7 +226,7 @@
 							><button
 								type="button"
 								class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block ml-auto"
-								on:click={() => {
+								onclick={() => {
 									formDirty = true;
 									if (isImageEmoji) {
 										isImageEmoji = false;
@@ -249,7 +257,7 @@
 									autocomplete="off"
 									name="emoji"
 									value={currentEmoji}
-									on:input={(event) => {
+									oninput={(event) => {
 										formDirty = true;
 
 										currentEmoji = event.currentTarget.value;
@@ -266,7 +274,7 @@
 									accept="image/*"
 									bind:this={fileInputEl}
 									bind:files
-									on:change={() => {
+									onchange={() => {
 										formDirty = true;
 									}}
 								/>
@@ -288,7 +296,7 @@
 								autocomplete="off"
 								name="tags"
 								bind:value={currentTags}
-								on:change={() => {
+								onchange={() => {
 									formDirty = true;
 								}}
 							/></td
@@ -304,7 +312,7 @@
 				<button
 					class="flex-grow"
 					type="button"
-					on:click={() => {
+					onclick={() => {
 						if (formDirty) {
 							formDirty = false;
 							resetForm();

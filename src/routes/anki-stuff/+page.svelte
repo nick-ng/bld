@@ -10,7 +10,7 @@
 				<td
 					><button
 						class="opaque"
-						on:click={() => {
+						onclick={() => {
 							navigator.clipboard.writeText(
 								`front:c* OR front:_c* OR front:j* OR front:_j* OR front:m* OR front:_m*`
 							);
@@ -23,7 +23,7 @@
 				<td
 					><button
 						class="opaque"
-						on:click={() => {
+						onclick={() => {
 							navigator.clipboard.writeText(
 								`-front:c* -front:_c* -front:j* -front:_j* -front:m* -front:_m*`
 							);
@@ -42,7 +42,7 @@
 				<td
 					><button
 						class="opaque"
-						on:click={() => {
+						onclick={() => {
 							navigator.clipboard.writeText(
 								`front:a* OR front:_a* OR front:e* OR front:_e* OR front:r* OR front:_r*`
 							);
@@ -55,7 +55,7 @@
 				<td
 					><button
 						class="opaque"
-						on:click={() => {
+						onclick={() => {
 							navigator.clipboard.writeText(
 								`-front:a* -front:_a* -front:e* -front:_e* -front:r* -front:_r*`
 							);

@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 
-	export let isMinutes: boolean = false;
-	export let showQuartermarkers: boolean = false;
+	interface Props {
+		isMinutes?: boolean;
+		showQuartermarkers?: boolean;
+	}
+
+	let { isMinutes = false, showQuartermarkers = false }: Props = $props();
 
 	const get12HourTimeHours = () => {
 		const now = new Date();
@@ -19,7 +23,9 @@
 	const handColour = "#ccc";
 	let timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
 	let intervalId: number | null = null;
-	let gradientStyle = `background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`;
+	let gradientStyle = $state(
+		`background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`
+	);
 
 	onMount(() => {
 		if (intervalId) {

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { run } from "svelte/legacy";
+
 	import { quizStore } from "$lib/stores/quiz";
 	import {
 		flashCardStore,
@@ -11,11 +13,11 @@
 	import { parseFlashCard } from "$lib/types";
 	import Image from "$lib/components/image.svelte";
 
-	let showAnswer = false;
-	let submittingConfidence = false;
+	let showAnswer = $state(false);
+	let submittingConfidence = $state(false);
 	let abortController: AbortController | null = null;
-	let memoConfidence = -1;
-	let commConfidence = -1;
+	let memoConfidence = $state(-1);
+	let commConfidence = $state(-1);
 
 	const handleLetterPair = (newLetterPair: string) => {
 		if (abortController) {
@@ -29,7 +31,9 @@
 		})();
 	};
 
-	$: handleLetterPair($quizStore[0]);
+	run(() => {
+		handleLetterPair($quizStore[0]);
+	});
 
 	const handleConfidence = async (newConfidence: number, confidenceType = "memo") => {
 		switch (confidenceType) {
@@ -97,7 +101,7 @@
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<button
 				class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block absolute top-0 right-0"
-				on:click={() => {
+				onclick={() => {
 					$quizStore = [];
 				}}>End Quiz</button
 			>
@@ -132,7 +136,7 @@
 								<td>
 									<button
 										class={`w-full ${memoConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
-										on:click={() => {
+										onclick={() => {
 											handleConfidence(confidence, "memo");
 										}}>{confidence}</button
 									>
@@ -145,7 +149,7 @@
 								<td>
 									<button
 										class={`w-full ${commConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
-										on:click={() => {
+										onclick={() => {
 											handleConfidence(confidence, "comm");
 										}}>{confidence}</button
 									>
@@ -164,7 +168,7 @@
 					<button
 						style="flex-grow: 2"
 						disabled={memoConfidence < 0 || commConfidence < 0}
-						on:click={(mouseEvent) => {
+						onclick={(mouseEvent) => {
 							mouseEvent.preventDefault();
 							submitConfidence(flashCard.letterPair);
 						}}>Submit</button
@@ -174,7 +178,7 @@
 				<button
 					class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block w-full"
 					disabled={submittingConfidence}
-					on:click={() => {
+					onclick={() => {
 						showAnswer = true;
 					}}>Show Answer</button
 				>

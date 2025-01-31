@@ -1,8 +1,12 @@
 <script lang="ts">
 	import { joinServerPath } from "$lib/utils";
 
-	export let imageUri = "";
-	export let alt: string;
+	interface Props {
+		imageUri?: string;
+		alt: string;
+	}
+
+	let { imageUri = "", alt }: Props = $props();
 
 	const PADDING_STEP = 2;
 	const SIZE_STEP = 10;

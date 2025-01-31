@@ -1,15 +1,15 @@
 <script lang="ts">
-	let timerStartMs = 0;
-	let timerEndMs = 0;
-	let intervalId: ReturnType<typeof setInterval> | null = null;
-	let minutes = "";
-	let barHeightPercent = 0;
+	let timerStartMs = $state(0);
+	let timerEndMs = $state(0);
+	let intervalId: ReturnType<typeof setInterval> | null = $state(null);
+	let minutes = $state("");
+	let barHeightPercent = $state(0);
 </script>
 
 <div class="timer">
 	<form
 		class="text-white"
-		on:submit={(event) => {
+		onsubmit={(event) => {
 			event.preventDefault();
 
 			if (typeof intervalId === "number") {
@@ -47,7 +47,7 @@
 			type="button"
 			class="timer_bar_inner border-none {typeof intervalId !== 'number' ? 'timer_animation' : ''}"
 			style={`height: ${barHeightPercent}%;`}
-			on:click={() => {
+			onclick={() => {
 				barHeightPercent = 0;
 			}}
 			>{#if barHeightPercent > 0}<span

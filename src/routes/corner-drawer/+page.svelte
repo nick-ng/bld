@@ -1,22 +1,24 @@
 <script lang="ts">
+	import { run } from "svelte/legacy";
+
 	import { onMount } from "svelte";
 	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from "$lib/components/corner-colour";
 	import Corners from "$lib/components/corners.svelte";
 
 	const colours = Object.values(COLOURS);
 
-	let pieceAsticker1 = COLOURS.COLOUR_GREY;
-	let pieceAsticker2 = COLOURS.COLOUR_GREY;
-	let pieceAsticker3 = COLOURS.COLOUR_GREY;
+	let pieceAsticker1 = $state(COLOURS.COLOUR_GREY);
+	let pieceAsticker2 = $state(COLOURS.COLOUR_GREY);
+	let pieceAsticker3 = $state(COLOURS.COLOUR_GREY);
 
-	let pieceBsticker1 = COLOURS.COLOUR_GREY;
-	let pieceBsticker2 = COLOURS.COLOUR_GREY;
-	let pieceBsticker3 = COLOURS.COLOUR_GREY;
+	let pieceBsticker1 = $state(COLOURS.COLOUR_GREY);
+	let pieceBsticker2 = $state(COLOURS.COLOUR_GREY);
+	let pieceBsticker3 = $state(COLOURS.COLOUR_GREY);
 
-	let letterPairInput: HTMLInputElement | null = null;
-	let letterPair = "";
-	let message = "a";
-	let messageTimeStamp = 0;
+	let letterPairInput: HTMLInputElement | null = $state(null);
+	let letterPair = $state("");
+	let message = $state("a");
+	let messageTimeStamp = $state(0);
 
 	function getHtmlStringForLetterPair(lp: string): string {
 		const letters = lp.split("");
@@ -55,7 +57,10 @@
 		});
 	}
 
-	$: htmlString = getHtmlStringForLetterPair(letterPair);
+	let htmlString;
+	run(() => {
+		htmlString = getHtmlStringForLetterPair(letterPair);
+	});
 
 	function focusLetterPairInput(event?: KeyboardEvent): void {
 		if (event && event.key !== "Enter") {
@@ -85,7 +90,7 @@
 		<Corners {letterPair} />
 	</div>
 	<form
-		on:submit={(event) => {
+		onsubmit={(event) => {
 			event.preventDefault();
 
 			navigator.clipboard.writeText(`${letterPair.slice(0, 2).toUpperCase()}<br />${htmlString}`);
@@ -122,7 +127,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceAsticker1 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -142,7 +147,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceAsticker2 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -162,7 +167,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceAsticker3 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -185,7 +190,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceBsticker1 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -205,7 +210,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceBsticker2 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -225,7 +230,7 @@
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
-							on:click={() => {
+							onclick={() => {
 								pieceBsticker3 = colour;
 								htmlString = makeHtmlString({
 									pieceAsticker1,
@@ -244,7 +249,7 @@
 	</details>
 	<div>
 		<button
-			on:click={() => {
+			onclick={() => {
 				navigator.clipboard.writeText(`${htmlString}`);
 				message = "HTML coppied to clipboard";
 				messageTimeStamp = Date.now();
