@@ -256,6 +256,21 @@
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={async () => {
+							const fixedPairs = threeStyle.lowConfidence
+								.sort((a, b) => a.letterPair.localeCompare(b.letterPair))
+								.slice(0, 10)
+								.map((f) => f.letterPair.toLocaleUpperCase());
+							$optionsStore.fixedQuiz = fixedPairs;
+							fixedPairsString = fixedPairs.join(", ");
+						}}
+						>Alphabetical Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all
+							.length})</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="w-full block text-xl leading-none py-2 text-center"
+						onclick={async () => {
 							const fixedPairs = sortByLastQuiz(threeStyle.lowConfidence)
 								.slice(0, 10)
 								.map((f) => f.letterPair.toLocaleUpperCase())
