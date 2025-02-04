@@ -317,24 +317,45 @@
 					>
 				</li>
 				<li class="mt-1">
-					<button
-						class="w-full block text-xl leading-none py-2 text-center"
-						onclick={() => {
-							const fixedQuiz = $optionsStore.fixedQuiz
-								.map((letterPair) => {
-									return {
-										letterPair,
-										flashCard: getFlashCard(letterPair, $flashCardStore)
-									};
-								})
-								.sort((a, b) => {
-									return a.flashCard.lastQuizUnix - b.flashCard.lastQuizUnix;
-								})
-								.map((a) => a.letterPair.toLocaleLowerCase());
+					<div class="w-full flex flex-row justify-stretch gap-1">
+						<button
+							class="text-xl leading-none py-2 text-center grow"
+							onclick={() => {
+								const fixedQuiz = $optionsStore.fixedQuiz
+									.map((letterPair) => {
+										return {
+											letterPair,
+											flashCard: getFlashCard(letterPair, $flashCardStore)
+										};
+									})
+									.sort((a, b) => {
+										return a.flashCard.lastQuizUnix - b.flashCard.lastQuizUnix;
+									})
+									.map((a) => a.letterPair.toLocaleLowerCase());
 
-							$quizStore = fixedQuiz;
-						}}>Start Fixed Quiz</button
-					>
+								$quizStore = fixedQuiz;
+							}}>Age Order Fixed Quiz</button
+						>
+						<button
+							class="text-xl leading-none py-2 text-center grow"
+							onclick={() => {
+								const fixedQuiz = $optionsStore.fixedQuiz
+									.map((letterPair) => {
+										return {
+											letterPair,
+											flashCard: getFlashCard(letterPair, $flashCardStore),
+											r: Math.random()
+										};
+									})
+									.sort((a, b) => {
+										return a.r - b.r;
+									})
+									.map((a) => a.letterPair.toLocaleLowerCase());
+
+								$quizStore = fixedQuiz;
+							}}>Random Fixed Quiz</button
+						>
+					</div>
 				</li>
 			</ul>
 			<details>
