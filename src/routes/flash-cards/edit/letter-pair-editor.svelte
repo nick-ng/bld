@@ -102,7 +102,7 @@
 </script>
 
 <div class="max-w-prose mx-auto">
-	<a href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a>
+	<a href={$quizStore.length > 0 ? "/quiz" : "/flash-cards"}>Back</a>
 	<h2 class="uppercase text-center">{letterPair}</h2>
 	<div class="text-center mb-1">
 		<Corners {letterPair} />
