@@ -26,6 +26,8 @@ export default [
 			"**/.env",
 			"**/.env.*",
 			"!**/.env.example",
+
+			// Ignore files for PNPM, NPM and YARN
 			"**/pnpm-lock.yaml",
 			"**/package-lock.json",
 			"**/yarn.lock"
