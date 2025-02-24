@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from "svelte/legacy";
-
 	import { quizStore } from "$lib/stores/quiz";
 	import {
 		flashCardStore,
@@ -13,6 +11,7 @@
 	import { parseFlashCard } from "$lib/types";
 	import Image from "$lib/components/image.svelte";
 
+	let flashCard = $derived($flashCardStore[$quizStore[0].toLocaleLowerCase()]);
 	let showAnswer = $state(false);
 	let submittingConfidence = $state(false);
 	let abortController: AbortController | null = null;
@@ -26,12 +25,17 @@
 
 		abortController = new AbortController();
 		(async () => {
-			await loadFlashCard(newLetterPair, abortController.signal);
+			const tempFlashCard = await loadFlashCard(newLetterPair, abortController.signal);
 			abortController = null;
+
+			if (tempFlashCard) {
+				memoConfidence = tempFlashCard.memoConfidence;
+				commConfidence = tempFlashCard.commConfidence;
+			}
 		})();
 	};
 
-	run(() => {
+	$effect.pre(() => {
 		handleLetterPair($quizStore[0]);
 	});
 
@@ -96,7 +100,6 @@
 
 <div class="max-w-prose mx-auto">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
-		{@const flashCard = $flashCardStore[$quizStore[0].toLocaleLowerCase()]}
 		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
 			<button
