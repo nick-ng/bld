@@ -88,8 +88,8 @@ export const defaultFlashCard = (letterPair: string): FlashCard => {
 		image: "",
 		commutator: "",
 		confidence: 0,
-		commConfidence: 0,
-		memoConfidence: 0,
+		commConfidence: -1,
+		memoConfidence: -1,
 		tags: "",
 		lastQuizUnix: 0
 	};

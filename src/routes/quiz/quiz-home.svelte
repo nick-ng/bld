@@ -2,7 +2,8 @@
 	import { onMount } from "svelte";
 	import { page } from "$app/stores";
 	import {
-		QUIZ_LOW_CONFIDENCE_STORE_KEY,
+		QUIZ_MEMO_CONFIDENCE_STORE_KEY,
+		QUIZ_COMM_CONFIDENCE_STORE_KEY,
 		QUIZ_OLDEST_STORE_KEY,
 		QUIZ_RANDOM_STORE_KEY
 	} from "$lib/constants";
@@ -17,21 +18,29 @@
 	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
 	import { sortByLastQuiz, threeStyleCommutators } from "./make-quiz";
 
-	// @todo(nick-ng): separate memo confidence and commutator confidence
 	// @todo(nick-ng): move these to the options store
 	let customOldest = $state(2);
-	let customLowConfidence = $state(6);
+	let customMemoConfidence = $state(6);
+	let customCommConfidence = $state(2);
 	let customRandom = $state(2);
 	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
 	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
 
-	const makeQuiz = async (
-		oldest: number,
-		lowConfidence: number,
-		random: number,
-		include3Style: boolean,
-		includeOP: boolean
-	) => {
+	const makeQuiz = async ({
+		oldest,
+		memoConfidence,
+		commConfidence,
+		random,
+		include3Style,
+		includeOP
+	}: {
+		oldest: number;
+		memoConfidence: number;
+		commConfidence: number;
+		random: number;
+		include3Style: boolean;
+		includeOP: boolean;
+	}) => {
 		const flashCardsMap = await fetchFlashCards();
 		const flashCards = Object.values(flashCardsMap).filter((f) => f.memo);
 		const remainingFlashCards = flashCards
@@ -56,11 +65,17 @@
 		remainingFlashCards.toSorted((a, b) => a.lastQuizUnix - b.lastQuizUnix);
 		quizCards.push(...remainingFlashCards.splice(0, oldest));
 
-		// least confidence
+		// low memo confidence
 		remainingFlashCards.sort(
-			(a, b) => a.confidence * 10 + a.random - (b.confidence * 10 + b.random)
+			(a, b) => a.memoConfidence * 10 + a.random - (b.memoConfidence * 10 + b.random)
 		);
-		quizCards.push(...remainingFlashCards.splice(0, lowConfidence));
+		quizCards.push(...remainingFlashCards.splice(0, memoConfidence));
+
+		// low comm confidence
+		remainingFlashCards.sort(
+			(a, b) => a.commConfidence * 10 + a.random - (b.commConfidence * 10 + b.random)
+		);
+		quizCards.push(...remainingFlashCards.splice(0, commConfidence));
 
 		// random
 		remainingFlashCards.sort((a, b) => a.random - b.random);
@@ -77,9 +92,18 @@
 			customOldest = parseInt(savedOldest, 10);
 		}
 
-		const savedLowConfidence = localStorage.getItem(QUIZ_LOW_CONFIDENCE_STORE_KEY);
-		if (typeof savedLowConfidence === "string" && !isNaN(parseInt(savedLowConfidence, 10))) {
-			customLowConfidence = parseInt(savedLowConfidence, 10);
+		const savedMemoConfidence = localStorage.getItem(QUIZ_MEMO_CONFIDENCE_STORE_KEY);
+		const parsedMemoConfidence =
+			typeof savedMemoConfidence === "string" && parseInt(savedMemoConfidence, 10);
+		if (typeof parsedMemoConfidence === "number") {
+			customMemoConfidence = parsedMemoConfidence;
+		}
+
+		const savedCommConfidence = localStorage.getItem(QUIZ_COMM_CONFIDENCE_STORE_KEY);
+		const prasedCommConfidence =
+			typeof savedCommConfidence === "string" && parseInt(savedCommConfidence, 10);
+		if (typeof prasedCommConfidence === "number") {
+			customCommConfidence = prasedCommConfidence;
 		}
 
 		const savedRandom = localStorage.getItem(QUIZ_RANDOM_STORE_KEY);
@@ -140,19 +164,40 @@
 							class="block py-2 lg:py-1 w-full"
 							type="button"
 							onclick={() => {
-								customLowConfidence = Math.max(0, customLowConfidence + 1);
-								localStorage.setItem(QUIZ_LOW_CONFIDENCE_STORE_KEY, `${customLowConfidence}`);
+								customMemoConfidence = Math.max(0, customMemoConfidence + 1);
+								localStorage.setItem(QUIZ_MEMO_CONFIDENCE_STORE_KEY, `${customMemoConfidence}`);
 							}}>➕</button
 						>
 						<div class="px-1 min-w-5 text-center">
-							<span class="font-mono">{customLowConfidence}</span> Low Confidence
+							<span class="font-mono">{customMemoConfidence}</span> Memo Confidence
 						</div>
 						<button
 							class="block py-2 lg:py-1 w-full"
 							type="button"
 							onclick={() => {
-								customLowConfidence = Math.max(0, customLowConfidence - 1);
-								localStorage.setItem(QUIZ_LOW_CONFIDENCE_STORE_KEY, `${customLowConfidence}`);
+								customMemoConfidence = Math.max(0, customMemoConfidence - 1);
+								localStorage.setItem(QUIZ_MEMO_CONFIDENCE_STORE_KEY, `${customMemoConfidence}`);
+							}}>➖</button
+						>
+					</div>
+					<div class="flex-grow">
+						<button
+							class="block py-2 lg:py-1 w-full"
+							type="button"
+							onclick={() => {
+								customCommConfidence = Math.max(0, customCommConfidence + 1);
+								localStorage.setItem(QUIZ_COMM_CONFIDENCE_STORE_KEY, `${customCommConfidence}`);
+							}}>➕</button
+						>
+						<div class="px-1 min-w-5 text-center">
+							<span class="font-mono">{customCommConfidence}</span> Comm Confidence
+						</div>
+						<button
+							class="block py-2 lg:py-1 w-full"
+							type="button"
+							onclick={() => {
+								customCommConfidence = Math.max(0, customCommConfidence - 1);
+								localStorage.setItem(QUIZ_COMM_CONFIDENCE_STORE_KEY, `${customCommConfidence}`);
 							}}>➖</button
 						>
 					</div>
@@ -182,33 +227,52 @@
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={() => {
-							makeQuiz(customOldest, customLowConfidence, customRandom, true, true);
+							makeQuiz({
+								commConfidence: customCommConfidence,
+								memoConfidence: customMemoConfidence,
+								oldest: customOldest,
+								random: customRandom,
+								include3Style: true,
+								includeOP: true
+							});
 						}}
-						>All: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
-							customLowConfidence +
-							customRandom}</button
+						>All: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
 					>
 				</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={() => {
-							makeQuiz(customOldest, customLowConfidence, customRandom, true, false);
+							makeQuiz({
+								commConfidence: customCommConfidence,
+								memoConfidence: customMemoConfidence,
+								oldest: customOldest,
+								random: customRandom,
+								include3Style: true,
+								includeOP: false
+							});
 						}}
-						>3-Style: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
-							customLowConfidence +
-							customRandom}</button
+						>3-Style: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom}
+						=
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
 					>
 				</li>
 				<li class="mt-1">
 					<button
 						class="w-full block text-xl leading-none py-2 text-center"
 						onclick={() => {
-							makeQuiz(customOldest, customLowConfidence, customRandom, false, true);
+							makeQuiz({
+								commConfidence: customCommConfidence,
+								memoConfidence: customMemoConfidence,
+								oldest: customOldest,
+								random: customRandom,
+								include3Style: false,
+								includeOP: true
+							});
 						}}
-						>OP: {customOldest} + {customLowConfidence} + {customRandom} = {customOldest +
-							customLowConfidence +
-							customRandom}</button
+						>OP: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
 					>
 				</li>
 				<!-- <li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
