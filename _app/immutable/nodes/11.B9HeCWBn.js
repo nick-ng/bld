@@ -1,0 +1,1 @@
+import{a as t,t as r}from"../chunks/C1ztm5LV.js";import"../chunks/Dt05l2Pd.js";var m=r('<div class="max-w-[130ch] mx-auto"><h1>Old Pochman Corners</h1></div>');function n(a){var o=m();t(a,o)}export{n as component};
