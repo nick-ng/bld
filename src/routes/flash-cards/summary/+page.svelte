@@ -139,14 +139,14 @@
 			<tbody>
 				{#each Object.keys(summary.memoConfidences)
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
-					.map((a) => parseInt(a)) as confidence}
+					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
 						<td class="text-right"
 							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
 								.length}/{summary.total})</td
 						>
 						<td>
-							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i}
+							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -166,14 +166,14 @@
 			<tbody>
 				{#each Object.keys(summary.commConfidences)
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
-					.map((a) => parseInt(a)) as confidence}
+					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
 						<td class="text-right"
 							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
 								.length}/{summary.total})</td
 						>
 						<td>
-							{#each summary.commConfidences[confidence].toSorted() as letterPair, i}
+							{#each summary.commConfidences[confidence].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -191,11 +191,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.inserts).toSorted(sortAlgs) as insert}
+				{#each Object.keys(summary.inserts).toSorted(sortAlgs) as insert (insert)}
 					<tr>
 						<td class="font-mono whitespace-nowrap">{insert}</td>
 						<td>
-							{#each summary.inserts[insert].toSorted() as letterPair, i}
+							{#each summary.inserts[insert].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -213,11 +213,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.setups).toSorted(sortAlgs) as setup}
+				{#each Object.keys(summary.setups).toSorted(sortAlgs) as setup (setup)}
 					<tr>
 						<td class="font-mono whitespace-nowrap">{setup}</td>
 						<td>
-							{#each summary.setups[setup].toSorted() as letterPair, i}
+							{#each summary.setups[setup].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -235,11 +235,11 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange}
+				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange (ageRange)}
 					<tr>
 						<td>{ageRange}</td>
 						<td>
-							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i}
+							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>

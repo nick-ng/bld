@@ -123,7 +123,7 @@
 				<h3>Piece A</h3>
 				<div>
 					<h4>Sticker 1</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
@@ -143,7 +143,7 @@
 				</div>
 				<div>
 					<h4>Sticker 2</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
@@ -163,7 +163,7 @@
 				</div>
 				<div>
 					<h4>Sticker 3</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
@@ -186,7 +186,7 @@
 				<h3>Piece B</h3>
 				<div>
 					<h4>Sticker 1</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
@@ -206,7 +206,7 @@
 				</div>
 				<div>
 					<h4>Sticker 2</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}
@@ -226,7 +226,7 @@
 				</div>
 				<div>
 					<h4>Sticker 3</h4>
-					{#each colours as colour}
+					{#each colours as colour (colour)}
 						<button
 							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
 							style={`background-color: ${colour}`}

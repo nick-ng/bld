@@ -49,7 +49,7 @@
 			}
 
 			return lp.startsWith(letterPairFilter);
-		}) as letterPair}
+		}) as letterPair (letterPair)}
 			<LetterPairChooser
 				{letterPair}
 				hideNon3Style={$optionsStore.hideNon3Style}

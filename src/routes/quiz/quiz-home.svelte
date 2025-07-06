@@ -432,7 +432,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						{#each $optionsStore.fixedQuiz as letterPair}
+						{#each $optionsStore.fixedQuiz as letterPair (letterPair)}
 							{@const flashCard = getFlashCard(letterPair, $flashCardStore)}
 							{#if flashCard}
 								<tr>
