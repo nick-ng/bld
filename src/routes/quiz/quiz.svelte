@@ -102,6 +102,7 @@
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
 		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
 			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
+			<div class="text-left absolute top-0 left-0">{$quizStore.length} left</div>
 			<button
 				class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block absolute top-0 right-0"
 				onclick={() => {
@@ -129,7 +130,6 @@
 			{/if}
 		</div>
 		<div class="absolute bottom-2 left-0 px-2 w-full lg:w-full lg:relative lg:px-0">
-			<div class="text-left">{$quizStore.length} left</div>
 			{#if showAnswer}
 				<table class="w-full border-collapse mb-2">
 					<tbody>
