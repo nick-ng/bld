@@ -1,21 +1,10 @@
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
-import globals from "globals";
-import tsParser from "@typescript-eslint/parser";
-import parser from "svelte-eslint-parser";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 import js from "@eslint/js";
-import { FlatCompat } from "@eslint/eslintrc";
+import svelte from "eslint-plugin-svelte";
+import globals from "globals";
+import ts from "typescript-eslint";
+import svelteConfig from "./svelte.config.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-	baseDirectory: __dirname,
-	recommendedConfig: js.configs.recommended,
-	allConfig: js.configs.all
-});
-
-export default [
+export default ts.config(
 	{
 		ignores: [
 			"**/.DS_Store",
@@ -33,52 +22,44 @@ export default [
 			"**/yarn.lock"
 		]
 	},
-	...compat.extends(
-		"eslint:recommended",
-		"plugin:@typescript-eslint/recommended",
-		"plugin:svelte/recommended",
-		"prettier"
-	),
+	js.configs.recommended,
+	...ts.configs.recommended,
+	...svelte.configs.recommended,
 	{
-		plugins: {
-			"@typescript-eslint": typescriptEslint
-		},
-
 		languageOptions: {
 			globals: {
 				...globals.browser,
 				...globals.node
-			},
-
-			parser: tsParser,
-			ecmaVersion: 2020,
-			sourceType: "module",
-
-			parserOptions: {
-				extraFileExtensions: [".svelte"]
 			}
-		},
-
-		rules: {
-			"@typescript-eslint/no-unused-vars": [
-				"error",
-				{
-					argsIgnorePattern: "^_"
-				}
-			]
 		}
 	},
 	{
-		files: ["**/*.svelte"],
-
+		files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
+		// See more details at: https://typescript-eslint.io/packages/parser/
 		languageOptions: {
-			parser: parser,
-			ecmaVersion: 5,
-			sourceType: "script",
-
 			parserOptions: {
-				parser: "@typescript-eslint/parser"
+				projectService: true,
+				extraFileExtensions: [".svelte"], // Add support for additional file extensions, such as .svelte
+				parser: ts.parser,
+				// Specify a parser for each language, if needed:
+				// parser: {
+				//   ts: ts.parser,
+				//   js: espree,    // Use espree for .js files (add: import espree from 'espree')
+				//   typescript: ts.parser
+				// },
+
+				// We recommend importing and specifying svelte.config.js.
+				// By doing so, some rules in eslint-plugin-svelte will automatically read the configuration and adjust their behavior accordingly.
+				// While certain Svelte settings may be statically loaded from svelte.config.js even if you don’t specify it,
+				// explicitly specifying it ensures better compatibility and functionality.
+				svelteConfig
 			}
 		}
+	},
+	{
+		rules: {
+			// Override or add rule settings here, such as:
+			// 'svelte/rule-name': 'error'
+		}
 	}
-];
+);

@@ -135,7 +135,7 @@
 					<tbody>
 						<tr>
 							<td class="w-1 pr-1">Memo</td>
-							{#each [0, 1, 2, 3] as confidence}
+							{#each [0, 1, 2, 3] as confidence (confidence)}
 								<td>
 									<button
 										class={`w-full ${memoConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
@@ -148,7 +148,7 @@
 						</tr>
 						<tr>
 							<td class="w-1 pr-1">Comm</td>
-							{#each [0, 1, 2, 3] as confidence}
+							{#each [0, 1, 2, 3] as confidence (confidence)}
 								<td>
 									<button
 										class={`w-full ${commConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}

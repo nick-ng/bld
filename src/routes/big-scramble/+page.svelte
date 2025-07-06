@@ -81,7 +81,7 @@
 		<Timer />
 	</div>
 	<div class="scramble">
-		{#each scrambleToMoves(scramble) as scrambleMove}
+		{#each scrambleToMoves(scramble) as scrambleMove, i (`${i}-${scrambleMove.move}-${scrambleMove.side}`)}
 			<div
 				class={["move", scrambleMove.side.toLowerCase(), scrambleMove.isPrime && "is_prime"]
 					.filter((c) => c)

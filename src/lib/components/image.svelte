@@ -79,7 +79,7 @@
 >
 	{#if imageUri.endsWith(".emoji")}
 		<div class="relative h-full flex-grow overflow-hidden">
-			{#each getEmojiLayers(imageUri) as emojiLayer, i}
+			{#each getEmojiLayers(imageUri) as emojiLayer, i (`${i}-${emojiLayer.emoji}-${emojiLayer.padding}`)}
 				<div
 					class="break-keep leading-none absolute left-0 right-0 top-0 bottom-0 m-auto text-9xl flex flex-row justify-center items-center"
 					style={`z-index: ${getEmojiLayers(imageUri).length - i}; font-size: ${128 + emojiLayer.sizeAdjustment}px;opacity: ${emojiLayer.opacity};padding: ${emojiLayer.padding};`}
