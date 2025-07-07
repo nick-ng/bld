@@ -29,7 +29,7 @@ const loadQuiz = () => {
 		const quizLetters = JSON.parse(quizString);
 		quizStore.set(quizLetters);
 	} catch (err) {
-		console.error("error when retrieving quiz");
+		console.error("error when retrieving quiz", err);
 	}
 };
 
