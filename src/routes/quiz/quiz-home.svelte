@@ -13,7 +13,7 @@
 		flashCardStoreStatus,
 		getFlashCard
 	} from "$lib/stores/flash-cards";
-	import { quizStore } from "$lib/stores/quiz";
+	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
 	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
 	import { sortByLastQuiz, threeStyleCommutators } from "./make-quiz";
@@ -84,6 +84,7 @@
 		const quizLetterPairs = quizCards.sort((a, b) => a.random - b.random).map((c) => c.letterPair);
 
 		$quizStore = quizLetterPairs;
+		touchCurrentQuiz();
 	};
 
 	onMount(() => {
