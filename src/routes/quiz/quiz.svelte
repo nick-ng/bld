@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { quizStore } from "$lib/stores/quiz";
+	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import {
 		flashCardStore,
 		flashCardStoreStatus,
@@ -72,6 +72,7 @@
 		// wait for next frame before going to the next question
 		setTimeout(() => {
 			$quizStore = $quizStore.filter((lp) => lp != letterPair);
+			touchCurrentQuiz();
 		}, 0);
 
 		const response = await authFetch(joinServerPath("quiz", letterPair), {
@@ -184,6 +185,6 @@
 			{/if}
 		</div>
 	{:else}
-		<div>Something went wrong.</div>
+		<div>Loading</div>
 	{/if}
 </div>
