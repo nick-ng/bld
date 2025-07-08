@@ -53,12 +53,11 @@
 	};
 
 	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
-		const flatFlashCards = Object.values(flashCards);
 		const inserts: { [insert: string]: string[] } = {};
 		const interchanges: { [interchange: string]: string[] } = {};
 		const setups: { [setup: string]: string[] } = {};
-		const memoConfidences: { [confidence: number]: string[] } = {};
-		const commConfidences: { [confidence: number]: string[] } = {};
+		const memoConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
+		const commConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
 		const missingComms: string[] = [];
 		const missingMemos: string[] = [];
 		const ageRanges: { [ageRangeString: string]: string[] } = {};
@@ -77,12 +76,20 @@
 					if (!memoConfidences[flashCard.memoConfidence]) {
 						memoConfidences[flashCard.memoConfidence] = [];
 					}
-					memoConfidences[flashCard.memoConfidence].push(flashCard.letterPair);
+					if (flashCard.memo) {
+						memoConfidences[flashCard.memoConfidence].push(letterPair);
+					} else {
+						missingMemos.push(letterPair);
+					}
 
 					if (!commConfidences[flashCard.commConfidence]) {
 						commConfidences[flashCard.commConfidence] = [];
 					}
-					commConfidences[flashCard.commConfidence].push(flashCard.letterPair);
+					if (flashCard.commutator) {
+						commConfidences[flashCard.commConfidence].push(letterPair);
+					} else {
+						missingComms.push(letterPair);
+					}
 
 					const ageRange = getAgeRange(flashCard.lastQuizUnix * 1000);
 					if (!ageRanges[ageRange]) {
