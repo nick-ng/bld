@@ -121,10 +121,8 @@ export const isTwist = (letterPair: string) => {
 	}
 
 	for (let i = 0; i < SAME_PIECES.length; i++) {
-		if (SAME_PIECES[i].includes(letters[0])) {
-			if (SAME_PIECES[i].includes(letters[1])) {
-				return true;
-			}
+		if (SAME_PIECES[i].includes(letters[0]) && SAME_PIECES[i].includes(letters[1])) {
+			return true;
 		}
 	}
 
