@@ -145,15 +145,16 @@
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-right">Comm. Confidence</th>
+					<th class="text-center">Comm. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#if summary.missingComms.length > 0}
 					<tr>
-						<td class="text-right">
-							No Comms ({summary.missingComms.length}/{summary.total})
+						<td class="text-center">
+							<div>No Comms</div>
+							<div>({summary.missingComms.length}/{summary.total})</div>
 						</td>
 						<td>
 							{#each summary.missingComms.toSorted() as letterPair, i (letterPair)}
@@ -168,9 +169,9 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
-						<td class="text-right"
-							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
-								.length}/{summary.total})</td
+						<td class="text-center"
+							><div>{confidence}</div>
+							<div>({summary.commConfidences[confidence].length}/{summary.total})</div></td
 						>
 						<td>
 							{#each summary.commConfidences[confidence].toSorted() as letterPair, i (letterPair)}
@@ -186,15 +187,16 @@
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-right">Memo. Confidence</th>
+					<th class="text-center">Memo. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
 				{#if summary.missingMemos.length > 0}
 					<tr>
-						<td class="text-right">
-							No Comms ({summary.missingMemos.length}/{summary.total})
+						<td class="text-center">
+							<div>No Memo</div>
+							<div>({summary.missingMemos.length}/{summary.total})</div>
 						</td>
 						<td>
 							{#each summary.missingMemos.toSorted() as letterPair, i (letterPair)}
@@ -209,9 +211,9 @@
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
-						<td class="text-right"
-							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
-								.length}/{summary.total})</td
+						<td class="text-center"
+							><div>{confidence}</div>
+							<div>({summary.memoConfidences[confidence].length}/{summary.total})</div></td
 						>
 						<td>
 							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i (letterPair)}
