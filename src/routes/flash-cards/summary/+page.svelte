@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { FlashCard } from "$lib/types";
+	import type { FlashCardStoreType } from "$lib/stores/flash-cards";
+
 	import { onMount } from "svelte";
-	import { commutatorDetails, sortAlgs } from "$lib/utils";
+	import { commutatorDetails, sortAlgs, is3Style, isTwist } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, fetchFlashCards } from "$lib/stores/flash-cards";
 
 	const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
@@ -51,58 +52,68 @@
 		}
 	};
 
-	const summariseFlashCards = (flatFlashCards: FlashCard[]) => {
+	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
+		const flatFlashCards = Object.values(flashCards);
 		const inserts: { [insert: string]: string[] } = {};
 		const interchanges: { [interchange: string]: string[] } = {};
 		const setups: { [setup: string]: string[] } = {};
 		const memoConfidences: { [confidence: number]: string[] } = {};
 		const commConfidences: { [confidence: number]: string[] } = {};
+		const missingComms: string[] = [];
+		const missingMemos: string[] = [];
 		const ageRanges: { [ageRangeString: string]: string[] } = {};
 		let total = 0;
-		for (let i = 0; i < flatFlashCards.length; i++) {
-			const flashCard = flatFlashCards[i];
-			if (flashCard.letterPair[0] === flashCard.letterPair[1] || !flashCard.commutator) {
-				continue;
+		for (let letter0 = 0; letter0 < 24; letter0++) {
+			for (let letter1 = 0; letter1 < 24; letter1++) {
+				const letterPair =
+					`${String.fromCharCode(65 + letter0)}${String.fromCharCode(65 + letter1)}`.toLowerCase();
+				if (!is3Style(letterPair) || isTwist(letterPair)) {
+					continue;
+				}
+
+				total += 1;
+				const flashCard = flashCards[letterPair];
+				if (flashCard) {
+					if (!memoConfidences[flashCard.memoConfidence]) {
+						memoConfidences[flashCard.memoConfidence] = [];
+					}
+					memoConfidences[flashCard.memoConfidence].push(flashCard.letterPair);
+
+					if (!commConfidences[flashCard.commConfidence]) {
+						commConfidences[flashCard.commConfidence] = [];
+					}
+					commConfidences[flashCard.commConfidence].push(flashCard.letterPair);
+
+					const ageRange = getAgeRange(flashCard.lastQuizUnix * 1000);
+					if (!ageRanges[ageRange]) {
+						ageRanges[ageRange] = [];
+					}
+					ageRanges[ageRange].push(flashCard.letterPair);
+
+					const { insert, interchange, setup } = commutatorDetails(flashCard.commutator);
+					if (!insert) {
+						continue;
+					}
+
+					if (!inserts[insert]) {
+						inserts[insert] = [];
+					}
+					inserts[insert].push(flashCard.letterPair);
+
+					if (!interchanges[interchange]) {
+						interchanges[interchange] = [];
+					}
+					interchanges[interchange].push(flashCard.letterPair);
+
+					if (!setups[setup]) {
+						setups[setup] = [];
+					}
+					setups[setup].push(flashCard.letterPair);
+				} else {
+					missingComms.push(letterPair);
+					missingMemos.push(letterPair);
+				}
 			}
-
-			total += 1;
-
-			const { insert, interchange, setup } = commutatorDetails(flashCard.commutator);
-
-			if (!insert) {
-				continue;
-			}
-
-			if (!inserts[insert]) {
-				inserts[insert] = [];
-			}
-			inserts[insert].push(flashCard.letterPair);
-
-			if (!interchanges[interchange]) {
-				interchanges[interchange] = [];
-			}
-			interchanges[interchange].push(flashCard.letterPair);
-
-			if (!setups[setup]) {
-				setups[setup] = [];
-			}
-			setups[setup].push(flashCard.letterPair);
-
-			if (!memoConfidences[flashCard.memoConfidence]) {
-				memoConfidences[flashCard.memoConfidence] = [];
-			}
-			memoConfidences[flashCard.memoConfidence].push(flashCard.letterPair);
-
-			if (!commConfidences[flashCard.commConfidence]) {
-				commConfidences[flashCard.commConfidence] = [];
-			}
-			commConfidences[flashCard.commConfidence].push(flashCard.letterPair);
-
-			const ageRange = getAgeRange(flashCard.lastQuizUnix * 1000);
-			if (!ageRanges[ageRange]) {
-				ageRanges[ageRange] = [];
-			}
-			ageRanges[ageRange].push(flashCard.letterPair);
 		}
 
 		return {
@@ -110,13 +121,15 @@
 			interchanges,
 			setups,
 			memoConfidences,
+			missingMemos,
 			commConfidences,
+			missingComms,
 			ageRanges,
 			total
 		};
 	};
 
-	let summary = $derived(summariseFlashCards(Object.values($flashCardStore)));
+	let summary = $derived(summariseFlashCards($flashCardStore));
 
 	onMount(() => {
 		if (Date.now() - $flashCardStoreStatus.fetchEndMs > STALE_THRESHOLD_MS) {
@@ -132,21 +145,35 @@
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-right">Memo. Confidence</th>
+					<th class="text-right">Comm. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.memoConfidences)
+				{#if summary.missingComms.length > 0}
+					<tr>
+						<td class="text-right">
+							No Comms ({summary.missingComms.length}/{summary.total})
+						</td>
+						<td>
+							{#each summary.missingComms.toSorted() as letterPair, i (letterPair)}
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp={letterPair}`} class="uppercase"
+									>{letterPair}</a
+								>
+							{/each}
+						</td>
+					</tr>
+				{/if}
+				{#each Object.keys(summary.commConfidences)
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
 						<td class="text-right"
-							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
+							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
 								.length}/{summary.total})</td
 						>
 						<td>
-							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i (letterPair)}
+							{#each summary.commConfidences[confidence].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
@@ -159,21 +186,35 @@
 		<table class="block summary-tables lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-right">Comm. Confidence</th>
+					<th class="text-right">Memo. Confidence</th>
 					<th class="text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
-				{#each Object.keys(summary.commConfidences)
+				{#if summary.missingMemos.length > 0}
+					<tr>
+						<td class="text-right">
+							No Comms ({summary.missingMemos.length}/{summary.total})
+						</td>
+						<td>
+							{#each summary.missingMemos.toSorted() as letterPair, i (letterPair)}
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp={letterPair}`} class="uppercase"
+									>{letterPair}</a
+								>
+							{/each}
+						</td>
+					</tr>
+				{/if}
+				{#each Object.keys(summary.memoConfidences)
 					.toSorted((a, b) => parseInt(a) - parseInt(b))
 					.map((a) => parseInt(a)) as confidence (confidence)}
 					<tr>
 						<td class="text-right"
-							><span class="font-bold">{confidence}</span> ({summary.commConfidences[confidence]
+							><span class="font-bold">{confidence}</span> ({summary.memoConfidences[confidence]
 								.length}/{summary.total})</td
 						>
 						<td>
-							{#each summary.commConfidences[confidence].toSorted() as letterPair, i (letterPair)}
+							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
