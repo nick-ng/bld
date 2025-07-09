@@ -101,7 +101,7 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 			fileStats, err := f.Stat()
 			if err != nil {
 				fmt.Println("error when getting snapshot stats", err)
-			} else {
+			} else if fileStats.Size() > 1000 {
 				lastSnapshotFileSize = fileStats.Size()
 			}
 		}

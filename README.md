@@ -53,7 +53,7 @@ css:
 
 ### ToDo Comments
 
-- server/database/database.go:478: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/database/database.go:479: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:6: @todo(nick-ng): change filter criteria "direction"
