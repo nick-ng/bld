@@ -346,6 +346,7 @@ func rowV1ToFlashCard(row string) (FlashCard, error) {
 	items := rowToItems(row)
 
 	if len(items) != 9 {
+		fmt.Println("error: v1 wrong number of items", row)
 		return FlashCard{}, errors.New("wrong number of items")
 	}
 
@@ -380,6 +381,7 @@ func rowV2ToFlashCard(row string) (FlashCard, error) {
 	items := rowToItems(row)
 
 	if len(items) != 10 {
+		fmt.Println("error: v2 wrong number of items", row)
 		return FlashCard{}, errors.New("wrong number of items")
 	}
 

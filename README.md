@@ -53,14 +53,14 @@ css:
 
 ### ToDo Comments
 
-- server/database/database.go:473: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/database/database.go:475: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:37: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:6: @todo(nick-ng): change filter criteria "direction"
-- src/lib/utils.ts:328: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
-- src/lib/utils.ts:329: @todo(nick-ng): remove items from bag and put into subsets
-- src/lib/utils.ts:330: @todo(nick-ng): when you have constructed the nth subset, return that subset
-- src/lib/utils.ts:331: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
+- src/lib/utils.ts:332: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
+- src/lib/utils.ts:333: @todo(nick-ng): remove items from bag and put into subsets
+- src/lib/utils.ts:334: @todo(nick-ng): when you have constructed the nth subset, return that subset
+- src/lib/utils.ts:335: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:119: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:21: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
