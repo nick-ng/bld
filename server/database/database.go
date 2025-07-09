@@ -25,12 +25,13 @@ type FlashCard struct {
 	Tags         string `json:"tags"`
 	LastQuizUnix int64  `json:"lastQuizUnix"`
 	Confidence   int    `json:"confidence"`
+	IsPublic     bool   `json:"isPublic"`
 }
 
-const VERSION_PREFIX = "v1"
+const VERSION_PREFIX = "v2"
 const USER_DATA_DIRECTORY = "user-data"
 const SYNC_ALL_WRITES = false
-const LOG_SIZE_FACTOR = 5
+const LOG_SIZE_FACTOR = 3
 
 var FlashCardData = map[string]FlashCard{}
 var lastSnapshotFileSize int64 = 1000
@@ -59,6 +60,16 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 		return newFlashCardData, err
 	}
 
+	// sort files ignoring version prefix (v1, v2, etc.)
+	slices.SortFunc(dirEntries, func(a, b os.DirEntry) int {
+		// names will begin with "-" (e.g. -202507...) which won't affect sort order
+		cutset := "v0123456789"
+		aName := strings.TrimLeft(a.Name(), cutset)
+		bName := strings.TrimLeft(b.Name(), cutset)
+
+		return strings.Compare(aName, bName)
+	})
+
 	var filenames []string
 	var lastSnapshot string
 	for _, dirEntry := range dirEntries {
@@ -69,10 +80,13 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 		}
 	}
 
-	slices.Sort(filenames)
 	for _, filename := range filenames {
 		if len(finalFilename) > 0 && filename == finalFilename {
 			return newFlashCardData, nil
+		}
+
+		if !strings.HasSuffix(filename, ".csv") {
+			continue
 		}
 
 		fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
@@ -108,8 +122,18 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 				continue
 			}
 
-			// @todo: check filename and use appropriate version of rowToFlashCard
-			flashCard, err := rowToFlashCard(tempLine)
+			var flashCard FlashCard
+			switch {
+			case strings.HasPrefix(filename, "v2-"):
+				{
+					flashCard, err = rowV2ToFlashCard(tempLine)
+				}
+			default:
+				{
+					// v1
+					flashCard, err = rowV1ToFlashCard(tempLine)
+				}
+			}
 			if err != nil {
 				continue
 			}
@@ -233,8 +257,16 @@ func getCurrentChangeLogFullPath() string {
 	}
 
 	now := time.Now()
+	filenameStart := fmt.Sprintf("%s-%s", VERSION_PREFIX, now.Format("20060102-150405"))
+	matchingFileCount := 0
+	for _, filename := range actualLogFilenames {
+		if strings.HasPrefix(filename, filenameStart) {
+			matchingFileCount += 1
+		}
+	}
 
-	fullPath := filepath.Join(USER_DATA_DIRECTORY, fmt.Sprintf("%s-%s-%d-log.csv", VERSION_PREFIX, now.Format("20060102-150405"), len(dirEntries)))
+	filename := fmt.Sprintf("%s-%d-log.csv", filenameStart, matchingFileCount)
+	fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
 
 	return fullPath
 }
@@ -275,6 +307,10 @@ func normaliseFlashCardType(flashCardType string) string {
 
 func flashCardToRow(flashCard FlashCard) (string, error) {
 	flashCardType := normaliseFlashCardType(flashCard.Type)
+	isPublicString := "0"
+	if flashCard.IsPublic {
+		isPublicString = "1"
+	}
 
 	row := []string{
 		flashCard.Owner,
@@ -285,6 +321,7 @@ func flashCardToRow(flashCard FlashCard) (string, error) {
 		flashCard.Tags,
 		flashCardType,
 		fmt.Sprintf("%d", flashCard.Confidence),
+		isPublicString,
 		fmt.Sprintf("%d", flashCard.LastQuizUnix),
 	}
 
@@ -305,8 +342,81 @@ func flashCardToRow(flashCard FlashCard) (string, error) {
 	return fmt.Sprintf("%s\n", rowString), nil
 }
 
-func rowToFlashCard(row string) (FlashCard, error) {
-	// @todo(nick-ng): handle new lines?
+func rowV1ToFlashCard(row string) (FlashCard, error) {
+	items := rowToItems(row)
+
+	if len(items) != 9 {
+		return FlashCard{}, errors.New("wrong number of items")
+	}
+
+	confidence, err := strconv.ParseInt(items[7], 10, 0)
+	if err != nil {
+		confidence = 0
+	}
+
+	lastQuizUnix, err := strconv.ParseInt(items[8], 10, 64)
+	if err != nil {
+		lastQuizUnix = 0
+	}
+
+	flashCardType := normaliseFlashCardType(items[6])
+	flashCard := FlashCard{
+		Owner:        items[0],
+		LetterPair:   items[1],
+		Memo:         items[2],
+		Image:        items[3],
+		Commutator:   items[4],
+		Tags:         items[5],
+		Type:         flashCardType,
+		Confidence:   int(confidence),
+		IsPublic:     false,
+		LastQuizUnix: lastQuizUnix,
+	}
+
+	return flashCard, nil
+}
+
+func rowV2ToFlashCard(row string) (FlashCard, error) {
+	items := rowToItems(row)
+
+	if len(items) != 10 {
+		return FlashCard{}, errors.New("wrong number of items")
+	}
+
+	confidence, err := strconv.ParseInt(items[7], 10, 0)
+	if err != nil {
+		confidence = 0
+	}
+
+	isPublic := false
+	if items[8] == "1" {
+		isPublic = true
+	}
+
+	lastQuizUnix, err := strconv.ParseInt(items[9], 10, 64)
+	if err != nil {
+		lastQuizUnix = 0
+	}
+
+	flashCardType := normaliseFlashCardType(items[6])
+	flashCard := FlashCard{
+		Owner:        items[0],
+		LetterPair:   items[1],
+		Memo:         items[2],
+		Image:        items[3],
+		Commutator:   items[4],
+		Tags:         items[5],
+		Type:         flashCardType,
+		Confidence:   int(confidence),
+		IsPublic:     isPublic,
+		LastQuizUnix: lastQuizUnix,
+	}
+
+	return flashCard, nil
+
+}
+
+func rowToItems(row string) []string {
 	var items []string
 
 	characters := strings.Split(row, "")
@@ -356,34 +466,7 @@ func rowToFlashCard(row string) (FlashCard, error) {
 		items = append(items, item)
 	}
 
-	if len(items) != 9 {
-		return FlashCard{}, errors.New("wrong number of values")
-	}
-
-	confidence, err := strconv.ParseInt(items[7], 10, 0)
-	if err != nil {
-		confidence = 0
-	}
-
-	lastQuizUnix, err := strconv.ParseInt(items[8], 10, 64)
-	if err != nil {
-		lastQuizUnix = 0
-	}
-
-	flashCardType := normaliseFlashCardType(items[6])
-	flashCard := FlashCard{
-		Owner:        items[0],
-		LetterPair:   items[1],
-		Memo:         items[2],
-		Image:        items[3],
-		Commutator:   items[4],
-		Tags:         items[5],
-		Type:         flashCardType,
-		Confidence:   int(confidence),
-		LastQuizUnix: lastQuizUnix,
-	}
-
-	return flashCard, nil
+	return items
 }
 
 func WriteFlashCard(flashCard FlashCard) error {
@@ -457,5 +540,6 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 		Tags:         "",
 		LastQuizUnix: 0,
 		Confidence:   0,
+		IsPublic:     false,
 	}, nil
 }
