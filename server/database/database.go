@@ -251,8 +251,6 @@ func getCurrentChangeLogFullPath() string {
 		fileSize := fileStats.Size()
 		if fileSize < int64(lastSnapshotFileSize*LOG_SIZE_FACTOR) {
 			return fullPath
-		} else {
-			go logsToSnapshot(newestLogFilename)
 		}
 	}
 
@@ -267,6 +265,7 @@ func getCurrentChangeLogFullPath() string {
 
 	filename := fmt.Sprintf("%s-%d-log.csv", filenameStart, matchingFileCount)
 	fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
+	go logsToSnapshot(filename)
 
 	return fullPath
 }
