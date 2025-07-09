@@ -8,7 +8,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -150,10 +149,9 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 	return newFlashCardData, nil
 }
 
-var snapshotRe = regexp.MustCompile(`-\d+-log\.csv$`)
-
 func logsToSnapshot(finalFilename string) {
-	snapshotFilename := snapshotRe.ReplaceAllString(finalFilename, "-snap.csv")
+	now := time.Now()
+	snapshotFilename := fmt.Sprintf("%s-%s-snap.csv", VERSION_PREFIX, now.Format("20060102-150405"))
 	snapshotFullPath := filepath.Join(USER_DATA_DIRECTORY, snapshotFilename)
 
 	newFlashCards, err := loadData(finalFilename)
@@ -267,7 +265,7 @@ func getCurrentChangeLogFullPath() string {
 		}
 	}
 
-	filename := fmt.Sprintf("%s-%d-log.csv", filenameStart, matchingFileCount)
+	filename := fmt.Sprintf("%s-zz-%d-log.csv", filenameStart, matchingFileCount)
 	fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
 	go logsToSnapshot(filename)
 
