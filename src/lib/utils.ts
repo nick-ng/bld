@@ -177,6 +177,10 @@ export const has3StyleBuffer = (letterPair: string) => {
 	return false;
 };
 
+export const isOrozco = (letterPair: string) => {
+	return letterPair.toLowerCase().includes("b");
+};
+
 export const getOperatingSystem = (): string => {
 	if (navigator.userAgent.includes("Win")) {
 		return "win";
