@@ -205,6 +205,10 @@ func logsToSnapshot(finalFilename string) {
 			return
 		}
 
+		if finalFilename == filename {
+			return
+		}
+
 		if !strings.HasSuffix(filename, ".csv") {
 			continue
 		}
