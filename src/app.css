@@ -33,7 +33,7 @@
 	}
 
 	summary {
-		@apply cursor-pointer select-none underline;
+		@apply cursor-pointer underline select-none;
 	}
 
 	h1 {
@@ -75,7 +75,7 @@
 
 		.markdown td,
 		.markdown th {
-			@apply border border-gray-600 dark:border-gray-300 p-2;
+			@apply border border-gray-600 p-2 dark:border-gray-300;
 		}
 
 		.markdown thead tr {
@@ -108,6 +108,6 @@
 	}
 
 	button {
-		@apply rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block;
+		@apply cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300;
 	}
 }

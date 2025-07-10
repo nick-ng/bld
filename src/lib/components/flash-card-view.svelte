@@ -12,14 +12,14 @@
 	let { flashCard }: Props = $props();
 </script>
 
-<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
-	<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
+<div class="relative flex min-h-[460px] flex-col items-center gap-1">
+	<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
 	<Corners letterPair={flashCard.letterPair} />
 	<div class="text-2xl">{flashCard.memo}</div>
 	<Image imageUri={flashCard.image} alt={`${flashCard.letterPair.toUpperCase()} visualisation`} />
 	{#if flashCard.commutator}
 		<div>
-			<span class="text-xl font-mono"
+			<span class="font-mono text-xl"
 				>{commutatorDetails(flashCard.commutator).normalisedCommutator}</span
 			>
 			<a

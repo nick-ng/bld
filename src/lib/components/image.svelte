@@ -75,13 +75,13 @@
 </script>
 
 <div
-	class={`flex flex-row justify-center h-64 w-64 ${!imageUri || imageUri.endsWith(".emoji") ? "border-gray-500 border items-center" : "items-stretch"}`}
+	class={`flex h-64 w-64 flex-row justify-center ${!imageUri || imageUri.endsWith(".emoji") ? "items-center border border-gray-500" : "items-stretch"}`}
 >
 	{#if imageUri.endsWith(".emoji")}
 		<div class="relative h-full flex-grow overflow-hidden">
 			{#each getEmojiLayers(imageUri) as emojiLayer, i (`${i}-${emojiLayer.emoji}-${emojiLayer.padding}`)}
 				<div
-					class="break-keep leading-none absolute left-0 right-0 top-0 bottom-0 m-auto text-9xl flex flex-row justify-center items-center"
+					class="absolute top-0 right-0 bottom-0 left-0 m-auto flex flex-row items-center justify-center text-9xl leading-none break-keep"
 					style={`z-index: ${getEmojiLayers(imageUri).length - i}; font-size: ${128 + emojiLayer.sizeAdjustment}px;opacity: ${emojiLayer.opacity};padding: ${emojiLayer.padding};`}
 				>
 					{emojiLayer.emoji}

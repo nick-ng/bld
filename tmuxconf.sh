@@ -5,8 +5,8 @@ if [[ ! $MY_SESSION ]]; then
 		tmux send "nvim ." Enter
 		tmux new-window
 		tmux new-window
-		tmux send "npm start"
-		tmux split-window -h
 		tmux send "./dev-server.sh"
+		tmux split-window -h
+		tmux send "npm start"
 		tmux attach-session -d -t bld
 fi

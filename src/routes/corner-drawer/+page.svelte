@@ -119,13 +119,13 @@
 	<details>
 		<summary>Piece Colour Picker</summary>
 		<div class="flex flex-col gap-1">
-			<div class="border border-gray-600 dark:border-gray-300 p-2">
+			<div class="border border-gray-600 p-2 dark:border-gray-300">
 				<h3>Piece A</h3>
 				<div>
 					<h4>Sticker 1</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceAsticker1 = colour;
@@ -145,7 +145,7 @@
 					<h4>Sticker 2</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceAsticker2 = colour;
@@ -165,7 +165,7 @@
 					<h4>Sticker 3</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceAsticker3 = colour;
@@ -182,13 +182,13 @@
 					{/each}
 				</div>
 			</div>
-			<div class="border border-gray-600 dark:border-gray-300 p-2">
+			<div class="border border-gray-600 p-2 dark:border-gray-300">
 				<h3>Piece B</h3>
 				<div>
 					<h4>Sticker 1</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceBsticker1 = colour;
@@ -208,7 +208,7 @@
 					<h4>Sticker 2</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceBsticker2 = colour;
@@ -228,7 +228,7 @@
 					<h4>Sticker 3</h4>
 					{#each colours as colour (colour)}
 						<button
-							class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block"
+							class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 							style={`background-color: ${colour}`}
 							onclick={() => {
 								pieceBsticker3 = colour;

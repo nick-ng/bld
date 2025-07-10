@@ -24,21 +24,21 @@
 
 {#if isTwist(letterPair) || isNotEitherMethod || (hideNon3Style && !is3Style(letterPair)) || (hideNonOP && !isOP(letterPair))}
 	<div
-		class="bg-gray-500 text-center no-underline p-0 border border-gray-500 cursor-not-allowed hidden lg:block"
+		class="hidden cursor-not-allowed border border-gray-500 bg-gray-500 p-0 text-center no-underline lg:block"
 	>
-		<div class="text-gray-500 uppercase p-0 mb-1 leading-none">{letterPair}</div>
+		<div class="mb-1 p-0 leading-none text-gray-500 uppercase">{letterPair}</div>
 		<div class="h-2 px-0.5 pb-0.5"></div>
 	</div>
 {:else}
 	<a
-		class="relative block bg-white text-center no-underline border p-0 border-gray-800"
+		class="relative block border border-gray-800 bg-white p-0 text-center no-underline"
 		href={`/flash-cards/edit?lp=${letterPair}`}
 	>
-		<div class="uppercase p-0 mb-1 leading-none">{letterPair}</div>
-		<div class="h-2 flex flex-row justify-center gap-0.5 px-0.5 pb-0.5">
+		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
+		<div class="flex h-2 flex-row justify-center gap-0.5 px-0.5 pb-0.5">
 			{#each getIndicators(letterPair, $flashCardStore) as colorHex, i (`${i}-${colorHex}`)}
 				<div
-					class="rounded-full block flex-1"
+					class="block flex-1 rounded-full"
 					style={`background-color: ${colorHex || "#ffffff00"};}`}
 				></div>
 			{/each}
