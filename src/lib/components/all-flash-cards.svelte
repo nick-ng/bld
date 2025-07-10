@@ -8,8 +8,8 @@
 	let letterPairFilter = $state("");
 </script>
 
-<div class="lg:w-min m-auto">
-	<div class="flex flex-row justify-center items-end">
+<div class="m-auto lg:w-min">
+	<div class="flex flex-row items-end justify-center">
 		<h1>Corner Flash Cards</h1>
 	</div>
 	<div class="flex flex-row gap-2">

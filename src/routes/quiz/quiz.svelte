@@ -99,13 +99,13 @@
 	};
 </script>
 
-<div class="max-w-prose mx-auto">
+<div class="mx-auto max-w-prose">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
-		<div class="flex flex-col items-center min-h-[460px] gap-1 relative">
-			<h2 class="uppercase m-0">{flashCard.letterPair}</h2>
-			<div class="text-left absolute top-0 left-0">{$quizStore.length} left</div>
+		<div class="relative flex min-h-[460px] flex-col items-center gap-1">
+			<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+			<div class="absolute top-0 left-0 text-left">{$quizStore.length} left</div>
 			<button
-				class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block absolute top-0 right-0"
+				class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 				onclick={() => {
 					$quizStore = [];
 				}}>End Quiz</button
@@ -119,16 +119,16 @@
 				/>
 				{#if flashCard.commutator}
 					<div>
-						<span class="text-xl font-mono"
+						<span class="font-mono text-xl"
 							>{commutatorDetails(flashCard.commutator).normalisedCommutator}</span
 						>
 					</div>
 				{/if}
 			{/if}
 		</div>
-		<div class="absolute bottom-2 left-0 px-2 w-full lg:w-full lg:relative lg:px-0">
+		<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
 			{#if showAnswer}
-				<table class="w-full border-collapse mb-2">
+				<table class="mb-2 w-full border-collapse">
 					<tbody>
 						<tr>
 							<td class="w-1 pr-1">Memo</td>
@@ -160,7 +160,7 @@
 				</table>
 				<div class="flex flex-row gap-1">
 					<a
-						class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block text-center"
+						class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
 						style="flex-grow: 2"
 						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
 					>
@@ -176,7 +176,7 @@
 				</div>
 			{:else}
 				<button
-					class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block w-full"
+					class="cannot-hover:py-2 block w-full rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 					disabled={submittingConfidence}
 					onclick={() => {
 						showAnswer = true;

@@ -8,8 +8,8 @@
 	let letterPairFilter = $state("");
 </script>
 
-<div class="lg:w-min m-auto">
-	<div class="flex flex-row justify-between items-end">
+<div class="m-auto lg:w-min">
+	<div class="flex flex-row items-end justify-between">
 		<a href="/flash-cards">Back</a>
 		<h1>Edit Flash Cards</h1>
 		<div></div>

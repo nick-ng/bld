@@ -15,7 +15,14 @@
 	} from "$lib/stores/flash-cards";
 	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
-	import { is3Style, isOP, upperCaseFirst, shuffleArray, commutatorDetails } from "$lib/utils";
+	import {
+		is3Style,
+		isOP,
+		upperCaseFirst,
+		shuffleArray,
+		commutatorDetails,
+		isOrozco
+	} from "$lib/utils";
 	import { sortByLastQuiz, threeStyleCommutators } from "./make-quiz";
 
 	// @todo(nick-ng): move these to the options store
@@ -25,6 +32,16 @@
 	let customRandom = $state(2);
 	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
 	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
+	let allCount = $derived(Object.values($flashCardStore).length);
+	let threeStyleCount = $derived(
+		Object.values($flashCardStore).filter((c) => is3Style(c.letterPair)).length
+	);
+	let orozcoCount = $derived(
+		Object.values($flashCardStore).filter(
+			(c) => isOrozco(c.letterPair) && c.letterPair[0] !== c.letterPair[1]
+		).length
+	);
+	let oPCount = $derived(Object.values($flashCardStore).filter((c) => isOP(c.letterPair)).length);
 
 	const makeQuiz = async ({
 		oldest,
@@ -32,14 +49,16 @@
 		commConfidence,
 		random,
 		include3Style,
-		includeOP
+		includeOP,
+		includeOrozco
 	}: {
 		oldest: number;
 		memoConfidence: number;
 		commConfidence: number;
 		random: number;
-		include3Style: boolean;
-		includeOP: boolean;
+		include3Style?: boolean;
+		includeOP?: boolean;
+		includeOrozco?: boolean;
 	}) => {
 		const flashCardsMap = await fetchFlashCards();
 		const flashCards = Object.values(flashCardsMap).filter((f) => f.memo);
@@ -53,7 +72,11 @@
 					return true;
 				}
 
-				return is3Style(c.letterPair) && isOP(c.letterPair);
+				if (includeOrozco && isOrozco(c.letterPair)) {
+					return true;
+				}
+
+				return false;
 			})
 			.map((c) => ({
 				...c,
@@ -121,8 +144,8 @@
 	});
 </script>
 
-<div class="max-w-prose mx-auto">
-	<div class="flex flex-row justify-between items-end">
+<div class="mx-auto max-w-prose">
+	<div class="flex flex-row items-end justify-between">
 		<a href="/flash-cards">Back</a>
 		<h1>Quiz</h1>
 		<div></div>
@@ -138,21 +161,21 @@
 				>
 			</p>
 			<ul>
-				<li class="mt-1 mb-3 lg:mb-0 flex flex-row gap-2">
+				<li class="mt-1 mb-3 flex flex-row gap-2 lg:mb-0">
 					<div class="flex-grow">
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customOldest = Math.max(0, customOldest + 1);
 								localStorage.setItem(QUIZ_OLDEST_STORE_KEY, `${customOldest}`);
 							}}>➕</button
 						>
-						<div class="px-1 min-w-5 text-center">
+						<div class="min-w-5 px-1 text-center">
 							<span class="font-mono">{customOldest}</span> Oldest
 						</div>
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customOldest = Math.max(0, customOldest - 1);
@@ -162,18 +185,18 @@
 					</div>
 					<div class="flex-grow">
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customMemoConfidence = Math.max(0, customMemoConfidence + 1);
 								localStorage.setItem(QUIZ_MEMO_CONFIDENCE_STORE_KEY, `${customMemoConfidence}`);
 							}}>➕</button
 						>
-						<div class="px-1 min-w-5 text-center">
+						<div class="min-w-5 px-1 text-center">
 							<span class="font-mono">{customMemoConfidence}</span> Memo Confidence
 						</div>
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customMemoConfidence = Math.max(0, customMemoConfidence - 1);
@@ -183,18 +206,18 @@
 					</div>
 					<div class="flex-grow">
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customCommConfidence = Math.max(0, customCommConfidence + 1);
 								localStorage.setItem(QUIZ_COMM_CONFIDENCE_STORE_KEY, `${customCommConfidence}`);
 							}}>➕</button
 						>
-						<div class="px-1 min-w-5 text-center">
+						<div class="min-w-5 px-1 text-center">
 							<span class="font-mono">{customCommConfidence}</span> Comm Confidence
 						</div>
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customCommConfidence = Math.max(0, customCommConfidence - 1);
@@ -204,18 +227,18 @@
 					</div>
 					<div class="flex-grow">
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customRandom = Math.max(0, customRandom + 1);
 								localStorage.setItem(QUIZ_RANDOM_STORE_KEY, `${customRandom}`);
 							}}>➕</button
 						>
-						<div class="px-1 min-w-5 text-center">
+						<div class="min-w-5 px-1 text-center">
 							<span class="font-mono">{customRandom}</span> Random
 						</div>
 						<button
-							class="block py-2 lg:py-1 w-full"
+							class="block w-full py-2 lg:py-1"
 							type="button"
 							onclick={() => {
 								customRandom = Math.max(0, customRandom - 1);
@@ -226,7 +249,7 @@
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={() => {
 							makeQuiz({
 								commConfidence: customCommConfidence,
@@ -234,46 +257,62 @@
 								oldest: customOldest,
 								random: customRandom,
 								include3Style: true,
-								includeOP: true
+								includeOP: true,
+								includeOrozco: true
 							});
 						}}
 						>All: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({allCount})</button
 					>
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={() => {
 							makeQuiz({
 								commConfidence: customCommConfidence,
 								memoConfidence: customMemoConfidence,
 								oldest: customOldest,
 								random: customRandom,
-								include3Style: true,
-								includeOP: false
+								include3Style: true
 							});
 						}}
 						>3-Style: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom}
 						=
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({threeStyleCount})</button
 					>
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={() => {
 							makeQuiz({
 								commConfidence: customCommConfidence,
 								memoConfidence: customMemoConfidence,
 								oldest: customOldest,
 								random: customRandom,
-								include3Style: false,
+								includeOrozco: true
+							});
+						}}
+						>Orozco: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom}
+						=
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({orozcoCount})</button
+					>
+				</li>
+				<li class="mt-1">
+					<button
+						class="block w-full py-2 text-center text-xl leading-none"
+						onclick={() => {
+							makeQuiz({
+								commConfidence: customCommConfidence,
+								memoConfidence: customMemoConfidence,
+								oldest: customOldest,
+								random: customRandom,
 								includeOP: true
 							});
 						}}
 						>OP: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom}</button
+						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({oPCount})</button
 					>
 				</li>
 				<!-- <li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
@@ -304,7 +343,7 @@
 				<li class="mt-1">Fixed Quiz</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={async () => {
 							const fixedPairs = shuffleArray(threeStyle.lowConfidence)
 								.slice(0, 10)
@@ -319,7 +358,7 @@
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={async () => {
 							const fixedPairs = threeStyle.lowConfidence
 								.sort((a, b) => a.letterPair.localeCompare(b.letterPair))
@@ -334,7 +373,7 @@
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={async () => {
 							const fixedPairs = sortByLastQuiz(threeStyle.lowConfidence)
 								.slice(0, 10)
@@ -348,7 +387,7 @@
 				</li>
 				<li class="mt-1">
 					<button
-						class="w-full block text-xl leading-none py-2 text-center"
+						class="block w-full py-2 text-center text-xl leading-none"
 						onclick={async () => {
 							const fixedPairs = sortByLastQuiz(Object.values($flashCardStore))
 								.filter((a) => is3Style(a.letterPair) && a.letterPair[0] !== a.letterPair[1])
@@ -362,7 +401,7 @@
 				</li>
 				<li class="mt-1 flex flex-row">
 					<input
-						class="w-full block text-xl leading-none lg:px-1 py-2 font-mono"
+						class="block w-full py-2 font-mono text-xl leading-none lg:px-1"
 						type="text"
 						bind:value={fixedPairsString}
 						onblur={() => {
@@ -382,9 +421,9 @@
 					>
 				</li>
 				<li class="mt-1">
-					<div class="w-full flex flex-row justify-stretch gap-1">
+					<div class="flex w-full flex-row justify-stretch gap-1">
 						<button
-							class="text-xl leading-none py-2 text-center grow"
+							class="grow py-2 text-center text-xl leading-none"
 							onclick={() => {
 								const fixedQuiz = $optionsStore.fixedQuiz
 									.map((letterPair) => {
@@ -402,7 +441,7 @@
 							}}>Age Order Fixed Quiz</button
 						>
 						<button
-							class="text-xl leading-none py-2 text-center grow"
+							class="grow py-2 text-center text-xl leading-none"
 							onclick={() => {
 								const fixedQuiz = $optionsStore.fixedQuiz
 									.map((letterPair) => {
@@ -425,7 +464,7 @@
 			</ul>
 			<details>
 				<summary>Commutator Check</summary>
-				<table class="border-spacing-x-2 border-separate">
+				<table class="border-separate border-spacing-x-2">
 					<thead>
 						<tr>
 							<th class=" text-center">Letter Pair</th>

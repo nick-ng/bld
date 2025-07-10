@@ -4,7 +4,7 @@
 	import Quiz from "./quiz.svelte";
 </script>
 
-<div class="max-w-prose mx-auto">
+<div class="mx-auto max-w-prose">
 	{#if $quizStore.length === 0}
 		<QuizHome />
 	{:else}

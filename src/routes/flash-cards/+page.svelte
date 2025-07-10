@@ -8,8 +8,8 @@
 </script>
 
 <AllFlashCards />
-<div class="max-w-prose mx-auto">
-	<details class="max-w-prose mx-auto" bind:open={showLogin}>
+<div class="mx-auto max-w-prose">
+	<details class="mx-auto max-w-prose" bind:open={showLogin}>
 		<summary>Login</summary>
 		<form
 			class="text-center"

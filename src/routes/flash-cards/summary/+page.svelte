@@ -147,9 +147,9 @@
 
 <div>
 	<div
-		class="grid summary-grid grid-cols-1 items-start justify-items-center content-center justify-center gap-2 lg:m-0 mx-auto"
+		class="summary-grid mx-auto grid grid-cols-1 content-center items-start justify-center justify-items-center gap-2 lg:m-0"
 	>
-		<table class="block summary-tables lg:max-w-lg">
+		<table class="summary-tables block lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-center">Comm. Confidence</th>
@@ -165,7 +165,7 @@
 						</td>
 						<td>
 							{#each summary.missingComms.toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp={letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -191,7 +191,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<table class="block summary-tables lg:max-w-lg">
+		<table class="summary-tables block lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-center">Memo. Confidence</th>
@@ -233,7 +233,29 @@
 				{/each}
 			</tbody>
 		</table>
-		<table class="block summary-tables lg:max-w-lg">
+		<table class="summary-tables block lg:col-span-2 lg:max-w-lg">
+			<thead>
+				<tr>
+					<th class="text-left whitespace-nowrap">Last Reviewed</th>
+					<th class="text-left">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange (ageRange)}
+					<tr>
+						<td>{ageRange}</td>
+						<td>
+							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i (letterPair)}
+								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+									>{letterPair}</a
+								>
+							{/each}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<table class="summary-tables block lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Insert</th>
@@ -255,7 +277,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<table class="block summary-tables lg:max-w-lg">
+		<table class="summary-tables block lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Setup</th>
@@ -268,28 +290,6 @@
 						<td class="font-mono whitespace-nowrap">{setup}</td>
 						<td>
 							{#each summary.setups[setup].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
-									>{letterPair}</a
-								>
-							{/each}
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-		<table class="block summary-tables lg:max-w-lg">
-			<thead>
-				<tr>
-					<th class="text-left whitespace-nowrap">Last Reviewed</th>
-					<th class="text-left">Letter Pairs</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each Object.keys(summary.ageRanges).toSorted((a, b) => ageRangeToMs(b) - ageRangeToMs(a)) as ageRange (ageRange)}
-					<tr>
-						<td>{ageRange}</td>
-						<td>
-							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i (letterPair)}
 								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>

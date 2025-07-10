@@ -101,10 +101,10 @@
 	});
 </script>
 
-<div class="max-w-prose mx-auto">
+<div class="mx-auto max-w-prose">
 	<a href={$quizStore.length > 0 ? "/quiz" : "/flash-cards"}>Back</a>
-	<h2 class="uppercase text-center">{letterPair}</h2>
-	<div class="text-center mb-1">
+	<h2 class="text-center uppercase">{letterPair}</h2>
+	<div class="mb-1 text-center">
 		<Corners {letterPair} />
 	</div>
 	{#if $flashCardStoreStatus.status !== "loaded"}
@@ -184,7 +184,7 @@
 				name="confidence"
 				value={flashCardOrDefault($flashCardStore, letterPair).confidence}
 			/>
-			<table class="flash-card-editor border-separate border-spacing-x-0.5 mx-auto">
+			<table class="flash-card-editor mx-auto border-separate border-spacing-x-0.5">
 				<tbody>
 					<tr>
 						<td class="text-right">Memo</td>
@@ -225,7 +225,7 @@
 						<td class="text-right"
 							><button
 								type="button"
-								class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block ml-auto"
+								class="cannot-hover:py-2 ml-auto block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 								onclick={() => {
 									formDirty = true;
 									if (isImageEmoji) {
@@ -304,9 +304,9 @@
 					</tr>
 				</tbody>
 			</table>
-			<div class="w-full flex flex-row justify-between mt-1 gap-8">
+			<div class="mt-1 flex w-full flex-row justify-between gap-8">
 				<a
-					class="rounded border border-gray-600 px-2 py-0 dark:border-gray-300 cannot-hover:py-2 block flex-grow text-center"
+					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
 					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a
 				>
 				<button
