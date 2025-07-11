@@ -31,15 +31,15 @@
 	let customCommConfidence = $state(2);
 	let customRandom = $state(2);
 	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
-	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
-	let allCount = $derived(Object.values($flashCardStore).length);
-	let threeStyleCount = $derived(
-		Object.values($flashCardStore).filter((c) => is3Style(c.letterPair)).length
+	let nonEmptyFlashCards = $derived(
+		Object.values($flashCardStore).filter((f) => f.memo || f.commutator || f.image)
 	);
+	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
+	let allCount = $derived(nonEmptyFlashCards.length);
+	let threeStyleCount = $derived(nonEmptyFlashCards.filter((c) => is3Style(c.letterPair)).length);
 	let orozcoCount = $derived(
-		Object.values($flashCardStore).filter(
-			(c) => isOrozco(c.letterPair) && c.letterPair[0] !== c.letterPair[1]
-		).length
+		nonEmptyFlashCards.filter((c) => isOrozco(c.letterPair) && c.letterPair[0] !== c.letterPair[1])
+			.length
 	);
 	let oPCount = $derived(Object.values($flashCardStore).filter((c) => isOP(c.letterPair)).length);
 
@@ -145,19 +145,23 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	<div class="flex flex-row items-end justify-between">
-		<a href="/flash-cards">Back</a>
+	<div class="flex flex-row items-end justify-center">
 		<h1>Quiz</h1>
-		<div></div>
 	</div>
 	{#if $flashCardStoreStatus.status !== "loaded"}
 		<div class="">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
-		{@const flatFlashCards = Object.values($flashCardStore).filter((f) => f.memo)}
+		{@const commutatorCount = nonEmptyFlashCards.filter(
+			(f) => f.letterPair[0] !== f.letterPair[1]
+		).length}
+		{@const parityCount = nonEmptyFlashCards.filter(
+			(f) => f.letterPair[0] === f.letterPair[1]
+		).length}
 		<div>
 			<p>
-				<a href="/flash-cards/edit"
-					>{flatFlashCards.length} letter pair{flatFlashCards.length === 1 ? "" : "s"}</a
+				<a href="/flash-cards"
+					>{commutatorCount} letter pair{commutatorCount === 1 ? "" : "s"} + {parityCount} parity = {commutatorCount +
+						parityCount}</a
 				>
 			</p>
 			<ul>
