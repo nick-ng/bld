@@ -178,7 +178,9 @@ export const has3StyleBuffer = (letterPair: string) => {
 };
 
 export const isOrozco = (letterPair: string) => {
-	return letterPair.toLowerCase().includes("b");
+	if (letterPair.toLowerCase().includes("b")) {
+		return is3Style(letterPair);
+	}
 };
 
 export const getOperatingSystem = (): string => {
