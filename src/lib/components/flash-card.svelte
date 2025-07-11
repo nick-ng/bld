@@ -1,69 +1,60 @@
 <script lang="ts">
 	import { defaultFlashCard } from "$lib/types";
-	import { upperCaseFirst } from "$lib/utils";
-	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
+	import { upperCaseFirst, commutatorDetails } from "$lib/utils";
+	import { flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
 
 	interface Props {
 		letterPair?: string;
+		quizLeft?: number;
+		quizShowAnswer?: boolean;
+		extraClass?: string;
+		onQuizEnd?: () => any;
 	}
 
-	let { letterPair = "" }: Props = $props();
+	let {
+		letterPair = "",
+		quizLeft = 0,
+		quizShowAnswer = true,
+		onQuizEnd,
+		extraClass = ""
+	}: Props = $props();
 	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair));
 </script>
 
 <div class="mx-auto max-w-prose">
-	<h2 class="text-center uppercase">{letterPair}</h2>
-	<div class="mb-1 text-center">
-		<Corners {letterPair} />
-	</div>
 	{#if $flashCardStoreStatus.status !== "loaded"}
 		<div class="text-center">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
-		<div>
-			<table class="flash-card-editor mx-auto border-separate border-spacing-x-0.5">
-				<tbody>
-					<tr>
-						<td class="text-right">Memo</td>
-						<td>{flashCard.memo}</td>
-					</tr>
-					<tr>
-						<td class="text-right">Commutator </td>
-						<td>{flashCard.commutator}</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<label for={`${letterPair}-image`} class="mx-auto mt-0.5 block">
-								<Image
-									imageUri={flashCard.image}
-									alt={`${letterPair.toUpperCase()} visualisation`}
-								/>
-							</label>
-						</td>
-					</tr>
-					<tr>
-						<td class="text-right">Tags</td>
-						<td>{flashCard.tags}</td>
-					</tr>
-				</tbody>
-			</table>
-			<div class="mt-1 flex w-full flex-row justify-between gap-8">
-				<a
-					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-					href="/flash-cards">Back</a
+		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
+			<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+			{#if quizLeft > 0}
+				<div class="absolute top-0 left-0 text-left">{quizLeft} left</div>
+			{/if}
+			{#if typeof onQuizEnd === "function"}
+				<button
+					class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
+					onclick={onQuizEnd}>End Quiz</button
 				>
-				<a
-					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-					href={`/flash-cards/edit?lp=${letterPair}`}>Edit</a
-				>
-			</div>
+			{/if}
+			<Corners letterPair={flashCard.letterPair} />
+			{#if quizShowAnswer}
+				<div class="text-2xl">{flashCard.memo}</div>
+				<div>
+					{#if flashCard.commutator}
+						<span class="font-mono text-xl">
+							{commutatorDetails(flashCard.commutator).normalisedCommutator}
+						</span>
+					{:else}
+						<span class="text-xl"> No Commutator </span>
+					{/if}
+				</div>
+				<Image
+					imageUri={flashCard.image}
+					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
+				/>
+			{/if}
 		</div>
 	{/if}
 </div>
-
-<style>
-	table.flash-card-editor td {
-		vertical-align: top;
-	}
-</style>
