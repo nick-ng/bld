@@ -6,11 +6,9 @@
 		getFlashCard,
 		loadFlashCard
 	} from "$lib/stores/flash-cards";
-	import { authFetch, joinServerPath, commutatorDetails } from "$lib/utils";
+	import { authFetch, joinServerPath } from "$lib/utils";
 	import FlashCard from "$lib/components/flash-card.svelte";
-	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
-	import Image from "$lib/components/image.svelte";
 
 	let flashCard = $derived($flashCardStore[$quizStore[0].toLocaleLowerCase()]);
 	let showAnswer = $state(false);

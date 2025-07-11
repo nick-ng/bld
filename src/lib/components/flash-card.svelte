@@ -10,7 +10,7 @@
 		quizLeft?: number;
 		quizShowAnswer?: boolean;
 		extraClass?: string;
-		onQuizEnd?: () => any;
+		onQuizEnd?: () => void | Promise<void>;
 	}
 
 	let {
