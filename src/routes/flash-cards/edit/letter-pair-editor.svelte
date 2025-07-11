@@ -163,7 +163,7 @@
 					const { data } = parseResponse;
 					$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
 
-					const backUrl = $quizStore.length > 0 ? "/quiz" : "/flash-cards/edit";
+					const backUrl = $quizStore.length > 0 ? "/quiz" : "/flash-cards?lp=${letterPair}";
 					$quizStore = $quizStore.filter((lp) => lp != letterPair);
 
 					goto(backUrl);
@@ -201,9 +201,8 @@
 					</tr>
 					<tr>
 						<td class="text-right"
-							><a
-								href={`https://blddb.net/corner.html?letter-pair=c${letterPair}`}
-								target="pux_blddb_corner_comm">Commutator</a
+							><a href={`https://v2.blddb.net/corner?mode=manmade`} target="pux_blddb_corner_comm"
+								>Commutator</a
 							>
 						</td>
 						<td
@@ -305,7 +304,7 @@
 			<div class="mt-1 flex w-full flex-row justify-between gap-8">
 				<a
 					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards/edit"}>Back</a
+					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards?lp=${letterPair}"}>Back</a
 				>
 				<button
 					class="flex-grow"
