@@ -201,7 +201,7 @@
 					</tr>
 					<tr>
 						<td class="text-right"
-							><a href={`https://v2.blddb.net/corner?mode=manmade`} target="pux_blddb_corner_comm"
+							><a href="https://v2.blddb.net/corner?mode=manmade" target="pux_blddb_corner_comm"
 								>Commutator</a
 							>
 						</td>
