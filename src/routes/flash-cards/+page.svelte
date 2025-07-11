@@ -10,7 +10,19 @@
 	let password = $state("");
 </script>
 
-{#if typeof letterPair === "string" && letterPair.length === 2}<FlashCard {letterPair} />{:else}
+{#if typeof letterPair === "string" && letterPair.length === 2}
+	<FlashCard {letterPair} />
+	<div class="mx-auto mt-1 flex max-w-prose flex-row justify-between gap-8">
+		<a
+			class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
+			href="/flash-cards">Back</a
+		>
+		<a
+			class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
+			href={`/flash-cards/edit?lp=${letterPair}`}>Edit</a
+		>
+	</div>
+{:else}
 	<AllFlashCards />
 	<div class="mx-auto max-w-prose">
 		<details class="mx-auto max-w-prose" bind:open={showLogin}>

@@ -7,6 +7,7 @@
 		loadFlashCard
 	} from "$lib/stores/flash-cards";
 	import { authFetch, joinServerPath, commutatorDetails } from "$lib/utils";
+	import FlashCard from "$lib/components/flash-card.svelte";
 	import Corners from "$lib/components/corners.svelte";
 	import { parseFlashCard } from "$lib/types";
 	import Image from "$lib/components/image.svelte";
@@ -101,31 +102,15 @@
 
 <div class="mx-auto max-w-prose">
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
-		<div class="relative flex min-h-[460px] flex-col items-center gap-1">
-			<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
-			<div class="absolute top-0 left-0 text-left">{$quizStore.length} left</div>
-			<button
-				class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
-				onclick={() => {
-					$quizStore = [];
-				}}>End Quiz</button
-			>
-			<Corners letterPair={flashCard.letterPair} />
-			{#if showAnswer}
-				<div class="text-2xl">{flashCard.memo}</div>
-				<Image
-					imageUri={flashCard.image}
-					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
-				/>
-				{#if flashCard.commutator}
-					<div>
-						<span class="font-mono text-xl"
-							>{commutatorDetails(flashCard.commutator).normalisedCommutator}</span
-						>
-					</div>
-				{/if}
-			{/if}
-		</div>
+		<FlashCard
+			letterPair={flashCard.letterPair}
+			quizLeft={$quizStore.length}
+			quizShowAnswer={showAnswer}
+			onQuizEnd={() => {
+				$quizStore = [];
+			}}
+			extraClass="min-h-[460px]"
+		/>
 		<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
 			{#if showAnswer}
 				<table class="mb-2 w-full border-collapse">
