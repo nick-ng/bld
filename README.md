@@ -61,6 +61,6 @@ css:
 - src/lib/utils.ts:337: @todo(nick-ng): remove items from bag and put into subsets
 - src/lib/utils.ts:338: @todo(nick-ng): when you have constructed the nth subset, return that subset
 - src/lib/utils.ts:339: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:117: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:123: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:28: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

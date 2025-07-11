@@ -391,3 +391,45 @@ export const getLettersOfTheDay = (
 
 	return bagRandomByDay(realLetterPairs, startDate, date);
 };
+
+const cornerSpeffzLocationMap = {
+	a: "UBL",
+	b: "UBR",
+	c: "UFR",
+	d: "UFL",
+	e: "LUB",
+	f: "LUF",
+	g: "LDF",
+	h: "LDB",
+	i: "FUL",
+	j: "FUR",
+	k: "FDR",
+	l: "FDL",
+	m: "RUF",
+	n: "RUB",
+	o: "RDB",
+	p: "RDF",
+	q: "BUR",
+	r: "BUL",
+	s: "BDL",
+	t: "BDR",
+	u: "DFL",
+	v: "DFR",
+	w: "DBR",
+	x: "DBL",
+	y: "DBL",
+	z: "DBL"
+};
+
+export const oneCornerSpeffzToLocation = (speffzLetter: string) => {
+	const letter = speffzLetter[0].toLowerCase();
+	if (letter && letter in cornerSpeffzLocationMap) {
+		return cornerSpeffzLocationMap[<keyof typeof cornerSpeffzLocationMap>letter];
+	}
+
+	return "";
+};
+
+export const cornerSpeffzToLocation = (speffzLetters: string) => {
+	return speffzLetters.split("").map(oneCornerSpeffzToLocation);
+};

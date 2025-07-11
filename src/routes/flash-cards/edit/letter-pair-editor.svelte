@@ -1,12 +1,18 @@
 <script lang="ts">
+	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
-	import { joinServerPath, upperCaseFirst, authFetch, getOperatingSystem } from "$lib/utils";
+	import {
+		joinServerPath,
+		upperCaseFirst,
+		authFetch,
+		getOperatingSystem,
+		cornerSpeffzToLocation
+	} from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
 	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
-	import { goto } from "$app/navigation";
 	import Image from "$lib/components/image.svelte";
-	import { onMount } from "svelte";
 
 	interface Props {
 		letterPair?: string;
@@ -201,8 +207,9 @@
 					</tr>
 					<tr>
 						<td class="text-right"
-							><a href="https://v2.blddb.net/corner?mode=manmade" target="pux_blddb_corner_comm"
-								>Commutator</a
+							><a
+								href={`https://v2.blddb.net/corner?position=${cornerSpeffzToLocation(`c${letterPair}`).join("-")}&mode=manmade`}
+								target="pux_blddb_corner_comm">Commutator</a
 							>
 						</td>
 						<td
