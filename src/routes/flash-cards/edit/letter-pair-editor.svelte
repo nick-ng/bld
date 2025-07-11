@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from "svelte/legacy";
-
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import { joinServerPath, upperCaseFirst, authFetch, getOperatingSystem } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
@@ -61,7 +59,7 @@
 		}
 	};
 
-	run(() => {
+	$effect(() => {
 		onFlashCardStoreUpdate($flashCardStore);
 	});
 

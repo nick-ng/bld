@@ -32,7 +32,7 @@
 {:else}
 	<a
 		class="relative block border border-gray-800 bg-white p-0 text-center no-underline"
-		href={`/flash-cards/edit?lp=${letterPair}`}
+		href={`/flash-cards?lp=${letterPair}`}
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
 		<div class="flex h-2 flex-row justify-center gap-0.5 px-0.5 pb-0.5">
