@@ -181,6 +181,8 @@ export const isOrozco = (letterPair: string) => {
 	if (letterPair.toLowerCase().includes("b")) {
 		return is3Style(letterPair);
 	}
+
+	return false;
 };
 
 export const getOperatingSystem = (): string => {
