@@ -225,7 +225,7 @@
 						</td>
 						<td>
 							{#each summary.missingMemos.toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp={letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
