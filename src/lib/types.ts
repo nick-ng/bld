@@ -15,18 +15,18 @@ export type FlashCard = {
 
 export const getPropertyOrDefault =
 	(unknown: unknown) =>
-		<T>(propertyName: string, defaultValue: T): T => {
-			if (!unknown || typeof unknown !== "object" || !(propertyName in unknown)) {
-				return defaultValue;
-			}
+	<T>(propertyName: string, defaultValue: T): T => {
+		if (!unknown || typeof unknown !== "object" || !(propertyName in unknown)) {
+			return defaultValue;
+		}
 
-			const value = (unknown as { [k: string]: unknown })[propertyName];
-			if (typeof value !== typeof defaultValue) {
-				return defaultValue;
-			}
+		const value = (unknown as { [k: string]: unknown })[propertyName];
+		if (typeof value !== typeof defaultValue) {
+			return defaultValue;
+		}
 
-			return value as typeof defaultValue;
-		};
+		return value as typeof defaultValue;
+	};
 
 export const parseFlashCard = (
 	unknown: unknown
