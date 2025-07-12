@@ -151,6 +151,7 @@ export const getFlashCard = (letterPair: string, flashCardMap: FlashCardStoreTyp
 		memo: "",
 		memoConfidence: 0,
 		tags: "",
+		isPublic: false,
 		type: "corner"
 	};
 };
