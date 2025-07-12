@@ -435,12 +435,14 @@ export const cornerSpeffzToLocation = (speffzLetters: string): string[] => {
 };
 
 export const arrayToCsvRow = (items: string[]): string => {
-	return items.map(i => {
-		const tempI = i.replaceAll("\n", "\\n")
-		if (tempI.includes(",")) {
-			return `"${tempI.replaceAll('"', '""')}"`
-		}
+	return items
+		.map((i) => {
+			const tempI = i.replaceAll("\n", "\\n");
+			if (tempI.includes(",")) {
+				return `"${tempI.replaceAll('"', '""')}"`;
+			}
 
-		return tempI
-	}).join(",")
-}
+			return tempI;
+		})
+		.join(",");
+};
