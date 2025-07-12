@@ -169,7 +169,7 @@
 					const { data } = parseResponse;
 					$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
 
-					const backUrl = $quizStore.length > 0 ? "/quiz" : "/flash-cards?lp=${letterPair}";
+					const backUrl = $quizStore.length > 0 ? "/quiz" : `/flash-cards?lp=${letterPair}`;
 					$quizStore = $quizStore.filter((lp) => lp != letterPair);
 
 					goto(backUrl);
