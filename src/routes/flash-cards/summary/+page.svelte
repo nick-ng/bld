@@ -137,6 +137,12 @@
 	};
 
 	let summary = $derived(summariseFlashCards($flashCardStore));
+	let randomMissingComm = $derived(
+		summary.missingComms[Math.floor(Math.random() * summary.missingComms.length)]
+	);
+	let randomMissingMemo = $derived(
+		summary.missingMemos[Math.floor(Math.random() * summary.missingMemos.length)]
+	);
 
 	onMount(() => {
 		if (Date.now() - $flashCardStoreStatus.fetchEndMs > STALE_THRESHOLD_MS) {
@@ -162,10 +168,16 @@
 						<td class="text-center">
 							<div>No Comms</div>
 							<div>({summary.missingComms.length}/{summary.total})</div>
+							{#if summary.missingComms.length > 0}
+								<a
+									class="my-1 block rounded border border-gray-600 px-2 py-1 dark:border-gray-300"
+									href={`/flash-cards?lp=${randomMissingComm}`}>Random</a
+								>
+							{/if}
 						</td>
 						<td>
 							{#each summary.missingComms.toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -182,7 +194,7 @@
 						>
 						<td>
 							{#each summary.commConfidences[confidence].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -204,10 +216,16 @@
 						<td class="text-center">
 							<div>No Memo</div>
 							<div>({summary.missingMemos.length}/{summary.total})</div>
+							{#if summary.missingMemos.length > 0}
+								<a
+									class="my-1 block rounded border border-gray-600 px-2 py-1 dark:border-gray-300"
+									href={`/flash-cards?lp=${randomMissingMemo}`}>Random</a
+								>
+							{/if}
 						</td>
 						<td>
 							{#each summary.missingMemos.toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp={letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp={letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -224,7 +242,7 @@
 						>
 						<td>
 							{#each summary.memoConfidences[confidence].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -246,7 +264,7 @@
 						<td>{ageRange}</td>
 						<td>
 							{#each summary.ageRanges[ageRange].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -268,7 +286,7 @@
 						<td class="font-mono whitespace-nowrap">{insert}</td>
 						<td>
 							{#each summary.inserts[insert].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
@@ -290,7 +308,7 @@
 						<td class="font-mono whitespace-nowrap">{setup}</td>
 						<td>
 							{#each summary.setups[setup].toSorted() as letterPair, i (letterPair)}
-								{i > 0 ? ", " : ""}<a href={`/flash-cards/edit?lp=${letterPair}`} class="uppercase"
+								{i > 0 ? ", " : ""}<a href={`/flash-cards?lp=${letterPair}`} class="uppercase"
 									>{letterPair}</a
 								>
 							{/each}
