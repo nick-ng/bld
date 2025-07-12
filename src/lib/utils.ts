@@ -421,7 +421,7 @@ const cornerSpeffzLocationMap = {
 	z: "DBL"
 };
 
-export const oneCornerSpeffzToLocation = (speffzLetter: string) => {
+export const oneCornerSpeffzToLocation = (speffzLetter: string): string => {
 	const letter = speffzLetter[0].toLowerCase();
 	if (letter && letter in cornerSpeffzLocationMap) {
 		return cornerSpeffzLocationMap[<keyof typeof cornerSpeffzLocationMap>letter];
@@ -430,6 +430,17 @@ export const oneCornerSpeffzToLocation = (speffzLetter: string) => {
 	return "";
 };
 
-export const cornerSpeffzToLocation = (speffzLetters: string) => {
+export const cornerSpeffzToLocation = (speffzLetters: string): string[] => {
 	return speffzLetters.split("").map(oneCornerSpeffzToLocation);
 };
+
+export const arrayToCsvRow = (items: string[]): string => {
+	return items.map(i => {
+		const tempI = i.replaceAll("\n", "\\n")
+		if (tempI.includes(",")) {
+			return `"${tempI.replaceAll('"', '""')}"`
+		}
+
+		return tempI
+	}).join(",")
+}
