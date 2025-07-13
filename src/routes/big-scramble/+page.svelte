@@ -43,9 +43,6 @@
 	const getClockStyle = ({ size }: { size: number }) =>
 		[`height: ${size * 1.5}px`, `width: ${size * 1.5}px`].join(";");
 
-	const getCubeImageUrl = (scramble: string) =>
-		`https://cube.rider.biz/visualcube.php?fmt=svg&size=265&view=plan&bg=black&dist=1.35&alg=x2${scramble.replaceAll(" ", "")}`;
-
 	const cube = new Cube();
 	let size: number = 120;
 	let fontOutline: number = 2;
@@ -92,62 +89,63 @@
 </svelte:head>
 
 <div class="big-scramble-root">
-	<div class="timer">
-		<Timer />
-	</div>
-	<div class="scramble">
-		{#each scrambleToMoves(scramble) as scrambleMove, i (`${i}-${scrambleMove.move}-${scrambleMove.side}`)}
-			<div
-				class={["move", scrambleMove.side.toLowerCase(), scrambleMove.isPrime && "is_prime"]
-					.filter((c) => c)
-					.join(" ")}
-				style={getMoveStyle({
-					outlineColor: scrambleMove.isPrime ? "#fff" : "#000",
-					fontOutline,
-					size
-				})}
-			>
-				{#if scrambleMove.isDouble}
-					<span>{scrambleMove.side}{scrambleMove.isWide ? "w" : ""}</span><span
-						class="two"
-						style={getMoveStyle({
-							outlineColor: "#FFF",
-							fontOutline,
-							size
-						})}>2</span
-					>
-				{:else}
-					{scrambleMove.move}
-				{/if}
+	<Timer />
+	<div class="flex flex-col">
+		<div class="scramble mt-8">
+			{#each scrambleToMoves(scramble) as scrambleMove, i (`${i}-${scrambleMove.move}-${scrambleMove.side}`)}
+				<div
+					class={["move", scrambleMove.side.toLowerCase(), scrambleMove.isPrime && "is_prime"]
+						.filter((c) => c)
+						.join(" ")}
+					style={getMoveStyle({
+						outlineColor: scrambleMove.isPrime ? "#fff" : "#000",
+						fontOutline,
+						size
+					})}
+				>
+					{#if scrambleMove.isDouble}
+						<span>{scrambleMove.side}{scrambleMove.isWide ? "w" : ""}</span><span
+							class="two"
+							style={getMoveStyle({
+								outlineColor: "#FFF",
+								fontOutline,
+								size
+							})}>2</span
+						>
+					{:else}
+						{scrambleMove.move}
+					{/if}
+				</div>
+			{/each}
+		</div>
+		<div class="clock">
+			<div class="clock-hand" style={getClockStyle({ size })}>
+				<ClockHand />
 			</div>
-		{/each}
-	</div>
-	<div class="clock">
-		<div class="clock-hand" style={getClockStyle({ size })}>
-			<ClockHand />
-		</div>
-		<div class="clock-hand" style={getClockStyle({ size })}>
-			<ClockHand isMinutes />
+			<div class="clock-hand" style={getClockStyle({ size })}>
+				<ClockHand isMinutes />
+			</div>
 		</div>
 	</div>
-	<div class="cube-preview text-white">
-		{cubeFacesString}
-		<div class="grid grid-cols-3 gap-1">
-			{#each cubeFacesString.slice(0, 10) as cubeFace, i (`U-${cubeFace}-${i}`)}
-				<div class={`w-10: h-10 ${cubeFace.toLowerCase()}`}>
+	<div class="cube-preview">
+		<div class="mb-4 grid grid-cols-3 gap-2">
+			{#each cubeFacesString.slice(0, 9) as cubeFace, i (`U-${cubeFace}-${i}`)}
+				<div class={`flex h-16 w-16 items-center justify-center ${cubeFace.toLowerCase()}`}>
 					{#if i === 4}
 						U
 					{/if}
 				</div>
 			{/each}
 		</div>
-	</div>
-	<div class="footer">
-		Scrambled cube images generated using Conrad Rider's <a
-			class="text-blue-500"
-			href="https://cube.rider.biz/visualcube.php"
-			target="_blank">VisualCube</a
-		>
+		<div class="grid grid-cols-3 gap-2">
+			{#each cubeFacesString.slice(18, 27) as cubeFace, i (`U-${cubeFace}-${i}`)}
+				<div class={`flex h-16 w-16 items-center justify-center ${cubeFace.toLowerCase()}`}>
+					{#if i === 4}
+						F
+					{/if}
+				</div>
+			{/each}
+		</div>
 	</div>
 </div>
 
@@ -155,10 +153,10 @@
 	.big-scramble-root {
 		background-color: black;
 		height: 100vh;
-		padding-top: 50px;
 		display: flex;
-		flex-direction: column;
-		align-items: center;
+		flex-direction: row;
+		justify-content: flex-start;
+		align-items: flex-start;
 		gap: 5px;
 		position: relative;
 	}
@@ -176,8 +174,8 @@
 
 	.cube-preview {
 		position: absolute;
-		right: 0;
-		bottom: 0;
+		right: 3px;
+		bottom: 3px;
 	}
 
 	.footer {
