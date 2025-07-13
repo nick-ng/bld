@@ -6,9 +6,9 @@
 	let barHeightPercent = $state(0);
 </script>
 
-<div class="timer">
+<div class="relative">
 	<form
-		class="text-white"
+		class="t-0 l-0 absolute w-max text-white"
 		onsubmit={(event) => {
 			event.preventDefault();
 
@@ -39,7 +39,7 @@
 		>
 	</form>
 	<div
-		class="timer_bar_outer mt-2 border {typeof intervalId === 'number'
+		class="timer_bar_outer mt-8 border {typeof intervalId === 'number'
 			? 'border-gray-500'
 			: 'border-black'}"
 	>
@@ -58,15 +58,9 @@
 </div>
 
 <style>
-	.timer {
-		position: absolute;
-		left: 0;
-		top: 0;
-	}
-
 	.timer_bar_outer {
 		height: 80vh;
-		width: 100px;
+		width: 70px;
 	}
 
 	.timer_bar_inner {
