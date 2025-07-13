@@ -24,6 +24,7 @@
 		"@types/markdown-it": "^14.1.2",
 		"@typescript-eslint/eslint-plugin": "^8.36.0",
 		"autoprefixer": "^10.4.21",
+		"cubejs": "^1.3.2",
 		"eslint": "^9.30.1",
 		"eslint-config-prettier": "^10.1.5",
 		"eslint-plugin-svelte": "^3.10.1",
