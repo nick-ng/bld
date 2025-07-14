@@ -21,7 +21,9 @@
 		const missingComms: string[] = [];
 		const missingMemos: string[] = [];
 		const quizAges: { letterPair: string; lastQuizUnix: number }[] = [
-			...Object.values(flashCards),
+			...Object.values(flashCards).filter(
+				(fc) => is3Style(fc.letterPair) && !isTwist(fc.letterPair)
+			),
 			{ letterPair: "1 Month", lastQuizUnix: (Date.now() - MONTH_MS) / 1000 },
 			{ letterPair: "1 Week", lastQuizUnix: (Date.now() - WEEK_MS) / 1000 },
 			{ letterPair: "1 Day", lastQuizUnix: (Date.now() - DAY_MS) / 1000 },
