@@ -311,7 +311,7 @@
 			<div class="mt-1 flex w-full flex-row justify-between gap-8">
 				<a
 					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-					href={$quizStore.length > 0 ? "/quiz" : "/flash-cards?lp=${letterPair}"}>Back</a
+					href={$quizStore.length > 0 ? "/quiz" : `/flash-cards?lp=${letterPair}`}>Back</a
 				>
 				<button
 					class="flex-grow"
