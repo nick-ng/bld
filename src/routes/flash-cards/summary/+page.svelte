@@ -10,7 +10,8 @@
 	const HOUR_MS = 60 * 60 * 1000;
 	const DAY_MS = 24 * HOUR_MS;
 	const WEEK_MS = 7 * DAY_MS;
-	const MONTH_MS = 4 * WEEK_MS;
+	const MONTH_MS = 30 * DAY_MS;
+	const YEAR_MS = 365 * DAY_MS;
 
 	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
 		const inserts: { [insert: string]: string[] } = {};
@@ -20,28 +21,45 @@
 		const commConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
 		const missingComms: string[] = [];
 		const missingMemos: string[] = [];
-		const quizAges: { letterPair: string; lastQuizUnix: number }[] = [
-			...Object.values(flashCards).filter(
-				(fc) => is3Style(fc.letterPair) && !isTwist(fc.letterPair)
-			),
-			{ letterPair: "1 Month", lastQuizUnix: (Date.now() - MONTH_MS) / 1000 },
-			{ letterPair: "1 Week", lastQuizUnix: (Date.now() - WEEK_MS) / 1000 },
-			{ letterPair: "1 Day", lastQuizUnix: (Date.now() - DAY_MS) / 1000 },
-			{ letterPair: "1 Hour", lastQuizUnix: (Date.now() - HOUR_MS) / 1000 }
-		].sort((a, b) => {
-			const ageDifference = a.lastQuizUnix - b.lastQuizUnix;
-			if (ageDifference !== 0) {
-				return ageDifference;
+		const quizAges: { letterPair: string; lastQuizUnix: number }[] = Object.values(flashCards)
+			.filter((fc) => is3Style(fc.letterPair) && !isTwist(fc.letterPair))
+			.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+		if (quizAges.length > 0) {
+			const nowMs = Date.now();
+			const newest = quizAges[quizAges.length - 1].lastQuizUnix * 1000;
+			const oldest = quizAges[0].lastQuizUnix * 1000;
+			const oldestDate = new Date(oldest);
+			quizAges.push({ letterPair: "1 Day", lastQuizUnix: (nowMs - DAY_MS) / 1000 });
+			quizAges.push({
+				lastQuizUnix: oldest / 1000 - 1,
+				letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`
+			});
+
+			if (newest > nowMs - HOUR_MS) {
+				quizAges.push({ letterPair: "1 Hour", lastQuizUnix: (nowMs - HOUR_MS) / 1000 });
+			}
+			if (oldest < nowMs - WEEK_MS) {
+				quizAges.push({ letterPair: "1 Week", lastQuizUnix: (nowMs - WEEK_MS) / 1000 });
+			}
+			if (oldest < nowMs - MONTH_MS) {
+				quizAges.push({ letterPair: "1 Month", lastQuizUnix: (nowMs - MONTH_MS) / 1000 });
+			}
+			if (oldest < nowMs - 6 * MONTH_MS) {
+				quizAges.push({ letterPair: "6 Months", lastQuizUnix: (nowMs - 6 * MONTH_MS) / 1000 });
+			}
+			if (oldest < nowMs - YEAR_MS) {
+				quizAges.push({ letterPair: "1 Year", lastQuizUnix: (nowMs - YEAR_MS) / 1000 });
 			}
 
-			return a.letterPair.localeCompare(b.letterPair);
-		});
-		const oldest = quizAges[0].lastQuizUnix;
-		const oldestDate = new Date(oldest * 1000);
-		quizAges.unshift({
-			lastQuizUnix: oldest - 1,
-			letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`
-		});
+			quizAges.sort((a, b) => {
+				const ageDifference = a.lastQuizUnix - b.lastQuizUnix;
+				if (ageDifference !== 0) {
+					return ageDifference;
+				}
+
+				return a.letterPair.localeCompare(b.letterPair);
+			});
+		}
 		let total = 0;
 		for (let letter0 = 0; letter0 < 24; letter0++) {
 			for (let letter1 = 0; letter1 < 24; letter1++) {
