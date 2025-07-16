@@ -28,7 +28,16 @@
 		<div class="text-center">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
-			<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+			<div class="relative m-0 flex flex-row justify-center self-stretch">
+				<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+				{#if flashCard.letterPair.length === 2 && flashCard.letterPair[0] !== flashCard.letterPair[1]}
+					{@const inverseLetterPair = `${flashCard.letterPair[1]}${flashCard.letterPair[0]}`}
+					<a
+						class="absolute top-0 right-0 bottom-0 my-auto block uppercase"
+						href={`/flash-cards?t=${flashCard.type}&lp=${inverseLetterPair}`}>{inverseLetterPair}</a
+					>
+				{/if}
+			</div>
 			{#if quizLeft > 0}
 				<div class="absolute top-0 left-0 text-left">{quizLeft} left</div>
 			{/if}

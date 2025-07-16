@@ -2,13 +2,20 @@
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { isTwist, is3Style, isOP } from "$lib/utils";
 
+	// @todo(nick-ng): parent should decide if the square is blank or not
 	interface Props {
 		letterPair?: string;
 		hideNonOP?: boolean;
 		hideNon3Style?: boolean;
+		flashCardType?: string;
 	}
 
-	let { letterPair = "", hideNonOP = true, hideNon3Style = true }: Props = $props();
+	let {
+		letterPair = "",
+		hideNonOP = true,
+		hideNon3Style = true,
+		flashCardType = "corner"
+	}: Props = $props();
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
 		const letterPairObject = store[letterPair];
@@ -32,7 +39,7 @@
 {:else}
 	<a
 		class="relative block border border-gray-800 bg-white p-0 text-center no-underline"
-		href={`/flash-cards?lp=${letterPair}`}
+		href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
 		<div class="flex h-2 flex-row justify-center gap-0.5 px-0.5 pb-0.5">

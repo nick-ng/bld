@@ -1,13 +1,15 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
+	import { page } from "$app/stores";
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { getAllLetterPairs, arrayToCsvRow } from "$lib/utils";
-	import LetterPairChooser from "./flash-card-chooser.svelte";
+	import FlashCardChooser from "./flash-card-chooser.svelte";
 
 	const allLetterPairs = getAllLetterPairs(true);
 	let letterPairFilter = $state("");
+	let flashCardType = $derived($page.url.searchParams.get("t") || "corner");
 	const now = new Date();
 	const formattedDate = [
 		now.getFullYear(),
@@ -81,10 +83,11 @@
 
 			return lp.startsWith(letterPairFilter);
 		}) as letterPair (letterPair)}
-			<LetterPairChooser
+			<FlashCardChooser
 				{letterPair}
 				hideNon3Style={$optionsStore.hideNon3Style}
 				hideNonOP={$optionsStore.hideNonOP}
+				{flashCardType}
 			/>
 		{/each}
 	</div>
