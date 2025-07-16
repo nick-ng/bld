@@ -5,6 +5,7 @@
 	import AllFlashCards from "$lib/components/all-flash-cards.svelte";
 
 	let letterPair = $derived(page.url.searchParams.get("lp"));
+	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	let showLogin = $state(false);
 	let username = $state("");
 	let password = $state("");
@@ -19,7 +20,7 @@
 		>
 		<a
 			class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-			href={`/flash-cards/edit?lp=${letterPair}`}>Edit</a
+			href={`/flash-cards/edit?t=${flashCardType}&lp=${letterPair}`}>Edit</a
 		>
 	</div>
 {:else}

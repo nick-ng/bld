@@ -145,7 +145,7 @@
 					<a
 						class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
 						style="flex-grow: 2"
-						href={`/flash-cards/edit?lp=${flashCard.letterPair}`}>Edit</a
+						href={`/flash-cards/edit?t=${flashCard.type}&lp=${flashCard.letterPair}`}>Edit</a
 					>
 					<div style="flex-grow: 1"></div>
 					<button

@@ -191,7 +191,9 @@
 			<table class="flash-card-editor mx-auto border-separate border-spacing-x-0.5">
 				<tbody>
 					<tr>
-						<td class="text-right">Memo</td>
+						<td class="text-right"
+							><a href="https://bestsiteever.ru/colpi/" target="pux_bld_colpi">Memo</a></td
+						>
 						<td
 							><input
 								class="w-full"
@@ -209,7 +211,7 @@
 						<td class="text-right"
 							><a
 								href={`https://v2.blddb.net/corner?position=${cornerSpeffzToLocation(`c${letterPair}`).join("-")}&mode=manmade`}
-								target="pux_blddb_corner_comm">Commutator</a
+								target="pux_bld_blddb_comm">Commutator</a
 							>
 						</td>
 						<td
