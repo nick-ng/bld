@@ -21,34 +21,54 @@
 		const commConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
 		const missingComms: string[] = [];
 		const missingMemos: string[] = [];
-		const quizAges: { letterPair: string; lastQuizUnix: number }[] = Object.values(flashCards)
+		const quizAges: {
+			letterPair: string;
+			lastQuizUnix: number;
+			hidden?: boolean;
+			isMarker?: boolean;
+		}[] = Object.values(flashCards)
 			.filter((fc) => is3Style(fc.letterPair) && !isTwist(fc.letterPair))
-			.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+			.sort((a, b) => b.lastQuizUnix - a.lastQuizUnix);
 		if (quizAges.length > 0) {
 			const nowMs = Date.now();
-			const newest = quizAges[quizAges.length - 1].lastQuizUnix * 1000;
-			const oldest = quizAges[0].lastQuizUnix * 1000;
-			const oldestDate = new Date(oldest);
-			quizAges.push({ letterPair: "1 Day", lastQuizUnix: (nowMs - DAY_MS) / 1000 });
+			const newest = quizAges[0].lastQuizUnix;
+			const newestDate = new Date(newest * 1000);
+			const oldest = quizAges[quizAges.length - 1].lastQuizUnix;
+			const oldestDate = new Date(oldest * 1000);
+			const historyMarkers = [
+				{ label: "1 Year", unixTimestamp: (nowMs - YEAR_MS) / 1000 },
+				{ label: "6 Months", unixTimestamp: (nowMs - 6 * MONTH_MS) / 1000 },
+				{ label: "1 Month", unixTimestamp: (nowMs - MONTH_MS) / 1000 },
+				{ label: "1 Week", unixTimestamp: (nowMs - WEEK_MS) / 1000 },
+				{ label: "1 Day", unixTimestamp: (nowMs - DAY_MS) / 1000 },
+				{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 }
+			];
+			for (let i = 0; i < historyMarkers.length; i++) {
+				if (oldest < historyMarkers[i].unixTimestamp && newest > historyMarkers[i].unixTimestamp) {
+					quizAges.push({
+						lastQuizUnix: historyMarkers[i].unixTimestamp,
+						letterPair: historyMarkers[i].label,
+						isMarker: true
+					});
+				}
+			}
 			quizAges.push({
-				lastQuizUnix: oldest / 1000 - 1,
-				letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`
+				lastQuizUnix: oldest - 1,
+				letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`,
+				isMarker: true
 			});
-
-			if (newest > nowMs - HOUR_MS) {
-				quizAges.push({ letterPair: "1 Hour", lastQuizUnix: (nowMs - HOUR_MS) / 1000 });
-			}
-			if (oldest < nowMs - WEEK_MS) {
-				quizAges.push({ letterPair: "1 Week", lastQuizUnix: (nowMs - WEEK_MS) / 1000 });
-			}
-			if (oldest < nowMs - MONTH_MS) {
-				quizAges.push({ letterPair: "1 Month", lastQuizUnix: (nowMs - MONTH_MS) / 1000 });
-			}
-			if (oldest < nowMs - 6 * MONTH_MS) {
-				quizAges.push({ letterPair: "6 Months", lastQuizUnix: (nowMs - 6 * MONTH_MS) / 1000 });
-			}
-			if (oldest < nowMs - YEAR_MS) {
-				quizAges.push({ letterPair: "1 Year", lastQuizUnix: (nowMs - YEAR_MS) / 1000 });
+			if (newest * 1000 > nowMs - DAY_MS) {
+				quizAges.push({
+					lastQuizUnix: quizAges[0].lastQuizUnix + 1,
+					letterPair: `${newestDate.getHours()}:${newestDate.getMinutes().toString().padStart(2, "0")}`,
+					isMarker: true
+				});
+			} else {
+				quizAges.push({
+					lastQuizUnix: newest + 1,
+					letterPair: `${newestDate.getFullYear()}-${(newestDate.getMonth() + 1).toString().padStart(2, "0")}-${newestDate.getDate().toString().padStart(2, "0")}`,
+					isMarker: true
+				});
 			}
 
 			quizAges.sort((a, b) => {
@@ -59,6 +79,12 @@
 
 				return a.letterPair.localeCompare(b.letterPair);
 			});
+
+			for (let i = 1; i < quizAges.length - 1; i++) {
+				if (quizAges[i].isMarker && quizAges[i - 1].isMarker && quizAges[i + 1].isMarker) {
+					quizAges[i].hidden = true;
+				}
+			}
 		}
 		let total = 0;
 		for (let letter0 = 0; letter0 < 24; letter0++) {
@@ -154,7 +180,7 @@
 			confidences={summary.memoConfidences}
 			total={summary.total}
 		/>
-		<table class="quiz-history block lg:col-span-2 lg:max-w-5xl">
+		<table class="quiz-history block lg:col-span-2 lg:max-w-full">
 			<thead>
 				<tr>
 					<th class="text-left whitespace-nowrap">Quiz History</th>
@@ -167,14 +193,14 @@
 							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 						>
 							{#each summary.quizAges as quizAge (quizAge.letterPair)}
-								{#if quizAge.letterPair.length !== 2}
-									<span
-										class="dark:bg-whitei dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100"
-										>{quizAge.letterPair}</span
-									>
-								{:else}
+								{#if !quizAge.isMarker}
 									<a href={`/flash-cards?lp=${quizAge.letterPair}`} class="p-0.5 uppercase"
 										>{quizAge.letterPair}</a
+									>
+								{:else if !quizAge.hidden}
+									<span
+										class="dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100 dark:bg-white"
+										>{quizAge.letterPair}</span
 									>
 								{/if}
 							{/each}
