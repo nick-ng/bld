@@ -14,7 +14,7 @@
 		const lowerCaseFilter = letterPairFilter.toLowerCase().replaceAll(/[^a-z ]/g, " ");
 
 		if (lowerCaseFilter.length === 2) {
-			return [lowerCaseFilter];
+			return [lowerCaseFilter, `${lowerCaseFilter[1]}${lowerCaseFilter[0]}`];
 		}
 
 		if (lowerCaseFilter.includes(" ")) {

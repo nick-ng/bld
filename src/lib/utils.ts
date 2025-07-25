@@ -256,7 +256,7 @@ export const commutatorDetails = (rawCommutator: string) => {
 	}
 
 	const normalisedCommutator = commutator
-		? `${regripEmoji}${normaliseCommutator(conjugatePlusCommutator)}`
+		? `[${regripEmoji}${normaliseCommutator(conjugatePlusCommutator)}]`
 		: rawCommutator;
 
 	return {
