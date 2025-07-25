@@ -12,6 +12,8 @@
 		extraClass?: string;
 		onQuizEnd?: () => void | Promise<void>;
 		showInverseLink?: boolean;
+		showLink?: boolean;
+		flashCardType?: string;
 	}
 
 	let {
@@ -20,7 +22,9 @@
 		quizShowAnswer = true,
 		onQuizEnd,
 		extraClass = "",
-		showInverseLink = false
+		showInverseLink = false,
+		showLink = false,
+		flashCardType = "corner"
 	}: Props = $props();
 	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair));
 </script>
@@ -31,7 +35,13 @@
 	{:else}
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
 			<div class="relative m-0 flex flex-row justify-center self-stretch">
-				<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+				{#if showLink}
+					<a href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}>
+						<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+					</a>
+				{:else}
+					<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+				{/if}
 			</div>
 			{#if quizLeft > 0}
 				<div class="absolute top-0 left-0 text-left">{quizLeft} left</div>
