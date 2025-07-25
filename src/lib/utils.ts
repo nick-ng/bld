@@ -269,7 +269,8 @@ export const commutatorDetails = (rawCommutator: string) => {
 		conjugatePlusCommutator,
 		setup,
 		insert,
-		interchange
+		interchange,
+		regripEmoji
 	};
 };
 
