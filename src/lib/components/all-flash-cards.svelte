@@ -1,15 +1,64 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { page } from "$app/stores";
+	import { page } from "$app/state";
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { getAllLetterPairs, arrayToCsvRow } from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
+	import FlashCard from "./flash-card.svelte";
 
 	const allLetterPairs = getAllLetterPairs(true);
-	let letterPairFilter = $state("");
-	let flashCardType = $derived($page.url.searchParams.get("t") || "corner");
+	let letterPairFilter = $state(page.url.searchParams.get("filter") || "");
+	let processedLetterPairFilter = $derived.by(() => {
+		const lowerCaseFilter = letterPairFilter.toLowerCase().replaceAll(/[^a-z ]/g, " ");
+
+		if (lowerCaseFilter.length === 2) {
+			return [lowerCaseFilter];
+		}
+
+		if (lowerCaseFilter.includes(" ")) {
+			const tempFilter = lowerCaseFilter.split(" ").filter((a) => a);
+			const outputFilter = [];
+			for (let i = 0; i < tempFilter.length; i++) {
+				switch (tempFilter[i].length) {
+					case 1: {
+						outputFilter.push(`${tempFilter[i]}${tempFilter[i]}`);
+						break;
+					}
+					case 2: {
+						outputFilter.push(tempFilter[i]);
+						break;
+					}
+					default: {
+						outputFilter.push(...tempFilter[i].split(""));
+					}
+				}
+			}
+
+			return outputFilter;
+		}
+
+		return lowerCaseFilter.split("");
+	});
+	let filteredLetterPairs = $derived(
+		letterPairFilter && processedLetterPairFilter.every((lp) => lp.length === 2)
+			? processedLetterPairFilter
+			: allLetterPairs.filter((lp) => {
+					if (processedLetterPairFilter.length < 1) {
+						return true;
+					}
+
+					if (processedLetterPairFilter.length === 1) {
+						return lp.includes(processedLetterPairFilter[0]);
+					}
+
+					return (
+						processedLetterPairFilter.includes(lp[0]) && processedLetterPairFilter.includes(lp[1])
+					);
+				})
+	);
+	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	const now = new Date();
 	const formattedDate = [
 		now.getFullYear(),
@@ -54,10 +103,16 @@
 				}
 			}}
 		>
-			<label class="block"
+			<label class="inline-block"
 				>Filter:
 				<input type="text" autocomplete="off" bind:value={letterPairFilter} />
-			</label>
+			</label><button
+				class="inline-block"
+				type="button"
+				onclick={() => {
+					letterPairFilter = "";
+				}}>Clear Filter</button
+			>
 		</form>
 		<label
 			>Hide Non-3-Style Pairs: <input
@@ -75,25 +130,40 @@
 			download={`v2-${formattedDate}-000000-log.csv`}>Export Flash Cards</a
 		>
 	</div>
-	<div class="letterPairGrid">
-		{#each allLetterPairs.filter((lp) => {
-			if (!letterPairFilter.trim()) {
-				return true;
-			}
-
-			return lp.startsWith(letterPairFilter);
-		}) as letterPair (letterPair)}
-			<FlashCardChooser
-				{letterPair}
-				hideNon3Style={$optionsStore.hideNon3Style}
-				hideNonOP={$optionsStore.hideNonOP}
-				{flashCardType}
-			/>
-		{/each}
-	</div>
+	{#if filteredLetterPairs.length <= 26}<div class="flashCards">
+			{#each filteredLetterPairs as letterPair (letterPair)}
+				<div class="w-68 rounded border border-gray-300 p-2 dark:border-gray-500">
+					<FlashCard {letterPair} />
+				</div>
+			{/each}
+		</div>{:else}
+		<div
+			class={["letterPairGrid", !letterPairFilter && "letterPairGridColumns"]
+				.filter((a) => a)
+				.join(" ")}
+		>
+			{#each filteredLetterPairs as letterPair (letterPair)}
+				<FlashCardChooser
+					{letterPair}
+					hideNon3Style={$optionsStore.hideNon3Style}
+					hideNonOP={$optionsStore.hideNonOP}
+					{flashCardType}
+				/>
+			{/each}
+		</div>
+	{/if}
 </div>
 
 <style>
+	.flashCards {
+		width: max-content;
+		max-width: 90vw;
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 4px;
+	}
+
 	.letterPairGrid {
 		display: grid;
 		justify-content: center;
@@ -102,9 +172,12 @@
 
 	@media (min-width: 1024px) {
 		.letterPairGrid {
-			grid-auto-flow: column dense;
 			grid-template-columns: repeat(24, 42px);
 			grid-template-rows: repeat(24, 1fr);
+		}
+
+		.letterPairGridColumns {
+			grid-auto-flow: column dense;
 		}
 	}
 </style>

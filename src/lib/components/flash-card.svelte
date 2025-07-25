@@ -11,6 +11,7 @@
 		quizShowAnswer?: boolean;
 		extraClass?: string;
 		onQuizEnd?: () => void | Promise<void>;
+		showInverseLink?: boolean;
 	}
 
 	let {
@@ -18,7 +19,8 @@
 		quizLeft = 0,
 		quizShowAnswer = true,
 		onQuizEnd,
-		extraClass = ""
+		extraClass = "",
+		showInverseLink = false
 	}: Props = $props();
 	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair));
 </script>
@@ -39,7 +41,7 @@
 					class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 					onclick={onQuizEnd}>End Quiz</button
 				>
-			{:else if flashCard.letterPair.length === 2 && flashCard.letterPair[0] !== flashCard.letterPair[1]}
+			{:else if showInverseLink && flashCard.letterPair.length === 2 && flashCard.letterPair[0] !== flashCard.letterPair[1]}
 				{@const inverseLetterPair = `${flashCard.letterPair[1]}${flashCard.letterPair[0]}`}
 				<a
 					class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 uppercase dark:border-gray-300"
@@ -48,7 +50,7 @@
 			{/if}
 			<Corners letterPair={flashCard.letterPair} />
 			{#if quizShowAnswer}
-				<div class="text-2xl">{flashCard.memo}</div>
+				<div class="w-full truncate text-center text-2xl">{flashCard.memo}</div>
 				<div>
 					{#if flashCard.commutator}
 						<span class="font-mono text-xl">
