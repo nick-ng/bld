@@ -26,6 +26,7 @@ import (
 
 const USER_IMAGES_DIRECTORY = "user-images"
 
+// @todo(nick-ng): wait some time before deleting unused images
 func cleanUpImages() {
 	dirEntries, err := os.ReadDir(USER_IMAGES_DIRECTORY)
 
@@ -77,10 +78,10 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
-		writer.WriteHeader(http.StatusUnauthorized)
-		return
+		authenticatedUsername = utils.GetDefaultUser()
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
 	}
-	writer.Header().Add("X-Access-Token", accessToken)
 
 	letterPair := req.PathValue("letterPair")
 	flashCardType := req.URL.Query().Get("type")
@@ -96,6 +97,10 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if !haveAccess {
+		flashCard = utils.AnonymiseFlashCard(flashCard)
+	}
+
 	jsonBytes, err := json.Marshal(flashCard)
 	if err != nil {
 		fmt.Fprintf(writer, "%s", err)
@@ -105,7 +110,11 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 
 	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
 	writer.Header().Add("Cache-Control", "no-store")
-	writer.WriteHeader(http.StatusOK)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+	} else {
+		writer.WriteHeader(http.StatusOK)
+	}
 	writer.Write(jsonBytes)
 }
 
@@ -114,16 +123,22 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
-		writer.WriteHeader(http.StatusUnauthorized)
-		return
+		authenticatedUsername = utils.GetDefaultUser()
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
 	}
-	writer.Header().Add("X-Access-Token", accessToken)
 
 	allFlashCards, err := database.ReadAllFlashCards(authenticatedUsername)
 	if err != nil {
 		fmt.Fprintf(writer, "%s", err)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	if !haveAccess {
+		for i, flashCard := range allFlashCards {
+			allFlashCards[i] = utils.AnonymiseFlashCard(flashCard)
+		}
 	}
 
 	jsonBytes, err := json.Marshal(allFlashCards)
@@ -135,7 +150,11 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 
 	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
 	writer.Header().Add("Cache-Control", "no-store")
-	writer.WriteHeader(http.StatusOK)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+	} else {
+		writer.WriteHeader(http.StatusOK)
+	}
 	writer.Write(jsonBytes)
 }
 

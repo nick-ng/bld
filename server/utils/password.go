@@ -14,6 +14,7 @@ import (
 )
 
 const ACCESS_TOKEN_TTL_SECONDS = 5 * 60 * 60 // 5 hours
+var defaultUser = ""
 
 type UserLogin struct {
 	Username     string `json:"username"`
@@ -58,6 +59,37 @@ func pruneExpiredAccessTokens() {
 	}
 }
 
+func getUserList() ([]UserLogin, error) {
+	userListPath := filepath.Join(database.USER_DATA_DIRECTORY, "users.json")
+	userListBytes, err := os.ReadFile(userListPath)
+
+	if err != nil {
+		fmt.Println("error when reading users.json", err)
+		return nil, err
+	}
+
+	userList := []UserLogin{}
+
+	err = json.Unmarshal(userListBytes, &userList)
+
+	if err != nil {
+		fmt.Println("error when parsing users.json")
+		return nil, err
+	}
+
+	defaultUser = userList[0].Username
+
+	return userList, nil
+}
+
+func GetDefaultUser() string {
+	if len(defaultUser) == 0 {
+		getUserList()
+	}
+
+	return defaultUser
+}
+
 // Returns if the authentication is successful, the authenticated username,
 // and the access token they should use
 func CheckCredentials(headers http.Header) (bool, string, string) {
@@ -86,20 +118,8 @@ func CheckCredentials(headers http.Header) (bool, string, string) {
 	}
 	password := passwordHeaders[len(passwordHeaders)-1]
 
-	userListPath := filepath.Join(database.USER_DATA_DIRECTORY, "users.json")
-	userListBytes, err := os.ReadFile(userListPath)
-
+	userList, err := getUserList()
 	if err != nil {
-		fmt.Println("error when reading users.json", err)
-		return false, "", ""
-	}
-
-	userList := []UserLogin{}
-
-	err = json.Unmarshal(userListBytes, &userList)
-
-	if err != nil {
-		fmt.Println("error when parsing users.json")
 		return false, "", ""
 	}
 
@@ -109,8 +129,8 @@ func CheckCredentials(headers http.Header) (bool, string, string) {
 		}
 
 		err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password))
-
 		if err != nil {
+			fmt.Println("error when parsing getting users")
 			return false, "", ""
 		}
 

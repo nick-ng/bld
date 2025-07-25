@@ -12,7 +12,7 @@
 	const SIZE_STEP = 10;
 
 	const getImageUrl = (uri: string) => {
-		if (uri.startsWith("blob:")) {
+		if (uri.startsWith("blob:") || uri.startsWith("/")) {
 			return uri;
 		}
 

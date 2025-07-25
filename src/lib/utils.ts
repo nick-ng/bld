@@ -78,8 +78,6 @@ export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean =
 
 	if (isValid) {
 		newInit.headers = headers;
-	} else if (!alwaysSend) {
-		return Promise.resolve();
 	}
 
 	const response = fetch(url, { mode: "cors", ...newInit });
@@ -91,6 +89,8 @@ export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean =
 				localStorage.setItem(ACCESS_TOKEN_STORE_KEY, newAccessToken);
 			}
 		}
+
+		return r;
 	});
 
 	return response;
