@@ -54,8 +54,9 @@ css:
 ### ToDo Comments
 
 - server/database/database.go:476: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+- server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
-- server/utils/password.go:37: @todo(nick-ng): does this actually help?
+- server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:5: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:6: @todo(nick-ng): change filter criteria "direction"
 - src/lib/utils.ts:340: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle

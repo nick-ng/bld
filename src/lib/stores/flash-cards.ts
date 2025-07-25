@@ -33,11 +33,12 @@ export const fetchFlashCards = async (
 		const res = await authFetch(joinServerPath("flash-cards"), {
 			cache
 		});
+
 		if (!res) {
 			return {};
 		}
 
-		if (!res.ok) {
+		if (!res.ok && res.status !== 401) {
 			console.warn("couldn't get flash cards because:", res.status, res.statusText);
 			flashCardStoreStatus.set({
 				status: `error`,

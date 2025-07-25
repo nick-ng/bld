@@ -1,6 +1,11 @@
 package utils
 
-import "net/http"
+import (
+	"bld-server/database"
+	"fmt"
+	"net/http"
+	"strings"
+)
 
 func AddCorsHeaders(writer http.ResponseWriter) {
 	writer.Header().Add("Access-Control-Allow-Origin", "*")
@@ -18,4 +23,26 @@ func FirstHeaders(headers http.Header) map[string]string {
 	}
 
 	return headerMap
+}
+
+func AnonymiseFlashCard(flashCard database.FlashCard) database.FlashCard {
+	anonymisedFlashCard := database.FlashCard{
+		Type:         flashCard.Type,
+		Owner:        "demo",
+		LetterPair:   flashCard.LetterPair,
+		Memo:         strings.ToUpper(fmt.Sprintf("%c___ %c___", flashCard.LetterPair[0], flashCard.LetterPair[1])),
+		Image:        "/no-image.png",
+		Commutator:   flashCard.Commutator,
+		Tags:         flashCard.Tags,
+		LastQuizUnix: flashCard.LastQuizUnix,
+		Confidence:   flashCard.Confidence,
+		IsPublic:     flashCard.IsPublic,
+	}
+
+	if flashCard.IsPublic {
+		anonymisedFlashCard.Memo = flashCard.Memo
+		anonymisedFlashCard.Image = flashCard.Image
+	}
+
+	return anonymisedFlashCard
 }
