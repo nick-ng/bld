@@ -255,9 +255,12 @@ export const commutatorDetails = (rawCommutator: string) => {
 		insert = temp[1];
 	}
 
-	const normalisedCommutator = commutator
-		? `[${regripEmoji}${normaliseCommutator(conjugatePlusCommutator)}]`
+	let normalisedCommutator = commutator
+		? `${normaliseCommutator(conjugatePlusCommutator)}`
 		: rawCommutator;
+	if (normalisedCommutator[0] !== "[") {
+		normalisedCommutator = `[${normalisedCommutator}]`;
+	}
 
 	return {
 		rawCommutator,
