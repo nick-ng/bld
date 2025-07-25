@@ -130,7 +130,7 @@
 			download={`v2-${formattedDate}-000000-log.csv`}>Export Flash Cards</a
 		>
 	</div>
-	{#if filteredLetterPairs.length <= 26}<div class="flashCards">
+	{#if filteredLetterPairs.length <= 10}<div class="flashCards">
 			{#each filteredLetterPairs as letterPair (letterPair)}
 				<div class="w-68 rounded border border-gray-300 p-2 dark:border-gray-500">
 					<FlashCard {letterPair} />
