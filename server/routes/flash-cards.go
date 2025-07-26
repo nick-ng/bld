@@ -78,6 +78,7 @@ func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
+		// @todo(nick-ng): only show default user's flash cards if no user provided
 		authenticatedUsername = utils.GetDefaultUser()
 	} else {
 		writer.Header().Add("X-Access-Token", accessToken)
@@ -123,6 +124,7 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
+		// @todo(nick-ng): only show default user's flash cards if no user provided
 		authenticatedUsername = utils.GetDefaultUser()
 	} else {
 		writer.Header().Add("X-Access-Token", accessToken)
@@ -181,6 +183,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	imageUrl := req.FormValue("imageUrl")
 	lastQuizUnixString := req.FormValue("lastQuizUnix")
 	confidenceString := req.FormValue("confidence")
+	isPublic := req.FormValue("isPublic")
 
 	lastQuizUnix, err := strconv.ParseInt(lastQuizUnixString, 10, 64)
 	if err != nil {
@@ -274,6 +277,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 		Tags:         tags,
 		LastQuizUnix: lastQuizUnix,
 		Confidence:   int(confidence),
+		IsPublic:     isPublic == "1",
 	}
 
 	database.WriteFlashCard(flashCard)
