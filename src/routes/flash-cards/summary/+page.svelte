@@ -2,8 +2,9 @@
 	import type { FlashCardStoreType } from "$lib/stores/flash-cards";
 
 	import { onMount } from "svelte";
-	import { commutatorDetails, sortAlgs, is3Style, isTwist } from "$lib/utils";
+	import { commutatorDetails, sortAlgs, isBuffer, isTwist } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, fetchFlashCards } from "$lib/stores/flash-cards";
+	import { optionsStore } from "$lib/stores/options";
 	import ConfidenceTable from "./confidence-table.svelte";
 
 	const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
@@ -12,6 +13,9 @@
 	const WEEK_MS = 7 * DAY_MS;
 	const MONTH_MS = 30 * DAY_MS;
 	const YEAR_MS = 365 * DAY_MS;
+
+	const flashCardType = "corner";
+	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
 
 	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
 		const inserts: { [insert: string]: string[] } = {};
@@ -27,7 +31,11 @@
 			hidden?: boolean;
 			isMarker?: boolean;
 		}[] = Object.values(flashCards)
-			.filter((fc) => is3Style(fc.letterPair) && !isTwist(fc.letterPair))
+			.filter(
+				(fc) =>
+					!isBuffer(fc.letterPair, flashCardTypeInfo.bufferPiece) &&
+					!isTwist(fc.letterPair, flashCardTypeInfo.samePieces)
+			)
 			.sort((a, b) => b.lastQuizUnix - a.lastQuizUnix);
 		if (quizAges.length > 0) {
 			const nowMs = Date.now();
@@ -89,9 +97,11 @@
 		let total = 0;
 		for (let letter0 = 0; letter0 < 24; letter0++) {
 			for (let letter1 = 0; letter1 < 24; letter1++) {
-				const letterPair =
-					`${String.fromCharCode(65 + letter0)}${String.fromCharCode(65 + letter1)}`.toLowerCase();
-				if (!is3Style(letterPair) || isTwist(letterPair)) {
+				const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
+				if (
+					isBuffer(letterPair, flashCardTypeInfo.bufferPiece) ||
+					isTwist(letterPair, flashCardTypeInfo.samePieces)
+				) {
 					continue;
 				}
 

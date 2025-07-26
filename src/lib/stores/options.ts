@@ -1,7 +1,12 @@
 import { writable } from "svelte/store";
 import { browser } from "$app/environment";
 
-import { FLASH_CARD_FILTER_STORE_KEY, FIXED_QUIZ_STORE_KEY } from "$lib/constants";
+import {
+	FLASH_CARD_FILTER_STORE_KEY,
+	FIXED_QUIZ_STORE_KEY,
+	SPEFFZ_SAME_PIECES,
+	SPEFFZ_UFR
+} from "$lib/constants";
 
 // @todo(nick-ng): change filter criteria "direction"
 // it's to do with the buffer piece
@@ -10,11 +15,21 @@ const options: {
 	hideNonOP: boolean;
 	fixedQuiz: string[];
 	isUserAuthenticated: boolean;
+	flashCardTypes: {
+		[key: string]: { name: string; samePieces: string[][]; bufferPiece: string[] };
+	};
 } = {
 	hideNon3Style: false,
 	hideNonOP: false,
 	fixedQuiz: [],
-	isUserAuthenticated: false
+	isUserAuthenticated: false,
+	flashCardTypes: {
+		corner: {
+			name: "Corner",
+			samePieces: SPEFFZ_SAME_PIECES,
+			bufferPiece: SPEFFZ_UFR
+		}
+	}
 };
 
 let storedFilterString = "";

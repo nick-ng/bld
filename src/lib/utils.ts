@@ -98,20 +98,7 @@ export const authFetch = (url: string, init?: RequestInit) => {
 	return response;
 };
 
-const UBL = ["a", "e", "r"];
-const UFR = ["c", "j", "m"];
-const SAME_PIECES = [
-	UBL,
-	["b", "n", "q"],
-	UFR,
-	["d", "f", "i"],
-	["g", "l", "u"],
-	["h", "s", "x"],
-	["k", "p", "v"],
-	["o", "t", "w"]
-];
-
-export const isTwist = (letterPair: string) => {
+export const isTwist = (letterPair: string, samePieces: string[][]) => {
 	const letters = letterPair.split("");
 	if (letters.length !== 2) {
 		return false;
@@ -122,8 +109,8 @@ export const isTwist = (letterPair: string) => {
 		return false;
 	}
 
-	for (let i = 0; i < SAME_PIECES.length; i++) {
-		if (SAME_PIECES[i].includes(letters[0]) && SAME_PIECES[i].includes(letters[1])) {
+	for (let i = 0; i < samePieces.length; i++) {
+		if (samePieces[i].includes(letters[0]) && samePieces[i].includes(letters[1])) {
 			return true;
 		}
 	}
@@ -131,57 +118,13 @@ export const isTwist = (letterPair: string) => {
 	return false;
 };
 
-export const isOP = (letterPair: string) => {
+export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
 	const letters = letterPair.split("");
 
 	for (let i = 0; i < letters.length; i++) {
-		if (UBL.includes(letters[i])) {
-			return false;
-		}
-	}
-
-	return true;
-};
-
-export const hasOPBuffer = (letterPair: string) => {
-	const letters = letterPair.split("");
-
-	for (let i = 0; i < letters.length; i++) {
-		if (UBL.includes(letters[i])) {
+		if (bufferPiece.includes(letters[i])) {
 			return true;
 		}
-	}
-
-	return false;
-};
-
-export const is3Style = (letterPair: string) => {
-	const letters = letterPair.split("");
-
-	for (let i = 0; i < letters.length; i++) {
-		if (UFR.includes(letters[i])) {
-			return false;
-		}
-	}
-
-	return true;
-};
-
-export const has3StyleBuffer = (letterPair: string) => {
-	const letters = letterPair.split("");
-
-	for (let i = 0; i < letters.length; i++) {
-		if (UFR.includes(letters[i])) {
-			return true;
-		}
-	}
-
-	return false;
-};
-
-export const isOrozco = (letterPair: string) => {
-	if (letterPair.toLowerCase().includes("b")) {
-		return is3Style(letterPair);
 	}
 
 	return false;
@@ -293,26 +236,6 @@ export const sortAlgs = (a: string, b: string): number => {
 	return a.localeCompare(b);
 };
 
-export const getAllLetterPairs = (includeTwists: boolean) => {
-	const allLetterPairs = [];
-
-	const codePointOffset = 97;
-	for (let i = 0; i < 24; i++) {
-		for (let j = 0; j < 24; j++) {
-			const firstLetter = String.fromCodePoint(codePointOffset + i);
-			const secondLetter = String.fromCodePoint(codePointOffset + j);
-			const letterPair = `${firstLetter}${secondLetter}`;
-			if (!includeTwists && isTwist(letterPair)) {
-				continue;
-			}
-
-			allLetterPairs.push(letterPair);
-		}
-	}
-
-	return allLetterPairs;
-};
-
 export const shuffleArray = <T>(arr: T[]): T[] => {
 	const temp = arr
 		.map((v) => {
@@ -329,73 +252,6 @@ export const shuffleArray = <T>(arr: T[]): T[] => {
 		});
 
 	return temp;
-};
-
-const bagRandomByDay = (itemSet: string[], startDate: Date, forDate: Date) => {
-	// 10: get number of days
-	const difference = forDate.valueOf() - startDate.valueOf();
-	// ms -> seconds -> minutes -> hours -> days
-	const differenceDays = Math.floor(difference / (1000 * 60 * 60 * 24));
-
-	console.log("differenceDays", differenceDays);
-
-	// @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
-	// @todo(nick-ng): remove items from bag and put into subsets
-	// @todo(nick-ng): when you have constructed the nth subset, return that subset
-	// @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
-
-	// 20: shuffle set
-	// let counter = 0;
-	// do {
-	// 	const seedDate = startDate;
-	// 	const seed =
-	// 		seedDate.getDate() * 100000 + (seedDate.getMonth() + 1) * 1000 + seedDate.getFullYear();
-	// 	console.log("seed", seed);
-	// 	const randomSequence = getRandomSequence(seed, itemSet.length);
-	// 	const temp = [...itemSet]
-	// 		.map((item, i) => ({
-	// 			item,
-	// 			shuffleValue: randomSequence[i]
-	// 		}))
-	// 		.sort((a, b) => {
-	// 			return a.shuffleValue - b.shuffleValue;
-	// 		});
-
-	// 	counter++;
-	// } while (counter < 10000);
-
-	// return tempSet;
-	return [];
-};
-
-export const getLettersOfTheDay = (
-	date: Date,
-	exclude3StyleBuffer: boolean,
-	excludeOPBuffer: boolean
-) => {
-	console.log(date, exclude3StyleBuffer, excludeOPBuffer);
-
-	const startDate = new Date("2025-01-19");
-
-	console.log("startDate", startDate);
-
-	const realLetterPairs = getAllLetterPairs(false).filter((lp) => {
-		if (lp[0] === lp[1]) {
-			return false;
-		}
-
-		if (exclude3StyleBuffer && has3StyleBuffer(lp)) {
-			return false;
-		}
-
-		if (excludeOPBuffer && hasOPBuffer(lp)) {
-			return false;
-		}
-
-		return true;
-	});
-
-	return bagRandomByDay(realLetterPairs, startDate, date);
 };
 
 const cornerSpeffzLocationMap = {

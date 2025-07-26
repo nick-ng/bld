@@ -1,15 +1,30 @@
 <script lang="ts">
+	import { onMount } from "svelte";
 	import { goto } from "$app/navigation";
 	import { page } from "$app/state";
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import { getAllLetterPairs, arrayToCsvRow } from "$lib/utils";
+	import { arrayToCsvRow, isBuffer, isTwist } from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
 
-	const allLetterPairs = getAllLetterPairs(true);
 	let letterPairFilter = $state(page.url.searchParams.get("filter") || "");
+	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
+	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
+	let filterInputElement = $derived<HTMLInputElement | null>(null);
+	let allLetterPairs = $derived.by(() => {
+		const tempLetterPairs: string[] = [];
+		for (let letter0 = 0; letter0 < 24; letter0++) {
+			for (let letter1 = 0; letter1 < 24; letter1++) {
+				const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
+				tempLetterPairs.push(letterPair);
+			}
+		}
+
+		return tempLetterPairs;
+	});
+
 	let processedLetterPairFilter = $derived.by(() => {
 		const lowerCaseFilter = letterPairFilter.toLowerCase().replaceAll(/[^a-z ]/g, " ");
 
@@ -43,10 +58,26 @@
 	});
 	let filteredLetterPairs = $derived(
 		letterPairFilter && processedLetterPairFilter.every((lp) => lp.length === 2)
-			? processedLetterPairFilter
+			? processedLetterPairFilter.filter((lp) => {
+					if (
+						isTwist(lp, flashCardTypeInfo.samePieces) ||
+						isBuffer(lp, flashCardTypeInfo.bufferPiece)
+					) {
+						return false;
+					}
+
+					return true;
+				})
 			: allLetterPairs.filter((lp) => {
 					if (processedLetterPairFilter.length < 1) {
 						return true;
+					}
+
+					if (
+						isTwist(lp, flashCardTypeInfo.samePieces) ||
+						isBuffer(lp, flashCardTypeInfo.bufferPiece)
+					) {
+						return false;
 					}
 
 					if (processedLetterPairFilter.length === 1) {
@@ -58,7 +89,6 @@
 					);
 				})
 	);
-	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	const now = new Date();
 	const formattedDate = [
 		now.getFullYear(),
@@ -85,6 +115,22 @@
 			})
 			.join("\n")
 	);
+
+	onMount(() => {
+		const focusFilterInput = (event: KeyboardEvent) => {
+			if (event.key !== ":") {
+				return;
+			}
+
+			filterInputElement?.focus();
+		};
+
+		document.addEventListener("keypress", focusFilterInput);
+
+		return () => {
+			document.removeEventListener("keypress", focusFilterInput);
+		};
+	});
 </script>
 
 <div class="m-auto lg:w-min">
@@ -93,6 +139,7 @@
 	</div>
 	<div class="mb-1 flex flex-row items-center gap-2">
 		<form
+			class="flex min-w-1/2 flex-row"
 			onsubmit={(event) => {
 				event.preventDefault();
 
@@ -103,26 +150,21 @@
 				}
 			}}
 		>
-			<label class="inline-block"
-				>Filter:
-				<input type="text" autocomplete="off" bind:value={letterPairFilter} />
-			</label><button
+			<input
+				class="shrink grow"
+				type="text"
+				autocomplete="off"
+				bind:this={filterInputElement}
+				bind:value={letterPairFilter}
+				placeholder="Filter Flash Cards"
+			/><button
 				class="inline-block"
 				type="button"
 				onclick={() => {
 					letterPairFilter = "";
-				}}>Clear Filter</button
+				}}>Clear</button
 			>
 		</form>
-		<label
-			>Hide Non-3-Style Pairs: <input
-				type="checkbox"
-				bind:checked={$optionsStore.hideNon3Style}
-			/></label
-		>
-		<label
-			>Hide Non-OP Pairs: <input type="checkbox" bind:checked={$optionsStore.hideNonOP} /></label
-		>
 		<div class="grow-1"></div>
 		<a
 			class="hidden rounded border border-gray-600 px-2 py-0 lg:inline dark:border-gray-300"
@@ -130,25 +172,26 @@
 			download={`v2-${formattedDate}-000000-log.csv`}>Export Flash Cards</a
 		>
 	</div>
-	{#if filteredLetterPairs.length <= 10}<div class="flashCards">
+	{#if filteredLetterPairs.length === 0}
+		<div class="w-prose max-w-full">
+			No flash cards match the filter "{letterPairFilter}"
+		</div>
+	{:else if filteredLetterPairs.length <= 10}
+		<div class="flashCards">
 			{#each filteredLetterPairs as letterPair (letterPair)}
 				<div class="w-68 rounded border border-gray-300 p-2 dark:border-gray-500">
 					<FlashCard {letterPair} showLink />
 				</div>
 			{/each}
-		</div>{:else}
+		</div>
+	{:else}
 		<div
 			class={["letterPairGrid", !letterPairFilter && "letterPairGridColumns"]
 				.filter((a) => a)
 				.join(" ")}
 		>
 			{#each filteredLetterPairs as letterPair (letterPair)}
-				<FlashCardChooser
-					{letterPair}
-					hideNon3Style={$optionsStore.hideNon3Style}
-					hideNonOP={$optionsStore.hideNonOP}
-					{flashCardType}
-				/>
+				<FlashCardChooser {letterPair} {flashCardType} />
 			{/each}
 		</div>
 	{/if}
