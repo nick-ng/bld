@@ -314,18 +314,27 @@
 							/></td
 						>
 					</tr>
-					<tr
-						><td class="text-right">Public</td>
+					<tr class={currentIsPublic ? "font-bold text-red-800 dark:text-red-200" : ""}
+						><td class="text-right"
+							><label for="isPublicCheckbox"
+								>{#if currentIsPublic}👀{/if}
+								Public</label
+							></td
+						>
 						<td
-							><input
-								class=""
-								type="checkbox"
-								name="isPublic"
-								bind:checked={currentIsPublic}
-								onchange={() => {
-									formDirty = true;
-								}}
-							/></td
+							><label class="inline-block w-full" for="isPublicCheckbox"
+								><input
+									class=""
+									type="checkbox"
+									name="isPublic"
+									id="isPublicCheckbox"
+									bind:checked={currentIsPublic}
+									onchange={() => {
+										formDirty = true;
+									}}
+								/>
+								{#if currentIsPublic}👀{/if}</label
+							></td
 						>
 					</tr></tbody
 				>

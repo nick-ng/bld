@@ -1,4 +1,5 @@
 import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
+import { optionsStore } from "$lib/stores/options";
 
 const RANDOM_LIMIT = 1_000_000;
 const regripEmojis = ["👍", "👎"];
@@ -72,7 +73,7 @@ export const addCredentialsToHeaders = (
 	};
 };
 
-export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean = false) => {
+export const authFetch = (url: string, init?: RequestInit) => {
 	const newInit = { ...init };
 	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);
 
@@ -84,6 +85,7 @@ export const authFetch = (url: string, init?: RequestInit, alwaysSend: boolean =
 
 	response.then((r) => {
 		if (r.ok) {
+			optionsStore.update((prevOptions) => ({ ...prevOptions, isUserAuthenticated: true }));
 			const newAccessToken = r.headers.get("X-Access-Token");
 			if (newAccessToken && previousAccessToken !== newAccessToken) {
 				localStorage.setItem(ACCESS_TOKEN_STORE_KEY, newAccessToken);
