@@ -2,6 +2,7 @@
 	import { defaultFlashCard } from "$lib/types";
 	import { upperCaseFirst, commutatorDetails } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
+	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
 
@@ -61,7 +62,7 @@
 			<Corners letterPair={flashCard.letterPair} />
 			{#if quizShowAnswer}
 				<div class="w-full truncate text-center text-2xl">
-					{#if flashCard.isPublic}
+					{#if flashCard.isPublic && $optionsStore.isUserAuthenticated}
 						👀
 					{/if}
 					{flashCard.memo}

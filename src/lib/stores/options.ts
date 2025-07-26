@@ -5,10 +5,16 @@ import { FLASH_CARD_FILTER_STORE_KEY, FIXED_QUIZ_STORE_KEY } from "$lib/constant
 
 // @todo(nick-ng): change filter criteria "direction"
 // it's to do with the buffer piece
-const options: { hideNon3Style: boolean; hideNonOP: boolean; fixedQuiz: string[] } = {
+const options: {
+	hideNon3Style: boolean;
+	hideNonOP: boolean;
+	fixedQuiz: string[];
+	isUserAuthenticated: boolean;
+} = {
 	hideNon3Style: false,
 	hideNonOP: false,
-	fixedQuiz: []
+	fixedQuiz: [],
+	isUserAuthenticated: false
 };
 
 let storedFilterString = "";
