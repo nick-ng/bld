@@ -59,12 +59,8 @@ css:
 - server/routes/flash-cards.go:127: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
-- src/lib/components/flash-card-chooser.svelte:5: @todo(nick-ng): parent should decide if the square is blank or not
-- src/lib/stores/options.ts:6: @todo(nick-ng): change filter criteria "direction"
-- src/lib/utils.ts:342: @todo(nick-ng): make a "bag" with all items in itemSet and shuffle
-- src/lib/utils.ts:343: @todo(nick-ng): remove items from bag and put into subsets
-- src/lib/utils.ts:344: @todo(nick-ng): when you have constructed the nth subset, return that subset
-- src/lib/utils.ts:345: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
+- src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
+- src/lib/stores/options.ts:11: @todo(nick-ng): change filter criteria "direction"
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:125: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/quiz/quiz-home.svelte:28: @todo(nick-ng): move these to the options store
+- src/routes/quiz/quiz-home.svelte:14: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

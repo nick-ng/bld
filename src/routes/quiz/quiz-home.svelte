@@ -1,87 +1,76 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { page } from "$app/stores";
 	import {
 		QUIZ_MEMO_CONFIDENCE_STORE_KEY,
 		QUIZ_COMM_CONFIDENCE_STORE_KEY,
 		QUIZ_OLDEST_STORE_KEY,
 		QUIZ_RANDOM_STORE_KEY
 	} from "$lib/constants";
-	import {
-		fetchFlashCards,
-		flashCardStore,
-		flashCardStoreStatus,
-		getFlashCard
-	} from "$lib/stores/flash-cards";
+	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
-	import {
-		is3Style,
-		isOP,
-		upperCaseFirst,
-		shuffleArray,
-		commutatorDetails,
-		isOrozco
-	} from "$lib/utils";
-	import { sortByLastQuiz, threeStyleCommutators } from "./make-quiz";
+	import { upperCaseFirst, isBuffer, isTwist } from "$lib/utils";
 
 	// @todo(nick-ng): move these to the options store
 	let customOldest = $state(2);
 	let customMemoConfidence = $state(6);
 	let customCommConfidence = $state(2);
 	let customRandom = $state(2);
-	let fixedPairsString = $state($optionsStore.fixedQuiz.join(", "));
 	let nonEmptyFlashCards = $derived(
 		Object.values($flashCardStore).filter((f) => f.memo || f.commutator || f.image)
 	);
-	let threeStyle = $derived(threeStyleCommutators(Object.values($flashCardStore), 1, 0));
-	let allCount = $derived(nonEmptyFlashCards.length);
-	let threeStyleCount = $derived(nonEmptyFlashCards.filter((c) => is3Style(c.letterPair)).length);
-	let orozcoCount = $derived(
-		nonEmptyFlashCards.filter((c) => isOrozco(c.letterPair) && c.letterPair[0] !== c.letterPair[1])
-			.length
+	let allCounts = $derived(
+		Object.keys($optionsStore.flashCardTypes).reduce(
+			(prev, curr) => {
+				const flashCardTypeInfo = $optionsStore.flashCardTypes[curr];
+				prev[curr] = nonEmptyFlashCards.filter(
+					(f) =>
+						!isBuffer(f.letterPair, flashCardTypeInfo.bufferPiece) &&
+						!isTwist(f.letterPair, flashCardTypeInfo.samePieces)
+				).length;
+
+				return prev;
+			},
+			{} as { [key: string]: number }
+		)
 	);
-	let oPCount = $derived(Object.values($flashCardStore).filter((c) => isOP(c.letterPair)).length);
 
 	const makeQuiz = async ({
 		oldest,
 		memoConfidence,
 		commConfidence,
 		random,
-		include3Style,
-		includeOP,
-		includeOrozco
+		cardType
 	}: {
 		oldest: number;
 		memoConfidence: number;
 		commConfidence: number;
 		random: number;
-		include3Style?: boolean;
-		includeOP?: boolean;
-		includeOrozco?: boolean;
+		cardType: string;
 	}) => {
 		const flashCardsMap = await fetchFlashCards();
 		const flashCards = Object.values(flashCardsMap).filter((f) => f.memo);
+		const flashCardTypeInfo = $optionsStore.flashCardTypes[cardType];
+		if (!flashCardTypeInfo) {
+			return;
+		}
 		const remainingFlashCards = flashCards
 			.filter((c) => {
-				if (include3Style && is3Style(c.letterPair)) {
-					return true;
+				if (isTwist(c.letterPair, flashCardTypeInfo.samePieces)) {
+					return false;
 				}
 
-				if (includeOP && isOP(c.letterPair)) {
-					return true;
+				if (isBuffer(c.letterPair, flashCardTypeInfo.bufferPiece)) {
+					return false;
 				}
 
-				if (includeOrozco && isOrozco(c.letterPair)) {
-					return true;
-				}
-
-				return false;
+				return true;
 			})
 			.map((c) => ({
 				...c,
 				random: Math.random()
 			}));
+
 		const quizCards: typeof remainingFlashCards = [];
 
 		// oldest
@@ -134,13 +123,6 @@
 		if (typeof savedRandom === "string" && !isNaN(parseInt(savedRandom, 10))) {
 			customRandom = parseInt(savedRandom, 10);
 		}
-
-		const fixedQuizParams = $page.url.searchParams.get("fq");
-		if (fixedQuizParams) {
-			const temp = fixedQuizParams.split(",").map((a) => a.trim());
-			fixedPairsString = temp.join(", ");
-			$optionsStore.fixedQuiz = temp;
-		}
 	});
 </script>
 
@@ -151,21 +133,9 @@
 	{#if $flashCardStoreStatus.status !== "loaded"}
 		<div class="">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
-		{@const commutatorCount = nonEmptyFlashCards.filter(
-			(f) => f.letterPair[0] !== f.letterPair[1]
-		).length}
-		{@const parityCount = nonEmptyFlashCards.filter(
-			(f) => f.letterPair[0] === f.letterPair[1]
-		).length}
 		<div>
-			<p>
-				<a href="/flash-cards"
-					>{commutatorCount} letter pair{commutatorCount === 1 ? "" : "s"} + {parityCount} parity = {commutatorCount +
-						parityCount}</a
-				>
-			</p>
-			<ul>
-				<li class="mt-1 mb-3 flex flex-row gap-2 lg:mb-0">
+			<div>
+				<div class="my-1 flex flex-row gap-2">
 					<div class="flex-grow">
 						<button
 							class="block w-full py-2 lg:py-1"
@@ -250,246 +220,31 @@
 							}}>➖</button
 						>
 					</div>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={() => {
-							makeQuiz({
-								commConfidence: customCommConfidence,
-								memoConfidence: customMemoConfidence,
-								oldest: customOldest,
-								random: customRandom,
-								include3Style: true,
-								includeOP: true,
-								includeOrozco: true
-							});
-						}}
-						>All: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({allCount})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={() => {
-							makeQuiz({
-								commConfidence: customCommConfidence,
-								memoConfidence: customMemoConfidence,
-								oldest: customOldest,
-								random: customRandom,
-								include3Style: true
-							});
-						}}
-						>3-Style: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom}
-						=
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({threeStyleCount})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={() => {
-							makeQuiz({
-								commConfidence: customCommConfidence,
-								memoConfidence: customMemoConfidence,
-								oldest: customOldest,
-								random: customRandom,
-								includeOrozco: true
-							});
-						}}
-						>Orozco: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom}
-						=
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({orozcoCount})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={() => {
-							makeQuiz({
-								commConfidence: customCommConfidence,
-								memoConfidence: customMemoConfidence,
-								oldest: customOldest,
-								random: customRandom,
-								includeOP: true
-							});
-						}}
-						>OP: {customOldest} + {customMemoConfidence} + {customCommConfidence} + {customRandom} =
-						{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({oPCount})</button
-					>
-				</li>
-				<!-- <li class="mt-1">5 Oldest + 3 Lowest Confidence + 2 Random</li>
-				<li class="mt-1">
-					<button
-						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
-							makeQuiz(5, 3, 2, true, true);
-						}}>All: 5 + 3 + 2 = 10</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
-							makeQuiz(5, 3, 2, true, false);
-						}}>3-Style: 5 + 3 + 2 = 10</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="w-full block text-xl leading-none py-2 text-center"
-						on:click={() => {
-							makeQuiz(5, 3, 2, false, true);
-						}}>OP: 5 + 3 + 2 = 10</button
-					>
-				</li> -->
-				<li class="mt-1">Fixed Quiz</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={async () => {
-							const fixedPairs = shuffleArray(threeStyle.lowConfidence)
-								.slice(0, 10)
-								.map((f) => f.letterPair.toLocaleUpperCase())
-								.sort((a, b) => a.localeCompare(b));
-							$optionsStore.fixedQuiz = fixedPairs;
-							fixedPairsString = fixedPairs.join(", ");
-						}}
-						>Random Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all
-							.length})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={async () => {
-							const fixedPairs = threeStyle.lowConfidence
-								.sort((a, b) => a.letterPair.localeCompare(b.letterPair))
-								.slice(0, 10)
-								.map((f) => f.letterPair.toLocaleUpperCase());
-							$optionsStore.fixedQuiz = fixedPairs;
-							fixedPairsString = fixedPairs.join(", ");
-						}}
-						>Alphabetical Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all
-							.length})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={async () => {
-							const fixedPairs = sortByLastQuiz(threeStyle.lowConfidence)
-								.slice(0, 10)
-								.map((f) => f.letterPair.toLocaleUpperCase())
-								.sort((a, b) => a.localeCompare(b));
-							$optionsStore.fixedQuiz = fixedPairs;
-							fixedPairsString = fixedPairs.join(", ");
-						}}
-						>Old Low Confidence ({threeStyle.lowConfidence.length}/{threeStyle.all.length})</button
-					>
-				</li>
-				<li class="mt-1">
-					<button
-						class="block w-full py-2 text-center text-xl leading-none"
-						onclick={async () => {
-							const fixedPairs = sortByLastQuiz(Object.values($flashCardStore))
-								.filter((a) => is3Style(a.letterPair) && a.letterPair[0] !== a.letterPair[1])
-								.slice(0, 10)
-								.map((f) => f.letterPair.toLocaleUpperCase())
-								.sort((a, b) => a.localeCompare(b));
-							$optionsStore.fixedQuiz = fixedPairs;
-							fixedPairsString = fixedPairs.join(", ");
-						}}>Old Any Pairs</button
-					>
-				</li>
-				<li class="mt-1 flex flex-row">
-					<input
-						class="block w-full py-2 font-mono text-xl leading-none lg:px-1"
-						type="text"
-						bind:value={fixedPairsString}
-						onblur={() => {
-							const fixedPairs = fixedPairsString
-								.split(",")
-								.map((a) => a.trim().toLocaleUpperCase())
-								.filter((a) => a);
-							$optionsStore.fixedQuiz = fixedPairs;
-						}}
-					/>
-					<button
-						onclick={() => {
-							const query = $optionsStore.fixedQuiz.join(",");
-							const url = `${location.origin}/quiz?fq=${query}`;
-							navigator.clipboard.writeText(url);
-						}}>Copy</button
-					>
-				</li>
-				<li class="mt-1">
-					<div class="flex w-full flex-row justify-stretch gap-1">
+				</div>
+				<hr class="my-2" />
+				{#each Object.keys($optionsStore.flashCardTypes) as flashCardType (flashCardType)}
+					{@const cardTypeInfo = $optionsStore.flashCardTypes[flashCardType]}
+					<div class="my-1">
 						<button
-							class="grow py-2 text-center text-xl leading-none"
+							class="block w-full py-2 text-center text-xl leading-none"
 							onclick={() => {
-								const fixedQuiz = $optionsStore.fixedQuiz
-									.map((letterPair) => {
-										return {
-											letterPair,
-											flashCard: getFlashCard(letterPair, $flashCardStore)
-										};
-									})
-									.sort((a, b) => {
-										return a.flashCard.lastQuizUnix - b.flashCard.lastQuizUnix;
-									})
-									.map((a) => a.letterPair.toLocaleLowerCase());
-
-								$quizStore = fixedQuiz;
-							}}>Age Order Fixed Quiz</button
-						>
-						<button
-							class="grow py-2 text-center text-xl leading-none"
-							onclick={() => {
-								const fixedQuiz = $optionsStore.fixedQuiz
-									.map((letterPair) => {
-										return {
-											letterPair,
-											flashCard: getFlashCard(letterPair, $flashCardStore),
-											r: Math.random()
-										};
-									})
-									.sort((a, b) => {
-										return a.r - b.r;
-									})
-									.map((a) => a.letterPair.toLocaleLowerCase());
-
-								$quizStore = fixedQuiz;
-							}}>Random Fixed Quiz</button
+								makeQuiz({
+									commConfidence: customCommConfidence,
+									memoConfidence: customMemoConfidence,
+									oldest: customOldest,
+									random: customRandom,
+									cardType: flashCardType
+								});
+							}}
+							>{cardTypeInfo.name}: {customOldest} + {customMemoConfidence} + {customCommConfidence}
+							+ {customRandom} =
+							{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({allCounts[
+								flashCardType
+							]})</button
 						>
 					</div>
-				</li>
-			</ul>
-			<details>
-				<summary>Commutator Check</summary>
-				<table class="border-separate border-spacing-x-2">
-					<thead>
-						<tr>
-							<th class=" text-center">Letter Pair</th>
-							<th class="text-left">Commutator</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each $optionsStore.fixedQuiz as letterPair (letterPair)}
-							{@const flashCard = getFlashCard(letterPair, $flashCardStore)}
-							{#if flashCard}
-								<tr>
-									<td class="text-center">{letterPair}</td>
-									<td class="font-mono"
-										>{commutatorDetails(flashCard.commutator).normalisedCommutator}</td
-									>
-								</tr>
-							{/if}
-						{/each}
-					</tbody>
-				</table>
-			</details>
+				{/each}
+			</div>
 		</div>
 	{/if}
 </div>

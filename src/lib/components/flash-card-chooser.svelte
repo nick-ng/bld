@@ -1,21 +1,15 @@
 <script lang="ts">
 	import { flashCardStore } from "$lib/stores/flash-cards";
-	import { isTwist, is3Style, isOP } from "$lib/utils";
+	import { optionsStore } from "$lib/stores/options";
+	import { isTwist, isBuffer } from "$lib/utils";
 
 	// @todo(nick-ng): parent should decide if the square is blank or not
 	interface Props {
 		letterPair?: string;
-		hideNonOP?: boolean;
-		hideNon3Style?: boolean;
 		flashCardType?: string;
 	}
 
-	let {
-		letterPair = "",
-		hideNonOP = true,
-		hideNon3Style = true,
-		flashCardType = "corner"
-	}: Props = $props();
+	let { letterPair = "", flashCardType = "corner" }: Props = $props();
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
 		const letterPairObject = store[letterPair];
@@ -26,10 +20,13 @@
 		];
 	};
 
-	let isNotEitherMethod = $derived(!isOP(letterPair) && !is3Style(letterPair));
+	let isVisible = $derived(
+		isTwist(letterPair, $optionsStore.flashCardTypes[flashCardType].samePieces) ||
+			isBuffer(letterPair, $optionsStore.flashCardTypes[flashCardType].bufferPiece)
+	);
 </script>
 
-{#if isTwist(letterPair) || isNotEitherMethod || (hideNon3Style && !is3Style(letterPair)) || (hideNonOP && !isOP(letterPair))}
+{#if isVisible}
 	<div
 		class="hidden cursor-not-allowed border border-gray-500 bg-gray-500 p-0 text-center no-underline lg:block"
 	>

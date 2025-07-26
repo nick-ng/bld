@@ -10,3 +10,16 @@ export const QUIZ_COMM_CONFIDENCE_STORE_KEY = "PUX_BLD_QUIZ_COMM_CONFIDENCE";
 export const QUIZ_RANDOM_STORE_KEY = "PUX_BLD_QUIZ_RANDOM";
 export const CURRENT_QUIZ_LETTER_PAIRS_STORE_KEY = "PUX_BLD_CURRENT_QUIZ_LETTER_PAIRS";
 export const CURRENT_QUIZ_AGE_STORE_KEY = "PUX_BLD_CURRENT_QUIZ_AGE";
+
+export const SPEFFZ_UBL = ["a", "e", "r"];
+export const SPEFFZ_UFR = ["c", "j", "m"];
+export const SPEFFZ_SAME_PIECES = [
+	SPEFFZ_UBL,
+	["b", "n", "q"],
+	SPEFFZ_UFR,
+	["d", "f", "i"],
+	["g", "l", "u"],
+	["h", "s", "x"],
+	["k", "p", "v"],
+	["o", "t", "w"]
+];
