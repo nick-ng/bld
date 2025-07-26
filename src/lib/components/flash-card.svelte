@@ -69,7 +69,7 @@
 				</div>
 				<div>
 					{#if flashCard.commutator}
-						<span class="font-mono text-xl">
+						<span class="text-xl">
 							{commutatorDetails(flashCard.commutator).normalisedCommutator}
 						</span>
 					{:else}
