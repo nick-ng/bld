@@ -26,7 +26,10 @@
 	});
 
 	let processedLetterPairFilter = $derived.by(() => {
-		const lowerCaseFilter = letterPairFilter.toLowerCase().replaceAll(/[^a-z ]/g, " ");
+		const lowerCaseFilter = letterPairFilter
+			.toLowerCase()
+			.replaceAll(/[^a-z ]/g, " ")
+			.replaceAll(/[yz]/g, "x");
 
 		if (lowerCaseFilter.length === 2) {
 			return [lowerCaseFilter, `${lowerCaseFilter[1]}${lowerCaseFilter[0]}`];
