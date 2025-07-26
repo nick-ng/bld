@@ -55,6 +55,8 @@ css:
 
 - server/database/database.go:476: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
+- server/routes/flash-cards.go:81: @todo(nick-ng): only show default user's flash cards if no user provided
+- server/routes/flash-cards.go:127: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:5: @todo(nick-ng): parent should decide if the square is blank or not
@@ -63,6 +65,6 @@ css:
 - src/lib/utils.ts:341: @todo(nick-ng): remove items from bag and put into subsets
 - src/lib/utils.ts:342: @todo(nick-ng): when you have constructed the nth subset, return that subset
 - src/lib/utils.ts:343: @todo(nick-ng): if there are not enough items in the bag to construct the nth subset, make a new bag
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:123: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:125: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:28: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

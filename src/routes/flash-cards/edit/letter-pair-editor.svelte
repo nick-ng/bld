@@ -26,6 +26,7 @@
 	let currentMemo = $state("");
 	let currentCommutator = $state("");
 	let currentTags = $state("");
+	let currentIsPublic = $state(false);
 	let currentEmoji = $state("");
 	let currentImageUrl = $state("");
 	let imageUrl = $state("");
@@ -55,6 +56,7 @@
 			currentMemo = flashCard.memo;
 			currentCommutator = flashCard.commutator;
 			currentTags = flashCard.tags;
+			currentIsPublic = flashCard.isPublic;
 			imageUrl = flashCard.image;
 			if (flashCard.image.endsWith(".emoji")) {
 				isImageEmoji = true;
@@ -148,6 +150,10 @@
 								formData.set(formInputName, file);
 								break;
 							}
+							case "checkbox": {
+								formData.set(formInputName, formInput.checked ? "1" : "0");
+								break;
+							}
 							default: {
 								formData.set(formInputName, formInput.value);
 							}
@@ -188,7 +194,7 @@
 				name="confidence"
 				value={flashCardOrDefault($flashCardStore, letterPair).confidence}
 			/>
-			<table class="flash-card-editor mx-auto border-separate border-spacing-x-0.5">
+			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
 				<tbody>
 					<tr>
 						<td class="text-right"
@@ -308,7 +314,21 @@
 							/></td
 						>
 					</tr>
-				</tbody>
+					<tr
+						><td class="text-right">Public</td>
+						<td
+							><input
+								class=""
+								type="checkbox"
+								name="isPublic"
+								bind:checked={currentIsPublic}
+								onchange={() => {
+									formDirty = true;
+								}}
+							/></td
+						>
+					</tr></tbody
+				>
 			</table>
 			<div class="mt-1 flex w-full flex-row justify-between gap-8">
 				<a

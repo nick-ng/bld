@@ -60,7 +60,12 @@
 			{/if}
 			<Corners letterPair={flashCard.letterPair} />
 			{#if quizShowAnswer}
-				<div class="w-full truncate text-center text-2xl">{flashCard.memo}</div>
+				<div class="w-full truncate text-center text-2xl">
+					{#if flashCard.isPublic}
+						👀
+					{/if}
+					{flashCard.memo}
+				</div>
 				<div>
 					{#if flashCard.commutator}
 						<span class="font-mono text-xl">
