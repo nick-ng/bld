@@ -61,6 +61,6 @@ css:
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:5: @todo(nick-ng): store options on server
-- src/routes/flash-cards/edit/letter-pair-editor.svelte:125: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
+- src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:14: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

@@ -14,12 +14,14 @@
 {#if typeof letterPair === "string" && letterPair.length === 2}
 	<FlashCard {letterPair} showInverseLink />
 	<div class="mx-auto mt-1 flex max-w-prose flex-row justify-between gap-8">
-		<a
-			class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-			href="/flash-cards">Back</a
+		<button
+			class="flex-grow"
+			onclick={() => {
+				history.back();
+			}}>Back</button
 		>
 		<a
-			class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
+			class="like-button block flex-grow"
 			href={`/flash-cards/edit?t=${flashCardType}&lp=${letterPair}`}>Edit</a
 		>
 	</div>

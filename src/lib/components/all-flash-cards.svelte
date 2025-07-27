@@ -198,8 +198,12 @@
 	{:else if filteredLetterPairs.length <= 10}
 		<div class="flashCards">
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
-				<div class="w-68 rounded border border-gray-300 p-2 dark:border-gray-500">
-					<FlashCard {letterPair} showLink />
+				<div class="w-68 rounded border border-gray-300 px-2 dark:border-gray-500">
+					<FlashCard {letterPair} {flashCardType} showLink extraClass="cannot-hover:mb-0" />
+					<a
+						class="cannot-hover:hidden mx-auto block text-center dark:border-gray-300"
+						href={`/flash-cards/edit?t=${flashCardType}&lp=${letterPair}`}>Edit</a
+					>
 				</div>
 			{/each}
 		</div>
