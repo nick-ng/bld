@@ -9,7 +9,22 @@
 		flashCardType?: string;
 	}
 
+	const FULL_RED_UNIX = 60 * 60 * 24 * 90; // 3 months in seconds
+	const getAgeColour = (lastQuizUnix?: number) => {
+		console.log(letterPair, lastQuizUnix);
+		if (typeof lastQuizUnix !== "number") {
+			return "#FFFFFF";
+		}
+		const nowSeconds = Date.now() / 1000;
+		const age = nowSeconds - lastQuizUnix;
+		const fraction = Math.max(FULL_RED_UNIX - age, 0) / FULL_RED_UNIX;
+		const nonYellow = Math.ceil(255 * fraction);
+		const rgb = `rgb(255, 255, ${nonYellow})`;
+		return rgb;
+	};
+
 	let { letterPair = "", flashCardType = "corner" }: Props = $props();
+	let flashCard = $derived($flashCardStore[letterPair]);
 
 	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
 		const letterPairObject = store[letterPair];
@@ -20,13 +35,13 @@
 		];
 	};
 
-	let isVisible = $derived(
+	let isHidden = $derived(
 		isTwist(letterPair, $optionsStore.flashCardTypes[flashCardType].samePieces) ||
 			isBuffer(letterPair, $optionsStore.flashCardTypes[flashCardType].bufferPiece)
 	);
 </script>
 
-{#if isVisible}
+{#if isHidden}
 	<div
 		class="hidden cursor-not-allowed border border-gray-500 bg-gray-500 p-0 text-center no-underline lg:block"
 	>
@@ -35,7 +50,8 @@
 	</div>
 {:else}
 	<a
-		class="relative block border border-gray-800 bg-white p-0 text-center no-underline"
+		class={`relative block border border-gray-800 p-0 text-center ${flashCard?.isPublic ? "underline" : "no-underline"}`}
+		style={`background-color:${getAgeColour(flashCard?.lastQuizUnix)};`}
 		href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>

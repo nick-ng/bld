@@ -38,10 +38,20 @@
 			<div class="relative m-0 flex flex-row justify-center self-stretch">
 				{#if showLink}
 					<a href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}>
-						<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+						<h2 class="m-0 uppercase">
+							{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
+								👀
+							{/if}
+							{flashCard.letterPair}
+						</h2>
 					</a>
 				{:else}
-					<h2 class="m-0 uppercase">{flashCard.letterPair}</h2>
+					<h2 class="m-0 uppercase">
+						{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
+							👀
+						{/if}
+						{flashCard.letterPair}
+					</h2>
 				{/if}
 			</div>
 			{#if quizLeft > 0}
@@ -62,9 +72,6 @@
 			<Corners letterPair={flashCard.letterPair} />
 			{#if quizShowAnswer}
 				<div class="w-full truncate text-center text-2xl">
-					{#if flashCard.isPublic && $optionsStore.isUserAuthenticated}
-						👀
-					{/if}
 					{flashCard.memo}
 				</div>
 				<div>
