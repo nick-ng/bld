@@ -68,30 +68,38 @@
 			})
 			.map((c) => ({
 				...c,
-				random: Math.random()
+				random: Math.random() / 10
 			}));
 
 		const quizCards: typeof remainingFlashCards = [];
 
-		// oldest
-		remainingFlashCards.toSorted((a, b) => a.lastQuizUnix - b.lastQuizUnix);
-		quizCards.push(...remainingFlashCards.splice(0, oldest));
-
 		// low memo confidence
-		remainingFlashCards.sort(
-			(a, b) => a.memoConfidence * 10 + a.random - (b.memoConfidence * 10 + b.random)
-		);
-		quizCards.push(...remainingFlashCards.splice(0, memoConfidence));
+		if (memoConfidence > 0) {
+			remainingFlashCards.sort(
+				(a, b) => a.memoConfidence + a.random - (b.memoConfidence + b.random)
+			);
+			quizCards.push(...remainingFlashCards.splice(0, memoConfidence));
+		}
 
 		// low comm confidence
-		remainingFlashCards.sort(
-			(a, b) => a.commConfidence * 10 + a.random - (b.commConfidence * 10 + b.random)
-		);
-		quizCards.push(...remainingFlashCards.splice(0, commConfidence));
+		if (commConfidence > 0) {
+			remainingFlashCards.sort(
+				(a, b) => a.commConfidence + a.random - (b.commConfidence + b.random)
+			);
+			quizCards.push(...remainingFlashCards.splice(0, commConfidence));
+		}
 
 		// random
-		remainingFlashCards.sort((a, b) => a.random - b.random);
-		quizCards.push(...remainingFlashCards.splice(0, random));
+		if (random > 0) {
+			remainingFlashCards.sort((a, b) => a.random - b.random);
+			quizCards.push(...remainingFlashCards.splice(0, random));
+		}
+
+		// oldest
+		if (oldest > 0) {
+			remainingFlashCards.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+			quizCards.push(...remainingFlashCards.splice(0, oldest));
+		}
 
 		const quizLetterPairs = quizCards.sort((a, b) => a.random - b.random).map((c) => c.letterPair);
 
