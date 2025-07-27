@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { goto } from "$app/navigation";
+	import { goto, replaceState } from "$app/navigation";
 	import { page } from "$app/state";
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { flashCardStore } from "$lib/stores/flash-cards";
@@ -9,7 +9,7 @@
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
 
-	let letterPairFilter = $state(page.url.searchParams.get("filter") || "");
+	let letterPairFilter = $state(page.url.searchParams.get("f") || "");
 	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
 	let filterInputElement = $derived<HTMLInputElement | null>(null);
@@ -119,6 +119,10 @@
 			.join("\n")
 	);
 
+	$effect(() => {
+		letterPairFilter = page.url.searchParams.get("f") || "";
+	});
+
 	onMount(() => {
 		const focusFilterInput = (event: KeyboardEvent) => {
 			if (event.key !== ":") {
@@ -126,6 +130,7 @@
 			}
 
 			filterInputElement?.focus();
+			filterInputElement?.select();
 		};
 
 		document.addEventListener("keypress", focusFilterInput);
@@ -158,7 +163,17 @@
 				type="text"
 				autocomplete="off"
 				bind:this={filterInputElement}
-				bind:value={letterPairFilter}
+				bind:value={
+					() => letterPairFilter,
+					(newLetterPairFilter) => {
+						letterPairFilter = newLetterPairFilter
+							.replaceAll(/,/g, " ")
+							.replaceAll(/[^a-z ()]/gi, "")
+							.replaceAll(/ +/g, " ");
+						page.url.searchParams.set("f", letterPairFilter);
+						replaceState(`/flash-cards?${page.url.searchParams.toString()}`, page.state);
+					}
+				}
 				placeholder="Filter Flash Cards"
 			/><button
 				class="inline-block"
@@ -181,7 +196,7 @@
 		</div>
 	{:else if filteredLetterPairs.length <= 10}
 		<div class="flashCards">
-			{#each filteredLetterPairs as letterPair (letterPair)}
+			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				<div class="w-68 rounded border border-gray-300 p-2 dark:border-gray-500">
 					<FlashCard {letterPair} showLink />
 				</div>
@@ -193,7 +208,7 @@
 				.filter((a) => a)
 				.join(" ")}
 		>
-			{#each filteredLetterPairs as letterPair (letterPair)}
+			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				<FlashCardChooser {letterPair} {flashCardType} />
 			{/each}
 		</div>

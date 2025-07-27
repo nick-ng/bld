@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import { page } from "$app/stores";
+	import { page } from "$app/state";
+	import { optionsStore } from "$lib/stores/options";
 	import "../app.css";
 
 	interface Props {
@@ -8,7 +9,10 @@
 	}
 
 	let { children }: Props = $props();
-	let showNav = $derived(["big-scramble", "clock"].every((a) => $page.route.id !== `/${a}`));
+	let showNav = $derived(["big-scramble", "clock"].every((a) => page.route.id !== `/${a}`));
+	let currentFlashCardType = $derived(
+		page.url.searchParams.get("t") || $optionsStore.defaultFlashCardType
+	);
 </script>
 
 <svelte:head>
@@ -19,7 +23,7 @@
 	<div class="mx-2 my-2 flex flex-row items-start gap-2">
 		<a
 			class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
-			href="/flash-cards">Flash Cards</a
+			href={`/flash-cards?t=${currentFlashCardType}`}>Flash Cards</a
 		>
 		<a
 			class="cannot-hover:py-2 block rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
