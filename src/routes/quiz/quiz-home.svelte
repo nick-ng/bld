@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import {
 		QUIZ_MEMO_CONFIDENCE_STORE_KEY,
 		QUIZ_COMM_CONFIDENCE_STORE_KEY,
@@ -40,19 +41,21 @@
 		memoConfidence,
 		commConfidence,
 		random,
-		cardType
+		cardType,
+		randomOldestFactor
 	}: {
 		oldest: number;
 		memoConfidence: number;
 		commConfidence: number;
 		random: number;
 		cardType: string;
+		randomOldestFactor: number;
 	}) => {
 		const flashCardsMap = await fetchFlashCards();
 		const flashCards = Object.values(flashCardsMap).filter((f) => f.memo);
 		const flashCardTypeInfo = $optionsStore.flashCardTypes[cardType];
 		if (!flashCardTypeInfo) {
-			return;
+			return [];
 		}
 		const remainingFlashCards = flashCards
 			.filter((c) => {
@@ -68,7 +71,7 @@
 			})
 			.map((c) => ({
 				...c,
-				random: Math.random() / 10
+				random: Math.random()
 			}));
 
 		const quizCards: typeof remainingFlashCards = [];
@@ -97,14 +100,17 @@
 
 		// oldest
 		if (oldest > 0) {
-			remainingFlashCards.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+			remainingFlashCards.sort(
+				(a, b) =>
+					a.lastQuizUnix +
+					a.random * randomOldestFactor -
+					(b.lastQuizUnix + b.random * randomOldestFactor)
+			);
 			quizCards.push(...remainingFlashCards.splice(0, oldest));
 		}
 
 		const quizLetterPairs = quizCards.sort((a, b) => a.random - b.random).map((c) => c.letterPair);
-
-		$quizStore = quizLetterPairs;
-		touchCurrentQuiz();
+		return quizLetterPairs;
 	};
 
 	onMount(() => {
@@ -135,9 +141,6 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	<div class="flex flex-row items-end justify-center">
-		<h1>Quiz</h1>
-	</div>
 	{#if $flashCardStoreStatus.status !== "loaded"}
 		<div class="">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
@@ -229,20 +232,57 @@
 						>
 					</div>
 				</div>
-				<hr class="my-2" />
+				<h2 class="text-center">Quiz</h2>
 				{#each Object.keys($optionsStore.flashCardTypes) as flashCardType (flashCardType)}
 					{@const cardTypeInfo = $optionsStore.flashCardTypes[flashCardType]}
 					<div class="my-1">
 						<button
 							class="block w-full py-2 text-center text-xl leading-none"
-							onclick={() => {
-								makeQuiz({
-									commConfidence: customCommConfidence,
-									memoConfidence: customMemoConfidence,
-									oldest: customOldest,
-									random: customRandom,
-									cardType: flashCardType
-								});
+							onclick={async () => {
+								try {
+									const quizLetterPairs = await makeQuiz({
+										commConfidence: customCommConfidence,
+										memoConfidence: customMemoConfidence,
+										oldest: customOldest,
+										random: customRandom,
+										cardType: flashCardType,
+										randomOldestFactor: 0
+									});
+									$quizStore = quizLetterPairs;
+									touchCurrentQuiz();
+								} catch (err) {
+									console.error("Error when making quiz", err);
+								}
+							}}
+							>{cardTypeInfo.name}: {customOldest} + {customMemoConfidence} + {customCommConfidence}
+							+ {customRandom} =
+							{customOldest + customMemoConfidence + customCommConfidence + customRandom} ({allCounts[
+								flashCardType
+							]})</button
+						>
+					</div>
+				{/each}
+				<h2 class="text-center">Review</h2>
+				{#each Object.keys($optionsStore.flashCardTypes) as flashCardType (flashCardType)}
+					{@const cardTypeInfo = $optionsStore.flashCardTypes[flashCardType]}
+					<div class="my-1">
+						<button
+							class="block w-full py-2 text-center text-xl leading-none"
+							onclick={async () => {
+								try {
+									const quizLetterPairs = await makeQuiz({
+										commConfidence: customCommConfidence,
+										memoConfidence: customMemoConfidence,
+										oldest: customOldest,
+										random: customRandom,
+										cardType: flashCardType,
+										randomOldestFactor: 60 * 60 * 24 * 7 // 1 week in seconds
+									});
+									const url = `/flash-cards?t=${flashCardType}&f=${quizLetterPairs.join("+")}`;
+									goto(url);
+								} catch (err) {
+									console.error("Error when making study list", err);
+								}
 							}}
 							>{cardTypeInfo.name}: {customOldest} + {customMemoConfidence} + {customCommConfidence}
 							+ {customRandom} =

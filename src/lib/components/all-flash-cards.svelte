@@ -33,6 +33,9 @@
 			.replaceAll(/[yz]/g, "x");
 
 		if (lowerCaseFilter.length === 2) {
+			if (lowerCaseFilter[0] === lowerCaseFilter[1]) {
+				return [lowerCaseFilter];
+			}
 			return [lowerCaseFilter, `${lowerCaseFilter[1]}${lowerCaseFilter[0]}`];
 		}
 
@@ -160,7 +163,7 @@
 			}}
 		>
 			<input
-				class="shrink grow"
+				class="shrink grow uppercase"
 				type="text"
 				autocomplete="off"
 				bind:this={filterInputElement}
