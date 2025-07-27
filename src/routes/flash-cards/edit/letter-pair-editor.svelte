@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { goto } from "$app/navigation";
 	import { parseFlashCard, defaultFlashCard } from "$lib/types";
 	import {
 		joinServerPath,
@@ -10,7 +9,6 @@
 		cornerSpeffzToLocation
 	} from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
-	import { quizStore } from "$lib/stores/quiz";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
 
@@ -108,7 +106,6 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	<a href={$quizStore.length > 0 ? "/quiz" : "/flash-cards"}>Back</a>
 	<h2 class="text-center uppercase">{letterPair}</h2>
 	<div class="mb-1 text-center">
 		<Corners {letterPair} />
@@ -175,10 +172,7 @@
 					const { data } = parseResponse;
 					$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
 
-					const backUrl = $quizStore.length > 0 ? "/quiz" : `/flash-cards?lp=${letterPair}`;
-					$quizStore = $quizStore.filter((lp) => lp != letterPair);
-
-					goto(backUrl);
+					history.back();
 				} else {
 					console.error("wrong", responseJson);
 				}
@@ -340,9 +334,12 @@
 				>
 			</table>
 			<div class="mt-1 flex w-full flex-row justify-between gap-8">
-				<a
-					class="cannot-hover:py-2 block flex-grow rounded border border-gray-600 px-2 py-0 text-center dark:border-gray-300"
-					href={$quizStore.length > 0 ? "/quiz" : `/flash-cards?lp=${letterPair}`}>Back</a
+				<button
+					class="flex-grow"
+					type="button"
+					onclick={() => {
+						history.back();
+					}}>Back</button
 				>
 				<button
 					class="flex-grow"
