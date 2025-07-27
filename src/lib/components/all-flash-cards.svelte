@@ -9,6 +9,7 @@
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
 
+	// eslint-disable-next-line svelte/prefer-writable-derived
 	let letterPairFilter = $state(page.url.searchParams.get("f") || "");
 	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
