@@ -9,7 +9,7 @@
 		flashCardType?: string;
 	}
 
-	const FULL_RED_UNIX = 60 * 60 * 24 * 90; // 3 months in seconds
+	const fullColour = 60 * 60 * 24 * $optionsStore.leitnerRetiredMaxAgeDays;
 	const getAgeColour = (lastQuizUnix?: number) => {
 		console.log(letterPair, lastQuizUnix);
 		if (typeof lastQuizUnix !== "number") {
@@ -17,9 +17,10 @@
 		}
 		const nowSeconds = Date.now() / 1000;
 		const age = nowSeconds - lastQuizUnix;
-		const fraction = Math.max(FULL_RED_UNIX - age, 0) / FULL_RED_UNIX;
-		const nonYellow = Math.ceil(255 * fraction);
-		const rgb = `rgb(255, 255, ${nonYellow})`;
+		const fraction = Math.max(fullColour - age, 0) / fullColour;
+		const blue = Math.ceil(255 * fraction);
+		const green = 230 + Math.ceil(25 * fraction);
+		const rgb = `rgb(255, ${green}, ${blue})`;
 		return rgb;
 	};
 
