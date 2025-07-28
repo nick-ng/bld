@@ -163,7 +163,7 @@
 			}}
 		>
 			<input
-				class="shrink grow uppercase"
+				class="shrink grow"
 				type="text"
 				autocomplete="off"
 				bind:this={filterInputElement}
@@ -173,7 +173,8 @@
 						letterPairFilter = newLetterPairFilter
 							.replaceAll(/,/g, " ")
 							.replaceAll(/[^a-z ()]/gi, "")
-							.replaceAll(/ +/g, " ");
+							.replaceAll(/ +/g, " ")
+							.toUpperCase();
 						page.url.searchParams.set("f", letterPairFilter);
 						replaceState(`/flash-cards?${page.url.searchParams.toString()}`, page.state);
 					}
