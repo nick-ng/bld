@@ -315,14 +315,7 @@ func handlePutQuizAnswer(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	confidenceString := req.FormValue("confidence")
-	confidence, err := strconv.ParseInt(confidenceString, 10, 0)
-	if err != nil {
-		confidence = 0
-	}
-
 	lastQuizUnix := time.Now().Unix()
-
 	flashCard, err := database.ReadFlashCard(authenticatedUsername, "corner", letterPair)
 
 	if err != nil {
@@ -332,7 +325,21 @@ func handlePutQuizAnswer(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	flashCard.LastQuizUnix = lastQuizUnix
-	flashCard.Confidence = int(confidence)
+
+	confidenceString := req.FormValue("confidence")
+	if len(confidenceString) > 0 {
+		confidence, err := strconv.ParseInt(confidenceString, 10, 0)
+		if err != nil {
+			confidence = 0
+		}
+
+		flashCard.Confidence = int(confidence)
+	}
+
+	tags := req.FormValue("tags")
+	if len(tags) > 0 {
+		flashCard.Tags = tags
+	}
 
 	database.WriteFlashCard(flashCard)
 

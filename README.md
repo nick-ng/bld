@@ -63,4 +63,10 @@ css:
 - src/lib/stores/options.ts:29: @todo(nick-ng): store options on server
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:15: @todo(nick-ng): move these to the options store
+- src/routes/quiz/quiz.svelte:120: @todo(nick-ng): get existing L: tag
+- src/routes/quiz/quiz.svelte:121: @todo(nick-ng): if last deck, change to L:R:YYYY-MM
+- src/routes/quiz/quiz.svelte:122: @todo(nick-ng): if empty, change to L:<session-number>
+- src/routes/quiz/quiz.svelte:123: @todo(nick-ng): if L:R:xxx, change to L:<session-number> because it's an expired retired deck
+- src/routes/quiz/quiz.svelte:124: @todo(nick-ng): if L:C, change to L:<session-number>
+- src/routes/quiz/quiz.svelte:125: @todo(nick-ng): otherwise leave unchanged
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

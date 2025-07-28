@@ -5,9 +5,9 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if $quizStore.length === 0}
-		<QuizHome />
-	{:else}
+	{#if $quizStore.length > 0}
 		<Quiz />
+	{:else}
+		<QuizHome />
 	{/if}
 </div>
