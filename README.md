@@ -60,13 +60,9 @@ css:
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
-- src/lib/stores/options.ts:29: @todo(nick-ng): store options on server
+- src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
+- src/lib/types.ts:33: @todo(nick-ng): change to zod
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/quiz/quiz-home.svelte:15: @todo(nick-ng): move these to the options store
-- src/routes/quiz/quiz.svelte:120: @todo(nick-ng): get existing L: tag
-- src/routes/quiz/quiz.svelte:121: @todo(nick-ng): if last deck, change to L:R:YYYY-MM
-- src/routes/quiz/quiz.svelte:122: @todo(nick-ng): if empty, change to L:<session-number>
-- src/routes/quiz/quiz.svelte:123: @todo(nick-ng): if L:R:xxx, change to L:<session-number> because it's an expired retired deck
-- src/routes/quiz/quiz.svelte:124: @todo(nick-ng): if L:C, change to L:<session-number>
-- src/routes/quiz/quiz.svelte:125: @todo(nick-ng): otherwise leave unchanged
+- src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
+- src/routes/quiz/quiz.svelte:128: @todo(nick-ng): get existing L: tag
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

@@ -1,3 +1,5 @@
+import z from "zod";
+
 export type FlashCard = {
 	letterPair: string;
 	type: string; // corner, edge
@@ -28,6 +30,7 @@ export const getPropertyOrDefault =
 		return value as typeof defaultValue;
 	};
 
+// @todo(nick-ng): change to zod
 export const parseFlashCard = (
 	unknown: unknown
 ): { isValid: true; data: FlashCard } | { isValid: false } => {
@@ -97,3 +100,25 @@ export const defaultFlashCard = (letterPair: string): FlashCard => {
 		lastQuizUnix: 0
 	};
 };
+
+export const optionsSchema = z.object({
+	isUserAuthenticated: z.boolean().optional(),
+	flashCardTypes: z.record(
+		z.string(),
+		z.object({
+			name: z.string(),
+			samePieces: z.array(z.array(z.string())),
+			bufferPiece: z.array(z.string())
+		})
+	),
+	defaultFlashCardType: z.string(),
+
+	leitnerMinReviewStandBy: z.number(),
+	leitnerMinReviewRetired: z.number(),
+	leitnerRetiredMaxAgeDays: z.number(),
+	leitnerSessionNumbers: z.record(z.string(), z.number()),
+	leitnerQuizCooldownHours: z.number(),
+	leitnerLastQuizUnix: z.record(z.string(), z.number())
+});
+
+export type Options = z.infer<typeof optionsSchema>;

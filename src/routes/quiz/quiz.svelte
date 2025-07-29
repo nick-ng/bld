@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
+	import { quizStore, quizTypeStore } from "$lib/stores/quiz";
 	import {
 		flashCardStore,
 		flashCardStoreStatus,
 		getFlashCard,
 		loadFlashCard
 	} from "$lib/stores/flash-cards";
-	import { putQuiz, leitnerSessionToDeckList, isLastLeitnerSession, updateTags } from "$lib/utils";
+	import { optionsStore } from "$lib/stores/options";
+	import { updateTags } from "$lib/utils";
+	import { putQuiz, isLastLeitnerSession, getLeitnerTag } from "$lib/quiz";
 	import FlashCard from "$lib/components/flash-card.svelte";
-	import { parseFlashCard } from "$lib/types";
 
-	let isLeitnerQuiz = page.url.searchParams.get("quiztype") === "leitner";
+	let flashCardType = page.url.searchParams.get("t") || "corner";
 	let flashCard = $derived($flashCardStore[$quizStore[0].toLocaleLowerCase()]);
 	let showAnswer = $state(false);
 	let submittingQuizAnswer = $state(false);
@@ -89,7 +90,7 @@
 		/>
 		<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
 			{#if showAnswer}
-				{#if isLeitnerQuiz}
+				{#if $quizTypeStore === "leitner"}
 					<div class="flex flex-row gap-1">
 						<button
 							class="flex-grow"
@@ -102,9 +103,14 @@
 
 								showAnswer = false;
 								submittingQuizAnswer = true;
+								if ($quizStore.length === 1) {
+									const sessionNumber = $optionsStore.leitnerSessionNumbers[flashCardType] || 0;
+									$optionsStore.leitnerLastQuizUnix[flashCardType] = Date.now() / 1000;
+									$optionsStore.leitnerSessionNumbers[flashCardType] = (sessionNumber + 1) % 10;
+								}
 								await putQuiz(flashCard.letterPair, formData);
 								submittingQuizAnswer = false;
-							}}>Wrong</button
+							}}>❌</button
 						>
 						<a
 							class="like-button flex-grow"
@@ -114,22 +120,44 @@
 							class="flex-grow"
 							type="button"
 							onclick={async () => {
+								const sessionNumber = $optionsStore.leitnerSessionNumbers[flashCardType] || 0;
+
 								// correct
 								const freshFlashCard = getFlashCard(flashCard.letterPair, $flashCardStore);
 								const formData = new FormData();
 								// @todo(nick-ng): get existing L: tag
-								// @todo(nick-ng): if last deck, change to L:R:YYYY-MM
-								// @todo(nick-ng): if empty, change to L:<session-number>
-								// @todo(nick-ng): if L:R:xxx, change to L:<session-number> because it's an expired retired deck
-								// @todo(nick-ng): if L:C, change to L:<session-number>
-								// @todo(nick-ng): otherwise leave unchanged
-								formData.set("tags", updateTags(freshFlashCard.tags, "L:", "L:C"));
+								const leitnerDeckInfo = getLeitnerTag(freshFlashCard.tags);
+								// if last deck, change to L:R:YYYY-MM
+								// if expired from retired deck, put back in retired deck
+								if (leitnerDeckInfo.leitnerDeck === "S" || leitnerDeckInfo.leitnerDeck === "C") {
+									formData.set("tags", updateTags(freshFlashCard.tags, "L:", `L:${sessionNumber}`));
+								} else if (
+									leitnerDeckInfo.leitnerDeck === "R" ||
+									isLastLeitnerSession(leitnerDeckInfo.leitnerDeck, sessionNumber)
+								) {
+									const now = new Date();
+									formData.set(
+										"tags",
+										updateTags(
+											freshFlashCard.tags,
+											"L:",
+											`L:R:${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}`
+										)
+									);
+								} else {
+									// one of the three session decks where this session isn't last. do nothing
+								}
 
 								showAnswer = false;
 								submittingQuizAnswer = true;
+								if ($quizStore.length === 1) {
+									const sessionNumber = $optionsStore.leitnerSessionNumbers[flashCardType] || 0;
+									$optionsStore.leitnerLastQuizUnix[flashCardType] = Date.now() / 1000;
+									$optionsStore.leitnerSessionNumbers[flashCardType] = (sessionNumber + 1) % 10;
+								}
 								await putQuiz(flashCard.letterPair, formData);
 								submittingQuizAnswer = false;
-							}}>Correct</button
+							}}>⭕</button
 						>
 					</div>
 				{:else}
