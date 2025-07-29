@@ -310,7 +310,10 @@ export const arrayToCsvRow = (items: string[]): string => {
 };
 
 export const updateTags = (previousTags: string, tagPrefix: string, newFullTag: string) => {
-	const splitTags = previousTags.split(";").map((a) => a.trim());
+	const splitTags = previousTags
+		.split(";")
+		.map((a) => a.trim())
+		.filter((a) => a);
 	const newTags = splitTags.filter((t) => !t.startsWith(tagPrefix));
 	newTags.push(newFullTag);
 

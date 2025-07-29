@@ -8,9 +8,10 @@
 		QUIZ_RANDOM_STORE_KEY
 	} from "$lib/constants";
 	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
-	import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
+	import { quizStore, quizTypeStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, isBuffer, isTwist } from "$lib/utils";
+	import { makeLeitnerQuiz } from "$lib/quiz";
 
 	// @todo(nick-ng): move these to the options store
 	let customOldest = $state(2);
@@ -146,6 +147,41 @@
 	{:else}
 		<div>
 			<div>
+				<h2 class="text-center">Leitner Quiz</h2>
+				{#each Object.keys($optionsStore.flashCardTypes) as flashCardType (flashCardType)}
+					{@const cardTypeInfo = $optionsStore.flashCardTypes[flashCardType]}
+					<div class="my-1">
+						<button
+							class="block w-full py-2 text-center text-xl leading-none"
+							onclick={async () => {
+								try {
+									const flashCardsMap = await fetchFlashCards();
+									const flashCards = Object.values(flashCardsMap).filter(
+										(f) =>
+											f.memo &&
+											!isBuffer(f.letterPair, cardTypeInfo.bufferPiece) &&
+											!isTwist(f.letterPair, cardTypeInfo.samePieces)
+									);
+									const quizLetterPairs = await makeLeitnerQuiz({
+										flashCardArray: flashCards,
+										minStandBy: $optionsStore.leitnerMinReviewStandBy,
+										minRetired: $optionsStore.leitnerMinReviewRetired,
+										retiredMaxAgeDays: $optionsStore.leitnerRetiredMaxAgeDays,
+										sessionNumber: $optionsStore.leitnerSessionNumbers[flashCardType] || 0
+									});
+									$quizStore = quizLetterPairs;
+									$quizTypeStore = "leitner";
+									touchCurrentQuiz();
+									goto(`/quiz?t=${flashCardType}`);
+								} catch (err) {
+									console.error("Error when making quiz", err);
+								}
+							}}>{cardTypeInfo.name} ({allCounts[flashCardType]})</button
+						>
+					</div>
+				{/each}
+				<hr />
+				<h2 class="text-center">Settings</h2>
 				<div class="my-1 flex flex-row gap-2">
 					<div class="flex-grow">
 						<button
@@ -249,7 +285,9 @@
 										randomOldestFactor: 0
 									});
 									$quizStore = quizLetterPairs;
+									$quizTypeStore = "normal";
 									touchCurrentQuiz();
+									goto(`/quiz?t=${flashCardType}`);
 								} catch (err) {
 									console.error("Error when making quiz", err);
 								}
