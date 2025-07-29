@@ -11,7 +11,6 @@
 
 	const fullColour = 60 * 60 * 24 * $optionsStore.leitnerRetiredMaxAgeDays;
 	const getAgeColour = (lastQuizUnix?: number) => {
-		console.log(letterPair, lastQuizUnix);
 		if (typeof lastQuizUnix !== "number") {
 			return "#FFFFFF";
 		}
