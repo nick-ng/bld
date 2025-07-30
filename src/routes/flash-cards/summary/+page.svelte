@@ -18,6 +18,12 @@
 
 	const flashCardType = "corner";
 	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
+	let leitnerCurrentDeck = $derived(
+		Object.values($flashCardStore).filter((fc) => {
+			const { leitnerDeck } = getLeitnerTag(fc.tags);
+			return leitnerDeck === "C";
+		})
+	);
 
 	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
 		const inserts: { [insert: string]: string[] } = {};
@@ -231,32 +237,36 @@
 			</thead>
 			<tbody
 				><tr>
-					<td class="p-1">Current</td>
+					<td class="p-1 whitespace-nowrap">Current</td>
 					<td>
 						<div
 							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 						>
-							{#each Object.values($flashCardStore).filter((fc) => {
-								const { leitnerDeck } = getLeitnerTag(fc.tags);
-								return leitnerDeck === "C";
-							}) as flashCard (flashCard.letterPair)}
+							{#each leitnerCurrentDeck as flashCard (flashCard.letterPair)}
 								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
 							{/each}
+							{#if leitnerCurrentDeck.length > 0}
+								<span class="p-0.5">({leitnerCurrentDeck.length})</span>
+							{/if}
 						</div>
 					</td>
 				</tr>{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
+					{@const leitnerDeck = Object.values($flashCardStore).filter((fc) => {
+						const { leitnerDeck } = getLeitnerTag(fc.tags);
+						return leitnerDeck === deckId;
+					})}
 					<tr>
-						<td class="p-1">{leitnerDecks[deckId]?.join("-")}</td>
+						<td class="p-1 whitespace-nowrap">{leitnerDecks[deckId]?.join("-")}</td>
 						<td>
 							<div
 								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 							>
-								{#each Object.values($flashCardStore).filter((fc) => {
-									const { leitnerDeck } = getLeitnerTag(fc.tags);
-									return leitnerDeck === deckId;
-								}) as flashCard (flashCard.letterPair)}
+								{#each leitnerDeck as flashCard (flashCard.letterPair)}
 									<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
 								{/each}
+								{#if leitnerDeck.length > 0}
+									<span class="p-0.5">({leitnerDeck.length})</span>
+								{/if}
 							</div></td
 						>
 					</tr>
