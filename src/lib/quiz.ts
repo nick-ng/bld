@@ -33,7 +33,7 @@ export const putQuiz = async (letterPair: string, formData: FormData) => {
 	}
 };
 
-const leitnerDecks: Record<string, string[]> = {};
+export const leitnerDecks: Record<string, string[]> = {};
 for (let i = 0; i < 10; i++) {
 	leitnerDecks[i.toString()] = [i % 10, (i + 2) % 10, (i + 5) % 10, (i + 9) % 10].map((a) =>
 		a.toString(10)
