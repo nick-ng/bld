@@ -2,10 +2,12 @@
 	import type { FlashCardStoreType } from "$lib/stores/flash-cards";
 
 	import { onMount } from "svelte";
-	import { commutatorDetails, sortAlgs, isBuffer, isTwist } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus, fetchFlashCards } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
+	import { commutatorDetails, sortAlgs, isBuffer, isTwist } from "$lib/utils";
+	import { leitnerDecks, getLeitnerTag } from "$lib/quiz";
 	import ConfidenceTable from "./confidence-table.svelte";
+	import LetterPair from "./letter-pair.svelte";
 
 	const STALE_THRESHOLD_MS = 5 * 60 * 1000; // 5 minutes
 	const HOUR_MS = 60 * 60 * 1000;
@@ -178,22 +180,10 @@
 	<div
 		class="summary-grid mx-auto grid grid-cols-1 content-center items-start justify-center justify-items-center gap-2 lg:m-0"
 	>
-		<ConfidenceTable
-			tableType="Comm"
-			missing={summary.missingComms}
-			confidences={summary.commConfidences}
-			total={summary.total}
-		/>
-		<ConfidenceTable
-			tableType="Memo"
-			missing={summary.missingMemos}
-			confidences={summary.memoConfidences}
-			total={summary.total}
-		/>
-		<table class="quiz-history block lg:col-span-2 lg:max-w-full">
+		<table class="quiz-history block lg:w-lg lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="text-left whitespace-nowrap">Quiz History</th>
+					<th class="w-full text-left whitespace-nowrap">Quiz History</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -219,11 +209,79 @@
 				</tr>
 			</tbody>
 		</table>
-		<table class="summary-tables block lg:max-w-lg">
+		<table class="summary-tables block lg:w-lg lg:max-w-lg">
+			<thead>
+				<tr>
+					<td colspan="2" class="p-1 text-left">
+						Next Session: {$optionsStore.leitnerSessionNumbers[flashCardType] || 0}, Cards in Decks: {Object.values(
+							$flashCardStore
+						).filter((fc) => {
+							const { leitnerDeck } = getLeitnerTag(fc.tags);
+							return leitnerDeck !== "S" && leitnerDeck !== "R";
+						}).length}, Retired Cards: {Object.values($flashCardStore).filter((fc) => {
+							const { leitnerDeck } = getLeitnerTag(fc.tags);
+							return leitnerDeck === "R";
+						}).length}
+					</td>
+				</tr>
+				<tr>
+					<th class="text-left whitespace-nowrap">Deck</th>
+					<th class="w-full text-left whitespace-nowrap">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody
+				><tr>
+					<td class="p-1">Current</td>
+					<td>
+						<div
+							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+						>
+							{#each Object.values($flashCardStore).filter((fc) => {
+								const { leitnerDeck } = getLeitnerTag(fc.tags);
+								return leitnerDeck === "C";
+							}) as flashCard (flashCard.letterPair)}
+								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
+							{/each}
+						</div>
+					</td>
+				</tr>{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
+					<tr>
+						<td class="p-1">{leitnerDecks[deckId]?.join("-")}</td>
+						<td>
+							<div
+								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+							>
+								{#each Object.values($flashCardStore).filter((fc) => {
+									const { leitnerDeck } = getLeitnerTag(fc.tags);
+									return leitnerDeck === deckId;
+								}) as flashCard (flashCard.letterPair)}
+									<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
+								{/each}
+							</div></td
+						>
+					</tr>
+				{/each}</tbody
+			>
+		</table>
+		<ConfidenceTable
+			tableType="Comm"
+			missing={summary.missingComms}
+			cardType={flashCardType}
+			confidences={summary.commConfidences}
+			total={summary.total}
+		/>
+		<ConfidenceTable
+			tableType="Memo"
+			missing={summary.missingMemos}
+			cardType={flashCardType}
+			confidences={summary.memoConfidences}
+			total={summary.total}
+		/>
+		<table class="summary-tables block lg:w-lg lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Insert</th>
-					<th class="text-left">Letter Pairs</th>
+					<th class="w-full text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -235,7 +293,7 @@
 								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 							>
 								{#each summary.inserts[insert].toSorted() as letterPair (letterPair)}
-									<a href={`/flash-cards?lp=${letterPair}`} class="p-0.5 uppercase">{letterPair}</a>
+									<LetterPair {letterPair} cardType={flashCardType} />
 								{/each}
 							</div>
 						</td>
@@ -243,11 +301,11 @@
 				{/each}
 			</tbody>
 		</table>
-		<table class="summary-tables block lg:max-w-lg">
+		<table class="summary-tables block lg:w-lg lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Setup</th>
-					<th class="text-left">Letter Pairs</th>
+					<th class="w-full text-left">Letter Pairs</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -259,7 +317,7 @@
 								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 							>
 								{#each summary.setups[setup].toSorted() as letterPair (letterPair)}
-									<a href={`/flash-cards?lp=${letterPair}`} class="p-0.5 uppercase">{letterPair}</a>
+									<LetterPair {letterPair} cardType={flashCardType} />
 								{/each}
 							</div>
 						</td>

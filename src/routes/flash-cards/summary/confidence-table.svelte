@@ -2,11 +2,14 @@
 	interface Props {
 		tableType: string;
 		missing: string[];
+		cardType: string;
 		confidences: { [confidence: number]: string[] };
 		total: number;
 	}
 
-	let { tableType, missing, confidences, total }: Props = $props();
+	import LetterPair from "./letter-pair.svelte";
+
+	let { tableType, missing, cardType, confidences, total }: Props = $props();
 	let randomMissing = $derived(missing[Math.floor(Math.random() * missing.length)]);
 </script>
 
@@ -14,7 +17,7 @@
 	<thead>
 		<tr>
 			<th class="text-center">{tableType}. Confidence</th>
-			<th class="text-left">Letter Pairs</th>
+			<th class="w-full text-left">Letter Pairs</th>
 		</tr>
 	</thead>
 	<tbody>
@@ -26,7 +29,7 @@
 					{#if missing.length > 0}
 						<a
 							class="my-1 block rounded border border-gray-600 px-2 py-1 dark:border-gray-300"
-							href={`/flash-cards?lp=${randomMissing}`}>Random</a
+							href={`/flash-cards?lp=${randomMissing}?t=${cardType}`}>Random</a
 						>
 					{/if}
 				</td>
@@ -35,7 +38,7 @@
 						class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 					>
 						{#each missing.toSorted() as letterPair (letterPair)}
-							<a href={`/flash-cards?lp=${letterPair}`} class="p-0.5 uppercase">{letterPair}</a>
+							<LetterPair {letterPair} {cardType} />
 						{/each}
 					</div>
 				</td>
@@ -54,7 +57,7 @@
 						class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 					>
 						{#each confidences[confidence].toSorted() as letterPair (letterPair)}
-							<a href={`/flash-cards?lp=${letterPair}`} class="p-0.5 uppercase">{letterPair}</a>
+							<LetterPair {letterPair} {cardType} />
 						{/each}
 					</div>
 				</td>
