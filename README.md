@@ -64,5 +64,4 @@ css:
 - src/lib/types.ts:33: @todo(nick-ng): change to zod
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
-- src/routes/quiz/quiz.svelte:128: @todo(nick-ng): get existing L: tag
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
