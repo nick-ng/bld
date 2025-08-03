@@ -120,10 +120,10 @@
 			onQuizEnd={() => {
 				$quizStore = [];
 			}}
-			extraClass="min-h-[460px]"
+			extraClass="min-h-[50vh] lg:min-h-[460px]"
 		/>
-		<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
-			{#if showAnswer}
+		{#if showAnswer}
+			<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
 				<table class="mb-2 w-full border-collapse">
 					<tbody>
 						<tr>
@@ -173,16 +173,18 @@
 						}}>Submit {commConfidence >= 2 && memoConfidence >= 2 ? "⭕" : "❌"}</button
 					>
 				</div>
-			{:else}
+			</div>
+		{:else}
+			<div class="w-full px-2 lg:px-0">
 				<button
-					class="cannot-hover:py-2 block w-full rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
+					class="cannot-hover:py-4 block w-full rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
 					disabled={submittingQuizAnswer}
 					onclick={() => {
 						showAnswer = true;
 					}}>Show Answer</button
 				>
-			{/if}
-		</div>
+			</div>
+		{/if}
 	{:else}
 		<div>Loading</div>
 	{/if}
