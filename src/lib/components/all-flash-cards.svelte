@@ -200,7 +200,7 @@
 			No flash cards match the filter "{letterPairFilter}"
 		</div>
 	{:else if filteredLetterPairs.length <= 10}
-		<div class="flashCards">
+		<div class="flashCards lg:min-w-120">
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				<div
 					class="cannot-hover:pb-2 w-68 rounded border border-gray-300 px-2 dark:border-gray-500"

@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.35
+// @version     1.36
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -407,7 +407,13 @@
 
 			windows.bigScramble = window.open(
 				`${targetOrigin}/big-scramble?scramble=${encodeURIComponent(scramble)}`,
-				`big_scramble_${ID}`
+				`big_scramble_${ID}`,
+				{
+					popup: true,
+					windowFeatures: {
+						resizable: true
+					}
+				}
 			);
 		});
 
