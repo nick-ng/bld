@@ -95,13 +95,14 @@ export const makeLeitnerQuiz = (settings: {
 	}));
 	const deckList = leitnerSessionToDeckList(sessionNumber);
 
-	// get all cards in decks that need to be reviewd
 	const quizDeck: string[] = flashCardsWithLeitnerDeck
 		.filter((fc) => {
+			// all cards in current deck
 			if (fc.leitnerDeck === "C") {
 				return true;
 			}
 
+			// all cards in decks that include the current session
 			if (deckList.includes(fc.leitnerDeck)) {
 				return true;
 			}
@@ -110,13 +111,25 @@ export const makeLeitnerQuiz = (settings: {
 		})
 		.map((fc) => fc.letterPair);
 
-	if (quizDeck.length < minStandBy) {
-		const missingCardCount = minStandBy - quizDeck.length;
-		const standbyDeck = flashCardsWithLeitnerDeck
-			.filter((fc) => fc.leitnerDeck === "S")
-			.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
-			.map((fc) => fc.letterPair);
-		quizDeck.push(...standbyDeck.slice(0, missingCardCount));
+	const standByLetterPairs = flashCardsWithLeitnerDeck
+		.filter((fc) => fc.leitnerDeck === "S")
+		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
+		.map((fc) => fc.letterPair);
+
+	if (standByLetterPairs.length > 0) {
+		// if deck is less than double the minimum stand-by size, add one stand-by card
+		if (quizDeck.length < minStandBy * 2) {
+			const bonusCard = standByLetterPairs.shift();
+			if (typeof bonusCard === "string") {
+				quizDeck.push(bonusCard);
+			}
+		}
+
+		// cards from stand-by deck until the minimum stand-by is reached
+		if (quizDeck.length < minStandBy) {
+			const missingCardCount = minStandBy - quizDeck.length;
+			quizDeck.push(...standByLetterPairs.slice(0, missingCardCount));
+		}
 	}
 
 	if (quizDeck.length < minRetired) {
