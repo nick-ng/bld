@@ -13,7 +13,6 @@
 		extraClass?: string;
 		onQuizEnd?: () => void | Promise<void>;
 		showInverseLink?: boolean;
-		showLink?: boolean;
 		flashCardType?: string;
 	}
 
