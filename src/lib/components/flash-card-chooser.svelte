@@ -52,7 +52,7 @@
 	<a
 		class={`relative block border border-gray-800 p-0 text-center ${flashCard?.isPublic ? "underline" : "no-underline"}`}
 		style={`background-color:${getAgeColour(flashCard?.lastQuizUnix)};`}
-		href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}
+		href={`/flash-cards?t=${flashCardType}&f=${letterPair.toUpperCase()}`}
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
 		<div class="flex h-2 flex-row justify-center gap-0.5 px-0.5 pb-0.5">

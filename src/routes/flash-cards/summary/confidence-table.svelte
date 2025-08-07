@@ -13,7 +13,7 @@
 	let randomMissing = $derived(missing[Math.floor(Math.random() * missing.length)]);
 </script>
 
-<table class="summary-tables block lg:max-w-lg">
+<table class="summary-tables block w-full lg:max-w-lg">
 	<thead>
 		<tr>
 			<th class="text-center">{tableType}. Confidence</th>

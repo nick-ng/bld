@@ -24,10 +24,9 @@
 		onQuizEnd,
 		extraClass = "",
 		showInverseLink = false,
-		showLink = false,
-		flashCardType = "corner"
+		flashCardType: cardType = "corner"
 	}: Props = $props();
-	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair));
+	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair, cardType));
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -36,23 +35,12 @@
 	{:else}
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
 			<div class="relative m-0 flex flex-row justify-center self-stretch">
-				{#if showLink}
-					<a href={`/flash-cards?t=${flashCardType}&lp=${letterPair}`}>
-						<h2 class="m-0 uppercase">
-							{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
-								👀
-							{/if}
-							{flashCard.letterPair}
-						</h2>
-					</a>
-				{:else}
-					<h2 class="m-0 uppercase">
-						{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
-							👀
-						{/if}
-						{flashCard.letterPair}
-					</h2>
-				{/if}
+				<h2 class="m-0 uppercase">
+					{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
+						👀
+					{/if}
+					{flashCard.letterPair}
+				</h2>
 			</div>
 			{#if quizLeft > 0}
 				<div class="absolute top-0 left-0 text-left">{quizLeft} left</div>

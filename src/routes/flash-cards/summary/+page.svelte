@@ -24,6 +24,12 @@
 			return leitnerDeck === "C";
 		})
 	);
+	let leitnerRetiredDeck = $derived(
+		Object.values($flashCardStore).filter((fc) => {
+			const { leitnerDeck } = getLeitnerTag(fc.tags);
+			return leitnerDeck === "R";
+		})
+	);
 
 	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
 		const inserts: { [insert: string]: string[] } = {};
@@ -186,7 +192,78 @@
 	<div
 		class="summary-grid mx-auto grid grid-cols-1 content-center items-start justify-center justify-items-center gap-2 lg:m-0"
 	>
-		<table class="quiz-history block lg:w-lg lg:max-w-lg">
+		<table class="summary-tables block w-full lg:max-w-lg">
+			<thead>
+				<tr>
+					<td colspan="2" class="p-1 text-left">
+						Next Session: {$optionsStore.leitnerSessionNumbers[flashCardType] || 0}, Cards in Decks: {Object.values(
+							$flashCardStore
+						).filter((fc) => {
+							const { leitnerDeck } = getLeitnerTag(fc.tags);
+							return leitnerDeck !== "S" && leitnerDeck !== "R";
+						}).length}, Retired Cards: {leitnerRetiredDeck.length}
+					</td>
+				</tr>
+				<tr>
+					<th class="text-left whitespace-nowrap">Deck</th>
+					<th class="w-full text-left whitespace-nowrap">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody
+				><tr>
+					<td class="p-1 whitespace-nowrap">Current</td>
+					<td>
+						<div
+							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+						>
+							{#each leitnerCurrentDeck as flashCard (flashCard.letterPair)}
+								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
+							{/each}
+							{#if leitnerCurrentDeck.length > 0}
+								<span class="p-0.5">({leitnerCurrentDeck.length})</span>
+							{/if}
+						</div>
+					</td>
+				</tr>
+				{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
+					{@const leitnerDeck = Object.values($flashCardStore).filter((fc) => {
+						const { leitnerDeck } = getLeitnerTag(fc.tags);
+						return leitnerDeck === deckId;
+					})}
+					<tr>
+						<td class="p-1 whitespace-nowrap">{leitnerDecks[deckId]?.join("-")}</td>
+						<td>
+							<div
+								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+							>
+								{#each leitnerDeck as flashCard (flashCard.letterPair)}
+									<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
+								{/each}
+								{#if leitnerDeck.length > 0}
+									<span class="p-0.5">({leitnerDeck.length})</span>
+								{/if}
+							</div></td
+						>
+					</tr>
+				{/each}
+				<tr>
+					<td class="p-1 whitespace-nowrap">Retired</td>
+					<td>
+						<div
+							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+						>
+							{#each leitnerRetiredDeck as flashCard (flashCard.letterPair)}
+								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
+							{/each}
+							{#if leitnerRetiredDeck.length > 0}
+								<span class="p-0.5">({leitnerRetiredDeck.length})</span>
+							{/if}
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="quiz-history block w-full lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="w-full text-left whitespace-nowrap">Quiz History</th>
@@ -215,64 +292,6 @@
 				</tr>
 			</tbody>
 		</table>
-		<table class="summary-tables block lg:w-lg lg:max-w-lg">
-			<thead>
-				<tr>
-					<td colspan="2" class="p-1 text-left">
-						Next Session: {$optionsStore.leitnerSessionNumbers[flashCardType] || 0}, Cards in Decks: {Object.values(
-							$flashCardStore
-						).filter((fc) => {
-							const { leitnerDeck } = getLeitnerTag(fc.tags);
-							return leitnerDeck !== "S" && leitnerDeck !== "R";
-						}).length}, Retired Cards: {Object.values($flashCardStore).filter((fc) => {
-							const { leitnerDeck } = getLeitnerTag(fc.tags);
-							return leitnerDeck === "R";
-						}).length}
-					</td>
-				</tr>
-				<tr>
-					<th class="text-left whitespace-nowrap">Deck</th>
-					<th class="w-full text-left whitespace-nowrap">Letter Pairs</th>
-				</tr>
-			</thead>
-			<tbody
-				><tr>
-					<td class="p-1 whitespace-nowrap">Current</td>
-					<td>
-						<div
-							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
-						>
-							{#each leitnerCurrentDeck as flashCard (flashCard.letterPair)}
-								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
-							{/each}
-							{#if leitnerCurrentDeck.length > 0}
-								<span class="p-0.5">({leitnerCurrentDeck.length})</span>
-							{/if}
-						</div>
-					</td>
-				</tr>{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
-					{@const leitnerDeck = Object.values($flashCardStore).filter((fc) => {
-						const { leitnerDeck } = getLeitnerTag(fc.tags);
-						return leitnerDeck === deckId;
-					})}
-					<tr>
-						<td class="p-1 whitespace-nowrap">{leitnerDecks[deckId]?.join("-")}</td>
-						<td>
-							<div
-								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
-							>
-								{#each leitnerDeck as flashCard (flashCard.letterPair)}
-									<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
-								{/each}
-								{#if leitnerDeck.length > 0}
-									<span class="p-0.5">({leitnerDeck.length})</span>
-								{/if}
-							</div></td
-						>
-					</tr>
-				{/each}</tbody
-			>
-		</table>
 		<ConfidenceTable
 			tableType="Comm"
 			missing={summary.missingComms}
@@ -287,7 +306,7 @@
 			confidences={summary.memoConfidences}
 			total={summary.total}
 		/>
-		<table class="summary-tables block lg:w-lg lg:max-w-lg">
+		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Insert</th>
@@ -311,7 +330,7 @@
 				{/each}
 			</tbody>
 		</table>
-		<table class="summary-tables block lg:w-lg lg:max-w-lg">
+		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>
 					<th class="text-left">Setup</th>

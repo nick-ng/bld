@@ -85,10 +85,10 @@ export const parseFlashCard = (
 	};
 };
 
-export const defaultFlashCard = (letterPair: string): FlashCard => {
+export const defaultFlashCard = (letterPair: string, cardType: string = "corner"): FlashCard => {
 	return {
 		letterPair,
-		type: "corner",
+		type: cardType,
 		memo: "",
 		image: "",
 		commutator: "",

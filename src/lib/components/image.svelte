@@ -75,7 +75,7 @@
 </script>
 
 <div
-	class={`flex h-64 w-64 flex-row justify-center ${!imageUri || imageUri.endsWith(".emoji") ? "items-center border border-gray-500" : "items-stretch"}`}
+	class={`flex h-64 w-64 flex-row justify-center ${!imageUri || imageUri.endsWith(".emoji") ? "items-center" : "items-stretch"}`}
 >
 	{#if imageUri.endsWith(".emoji")}
 		<div class="relative h-full flex-grow overflow-hidden">

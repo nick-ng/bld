@@ -316,7 +316,7 @@
 										cardType: flashCardType,
 										randomOldestFactor: 60 * 60 * 24 * 7 // 1 week in seconds
 									});
-									const url = `/flash-cards?t=${flashCardType}&f=${quizLetterPairs.join("+")}`;
+									const url = `/flash-cards?t=${flashCardType}&f=${quizLetterPairs.join("+").toUpperCase()}`;
 									goto(url);
 								} catch (err) {
 									console.error("Error when making study list", err);
