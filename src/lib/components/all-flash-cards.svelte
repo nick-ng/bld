@@ -184,7 +184,8 @@
 				class="inline-block"
 				type="button"
 				onclick={() => {
-					letterPairFilter = "";
+					page.url.searchParams.delete("f");
+					goto(`/flash-cards?${page.url.searchParams.toString()}`);
 				}}>Clear</button
 			>
 		</form>
