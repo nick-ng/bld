@@ -33,7 +33,7 @@
 		<div class="text-center">{upperCaseFirst($flashCardStoreStatus.message)}</div>
 	{:else}
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
-			<div class="relative m-0 flex flex-row justify-center self-stretch">
+			<div class="m-0 flex flex-row justify-center self-stretch">
 				<h2 class="m-0 uppercase">
 					{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
 						👀
@@ -58,7 +58,7 @@
 			{/if}
 			<Corners letterPair={flashCard.letterPair} />
 			{#if quizShowAnswer}
-				<div class="w-full truncate text-center text-2xl">
+				<div class="max-w-64 truncate text-center text-2xl">
 					{flashCard.memo}
 				</div>
 				<div>
