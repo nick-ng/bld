@@ -214,13 +214,9 @@ export const parseCommutator = (rawCommutator: string) => {
 			conjugatePlusCommutator = `[${conjugatePlusCommutator}]`;
 		}
 
-		let normalisedCommutator = commutator
-			? `${normaliseCommutator(conjugatePlusCommutator)}`
-			: rawCommutator;
-
 		return {
 			rawCommutator,
-			normalisedCommutator,
+			normalisedCommutator: conjugatePlusCommutator,
 			commutator,
 			conjugatePlusCommutator,
 			setup,
