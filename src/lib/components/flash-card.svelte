@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { defaultFlashCard } from "$lib/types";
-	import { upperCaseFirst, commutatorDetails } from "$lib/utils";
+	import { upperCaseFirst, parseCommutator } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
@@ -64,7 +64,7 @@
 				<div>
 					{#if flashCard.commutator}
 						<span class="text-xl">
-							{commutatorDetails(flashCard.commutator).normalisedCommutator}
+							{parseCommutator(flashCard.commutator).normalisedCommutator}
 						</span>
 					{:else}
 						<span class="text-xl"> No Commutator </span>

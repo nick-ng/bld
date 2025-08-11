@@ -4,7 +4,7 @@
 	import { onMount } from "svelte";
 	import { flashCardStore, flashCardStoreStatus, fetchFlashCards } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import { commutatorDetails, sortAlgs, isBuffer, isTwist } from "$lib/utils";
+	import { parseCommutator, sortAlgs, isBuffer, isTwist } from "$lib/utils";
 	import { leitnerDecks, getLeitnerTag } from "$lib/quiz";
 	import ConfidenceTable from "./confidence-table.svelte";
 	import LetterPair from "./letter-pair.svelte";
@@ -140,7 +140,7 @@
 						missingComms.push(letterPair);
 					}
 
-					const { insert, interchange, setup } = commutatorDetails(flashCard.commutator);
+					const { insert, interchange, setup } = parseCommutator(flashCard.commutator);
 					if (!insert) {
 						continue;
 					}

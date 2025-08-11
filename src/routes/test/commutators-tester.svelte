@@ -1,7 +1,7 @@
 <script lang="ts">
-	import { commutatorDetails } from "$lib/utils";
+	import { parseCommutator } from "$lib/utils";
 	let singleCommutator = $state("");
-	let parsedCommutator = $derived(commutatorDetails(singleCommutator));
+	let parsedCommutator = $derived(parseCommutator(singleCommutator));
 </script>
 
 <div>

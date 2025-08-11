@@ -142,30 +142,36 @@ export const getOperatingSystem = (): string => {
 
 export const normaliseCommutator = (rawCommutator: string): string => {
 	return rawCommutator
-		.replaceAll(" ", "")
-		.replace(/([ufrdlb])/gi, " $1")
-		.replaceAll("[ ", "[")
-		.replaceAll(", ", ",")
-		.replaceAll(": ", ":")
+		.replaceAll(/  +/g, " ")
+		.replaceAll(/ *([ufrdlb])/gi, " $1")
+		.replaceAll(/ *\[ */g, "[")
+		.replaceAll(/ *\] */g, "]")
+		.replaceAll(/ *, */g, ",")
+		.replaceAll(/ *: */g, ":")
+		.replaceAll(/ *\/ */g, "/")
 		.trim();
 };
 
-export const commutatorDetails = (rawCommutator: string) => {
-	const commutatorResult = rawCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
-
-	if (!commutatorResult) {
-		// if there isn't a commutator, return the original string
-		return {
-			rawCommutator,
-			normalisedCommutator: rawCommutator,
-			commutator: "",
-			conjugatePlusCommutator: "",
-			setup: "",
-			insert: "",
-			interchange: ""
-		};
+export const reverseMoves = (moves: string): string => {
+	const moveList = moves
+		.split(" ")
+		.filter((a) => a)
+		.reverse();
+	for (let i = 0; i < moveList.length; i++) {
+		if (moveList[i].includes("2")) {
+			continue;
+		} else if (moveList[i].includes("'")) {
+			moveList[i] = moveList[i].replaceAll("'", "");
+		} else {
+			moveList[i] = `${moveList[i]}'`;
+		}
 	}
 
+	return moveList.join(" ");
+};
+
+// @todo(nick-ng): handle cube rotations (x y z)
+export const parseCommutator = (rawCommutator: string) => {
 	let regripEmoji = "";
 	for (let i = 0; i < regripEmojis.length; i++) {
 		if (rawCommutator.includes(regripEmojis[i])) {
@@ -174,48 +180,114 @@ export const commutatorDetails = (rawCommutator: string) => {
 		}
 	}
 
-	const commutator = normaliseCommutator(commutatorResult[0]);
-	// there is at least a commutator
-	let conjugatePlusCommutator = commutator;
-	// check if there is a conjugate as well
-	const conjugatePlusCommutatorResult = rawCommutator.match(
-		/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
+	const commutatorResult = rawCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
+	if (commutatorResult) {
+		const commutator = normaliseCommutator(commutatorResult[0]);
+		// there is at least a commutator
+		let conjugatePlusCommutator = commutator;
+		// check if there is a conjugate as well
+		const conjugatePlusCommutatorResult = rawCommutator.match(
+			/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
+		);
+		let setup = "";
+		if (conjugatePlusCommutatorResult) {
+			conjugatePlusCommutator = normaliseCommutator(conjugatePlusCommutatorResult[0]);
+			const temp = conjugatePlusCommutator.split(":");
+			setup = temp[0].trim();
+		}
+
+		let insert = "";
+		let interchange = "";
+		const temp = commutator
+			.replaceAll("[", "")
+			.replaceAll("]", "")
+			.split(",")
+			.map((a) => a.trim());
+		insert = temp[0];
+		interchange = temp[1];
+		if (temp[0].match(/^[ufrdlb][2']*$/i)) {
+			interchange = temp[0];
+			insert = temp[1];
+		}
+
+		if (conjugatePlusCommutator[0] !== "[") {
+			conjugatePlusCommutator = `[${conjugatePlusCommutator}]`;
+		}
+
+		let normalisedCommutator = commutator
+			? `${normaliseCommutator(conjugatePlusCommutator)}`
+			: rawCommutator;
+
+		return {
+			rawCommutator,
+			normalisedCommutator,
+			commutator,
+			conjugatePlusCommutator,
+			setup,
+			insert,
+			interchange,
+			regripEmoji,
+			expansion: [
+				setup,
+				temp[0],
+				temp[1],
+				reverseMoves(temp[0]),
+				reverseMoves(temp[1]),
+				reverseMoves(setup)
+			]
+				.filter((a) => a)
+				.join(" ")
+		};
+	}
+
+	const slashCommutatorResult = rawCommutator.match(
+		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb']\/[ufrdlb2' ]+\])/i
 	);
-	let setup = "";
-	if (conjugatePlusCommutatorResult) {
-		conjugatePlusCommutator = normaliseCommutator(conjugatePlusCommutatorResult[0]);
-		const temp = conjugatePlusCommutator.split(":");
-		setup = temp[0].trim();
-	}
+	if (slashCommutatorResult) {
+		const { setupRG, commutatorRG } = slashCommutatorResult.groups || {};
 
-	const temp = commutator
-		.replaceAll("[", "")
-		.replaceAll("]", "")
-		.split(",")
-		.map((a) => a.trim());
-	let insert = temp[0];
-	let interchange = temp[1];
-	if (temp[0].match(/^[ufrdlb][2']*$/i)) {
-		interchange = temp[0];
-		insert = temp[1];
-	}
+		const [temp, insert] = commutatorRG.replaceAll("[", "").replaceAll("]", "").split("/");
+		const interchange = temp.trim();
+		const interchange2 = `${interchange.replaceAll("'", "")}2`;
 
-	let normalisedCommutator = commutator
-		? `${normaliseCommutator(conjugatePlusCommutator)}`
-		: rawCommutator;
-	if (normalisedCommutator[0] !== "[") {
-		normalisedCommutator = `[${normalisedCommutator}]`;
+		const commutator = normaliseCommutator(commutatorRG);
+		const setup = setupRG ? normaliseCommutator(setupRG.replaceAll(":", "")) : "";
+		let conjugatePlusCommutator = commutator;
+		if (setup) {
+			conjugatePlusCommutator = `[${setup}:${commutator}]`;
+		}
+
+		return {
+			rawCommutator,
+			normalisedCommutator: conjugatePlusCommutator,
+			commutator,
+			conjugatePlusCommutator,
+			setup,
+			insert,
+			interchange: interchange2,
+			expansion: [
+				setup,
+				interchange,
+				insert,
+				interchange2,
+				reverseMoves(insert),
+				interchange,
+				reverseMoves(setup)
+			]
+				.filter((a) => a)
+				.join(" ")
+		};
 	}
 
 	return {
 		rawCommutator,
-		normalisedCommutator,
-		commutator,
-		conjugatePlusCommutator,
-		setup,
-		insert,
-		interchange,
-		regripEmoji
+		normalisedCommutator: rawCommutator,
+		commutator: "",
+		conjugatePlusCommutator: "",
+		setup: "",
+		insert: "",
+		interchange: "",
+		expansion: ""
 	};
 };
 
