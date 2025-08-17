@@ -24,6 +24,8 @@
 		<a class="like-button" href={`/flash-cards?t=${currentFlashCardType}`}>Browse</a>
 		<a class="like-button" href="/quiz">Study</a>
 		<a class="like-button" href="/flash-cards/summary">Summary</a>
+		<div class="grow"></div>
+		<a class="like-button" href="/settings">Settings</a>
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>

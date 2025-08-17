@@ -29,7 +29,7 @@
 					{#if missing.length > 0}
 						<a
 							class="my-1 block rounded border border-gray-600 px-2 py-1 dark:border-gray-300"
-							href={`/flash-cards?lp=${randomMissing}?t=${cardType}`}>Random</a
+							href={`/flash-cards?t=${cardType}&f=${randomMissing}`}>Random</a
 						>
 					{/if}
 				</td>
