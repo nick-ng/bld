@@ -108,7 +108,9 @@ export const optionsSchema = z.object({
 		z.object({
 			name: z.string(),
 			samePieces: z.array(z.array(z.string())),
-			bufferPiece: z.array(z.string())
+			bufferPiece: z.array(z.string()),
+			leitnerSession: z.number().optional(),
+			leitnerLastQuizUnix: z.number().optional()
 		})
 	),
 	defaultFlashCardType: z.string(),
@@ -116,9 +118,9 @@ export const optionsSchema = z.object({
 	leitnerMinReviewStandBy: z.number(),
 	leitnerMinReviewRetired: z.number(),
 	leitnerRetiredMaxAgeDays: z.number(),
-	leitnerSessionNumbers: z.record(z.string(), z.number()),
+	leitnerSessionNumbers: z.record(z.string(), z.number()).optional(),
 	leitnerQuizCooldownHours: z.number(),
-	leitnerLastQuizUnix: z.record(z.string(), z.number())
+	leitnerLastQuizUnix: z.record(z.string(), z.number()).optional()
 });
 
 export type Options = z.infer<typeof optionsSchema>;

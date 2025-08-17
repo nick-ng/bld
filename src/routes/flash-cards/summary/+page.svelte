@@ -196,9 +196,8 @@
 			<thead>
 				<tr>
 					<td colspan="2" class="p-1 text-left">
-						Next Session: {$optionsStore.leitnerSessionNumbers[flashCardType] || 0}, Cards in Decks: {Object.values(
-							$flashCardStore
-						).filter((fc) => {
+						Next Session: {$optionsStore.flashCardTypes[flashCardType].leitnerSession || 0}, Cards
+						in Decks: {Object.values($flashCardStore).filter((fc) => {
 							const { leitnerDeck } = getLeitnerTag(fc.tags);
 							return leitnerDeck !== "S" && leitnerDeck !== "R";
 						}).length}, Retired Cards: {leitnerRetiredDeck.length}

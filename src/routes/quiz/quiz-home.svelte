@@ -162,12 +162,12 @@
 											!isBuffer(f.letterPair, cardTypeInfo.bufferPiece) &&
 											!isTwist(f.letterPair, cardTypeInfo.samePieces)
 									);
-									const quizLetterPairs = await makeLeitnerQuiz({
+									const quizLetterPairs = makeLeitnerQuiz({
 										flashCardArray: flashCards,
 										minStandBy: $optionsStore.leitnerMinReviewStandBy,
 										minRetired: $optionsStore.leitnerMinReviewRetired,
 										retiredMaxAgeDays: $optionsStore.leitnerRetiredMaxAgeDays,
-										sessionNumber: $optionsStore.leitnerSessionNumbers[flashCardType] || 0
+										sessionNumber: $optionsStore.flashCardTypes[flashCardType].leitnerSession || 0
 									});
 									$quizStore = quizLetterPairs;
 									$quizTypeStore = "leitner";
