@@ -215,7 +215,7 @@
 						<div
 							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 						>
-							{#each leitnerCurrentDeck as flashCard (flashCard.letterPair)}
+							{#each leitnerCurrentDeck.toSorted( (a, b) => a.letterPair.localeCompare( b.letterPair, "en", { sensitivity: "base" } ) ) as flashCard (flashCard.letterPair)}
 								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
 							{/each}
 							{#if leitnerCurrentDeck.length > 0}
@@ -225,10 +225,14 @@
 					</td>
 				</tr>
 				{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
-					{@const leitnerDeck = Object.values($flashCardStore).filter((fc) => {
-						const { leitnerDeck } = getLeitnerTag(fc.tags);
-						return leitnerDeck === deckId;
-					})}
+					{@const leitnerDeck = Object.values($flashCardStore)
+						.filter((fc) => {
+							const { leitnerDeck } = getLeitnerTag(fc.tags);
+							return leitnerDeck === deckId;
+						})
+						.sort((a, b) =>
+							a.letterPair.localeCompare(b.letterPair, "en", { sensitivity: "base" })
+						)}
 					<tr>
 						<td class="p-1 whitespace-nowrap">{leitnerDecks[deckId]?.join("-")}</td>
 						<td>
@@ -251,7 +255,7 @@
 						<div
 							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
 						>
-							{#each leitnerRetiredDeck as flashCard (flashCard.letterPair)}
+							{#each leitnerRetiredDeck.toSorted( (a, b) => a.letterPair.localeCompare( b.letterPair, "en", { sensitivity: "base" } ) ) as flashCard (flashCard.letterPair)}
 								<LetterPair letterPair={flashCard.letterPair} cardType={flashCardType} />
 							{/each}
 							{#if leitnerRetiredDeck.length > 0}
