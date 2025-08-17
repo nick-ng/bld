@@ -61,6 +61,7 @@ css:
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
+- src/lib/stores/options.ts:45: @todo(nick-ng): remove migration code later
 - src/lib/types.ts:33: @todo(nick-ng): change to zod
 - src/lib/utils.ts:173: @todo(nick-ng): handle cube rotations (x y z)
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?

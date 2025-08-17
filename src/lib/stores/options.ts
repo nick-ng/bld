@@ -13,16 +13,16 @@ const options: Options = {
 		corner: {
 			name: "Corner",
 			samePieces: SPEFFZ_SAME_PIECES,
-			bufferPiece: SPEFFZ_UFR
+			bufferPiece: SPEFFZ_UFR,
+			leitnerSession: 0,
+			leitnerLastQuizUnix: 0
 		}
 	},
 	defaultFlashCardType: "corner",
 	leitnerMinReviewStandBy: 10,
 	leitnerMinReviewRetired: 5,
 	leitnerRetiredMaxAgeDays: 60,
-	leitnerSessionNumbers: { corner: 0 },
-	leitnerQuizCooldownHours: 12,
-	leitnerLastQuizUnix: { corner: 0 }
+	leitnerQuizCooldownHours: 12
 };
 
 export const optionsStore = writable(options);
@@ -38,7 +38,24 @@ if (browser) {
 
 		if (parsedOptions.success) {
 			optionsStore.update((prev) => {
-				return { ...prev, ...parsedOptions.data };
+				const { leitnerSessionNumbers, leitnerLastQuizUnix, ...newOptions } = {
+					...prev,
+					...parsedOptions.data
+				};
+				// @todo(nick-ng): remove migration code later
+				if (leitnerSessionNumbers) {
+					// migrate from old option schema
+					Object.keys(leitnerSessionNumbers).forEach((key) => {
+						if (typeof newOptions.flashCardTypes[key]?.leitnerSession === "number") {
+							// already migrated
+							return;
+						}
+
+						newOptions.flashCardTypes[key].leitnerSession = leitnerSessionNumbers?.[key] || 0;
+						newOptions.flashCardTypes[key].leitnerLastQuizUnix = leitnerLastQuizUnix?.[key] || 0;
+					});
+				}
+				return newOptions;
 			});
 		}
 	};

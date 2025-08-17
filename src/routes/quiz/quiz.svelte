@@ -68,11 +68,10 @@
 		formData.set("confidence", packedConfidence.toString(10));
 
 		if ($quizTypeStore === "leitner") {
-			const sessionNumber = $optionsStore.leitnerSessionNumbers[flashCardType] || 0;
+			const sessionNumber = $optionsStore.flashCardTypes[flashCardType].leitnerSession || 0;
 			if ($quizStore.length === 1) {
-				const sessionNumber = $optionsStore.leitnerSessionNumbers[flashCardType] || 0;
-				$optionsStore.leitnerLastQuizUnix[flashCardType] = Date.now() / 1000;
-				$optionsStore.leitnerSessionNumbers[flashCardType] = (sessionNumber + 1) % 10;
+				$optionsStore.flashCardTypes[flashCardType].leitnerLastQuizUnix = Date.now() / 1000;
+				$optionsStore.flashCardTypes[flashCardType].leitnerSession = (sessionNumber + 1) % 10;
 			}
 
 			if (commConfidence >= 2 && memoConfidence >= 2) {
