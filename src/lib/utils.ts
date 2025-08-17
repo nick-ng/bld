@@ -237,7 +237,7 @@ export const parseCommutator = (rawCommutator: string) => {
 	}
 
 	const slashCommutatorResult = rawCommutator.match(
-		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb']\/[ufrdlb2' ]+\])/i
+		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb]'?\/[ufrdlb2' ]+\])/i
 	);
 	if (slashCommutatorResult) {
 		const { setupRG, commutatorRG } = slashCommutatorResult.groups || {};
