@@ -35,7 +35,11 @@
 			</tr>
 			<tr>
 				<td colspan={2}>
-					<pre>{JSON.stringify($optionsStore.flashCardTypes[flashCardType], null, 2)}</pre>
+					<pre class="overflow-x-hidden">{JSON.stringify(
+							$optionsStore.flashCardTypes[flashCardType],
+							null,
+							2
+						)}</pre>
 				</td>
 			</tr>
 		</tbody>
