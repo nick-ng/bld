@@ -150,18 +150,7 @@
 		<h1>Corner Flash Cards</h1>
 	</div>
 	<div class="mb-1 flex flex-row items-center gap-2">
-		<form
-			class="flex min-w-1/2 flex-row"
-			onsubmit={(event) => {
-				event.preventDefault();
-
-				const trimmedLetterPair = letterPairFilter.trim().toLowerCase();
-
-				if (trimmedLetterPair.length === 2 && allLetterPairs.includes(trimmedLetterPair)) {
-					goto(`/flash-cards?lp=${trimmedLetterPair}`);
-				}
-			}}
-		>
+		<div class="flex min-w-1/2 flex-row">
 			<input
 				class="shrink grow"
 				type="text"
@@ -188,7 +177,7 @@
 					goto(`/flash-cards?${page.url.searchParams.toString()}`);
 				}}>Clear</button
 			>
-		</form>
+		</div>
 		<div class="grow-1"></div>
 		<a
 			class="hidden rounded border border-gray-600 px-2 py-0 lg:inline dark:border-gray-300"

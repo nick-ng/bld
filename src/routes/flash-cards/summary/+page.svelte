@@ -276,7 +276,7 @@
 						>
 							{#each summary.quizAges as quizAge (quizAge.letterPair)}
 								{#if !quizAge.isMarker}
-									<a href={`/flash-cards?lp=${quizAge.letterPair}`} class="p-0.5 uppercase"
+									<a href={`/flash-cards?f=${quizAge.letterPair}`} class="p-0.5 uppercase"
 										>{quizAge.letterPair}</a
 									>
 								{:else if !quizAge.hidden}

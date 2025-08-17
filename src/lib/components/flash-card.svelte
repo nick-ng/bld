@@ -53,7 +53,7 @@
 				{@const inverseLetterPair = `${flashCard.letterPair[1]}${flashCard.letterPair[0]}`}
 				<a
 					class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 uppercase dark:border-gray-300"
-					href={`/flash-cards?t=${flashCard.type}&lp=${inverseLetterPair}`}>{inverseLetterPair}</a
+					href={`/flash-cards?t=${flashCard.type}&f=${inverseLetterPair}`}>{inverseLetterPair}</a
 				>
 			{/if}
 			<Corners letterPair={flashCard.letterPair} />
