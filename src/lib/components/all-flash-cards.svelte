@@ -189,7 +189,7 @@
 		<div class="w-prose max-w-full">
 			No flash cards match the filter "{letterPairFilter}"
 		</div>
-	{:else if filteredLetterPairs.length <= 10}
+	{:else if filteredLetterPairs.length <= 25}
 		<div class="flashCards lg:min-w-120">
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				<div
