@@ -170,6 +170,14 @@ export const reverseMoves = (moves: string): string => {
 	return moveList.join(" ");
 };
 
+export const getAlgorithm = (algName: string) => {
+	switch (algName.toLocaleLowerCase()) {
+		default: {
+			return algName;
+		}
+	}
+};
+
 // @todo(nick-ng): handle cube rotations (x y z)
 export const parseCommutator = (rawCommutator: string) => {
 	let regripEmoji = "";
@@ -284,6 +292,92 @@ export const parseCommutator = (rawCommutator: string) => {
 		insert: "",
 		interchange: "",
 		expansion: ""
+	};
+};
+
+export const simplifyAlgorithm = (alg: string) => {
+	const moves = alg.split(" ").filter((a) => a);
+	let simplified1 = moves.map((move, i) => ({
+		face: move.replaceAll("'", "").replaceAll("2", ""),
+		amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
+		type: "normal",
+		steps: [i]
+	}));
+	let simplified2 = [...simplified1];
+
+	for (let i = 0; i < 1000; i++) {
+		simplified2 = [];
+
+		simplified1.forEach((step) => {
+			if (simplified2.length === 0) {
+				simplified2.push(step);
+				return;
+			}
+
+			const lastI = simplified2.length - 1;
+
+			if (simplified2[lastI].face === step.face) {
+				simplified2[lastI].amount = simplified2[lastI].amount + step.amount;
+				simplified2[lastI].type = "cancelled";
+				simplified2[lastI].steps.push(...step.steps);
+
+				return;
+			}
+
+			simplified2.push(step);
+		});
+
+		if (simplified1.length === simplified2.length) {
+			const originalMoves = moves.map((move) => ({ move, type: "normal" }));
+			const simplifiedMoves = simplified2
+				.map((step) => {
+					const amount = step.amount % 4;
+					if (step.type === "cancelled") {
+						step.steps.forEach((i) => {
+							originalMoves[i].type = "cancelled";
+						});
+					}
+					switch (amount) {
+						case 0: {
+							step.steps.forEach((i) => {
+								originalMoves[i].type = "gone";
+							});
+							return "";
+						}
+						case 1: {
+							return `${step.face}`;
+						}
+						case 2: {
+							return `${step.face}2`;
+						}
+						case 3: {
+							return `${step.face}'`;
+						}
+						default: {
+							console.warn("step", step);
+							alert("Invalid move. See console for details");
+						}
+					}
+				})
+				.filter((a) => a);
+
+			return {
+				original: originalMoves,
+				simplified: simplifiedMoves.join(" "),
+				originalCount: moves.length,
+				simplifiedCount: simplifiedMoves.length
+			};
+		}
+
+		simplified1 = simplified2;
+	}
+
+	console.warn("took too long to simplify moves");
+
+	return {
+		simplified: alg,
+		originalCount: moves.length,
+		simplifiedCount: moves.length
 	};
 };
 

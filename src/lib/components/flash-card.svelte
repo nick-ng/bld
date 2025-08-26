@@ -1,10 +1,11 @@
 <script lang="ts">
 	import { defaultFlashCard } from "$lib/types";
-	import { upperCaseFirst, parseCommutator } from "$lib/utils";
+	import { upperCaseFirst, parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	import { flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
+	import Step from "./step.svelte";
 
 	interface Props {
 		letterPair?: string;
@@ -61,13 +62,21 @@
 				<div class="max-w-64 truncate text-center text-2xl">
 					{flashCard.memo}
 				</div>
-				<div>
+				<div class="text-xl">
 					{#if flashCard.commutator}
-						<span class="text-xl">
-							{parseCommutator(flashCard.commutator).normalisedCommutator}
-						</span>
+						{@const commutatorDetails = parseCommutator(flashCard.commutator)}
+						{@const simplification = simplifyAlgorithm(commutatorDetails.expansion)}
+						<details>
+							<summary class="text-center">{commutatorDetails.normalisedCommutator}</summary>
+							<div class="text-center">
+								{#each simplification.original as step, i (`${step.move}${i}`)}
+									{#if i > 0}{" "}{/if}<Step move={step.move} cancellationType={step.type} />
+								{/each}
+							</div>
+							<div class="text-center">{simplification.simplified}</div>
+						</details>
 					{:else}
-						<span class="text-xl"> No Commutator </span>
+						<span> No Commutator </span>
 					{/if}
 				</div>
 				<Image

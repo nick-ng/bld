@@ -1,5 +1,5 @@
 # stage build
-FROM golang:1.23.2-alpine3.20
+FROM golang:1.25.0-alpine3.22
 
 RUN mkdir /app
 
@@ -16,7 +16,7 @@ RUN go build -o server
 RUN ls
 
 # stage run
-FROM alpine:3.20
+FROM alpine:3.22
 
 WORKDIR /app
 
