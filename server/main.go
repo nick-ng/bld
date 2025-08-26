@@ -3,6 +3,7 @@ package main
 import (
 	"bld-server/routes"
 	"bld-server/utils"
+	"log"
 	"net/http"
 )
 
@@ -33,4 +34,5 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 
 	http.ListenAndServe(":27945", nil)
+	log.Println("server is running")
 }
