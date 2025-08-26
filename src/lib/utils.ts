@@ -329,7 +329,7 @@ export const simplifyAlgorithm = (alg: string) => {
 
 		if (simplified1.length === simplified2.length) {
 			const originalMoves = moves.map((move) => ({ move, type: "normal" }));
-			const simplifiedMoves = simplified2
+			const simplified = simplified2
 				.map((step) => {
 					const amount = step.amount % 4;
 					if (step.type === "cancelled") {
@@ -337,33 +337,39 @@ export const simplifyAlgorithm = (alg: string) => {
 							originalMoves[i].type = "cancelled";
 						});
 					}
+
 					switch (amount) {
 						case 0: {
 							step.steps.forEach((i) => {
 								originalMoves[i].type = "gone";
 							});
-							return "";
+							return { ...step, amount, move: "" };
 						}
 						case 1: {
-							return `${step.face}`;
+							return { ...step, amount, move: `${step.face}` };
 						}
 						case 2: {
-							return `${step.face}2`;
+							return { ...step, amount, move: `${step.face}2` };
 						}
 						case 3: {
-							return `${step.face}'`;
+							return { ...step, amount, move: `${step.face}'` };
 						}
-						default: {
-							console.warn("step", step);
-							alert("Invalid move. See console for details");
-						}
+						default:
+							{
+								console.warn("step", step);
+								alert("Invalid move. See console for details");
+							}
+
+							return { ...step, move: "" };
 					}
 				})
-				.filter((a) => a);
+				.filter((step) => step.move);
+			const simplifiedMoves = simplified.map((step) => step.move);
 
 			return {
 				original: originalMoves,
-				simplified: simplifiedMoves.join(" "),
+				simplified,
+				simplifiedString: simplifiedMoves.join(" "),
 				originalCount: moves.length,
 				simplifiedCount: simplifiedMoves.length
 			};
