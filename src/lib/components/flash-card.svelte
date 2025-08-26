@@ -70,7 +70,7 @@
 							<summary class="text-center">{commutatorDetails.normalisedCommutator}</summary>
 							<div class="text-center">
 								{#each simplification.original as step, i (`${step.move}${i}`)}
-									{#if i > 0}{" "}{/if}<Step move={step.move} cancellationType={step.type} />
+									{#if i > 0}&nbsp;{/if}<Step move={step.move} cancellationType={step.type} />
 								{/each}
 							</div>
 							<div class="text-center">{simplification.simplified}</div>
