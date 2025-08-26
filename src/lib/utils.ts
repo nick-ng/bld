@@ -297,6 +297,7 @@ export const parseCommutator = (rawCommutator: string) => {
 
 export const simplifyAlgorithm = (alg: string) => {
 	const moves = alg.split(" ").filter((a) => a);
+	const originalMoves = moves.map((move) => ({ move, type: "normal" }));
 	let simplified1 = moves.map((move, i) => ({
 		face: move.replaceAll("'", "").replaceAll("2", ""),
 		amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
@@ -328,7 +329,6 @@ export const simplifyAlgorithm = (alg: string) => {
 		});
 
 		if (simplified1.length === simplified2.length) {
-			const originalMoves = moves.map((move) => ({ move, type: "normal" }));
 			const simplified = simplified2
 				.map((step) => {
 					const amount = step.amount % 4;
@@ -381,7 +381,9 @@ export const simplifyAlgorithm = (alg: string) => {
 	console.warn("took too long to simplify moves");
 
 	return {
-		simplified: alg,
+		original: originalMoves,
+		simplified: originalMoves,
+		simplifiedString: alg,
 		originalCount: moves.length,
 		simplifiedCount: moves.length
 	};
