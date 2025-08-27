@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { parseCommutator } from "$lib/utils";
+	import { parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	let singleCommutator = $state("");
 	let parsedCommutator = $derived(parseCommutator(singleCommutator));
 </script>
@@ -26,6 +26,10 @@
 				<td>
 					<pre>{JSON.stringify(parsedCommutator, null, "  ")}</pre>
 				</td>
+			</tr>
+			<tr>
+				<td> Simplified </td>
+				<td><pre>{JSON.stringify(simplifyAlgorithm(parsedCommutator.expansion), null, 2)}</pre></td>
 			</tr>
 		</tbody>
 	</table>
