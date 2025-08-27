@@ -298,40 +298,44 @@ export const parseCommutator = (rawCommutator: string) => {
 export const simplifyAlgorithm = (alg: string) => {
 	const moves = alg.split(" ").filter((a) => a);
 	const originalMoves = moves.map((move) => ({ move, type: "normal" }));
-	let simplified1 = moves.map((move, i) => ({
-		face: move.replaceAll("'", "").replaceAll("2", ""),
-		amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
-		type: "normal",
-		steps: [i]
-	}));
-	let simplified2 = [...simplified1];
-	simplified2 = [];
-	simplified1.forEach((step, i) => {
-		if (simplified2.length === 0) {
-			simplified2.push(step);
+	const tempSimplified: {
+		face: string;
+		amount: number;
+		type: string;
+		steps: number[];
+	}[] = [];
+	moves.forEach((move, i) => {
+		const step = {
+			face: move.replaceAll("'", "").replaceAll("2", ""),
+			amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
+			type: "normal",
+			steps: [i]
+		};
+		if (tempSimplified.length === 0) {
+			tempSimplified.push(step);
 			return;
 		}
 
-		let lastI = simplified2.length - 1;
-		for (let j = simplified2.length - 1; j >= 0; j--) {
-			if (simplified2[j].amount !== 0) {
+		let lastI = tempSimplified.length - 1;
+		for (let j = tempSimplified.length - 1; j >= 0; j--) {
+			if (tempSimplified[j].amount !== 0) {
 				lastI = j;
 				break;
 			}
 		}
 
-		if (simplified2[lastI].face === step.face) {
-			simplified2[lastI].amount = (simplified2[lastI].amount + step.amount) % 4;
-			simplified2[lastI].type = "cancelled";
-			simplified2[lastI].steps.push(...step.steps);
+		if (tempSimplified[lastI].face === step.face) {
+			tempSimplified[lastI].amount = (tempSimplified[lastI].amount + step.amount) % 4;
+			tempSimplified[lastI].type = "cancelled";
+			tempSimplified[lastI].steps.push(...step.steps);
 
 			return;
 		}
 
-		simplified2.push(step);
+		tempSimplified.push(step);
 	});
 
-	const simplified = simplified2
+	const simplified = tempSimplified
 		.map((step) => {
 			if (step.type === "cancelled") {
 				step.steps.forEach((i) => {
