@@ -298,94 +298,85 @@ export const parseCommutator = (rawCommutator: string) => {
 export const simplifyAlgorithm = (alg: string) => {
 	const moves = alg.split(" ").filter((a) => a);
 	const originalMoves = moves.map((move) => ({ move, type: "normal" }));
-	let simplified1 = moves.map((move, i) => ({
-		face: move.replaceAll("'", "").replaceAll("2", ""),
-		amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
-		type: "normal",
-		steps: [i]
-	}));
-	let simplified2 = [...simplified1];
-
-	for (let i = 0; i < 1000; i++) {
-		simplified2 = [];
-
-		simplified1.forEach((step) => {
-			if (simplified2.length === 0) {
-				simplified2.push(step);
-				return;
-			}
-
-			const lastI = simplified2.length - 1;
-
-			if (simplified2[lastI].face === step.face) {
-				simplified2[lastI].amount = simplified2[lastI].amount + step.amount;
-				simplified2[lastI].type = "cancelled";
-				simplified2[lastI].steps.push(...step.steps);
-
-				return;
-			}
-
-			simplified2.push(step);
-		});
-
-		if (simplified1.length === simplified2.length) {
-			const simplified = simplified2
-				.map((step) => {
-					const amount = step.amount % 4;
-					if (step.type === "cancelled") {
-						step.steps.forEach((i) => {
-							originalMoves[i].type = "cancelled";
-						});
-					}
-
-					switch (amount) {
-						case 0: {
-							step.steps.forEach((i) => {
-								originalMoves[i].type = "gone";
-							});
-							return { ...step, amount, move: "" };
-						}
-						case 1: {
-							return { ...step, amount, move: `${step.face}` };
-						}
-						case 2: {
-							return { ...step, amount, move: `${step.face}2` };
-						}
-						case 3: {
-							return { ...step, amount, move: `${step.face}'` };
-						}
-						default:
-							{
-								console.warn("step", step);
-								alert("Invalid move. See console for details");
-							}
-
-							return { ...step, move: "" };
-					}
-				})
-				.filter((step) => step.move);
-			const simplifiedMoves = simplified.map((step) => step.move);
-
-			return {
-				original: originalMoves,
-				simplified,
-				simplifiedString: simplifiedMoves.join(" "),
-				originalCount: moves.length,
-				simplifiedCount: simplifiedMoves.length
-			};
+	const tempSimplified: {
+		face: string;
+		amount: number;
+		type: string;
+		steps: number[];
+	}[] = [];
+	moves.forEach((move, i) => {
+		const step = {
+			face: move.replaceAll("'", "").replaceAll("2", ""),
+			amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
+			type: "normal",
+			steps: [i]
+		};
+		if (tempSimplified.length === 0) {
+			tempSimplified.push(step);
+			return;
 		}
 
-		simplified1 = simplified2;
-	}
+		let lastI = tempSimplified.length - 1;
+		for (let j = tempSimplified.length - 1; j >= 0; j--) {
+			if (tempSimplified[j].amount !== 0) {
+				lastI = j;
+				break;
+			}
+		}
 
-	console.warn("took too long to simplify moves");
+		if (tempSimplified[lastI].face === step.face) {
+			tempSimplified[lastI].amount = (tempSimplified[lastI].amount + step.amount) % 4;
+			tempSimplified[lastI].type = "cancelled";
+			tempSimplified[lastI].steps.push(...step.steps);
+
+			return;
+		}
+
+		tempSimplified.push(step);
+	});
+
+	const simplified = tempSimplified
+		.map((step) => {
+			if (step.type === "cancelled") {
+				step.steps.forEach((i) => {
+					originalMoves[i].type = "cancelled";
+				});
+			}
+
+			switch (step.amount) {
+				case 0: {
+					step.steps.forEach((i) => {
+						originalMoves[i].type = "gone";
+					});
+					return { ...step, move: "" };
+				}
+				case 1: {
+					return { ...step, move: `${step.face}` };
+				}
+				case 2: {
+					return { ...step, move: `${step.face}2` };
+				}
+				case 3: {
+					return { ...step, move: `${step.face}'` };
+				}
+				default:
+					{
+						console.warn("step", step);
+						alert("Invalid move. See console for details");
+					}
+
+					return { ...step, move: "" };
+			}
+		})
+		.filter((step) => step.move);
+	const simplifiedMoves = simplified.map((step) => step.move);
 
 	return {
 		original: originalMoves,
-		simplified: originalMoves,
-		simplifiedString: alg,
+		simplified,
+		simplifiedString: simplifiedMoves.join(" "),
 		originalCount: moves.length,
-		simplifiedCount: moves.length
+		simplifiedCount: simplifiedMoves.length
 	};
 };
 

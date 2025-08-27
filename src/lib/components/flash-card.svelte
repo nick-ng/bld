@@ -5,7 +5,7 @@
 	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
-	import Step from "./step.svelte";
+	import Step from "$lib/components/step.svelte";
 
 	interface Props {
 		letterPair?: string;
@@ -68,16 +68,18 @@
 						{@const simplification = simplifyAlgorithm(commutatorDetails.expansion)}
 						<details>
 							<summary class="text-center">{commutatorDetails.normalisedCommutator}</summary>
-							<div class="text-center">
+							<div class="mt-2 text-center leading-none text-balance">
 								{#each simplification.original as step, i (`${step.move}${i}`)}
-									{#if i > 0}&nbsp;{/if}<Step move={step.move} cancellationType={step.type} />
+									{i > 0 ? " " : ""}<Step move={step.move} cancellationType={step.type} />
 								{/each}
 							</div>
-							<div class="text-center">
-								{#each simplification.simplified as step, i (`${step.move}${i}`)}
-									{#if i > 0}&nbsp;{/if}<Step move={step.move} cancellationType={step.type} />
-								{/each}
-							</div>
+							{#if simplification.originalCount > simplification.simplifiedCount}
+								<div class="mt-2 text-center leading-none text-balance">
+									{#each simplification.simplified as step, i (`${step.move}${i}`)}
+										{i > 0 ? " " : ""}<Step move={step.move} cancellationType={step.type} />
+									{/each}
+								</div>
+							{/if}
 						</details>
 					{:else}
 						<span> No Commutator </span>

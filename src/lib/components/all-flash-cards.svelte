@@ -5,9 +5,10 @@
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import { arrayToCsvRow, isBuffer, isTwist } from "$lib/utils";
+	import { arrayToCsvRow, isBuffer, isTwist, parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
+	import Step from "$lib/components/step.svelte";
 
 	// eslint-disable-next-line svelte/prefer-writable-derived
 	let letterPairFilter = $state(page.url.searchParams.get("f") || "");
@@ -96,6 +97,7 @@
 					);
 				})
 	);
+	let filteredCommutators = $derived(filteredLetterPairs.map((lp) => $flashCardStore[lp]));
 	const now = new Date();
 	const formattedDate = [
 		now.getFullYear(),
@@ -203,6 +205,25 @@
 				</div>
 			{/each}
 		</div>
+		{#if filteredCommutators.every((a) => a?.commutator)}
+			{@const simplification = simplifyAlgorithm(
+				filteredCommutators.map((c) => parseCommutator(c.commutator).expansion).join(" ")
+			)}
+			<div class="text-xl">
+				<div class="mt-2 text-center leading-none text-balance">
+					{#each simplification.original as step, i (`${step.move}-${i}`)}
+						{i > 0 ? " " : ""}<Step move={step.move} cancellationType={step.type} />
+					{/each}
+				</div>
+				{#if simplification.originalCount > simplification.simplifiedCount}
+					<div class="mt-2 text-center leading-none text-balance">
+						{#each simplification.simplified as step, i (`${step.move}-${i}`)}
+							{i > 0 ? " " : ""}<Step move={step.move} cancellationType={step.type} />
+						{/each}
+					</div>
+				{/if}
+			</div>
+		{/if}
 	{:else}
 		<div
 			class={["letterPairGrid", !letterPairFilter && "letterPairGridColumns"]
