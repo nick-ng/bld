@@ -305,87 +305,74 @@ export const simplifyAlgorithm = (alg: string) => {
 		steps: [i]
 	}));
 	let simplified2 = [...simplified1];
-
-	for (let i = 0; i < 1000; i++) {
-		simplified2 = [];
-
-		simplified1.forEach((step) => {
-			if (simplified2.length === 0) {
-				simplified2.push(step);
-				return;
-			}
-
-			const lastI = simplified2.length - 1;
-
-			if (simplified2[lastI].face === step.face) {
-				simplified2[lastI].amount = simplified2[lastI].amount + step.amount;
-				simplified2[lastI].type = "cancelled";
-				simplified2[lastI].steps.push(...step.steps);
-
-				return;
-			}
-
+	simplified2 = [];
+	simplified1.forEach((step, i) => {
+		if (simplified2.length === 0) {
 			simplified2.push(step);
-		});
-
-		if (simplified1.length === simplified2.length) {
-			const simplified = simplified2
-				.map((step) => {
-					const amount = step.amount % 4;
-					if (step.type === "cancelled") {
-						step.steps.forEach((i) => {
-							originalMoves[i].type = "cancelled";
-						});
-					}
-
-					switch (amount) {
-						case 0: {
-							step.steps.forEach((i) => {
-								originalMoves[i].type = "gone";
-							});
-							return { ...step, amount, move: "" };
-						}
-						case 1: {
-							return { ...step, amount, move: `${step.face}` };
-						}
-						case 2: {
-							return { ...step, amount, move: `${step.face}2` };
-						}
-						case 3: {
-							return { ...step, amount, move: `${step.face}'` };
-						}
-						default:
-							{
-								console.warn("step", step);
-								alert("Invalid move. See console for details");
-							}
-
-							return { ...step, move: "" };
-					}
-				})
-				.filter((step) => step.move);
-			const simplifiedMoves = simplified.map((step) => step.move);
-
-			return {
-				original: originalMoves,
-				simplified,
-				simplifiedString: simplifiedMoves.join(" "),
-				originalCount: moves.length,
-				simplifiedCount: simplifiedMoves.length
-			};
+			return;
 		}
 
-		simplified1 = simplified2;
-	}
+		let lastI = simplified2.length - 1;
+		for (let j = simplified2.length - 1; j >= 0; j--) {
+			if (simplified2[j].amount !== 0) {
+				lastI = j;
+				break;
+			}
+		}
 
-	console.warn("took too long to simplify moves");
+		if (simplified2[lastI].face === step.face) {
+			simplified2[lastI].amount = (simplified2[lastI].amount + step.amount) % 4;
+			simplified2[lastI].type = "cancelled";
+			simplified2[lastI].steps.push(...step.steps);
+
+			return;
+		}
+
+		simplified2.push(step);
+	});
+
+	const simplified = simplified2
+		.map((step) => {
+			if (step.type === "cancelled") {
+				step.steps.forEach((i) => {
+					originalMoves[i].type = "cancelled";
+				});
+			}
+
+			switch (step.amount) {
+				case 0: {
+					step.steps.forEach((i) => {
+						originalMoves[i].type = "gone";
+					});
+					return { ...step, move: "" };
+				}
+				case 1: {
+					return { ...step, move: `${step.face}` };
+				}
+				case 2: {
+					return { ...step, move: `${step.face}2` };
+				}
+				case 3: {
+					return { ...step, move: `${step.face}'` };
+				}
+				default:
+					{
+						console.warn("step", step);
+						alert("Invalid move. See console for details");
+					}
+
+					return { ...step, move: "" };
+			}
+		})
+		.filter((step) => step.move);
+	const simplifiedMoves = simplified.map((step) => step.move);
 
 	return {
 		original: originalMoves,
-		simplified: originalMoves,
-		simplifiedString: alg,
+		simplified,
+		simplifiedString: simplifiedMoves.join(" "),
 		originalCount: moves.length,
-		simplifiedCount: moves.length
+		simplifiedCount: simplifiedMoves.length
 	};
 };
 
