@@ -67,7 +67,7 @@
 						{@const commutatorDetails = parseCommutator(flashCard.commutator)}
 						{@const simplification = simplifyAlgorithm(commutatorDetails.expansion)}
 						<details>
-							<summary class="text-center">{commutatorDetails.normalisedCommutator}</summary>
+							<summary class="text-center">{commutatorDetails.rawCommutator}</summary>
 							<div class="mt-2 text-center leading-none text-balance">
 								{#each simplification.original as step, i (`${step.move}${i}`)}
 									{i > 0 ? " " : ""}<Step move={step.move} cancellationType={step.type} />
