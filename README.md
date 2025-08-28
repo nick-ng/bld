@@ -63,7 +63,7 @@ css:
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:45: @todo(nick-ng): remove migration code later
 - src/lib/types.ts:33: @todo(nick-ng): change to zod
-- src/lib/utils.ts:181: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:188: @todo(nick-ng): handle cube rotations (x y z)
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable

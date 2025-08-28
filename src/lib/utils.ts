@@ -170,31 +170,39 @@ export const reverseMoves = (moves: string): string => {
 	return moveList.join(" ");
 };
 
-export const getAlgorithm = (algName: string) => {
-	switch (algName.toLocaleLowerCase()) {
-		default: {
-			return algName;
-		}
-	}
+const jbPerm = "R U R' F' R U R' U' R' F R2 U' R' U'";
+const tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
+const opSwap = "R' F R2 U' R' U' R U R' F' R U R' U'";
+const leftJbPerm = "L' U' L F L' U' L U L F' L2 U L U";
+export const hydrateAlgorithms = (rawAlg: string) => {
+	const hydratedAlg = rawAlg
+		.replaceAll(/<jb-perm>/gi, jbPerm)
+		.replaceAll(/<op-swap>/gi, opSwap)
+		.replaceAll(/<left jb-perm>/gi, leftJbPerm)
+		.replaceAll(/<ljb-perm>/gi, leftJbPerm)
+		.replaceAll(/<t-perm>/gi, tPerm);
+
+	return hydratedAlg;
 };
 
 // @todo(nick-ng): handle cube rotations (x y z)
 export const parseCommutator = (rawCommutator: string) => {
+	const hydratedCommutator = hydrateAlgorithms(rawCommutator);
 	let regripEmoji = "";
 	for (let i = 0; i < regripEmojis.length; i++) {
-		if (rawCommutator.includes(regripEmojis[i])) {
+		if (hydratedCommutator.includes(regripEmojis[i])) {
 			regripEmoji = `${regripEmojis[i]} `;
 			break;
 		}
 	}
 
-	const commutatorResult = rawCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
+	const commutatorResult = hydratedCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
 	if (commutatorResult) {
 		const commutator = normaliseCommutator(commutatorResult[0]);
 		// there is at least a commutator
 		let conjugatePlusCommutator = commutator;
 		// check if there is a conjugate as well
-		const conjugatePlusCommutatorResult = rawCommutator.match(
+		const conjugatePlusCommutatorResult = hydratedCommutator.match(
 			/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
 		);
 		let setup = "";
@@ -244,7 +252,7 @@ export const parseCommutator = (rawCommutator: string) => {
 		};
 	}
 
-	const slashCommutatorResult = rawCommutator.match(
+	const slashCommutatorResult = hydratedCommutator.match(
 		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb]'?\/[ufrdlb2' ]+\])/i
 	);
 	if (slashCommutatorResult) {
@@ -283,6 +291,27 @@ export const parseCommutator = (rawCommutator: string) => {
 		};
 	}
 
+	const conjugateResult = hydratedCommutator.match(
+		/(?<setupRG>[ufrdlb2' ]+) *: *(?<algorithmRG>[ufrdlb2' ]+)/i
+	);
+	if (conjugateResult) {
+		const { setupRG, algorithmRG } = conjugateResult.groups || {};
+
+		const setup = setupRG ? normaliseCommutator(setupRG) : "";
+		const algorithm = algorithmRG ? normaliseCommutator(algorithmRG) : "";
+
+		return {
+			rawCommutator,
+			normalisedCommutator: `[${setup}:${algorithm}]`,
+			commutator: "",
+			conjugatePlusCommutator: "",
+			setup,
+			insert: "",
+			interchange: "",
+			expansion: [setup, algorithm, reverseMoves(setup)].filter((a) => a).join(" ")
+		};
+	}
+
 	return {
 		rawCommutator,
 		normalisedCommutator: rawCommutator,
@@ -291,7 +320,7 @@ export const parseCommutator = (rawCommutator: string) => {
 		setup: "",
 		insert: "",
 		interchange: "",
-		expansion: ""
+		expansion: hydratedCommutator
 	};
 };
 
