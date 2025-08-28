@@ -117,11 +117,19 @@ export const makeLeitnerQuiz = (settings: {
 		.map((fc) => fc.letterPair);
 
 	if (standByLetterPairs.length > 0) {
-		// if deck is less than double the minimum stand-by size, add one stand-by card
+		// if deck is less than double the minimum stand-by size, add one stand-by card and one card that has been retired for over 10 days
 		if (quizDeck.length < minStandBy * 2) {
 			const bonusCard = standByLetterPairs.shift();
 			if (typeof bonusCard === "string") {
 				quizDeck.push(bonusCard);
+			}
+
+			const oldRetiredCards = flashCardsWithLeitnerDeck.filter(
+				(fc) => fc.leitnerDeck === "R" && fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10
+			);
+			if (oldRetiredCards.length > 0) {
+				const bonusRetiredCard = shuffleArray(oldRetiredCards)[0];
+				quizDeck.push(bonusRetiredCard.letterPair);
 			}
 		}
 
