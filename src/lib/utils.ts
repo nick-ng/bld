@@ -333,7 +333,7 @@ export const simplifyAlgorithm = (alg: string) => {
 		type: string;
 		steps: number[];
 	}[] = [];
-	let steps = moves.map((move, i) => {
+	const steps = moves.map((move, i) => {
 		return {
 			move,
 			face: move.replaceAll("'", "").replaceAll("2", ""),
@@ -343,6 +343,7 @@ export const simplifyAlgorithm = (alg: string) => {
 		};
 	});
 
+	// @todo(nick-ng): is the loop necessary?
 	let nextSteps = steps.map((step) => step.move).join(" ");
 	let previousSteps = "";
 	while (previousSteps !== nextSteps) {
