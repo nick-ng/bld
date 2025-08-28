@@ -333,13 +333,49 @@ export const simplifyAlgorithm = (alg: string) => {
 		type: string;
 		steps: number[];
 	}[] = [];
-	moves.forEach((move, i) => {
-		const step = {
+	let steps = moves.map((move, i) => {
+		return {
+			move,
 			face: move.replaceAll("'", "").replaceAll("2", ""),
 			amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
 			type: "normal",
 			steps: [i]
 		};
+	});
+
+	let nextSteps = steps.map((step) => step.move).join(" ");
+	let previousSteps = "";
+	while (previousSteps !== nextSteps) {
+		previousSteps = nextSteps;
+		steps.sort((a, b) => {
+			if (a.move.startsWith("U") && b.move.startsWith("D")) {
+				return -1;
+			}
+			if (a.move.startsWith("D") && b.move.startsWith("U")) {
+				return 1;
+			}
+
+			if (a.move.startsWith("F") && b.move.startsWith("B")) {
+				return -1;
+			}
+			if (a.move.startsWith("B") && b.move.startsWith("F")) {
+				return 1;
+			}
+
+			if (a.move.startsWith("R") && b.move.startsWith("L")) {
+				return -1;
+			}
+			if (a.move.startsWith("L") && b.move.startsWith("R")) {
+				return 1;
+			}
+
+			return 0;
+		});
+
+		nextSteps = steps.map((step) => step.move).join(" ");
+	}
+
+	steps.forEach((step) => {
 		if (tempSimplified.length === 0) {
 			tempSimplified.push(step);
 			return;
