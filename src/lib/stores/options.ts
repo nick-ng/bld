@@ -22,7 +22,9 @@ const options: Options = {
 	leitnerMinReviewStandBy: 10,
 	leitnerMinReviewRetired: 5,
 	leitnerRetiredMaxAgeDays: 60,
-	leitnerQuizCooldownHours: 12
+	leitnerQuizCooldownHours: 12,
+	leitnerBonusStandby: 2,
+	leitnerBonusRetired: 2
 };
 
 export const optionsStore = writable(options);
