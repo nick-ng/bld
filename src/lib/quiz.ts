@@ -1,5 +1,8 @@
 import type { FlashCard } from "$lib/types";
+
+import { get } from "svelte/store";
 import { flashCardStore } from "$lib/stores/flash-cards";
+import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
 import { parseFlashCard } from "$lib/types";
@@ -115,21 +118,32 @@ export const makeLeitnerQuiz = (settings: {
 		.filter((fc) => fc.leitnerDeck === "S")
 		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
 		.map((fc) => fc.letterPair);
+	const oldRetiredCards = shuffleArray(
+		flashCardsWithLeitnerDeck.filter(
+			(fc) => fc.leitnerDeck === "R" && fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10
+		)
+	);
 
 	if (standByLetterPairs.length > 0) {
 		// if deck is less than double the minimum stand-by size, add one stand-by card and one card that has been retired for over 10 days
 		if (quizDeck.length < minStandBy * 2) {
-			const bonusCard = standByLetterPairs.shift();
-			if (typeof bonusCard === "string") {
-				quizDeck.push(bonusCard);
+			const options = get(optionsStore);
+			for (let i = 0; i < (options.leitnerBonusStandby || 0); i++) {
+				const bonusCard = standByLetterPairs.shift();
+				if (typeof bonusCard === "string") {
+					quizDeck.push(bonusCard);
+				} else {
+					break;
+				}
 			}
 
-			const oldRetiredCards = flashCardsWithLeitnerDeck.filter(
-				(fc) => fc.leitnerDeck === "R" && fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10
-			);
-			if (oldRetiredCards.length > 0) {
-				const bonusRetiredCard = shuffleArray(oldRetiredCards)[0];
-				quizDeck.push(bonusRetiredCard.letterPair);
+			for (let i = 0; i < (options.leitnerBonusRetired || 0); i++) {
+				const bonusRetiredCard = oldRetiredCards.shift();
+				if (bonusRetiredCard) {
+					quizDeck.push(bonusRetiredCard.letterPair);
+				} else {
+					break;
+				}
 			}
 		}
 
@@ -142,7 +156,7 @@ export const makeLeitnerQuiz = (settings: {
 
 	if (quizDeck.length < minRetired) {
 		const missingCardCount = minRetired - quizDeck.length;
-		const retiredDeck = flashCardsWithLeitnerDeck
+		const retiredDeck = oldRetiredCards
 			.filter((fc) => fc.leitnerDeck === "R" && fc.leitnerAgeDays > retiredMaxAgeDays)
 			.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
 			.map((fc) => fc.letterPair);

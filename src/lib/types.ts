@@ -120,7 +120,9 @@ export const optionsSchema = z.object({
 	leitnerRetiredMaxAgeDays: z.number(),
 	leitnerSessionNumbers: z.record(z.string(), z.number()).optional(),
 	leitnerQuizCooldownHours: z.number(),
-	leitnerLastQuizUnix: z.record(z.string(), z.number()).optional()
+	leitnerLastQuizUnix: z.record(z.string(), z.number()).optional(),
+	leitnerBonusStandby: z.number().optional(),
+	leitnerBonusRetired: z.number().optional()
 });
 
 export type Options = z.infer<typeof optionsSchema>;
