@@ -122,7 +122,7 @@
 			extraClass="min-h-[50vh] lg:min-h-[460px]"
 		/>
 		{#if showAnswer}
-			<div class="absolute bottom-2 left-0 w-full px-2 lg:relative lg:w-full lg:px-0">
+			<div class="absolute bottom-2 left-0 z-1 w-full px-2 lg:relative lg:w-full lg:px-0">
 				<table class="mb-2 w-full border-collapse">
 					<tbody>
 						<tr>
@@ -130,7 +130,7 @@
 							{#each [0, 1, 2, 3] as confidence (confidence)}
 								<td>
 									<button
-										class={`w-full ${memoConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+										class={`w-full ${memoConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
 										type="button"
 										onclick={() => {
 											handleConfidence(confidence, "memo");
@@ -144,7 +144,7 @@
 							{#each [0, 1, 2, 3] as confidence (confidence)}
 								<td>
 									<button
-										class={`w-full ${commConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+										class={`w-full ${commConfidence == confidence ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
 										type="button"
 										onclick={() => {
 											handleConfidence(confidence, "comm");
