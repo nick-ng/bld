@@ -65,7 +65,10 @@ export const fetchFlashCards = async (
 		for (let i = 0; i < flashCardsArray.length; i++) {
 			const result = parseFlashCard(flashCardsArray[i]);
 			if (result.isValid) {
-				flashCards[result.data.letterPair] = { ...result.data, fetchedAtMs: nowMs };
+				flashCards[result.data.letterPair] = {
+					...result.data,
+					fetchedAtMs: nowMs
+				};
 			}
 		}
 

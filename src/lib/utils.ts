@@ -46,7 +46,11 @@ export const upperCaseFirst = (str: string) => {
 
 export const addCredentialsToHeaders = (
 	originalHeaders?: HeadersInit
-): { headers: Headers; isValid: boolean; previousAccessToken: string | null } => {
+): {
+	headers: Headers;
+	isValid: boolean;
+	previousAccessToken: string | null;
+} => {
 	const headers = originalHeaders ? new Headers(originalHeaders) : new Headers();
 
 	const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY);
@@ -85,7 +89,10 @@ export const authFetch = (url: string, init?: RequestInit) => {
 
 	response.then((r) => {
 		if (r.ok) {
-			optionsStore.update((prevOptions) => ({ ...prevOptions, isUserAuthenticated: true }));
+			optionsStore.update((prevOptions) => ({
+				...prevOptions,
+				isUserAuthenticated: true
+			}));
 			const newAccessToken = r.headers.get("X-Access-Token");
 			if (newAccessToken && previousAccessToken !== newAccessToken) {
 				localStorage.setItem(ACCESS_TOKEN_STORE_KEY, newAccessToken);
