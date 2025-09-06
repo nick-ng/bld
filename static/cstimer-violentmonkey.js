@@ -571,7 +571,9 @@
 			{ id: `style_${ID}` }
 		);
 
-		displayElements.lastNStyle = makeElement("style", null, "", { id: `last_n_style_${ID}` });
+		displayElements.lastNStyle = makeElement("style", null, "", {
+			id: `last_n_style_${ID}`
+		});
 
 		displayElements.bigPreviewStyle = makeElement("style", null, "", {
 			id: `big_preview_style_${ID}`
@@ -623,7 +625,10 @@
 		} else {
 			updateElement(
 				`${prefix}_count`,
-				`${groupStats.solves.length - groupStats.dnfs}/${groupStats.solves.length} (${((1 - groupStats.dnfs / groupStats.solves.length) * 100).toFixed(0)}%)`
+				`${groupStats.solves.length - groupStats.dnfs}/${groupStats.solves.length} (${(
+					(1 - groupStats.dnfs / groupStats.solves.length) *
+					100
+				).toFixed(0)}%)`
 			);
 		}
 
@@ -658,7 +663,10 @@
 
 					const classes = [move[0], isPrime && "is_prime"];
 
-					return `<div class="${classes.join(" ")}">${m.replace("2", '<span class="two">2</span>')}</div>`;
+					return `<div class="${classes.join(" ")}">${m.replace(
+						"2",
+						'<span class="two">2</span>'
+					)}</div>`;
 				}),
 				`<div class="clock_div_${ID}"><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe></div>`
 			].join(""),

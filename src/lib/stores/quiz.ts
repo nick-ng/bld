@@ -1,8 +1,8 @@
 import { get, writable } from "svelte/store";
 import { browser } from "$app/environment";
 import {
-	CURRENT_QUIZ_LETTER_PAIRS_STORE_KEY,
 	CURRENT_QUIZ_AGE_STORE_KEY,
+	CURRENT_QUIZ_LETTER_PAIRS_STORE_KEY,
 	CURRENT_QUIZ_TYPE_STORE_KEY
 } from "$lib/constants";
 import { optionsStore } from "$lib/stores/options";

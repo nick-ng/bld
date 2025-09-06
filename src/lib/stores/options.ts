@@ -4,7 +4,7 @@ import localforage from "localforage";
 
 import { browser } from "$app/environment";
 import { optionsSchema } from "$lib/types";
-import { SPEFFZ_SAME_PIECES, SPEFFZ_UFR, OPTIONS_STORE_PREFIX } from "$lib/constants";
+import { OPTIONS_STORE_PREFIX, SPEFFZ_SAME_PIECES, SPEFFZ_UFR } from "$lib/constants";
 
 // @todo(nick-ng): store options on server
 const options: Options = {
@@ -32,7 +32,9 @@ export const optionsStore = writable(options);
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;
 
 if (browser) {
-	const optionsForage = localforage.createInstance({ name: `${OPTIONS_STORE_PREFIX}_INDEXDB` });
+	const optionsForage = localforage.createInstance({
+		name: `${OPTIONS_STORE_PREFIX}_INDEXDB`
+	});
 	const loadOptions = async () => {
 		const tempOptions = await optionsForage.getItem(optionsStorageKey);
 

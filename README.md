@@ -11,16 +11,20 @@ Front-end:
 
 Back-end:
 
-1. copy `./server/user-data/users.sample.json` to `./server/user-data/users.json`
+1. copy `./server/user-data/users.sample.json` to
+   `./server/user-data/users.json`
 2. Go something
 
 Credentials are:
+
 - Username: `username`
 - Password: `password`
 
 ## Building/Deploying
 
-The GitHub action will build the front-end and put it on the `gh-pages` branch. You should configure GitHub Pages to build that branch. Choose the "/ (root)" folder.
+The GitHub action will build the front-end and put it on the `gh-pages` branch.
+You should configure GitHub Pages to build that branch. Choose the "/ (root)"
+folder.
 
 ```bash
 npm run build
@@ -31,13 +35,15 @@ npm run build
 ### Current Time
 
 html:
+
 ```html
-<iframe class="myframe" src="https://bld.pux.one/clock"/>
-<iframe class="myframe" src="https://bld.pux.one/clock?quartermarkers=true"/>
+<iframe class="myframe" src="https://bld.pux.one/clock" />
+<iframe class="myframe" src="https://bld.pux.one/clock?quartermarkers=true" />
 <iframe class="myframe" src="https://bld.pux.one/clock?unit=minutes" />
 ```
 
 css:
+
 ```css
 .myframe {
   width: 100px;
@@ -61,10 +67,10 @@ css:
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
-- src/lib/stores/options.ts:47: @todo(nick-ng): remove migration code later
+- src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
 - src/lib/types.ts:33: @todo(nick-ng): change to zod
-- src/lib/utils.ts:188: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:346: @todo(nick-ng): is the loop necessary?
+- src/lib/utils.ts:195: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:353: @todo(nick-ng): is the loop necessary?
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable
