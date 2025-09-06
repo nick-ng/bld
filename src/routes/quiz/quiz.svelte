@@ -1,19 +1,14 @@
 <script lang="ts">
 	import { page } from "$app/state";
 	import { quizStore, quizTypeStore } from "$lib/stores/quiz";
-	import {
-		flashCardStore,
-		flashCardStoreStatus,
-		getFlashCard,
-		loadFlashCard
-	} from "$lib/stores/flash-cards";
+	import { flashCardStoreStatus, getFlashCard, loadFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { updateTags } from "$lib/utils";
 	import { putQuiz, isLastLeitnerSession, getLeitnerTag } from "$lib/quiz";
 	import FlashCard from "$lib/components/flash-card.svelte";
 
 	let flashCardType = page.url.searchParams.get("t") || "corner";
-	let flashCard = $derived($flashCardStore[$quizStore[0].toLocaleLowerCase()]);
+	let flashCard = $derived(getFlashCard($quizStore[0], flashCardType));
 	let showAnswer = $state(false);
 	let submittingQuizAnswer = $state(false);
 	let abortController: AbortController | null = null;
@@ -54,7 +49,7 @@
 		}
 	};
 	const submitConfidence = async (letterPair: string) => {
-		const flashCard = getFlashCard(letterPair, $flashCardStore);
+		const flashCard = getFlashCard(letterPair, flashCardType);
 		if (!flashCard) {
 			return;
 		}

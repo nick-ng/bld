@@ -74,5 +74,5 @@ css:
 - src/routes/drill/+page.svelte:7: @todo(nick-ng): save these to localstorage
 - src/routes/drill/+page.svelte:34: @todo(nick-ng): update drill time
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
+- src/routes/quiz/quiz-home.svelte:22: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable

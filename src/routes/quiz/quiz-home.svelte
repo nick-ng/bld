@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 	import {
 		QUIZ_MEMO_CONFIDENCE_STORE_KEY,
@@ -7,19 +8,24 @@
 		QUIZ_OLDEST_STORE_KEY,
 		QUIZ_RANDOM_STORE_KEY
 	} from "$lib/constants";
-	import { fetchFlashCards, flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
+	import {
+		fetchFlashCards,
+		flashCardStoreStatus,
+		getAllFlashCardsOfType
+	} from "$lib/stores/flash-cards";
 	import { quizStore, quizTypeStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, isBuffer, isTwist } from "$lib/utils";
 	import { makeLeitnerQuiz } from "$lib/quiz";
 
+	let flashCardType = page.url.searchParams.get("t") || "corner";
 	// @todo(nick-ng): move these to the options store
 	let customOldest = $state(2);
 	let customMemoConfidence = $state(6);
 	let customCommConfidence = $state(2);
 	let customRandom = $state(2);
 	let nonEmptyFlashCards = $derived(
-		Object.values($flashCardStore).filter((f) => f.memo || f.commutator || f.image)
+		getAllFlashCardsOfType(flashCardType).filter((f) => f.memo || f.commutator || f.image)
 	);
 	let allCounts = $derived(
 		Object.keys($optionsStore.flashCardTypes).reduce(
