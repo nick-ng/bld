@@ -71,6 +71,8 @@ css:
 - src/lib/types.ts:33: @todo(nick-ng): change to zod
 - src/lib/utils.ts:195: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:353: @todo(nick-ng): is the loop necessary?
+- src/routes/drill/+page.svelte:7: @todo(nick-ng): save these to localstorage
+- src/routes/drill/+page.svelte:34: @todo(nick-ng): update drill time
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:122: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:16: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable

@@ -11,6 +11,7 @@
 		letterPair?: string;
 		quizLeft?: number;
 		quizShowAnswer?: boolean;
+		showCorners?: boolean;
 		extraClass?: string;
 		onQuizEnd?: () => void | Promise<void>;
 		showInverseLink?: boolean;
@@ -21,6 +22,7 @@
 		letterPair = "",
 		quizLeft = 0,
 		quizShowAnswer = true,
+		showCorners = true,
 		onQuizEnd,
 		extraClass = "",
 		showInverseLink = false,
@@ -57,7 +59,9 @@
 					href={`/flash-cards?t=${flashCard.type}&f=${inverseLetterPair}`}>{inverseLetterPair}</a
 				>
 			{/if}
-			<Corners letterPair={flashCard.letterPair} />
+			{#if showCorners}
+				<Corners letterPair={flashCard.letterPair} />
+			{/if}
 			{#if quizShowAnswer}
 				<div class="max-w-64 truncate text-center text-2xl">
 					{flashCard.memo}
