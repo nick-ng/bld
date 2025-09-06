@@ -1,6 +1,6 @@
 import type { FlashCard } from "$lib/types";
 
-import { writable } from "svelte/store";
+import { writable, get } from "svelte/store";
 import { browser } from "$app/environment";
 import { authFetch, joinServerPath } from "$lib/utils";
 import { defaultFlashCard, parseFlashCard } from "$lib/types";
@@ -19,6 +19,9 @@ export const flashCardStoreStatus = writable<{
 	fetchEndMs: number;
 }>({ status: "stand-by", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
 
+export const getFlashCardKey = (letterPair: string, flashCardType: string) => {
+	return `${letterPair}-${flashCardType}`.toLowerCase();
+};
 export const fetchFlashCards = async (
 	cache: RequestCache = "default"
 ): Promise<FlashCardStoreType> => {
@@ -65,7 +68,8 @@ export const fetchFlashCards = async (
 		for (let i = 0; i < flashCardsArray.length; i++) {
 			const result = parseFlashCard(flashCardsArray[i]);
 			if (result.isValid) {
-				flashCards[result.data.letterPair] = {
+				const flashCardKey = getFlashCardKey(result.data.letterPair, result.data.type);
+				flashCards[flashCardKey] = {
 					...result.data,
 					fetchedAtMs: nowMs
 				};
@@ -138,8 +142,10 @@ export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSigna
 	}
 };
 
-export const getFlashCard = (letterPair: string, flashCardMap: FlashCardStoreType): FlashCard => {
-	const temp = flashCardMap[letterPair.toLocaleLowerCase()];
+export const getFlashCard = (letterPair: string, flashCardType: string): FlashCard => {
+	const flashCardMap = get(flashCardStore);
+	const flashCardKey = getFlashCardKey(letterPair, flashCardType);
+	const temp = flashCardMap[flashCardKey];
 
 	if (temp) {
 		return temp;
@@ -158,4 +164,10 @@ export const getFlashCard = (letterPair: string, flashCardMap: FlashCardStoreTyp
 		isPublic: false,
 		type: "corner"
 	};
+};
+
+export const getAllFlashCardsOfType = (flashCardType: string): FlashCard[] => {
+	const flashCardMap = get(flashCardStore);
+
+	return Object.values(flashCardMap).filter((fc) => fc.type === flashCardType);
 };

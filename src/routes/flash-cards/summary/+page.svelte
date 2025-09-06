@@ -1,8 +1,14 @@
 <script lang="ts">
-	import type { FlashCardStoreType } from "$lib/stores/flash-cards";
+	import type { FlashCard } from "$lib/types";
 
 	import { onMount } from "svelte";
-	import { flashCardStore, flashCardStoreStatus, fetchFlashCards } from "$lib/stores/flash-cards";
+	import { page } from "$app/state";
+	import {
+		flashCardStoreStatus,
+		fetchFlashCards,
+		getFlashCard,
+		getAllFlashCardsOfType
+	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { parseCommutator, sortAlgs, isBuffer, isTwist } from "$lib/utils";
 	import { leitnerDecks, getLeitnerTag } from "$lib/quiz";
@@ -16,22 +22,23 @@
 	const MONTH_MS = 30 * DAY_MS;
 	const YEAR_MS = 365 * DAY_MS;
 
-	const flashCardType = "corner";
+	let flashCardType = page.url.searchParams.get("t") || "corner";
 	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
 	let leitnerCurrentDeck = $derived(
-		Object.values($flashCardStore).filter((fc) => {
+		getAllFlashCardsOfType(flashCardType).filter((fc) => {
 			const { leitnerDeck } = getLeitnerTag(fc.tags);
 			return leitnerDeck === "C";
 		})
 	);
 	let leitnerRetiredDeck = $derived(
-		Object.values($flashCardStore).filter((fc) => {
+		getAllFlashCardsOfType(flashCardType).filter((fc) => {
 			const { leitnerDeck } = getLeitnerTag(fc.tags);
 			return leitnerDeck === "R";
 		})
 	);
 
-	const summariseFlashCards = (flashCards: FlashCardStoreType) => {
+	const summariseFlashCards = (flashCardType: string) => {
+		const flashCards = getAllFlashCardsOfType(flashCardType);
 		const inserts: { [insert: string]: string[] } = {};
 		const interchanges: { [interchange: string]: string[] } = {};
 		const setups: { [setup: string]: string[] } = {};
@@ -120,7 +127,7 @@
 				}
 
 				total += 1;
-				const flashCard = flashCards[letterPair];
+				const flashCard = getFlashCard(letterPair, flashCardType);
 				if (flashCard) {
 					if (!memoConfidences[flashCard.memoConfidence]) {
 						memoConfidences[flashCard.memoConfidence] = [];
@@ -179,7 +186,7 @@
 		};
 	};
 
-	let summary = $derived(summariseFlashCards($flashCardStore));
+	let summary = $derived(summariseFlashCards(flashCardType));
 
 	onMount(() => {
 		if (Date.now() - $flashCardStoreStatus.fetchEndMs > STALE_THRESHOLD_MS) {
@@ -197,7 +204,7 @@
 				<tr>
 					<td colspan="2" class="p-1 text-left">
 						Next Session: {$optionsStore.flashCardTypes[flashCardType].leitnerSession || 0}, Cards
-						in Decks: {Object.values($flashCardStore).filter((fc) => {
+						in Decks: {getAllFlashCardsOfType(flashCardType).filter((fc) => {
 							const { leitnerDeck } = getLeitnerTag(fc.tags);
 							return leitnerDeck !== "S" && leitnerDeck !== "R";
 						}).length}, Retired Cards: {leitnerRetiredDeck.length}
@@ -225,7 +232,7 @@
 					</td>
 				</tr>
 				{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
-					{@const leitnerDeck = Object.values($flashCardStore)
+					{@const leitnerDeck = getAllFlashCardsOfType(flashCardType)
 						.filter((fc) => {
 							const { leitnerDeck } = getLeitnerTag(fc.tags);
 							return leitnerDeck === deckId;
