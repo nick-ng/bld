@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { parseFlashCard, defaultFlashCard } from "$lib/types";
+	import { parseFlashCard } from "$lib/types";
 	import {
 		joinServerPath,
 		upperCaseFirst,
