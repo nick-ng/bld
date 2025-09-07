@@ -84,7 +84,8 @@ export const makeDrillSet = async (key: string): Promise<DrillItem[]> => {
 			const matchingFlashCards = Object.values(flashCards).filter((f) =>
 				f.letterPair.toLowerCase().startsWith(drillSet.value.toLowerCase())
 			);
-			return shuffleArray(
+
+			const newDrill = shuffleArray(
 				matchingFlashCards.map((fc) => ({
 					letterPair: fc.letterPair,
 					quizzed: false,
@@ -92,6 +93,10 @@ export const makeDrillSet = async (key: string): Promise<DrillItem[]> => {
 					skipped: true
 				}))
 			);
+
+			localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(newDrill));
+
+			return newDrill;
 		}
 		default: {
 			return [];

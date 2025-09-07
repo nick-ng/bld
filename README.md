@@ -68,11 +68,11 @@ css:
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
-- src/lib/types.ts:33: @todo(nick-ng): change to zod
+- src/lib/types.ts:34: @todo(nick-ng): change to zod
 - src/lib/utils.ts:195: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:353: @todo(nick-ng): is the loop necessary?
-- src/routes/drill/+page.svelte:7: @todo(nick-ng): save these to localstorage
-- src/routes/drill/+page.svelte:34: @todo(nick-ng): update drill time
+- src/routes/drill/+page.svelte:10: @todo(nick-ng): make drill aware of flash card type
+- src/routes/drill/+page.svelte:12: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/quiz/quiz-home.svelte:23: @todo(nick-ng): move these to the options store
+- src/routes/quiz/quiz-home.svelte:24: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable

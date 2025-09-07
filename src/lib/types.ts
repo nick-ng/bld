@@ -9,6 +9,7 @@ export type FlashCard = {
 	confidence: number; // packed commutator and memo confidence. comm = high
 	commConfidence: number;
 	memoConfidence: number;
+	drillTimeDs: number; // deciseconds (10 deciseconds = 1 second)
 	tags: string;
 	lastQuizUnix: number;
 	isPublic: boolean;
@@ -67,6 +68,11 @@ export const parseFlashCard = (
 		commConfidence = 0;
 	}
 
+	let drillTimeDs = (confidence >> 4) & 255;
+	if (drillTimeDs === 0) {
+		drillTimeDs = 255;
+	}
+
 	return {
 		isValid: true,
 		data: {
@@ -78,6 +84,7 @@ export const parseFlashCard = (
 			confidence,
 			commConfidence,
 			memoConfidence,
+			drillTimeDs,
 			tags: getFromUnknown("tags", ""),
 			isPublic: getFromUnknown("isPublic", false),
 			lastQuizUnix: unknown.lastQuizUnix
@@ -95,6 +102,7 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 		confidence: 0,
 		commConfidence: -1,
 		memoConfidence: -1,
+		drillTimeDs: 255,
 		tags: "",
 		isPublic: false,
 		lastQuizUnix: 0

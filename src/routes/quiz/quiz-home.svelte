@@ -18,6 +18,7 @@
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, isBuffer, isTwist } from "$lib/utils";
 	import { makeLeitnerQuiz } from "$lib/quiz";
+	import DrillMaker from "$lib/components/drill-maker.svelte";
 
 	let flashCardType = page.url.searchParams.get("t") || "corner";
 	// @todo(nick-ng): move these to the options store
@@ -339,6 +340,13 @@
 						>
 					</div>
 				{/each}
+				<hr />
+				<h2 class="text-center">Drill</h2>
+				<DrillMaker
+					onMakeDrill={() => {
+						goto("/drill");
+					}}
+				/>
 			</div>
 		</div>
 	{/if}
