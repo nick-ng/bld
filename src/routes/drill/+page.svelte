@@ -1,16 +1,19 @@
 <script lang="ts">
 	import type { DrillItem } from "$lib/drill";
-	import { onMount } from "svelte";
-	import { getDrillItems, drillSets, makeDrillSet } from "$lib/drill";
-	import FlashCard from "$lib/components/flash-card.svelte";
 
-	// @todo(nick-ng): save these to localstorage
+	import { onMount } from "svelte";
+	import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
+	import { getDrillItems } from "$lib/drill";
+	import FlashCard from "$lib/components/flash-card.svelte";
+	import DrillMaker from "$lib/components/drill-maker.svelte";
+
+	// @todo(nick-ng): make drill aware of flash card type
 	let drillLetters = $state<DrillItem[]>([]);
+	// @todo(nick-ng): save these to local storage
 	let showCorners = $state(false);
 	let showMemo = $state(false);
 	let showImage = $state(false);
 	let spaceIsAccept = $state(false);
-	let drillSetKey = $state("none");
 	let drillIndex = $derived.by(() => {
 		if (drillLetters.length === 0) {
 			return 0;
@@ -18,82 +21,103 @@
 
 		return drillLetters.findIndex((dl) => !dl.quizzed);
 	});
-	let mainArea = $state<HTMLElement | null>(null);
 	let quizState = $state("stand-by"); // stand-by, ready, timing, review
 	let pressedAtMs = $state(Date.now());
 	let timerStartMs = $state(0);
 	let timerStopMs = $state(0);
-	const holdTimeMs = 500;
+	const holdTimeMs = 300;
 
-	const skipDrillResult = () => {
-		drillLetters[drillIndex].quizzed = true;
-		drillLetters[drillIndex].skipped = true;
+	const skipDrillResult = (index: number) => {
+		if (index < 0 || !drillLetters[index]) {
+			return;
+		}
+
+		drillLetters[index].quizzed = true;
+		drillLetters[index].skipped = true;
+		drillLetters[index].timeMs = timerStopMs - timerStartMs;
+		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 	};
 
-	const acceptDrillResult = () => {
-		// @todo(nick-ng): update drill time
-		drillLetters[drillIndex].quizzed = true;
-		drillLetters[drillIndex].skipped = false;
-		drillLetters[drillIndex].timeMs = timerStopMs - timerStartMs;
+	const acceptDrillResult = (index: number) => {
+		if (index < 0) {
+			return;
+		}
+
+		drillLetters[index].quizzed = true;
+		drillLetters[index].skipped = false;
+		drillLetters[index].timeMs = timerStopMs - timerStartMs;
+		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 	};
 
 	onMount(() => {
 		drillLetters = getDrillItems();
+
+		const handleKeyDown = (event: KeyboardEvent) => {
+			if (event.key !== " ") {
+				return;
+			}
+
+			if (event.shiftKey) {
+				if (quizState === "review") {
+					if (spaceIsAccept) {
+						acceptDrillResult(drillIndex);
+					} else {
+						skipDrillResult(drillIndex);
+					}
+
+					quizState = "stand-by";
+					pressedAtMs = Date.now();
+				}
+
+				return;
+			}
+
+			if (quizState === "stand-by") {
+				quizState = "ready";
+				pressedAtMs = Date.now();
+			} else if (quizState === "timing") {
+				quizState = "review";
+				timerStopMs = Date.now();
+			}
+		};
+
+		const handleKeyUp = (event: KeyboardEvent) => {
+			if (quizState === "ready") {
+				if (Date.now() - pressedAtMs >= holdTimeMs) {
+					quizState = "timing";
+					timerStartMs = Date.now();
+				} else {
+					quizState = "stand-by";
+				}
+			} else if (quizState === "review" && event.shiftKey) {
+				switch (event.key.toLowerCase()) {
+					case "a": {
+						console.log("accept");
+						acceptDrillResult(drillIndex);
+						quizState = "stand-by";
+						break;
+					}
+					case "s": {
+						console.log("skip");
+						skipDrillResult(drillIndex);
+						quizState = "stand-by";
+						break;
+					}
+				}
+			}
+		};
+
+		document.addEventListener("keydown", handleKeyDown);
+		document.addEventListener("keyup", handleKeyUp);
+
+		return () => {
+			document.removeEventListener("keydown", handleKeyDown);
+			document.removeEventListener("keyup", handleKeyUp);
+		};
 	});
 </script>
 
-<div
-	class="flex justify-between"
-	role="button"
-	tabindex="0"
-	bind:this={mainArea}
-	onkeydown={(event) => {
-		if (event.key !== " ") {
-			return;
-		}
-
-		if (quizState === "review") {
-			quizState = "ready";
-			pressedAtMs = Date.now();
-			if (spaceIsAccept) {
-				acceptDrillResult();
-			} else {
-				skipDrillResult();
-			}
-		} else if (quizState === "stand-by") {
-			quizState = "ready";
-			pressedAtMs = Date.now();
-		} else if (quizState === "timing") {
-			quizState = "review";
-			timerStopMs = Date.now();
-		}
-	}}
-	onkeyup={(event) => {
-		if (quizState === "ready") {
-			if (Date.now() - pressedAtMs >= holdTimeMs) {
-				quizState = "timing";
-				timerStartMs = Date.now();
-			} else {
-				quizState = "stand-by";
-			}
-		} else if (quizState === "review" && event.shiftKey) {
-			switch (event.key.toLowerCase()) {
-				case "a": {
-					console.log("accept");
-					acceptDrillResult();
-					quizState = "stand-by";
-					break;
-				}
-				case "s": {
-					console.log("skip");
-					skipDrillResult();
-					quizState = "stand-by";
-					break;
-				}
-			}
-		}
-	}}
->
+<div class="flex justify-between">
 	<div>
 		<table>
 			<tbody>
@@ -157,7 +181,28 @@
 			<div>No drill in progress</div>
 		{:else if drillIndex < 0}
 			<!-- @todo(nick-ng): review drill then flash cards -->
-			<div>Review drill results</div>
+			<div>
+				<table>
+					<thead>
+						<tr>
+							<th class="border border-gray-500 px-1 text-left">Letter Pair</th>
+							<th class="border border-gray-500 px-1 text-right">Time (s)</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each drillLetters as drillLetter (drillLetter.letterPair)}
+							<tr>
+								<td class="border border-gray-500 px-1 text-left uppercase"
+									>{drillLetter.letterPair}</td
+								>
+								<td class="border border-gray-500 px-1 text-right"
+									>{(drillLetter.timeMs / 1000).toFixed(1)}</td
+								>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
 		{:else if quizState === "timing" || quizState === "review"}
 			<FlashCard
 				letterPair={drillLetters[drillIndex].letterPair}
@@ -166,7 +211,15 @@
 				quizShowAnswer={quizState === "review"}
 			/>
 		{:else}
-			<div>Hold space for 0.5 seconds then release</div>
+			<div>
+				<p>Hold space for 0.5 seconds then release</p>
+				<p>{drillLetters.filter((d) => !d.quizzed).length} left</p>
+				<div class={`${quizState === "ready" ? "border" : ""} relative h-4`}>
+					<div
+						class={`${quizState === "ready" ? "animate" : ""} absolute top-0 left-0 h-full bg-red-500`}
+					></div>
+				</div>
+			</div>
 		{/if}
 		{#if quizState === "review"}
 			{@const timerElapsedMs = timerStopMs - timerStartMs}
@@ -176,45 +229,51 @@
 					<button
 						type="button"
 						onclick={() => {
-							acceptDrillResult();
+							acceptDrillResult(drillIndex);
 							quizState = "stand-by";
-							if (mainArea) {
-								mainArea.focus();
-							}
 						}}>Accept (Shift + A)</button
 					>
 					<button
 						type="button"
 						onclick={() => {
-							skipDrillResult();
+							skipDrillResult(drillIndex);
 							quizState = "stand-by";
-							if (mainArea) {
-								mainArea.focus();
-							}
 						}}>Skip (Shift + S)</button
 					>
 				</div>
 			</div>
 		{/if}
 	</div>
-	<div class="flex flex-col gap-1">
-		<label
-			>Drill Set: <select class="" bind:value={drillSetKey}>
-				<option value="none">Choose a set</option>
-				{#each drillSets as drillSet (drillSet.key)}
-					<option value={drillSet.key}>{drillSet.label}</option>
-				{/each}
-			</select>
-		</label>
-		<button
-			type="button"
-			onclick={async () => {
-				drillLetters = await makeDrillSet(drillSetKey);
-				console.log("mainArea", mainArea);
-				if (mainArea) {
-					mainArea.focus();
-				}
-			}}>Start Drill</button
-		>
-	</div>
+	<DrillMaker
+		onMakeDrill={(newDrillLetters) => {
+			drillLetters = newDrillLetters;
+		}}
+	/>
 </div>
+
+<style>
+	@keyframes bar-grow {
+		0% {
+			background-color: #ff0000;
+			width: 0;
+		}
+
+		99.99% {
+			background-color: #ff0000;
+			width: 99.99%;
+		}
+
+		100% {
+			background-color: #00ff00;
+			width: 100%;
+		}
+	}
+
+	.animate {
+		animation-duration: 305ms;
+		animation-name: bar-grow;
+		animation-timing-function: linear;
+		animation-iteration-count: 1;
+		animation-fill-mode: forwards;
+	}
+</style>
