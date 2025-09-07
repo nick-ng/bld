@@ -1,6 +1,6 @@
 import type { FlashCard } from "$lib/types";
 
-import { writable, get } from "svelte/store";
+import { writable } from "svelte/store";
 import { browser } from "$app/environment";
 import { authFetch, joinServerPath } from "$lib/utils";
 import { defaultFlashCard, parseFlashCard } from "$lib/types";
@@ -118,12 +118,14 @@ flashCardStore.subscribe((newFlashCards) => {
 	currentFlashCards = newFlashCards;
 });
 
-export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSignal) => {
-	if (!letterPair) {
-		return defaultFlashCard(letterPair);
-	}
+export const loadFlashCard = async (
+	letterPair: string,
+	flashCardType: string,
+	abortSignal?: AbortSignal
+) => {
+	const flashCardKey = getFlashCardKey(letterPair, flashCardType);
 
-	const flashCard = currentFlashCards[letterPair];
+	const flashCard = currentFlashCards[flashCardKey];
 	if (flashCard && Date.now() - flashCard.fetchedAtMs < MAX_AGE_MS) {
 		return flashCard;
 	}
@@ -140,11 +142,7 @@ export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSigna
 		const resJson = await res.json();
 		const parseResult = parseFlashCard(resJson);
 		if (parseResult.isValid) {
-			const { data } = parseResult;
-			flashCardStore.update((previous) => {
-				previous[data.letterPair] = { ...data, fetchedAtMs: Date.now() };
-				return previous;
-			});
+			updateFlashCard(parseResult.data);
 
 			return parseResult.data;
 		}

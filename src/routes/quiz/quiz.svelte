@@ -27,7 +27,11 @@
 
 		abortController = new AbortController();
 		(async () => {
-			const tempFlashCard = await loadFlashCard(newLetterPair, abortController.signal);
+			const tempFlashCard = await loadFlashCard(
+				newLetterPair,
+				flashCardType,
+				abortController.signal
+			);
 			abortController = null;
 
 			if (tempFlashCard) {
