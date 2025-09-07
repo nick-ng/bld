@@ -153,8 +153,11 @@ export const loadFlashCard = async (letterPair: string, abortSignal?: AbortSigna
 	}
 };
 
-export const getFlashCard = (letterPair: string, flashCardType: string): FlashCard => {
-	const flashCardMap = get(flashCardStore);
+export const getFlashCard = (
+	letterPair: string,
+	flashCardType: string,
+	flashCardMap: FlashCardStoreType
+): FlashCard => {
 	const flashCardKey = getFlashCardKey(letterPair, flashCardType);
 	const temp = flashCardMap[flashCardKey];
 
@@ -165,8 +168,9 @@ export const getFlashCard = (letterPair: string, flashCardType: string): FlashCa
 	return defaultFlashCard(letterPair, flashCardType);
 };
 
-export const getAllFlashCardsOfType = (flashCardType: string): FlashCard[] => {
-	const flashCardMap = get(flashCardStore);
-
+export const getAllFlashCardsOfType = (
+	flashCardType: string,
+	flashCardMap: FlashCardStoreType
+): FlashCard[] => {
 	return Object.values(flashCardMap).filter((fc) => fc.type === flashCardType);
 };

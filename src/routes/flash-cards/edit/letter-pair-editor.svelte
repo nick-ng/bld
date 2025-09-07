@@ -13,7 +13,8 @@
 		flashCardStoreStatus,
 		loadFlashCard,
 		fetchFlashCards,
-		updateFlashCard
+		updateFlashCard,
+		flashCardStore
 	} from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
@@ -54,7 +55,7 @@
 	const onFlashCardStoreUpdate = async () => {
 		if (!formDirty) {
 			await fetchFlashCards();
-			const flashCard = getFlashCard(letterPair, flashCardType);
+			const flashCard = getFlashCard(letterPair, flashCardType, $flashCardStore);
 			currentMemo = flashCard.memo;
 			currentCommutator = flashCard.commutator;
 			currentTags = flashCard.tags;
@@ -185,12 +186,12 @@
 			<input
 				type="hidden"
 				name="lastQuizUnix"
-				value={getFlashCard(letterPair, flashCardType).lastQuizUnix}
+				value={getFlashCard(letterPair, flashCardType, $flashCardStore).lastQuizUnix}
 			/>
 			<input
 				type="hidden"
 				name="confidence"
-				value={getFlashCard(letterPair, flashCardType).confidence}
+				value={getFlashCard(letterPair, flashCardType, $flashCardStore).confidence}
 			/>
 			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
 				<tbody>
