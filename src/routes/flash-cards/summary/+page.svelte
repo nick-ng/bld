@@ -1,13 +1,12 @@
 <script lang="ts">
-	import type { FlashCard } from "$lib/types";
-
 	import { onMount } from "svelte";
 	import { page } from "$app/state";
 	import {
 		flashCardStoreStatus,
 		fetchFlashCards,
 		getFlashCard,
-		getAllFlashCardsOfType
+		getAllFlashCardsOfType,
+		flashCardStore
 	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { parseCommutator, sortAlgs, isBuffer, isTwist } from "$lib/utils";
@@ -25,20 +24,20 @@
 	let flashCardType = page.url.searchParams.get("t") || "corner";
 	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
 	let leitnerCurrentDeck = $derived(
-		getAllFlashCardsOfType(flashCardType).filter((fc) => {
+		getAllFlashCardsOfType(flashCardType, $flashCardStore).filter((fc) => {
 			const { leitnerDeck } = getLeitnerTag(fc.tags);
 			return leitnerDeck === "C";
 		})
 	);
 	let leitnerRetiredDeck = $derived(
-		getAllFlashCardsOfType(flashCardType).filter((fc) => {
+		getAllFlashCardsOfType(flashCardType, $flashCardStore).filter((fc) => {
 			const { leitnerDeck } = getLeitnerTag(fc.tags);
 			return leitnerDeck === "R";
 		})
 	);
 
 	const summariseFlashCards = (flashCardType: string) => {
-		const flashCards = getAllFlashCardsOfType(flashCardType);
+		const flashCards = getAllFlashCardsOfType(flashCardType, $flashCardStore);
 		const inserts: { [insert: string]: string[] } = {};
 		const interchanges: { [interchange: string]: string[] } = {};
 		const setups: { [setup: string]: string[] } = {};
@@ -127,7 +126,7 @@
 				}
 
 				total += 1;
-				const flashCard = getFlashCard(letterPair, flashCardType);
+				const flashCard = getFlashCard(letterPair, flashCardType, $flashCardStore);
 				if (flashCard) {
 					if (!memoConfidences[flashCard.memoConfidence]) {
 						memoConfidences[flashCard.memoConfidence] = [];
@@ -204,7 +203,7 @@
 				<tr>
 					<td colspan="2" class="p-1 text-left">
 						Next Session: {$optionsStore.flashCardTypes[flashCardType].leitnerSession || 0}, Cards
-						in Decks: {getAllFlashCardsOfType(flashCardType).filter((fc) => {
+						in Decks: {getAllFlashCardsOfType(flashCardType, $flashCardStore).filter((fc) => {
 							const { leitnerDeck } = getLeitnerTag(fc.tags);
 							return leitnerDeck !== "S" && leitnerDeck !== "R";
 						}).length}, Retired Cards: {leitnerRetiredDeck.length}
@@ -232,7 +231,7 @@
 					</td>
 				</tr>
 				{#each ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as deckId (deckId)}
-					{@const leitnerDeck = getAllFlashCardsOfType(flashCardType)
+					{@const leitnerDeck = getAllFlashCardsOfType(flashCardType, $flashCardStore)
 						.filter((fc) => {
 							const { leitnerDeck } = getLeitnerTag(fc.tags);
 							return leitnerDeck === deckId;

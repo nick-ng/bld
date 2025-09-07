@@ -11,7 +11,8 @@
 	import {
 		fetchFlashCards,
 		flashCardStoreStatus,
-		getAllFlashCardsOfType
+		getAllFlashCardsOfType,
+		flashCardStore
 	} from "$lib/stores/flash-cards";
 	import { quizStore, quizTypeStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
@@ -25,7 +26,9 @@
 	let customCommConfidence = $state(2);
 	let customRandom = $state(2);
 	let nonEmptyFlashCards = $derived(
-		getAllFlashCardsOfType(flashCardType).filter((f) => f.memo || f.commutator || f.image)
+		getAllFlashCardsOfType(flashCardType, $flashCardStore).filter(
+			(f) => f.memo || f.commutator || f.image
+		)
 	);
 	let allCounts = $derived(
 		Object.keys($optionsStore.flashCardTypes).reduce(

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { upperCaseFirst, parseCommutator, simplifyAlgorithm } from "$lib/utils";
-	import { flashCardStoreStatus, getFlashCard } from "$lib/stores/flash-cards";
+	import { flashCardStoreStatus, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
@@ -27,7 +27,7 @@
 		showInverseLink = false,
 		flashCardType: cardType = "corner"
 	}: Props = $props();
-	let flashCard = $derived(getFlashCard(letterPair, cardType));
+	let flashCard = $derived(getFlashCard(letterPair, cardType, $flashCardStore));
 </script>
 
 <div class="mx-auto max-w-prose">

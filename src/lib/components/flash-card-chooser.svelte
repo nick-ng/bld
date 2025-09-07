@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { getFlashCard } from "$lib/stores/flash-cards";
+	import { flashCardStore, getFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { isTwist, isBuffer } from "$lib/utils";
 
@@ -24,7 +24,7 @@
 	};
 
 	let { letterPair, flashCardType }: Props = $props();
-	let flashCard = $derived(getFlashCard(letterPair, flashCardType));
+	let flashCard = $derived(getFlashCard(letterPair, flashCardType, $flashCardStore));
 	let indicators = $derived([
 		!flashCard?.memo ? "#ff0000ff" : "#ffffff00",
 		!flashCard?.commutator ? "#00aa00ff" : "#ffffff00",
