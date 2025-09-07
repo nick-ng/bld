@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { defaultFlashCard } from "$lib/types";
 	import { upperCaseFirst, parseCommutator, simplifyAlgorithm } from "$lib/utils";
-	import { flashCardStore, flashCardStoreStatus } from "$lib/stores/flash-cards";
+	import { flashCardStoreStatus, getFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
@@ -28,7 +27,7 @@
 		showInverseLink = false,
 		flashCardType: cardType = "corner"
 	}: Props = $props();
-	let flashCard = $derived($flashCardStore[letterPair] || defaultFlashCard(letterPair, cardType));
+	let flashCard = $derived(getFlashCard(letterPair, cardType));
 </script>
 
 <div class="mx-auto max-w-prose">

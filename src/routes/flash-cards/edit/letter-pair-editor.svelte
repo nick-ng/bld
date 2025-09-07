@@ -8,15 +8,22 @@
 		getOperatingSystem,
 		cornerSpeffzToLocation
 	} from "$lib/utils";
-	import { flashCardStore, flashCardStoreStatus, loadFlashCard } from "$lib/stores/flash-cards";
+	import {
+		getFlashCard,
+		flashCardStoreStatus,
+		loadFlashCard,
+		fetchFlashCards,
+		updateFlashCard
+	} from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
 
 	interface Props {
-		letterPair?: string;
+		letterPair: string;
+		flashCardType: string;
 	}
 
-	let { letterPair = "" }: Props = $props();
+	let { letterPair, flashCardType }: Props = $props();
 
 	let files: FileList | null = $state(null);
 	let fileInputEl: HTMLInputElement | null = $state(null);
@@ -44,13 +51,10 @@
 		}
 	};
 
-	const flashCardOrDefault = (store: typeof $flashCardStore, letterPair: string) => {
-		return store[letterPair] || defaultFlashCard(letterPair);
-	};
-
-	const onFlashCardStoreUpdate = (store: typeof $flashCardStore) => {
+	const onFlashCardStoreUpdate = async () => {
 		if (!formDirty) {
-			const flashCard = flashCardOrDefault(store, letterPair);
+			await fetchFlashCards();
+			const flashCard = getFlashCard(letterPair, flashCardType);
 			currentMemo = flashCard.memo;
 			currentCommutator = flashCard.commutator;
 			currentTags = flashCard.tags;
@@ -66,7 +70,7 @@
 	};
 
 	$effect(() => {
-		onFlashCardStoreUpdate($flashCardStore);
+		onFlashCardStoreUpdate();
 	});
 
 	const getImageUrl = (f: FileList | null, imageUrl: string) => {
@@ -82,7 +86,7 @@
 	};
 
 	const resetForm = () => {
-		onFlashCardStoreUpdate($flashCardStore);
+		onFlashCardStoreUpdate();
 		if (fileInputEl) {
 			fileInputEl.value = "";
 			files = null;
@@ -170,7 +174,7 @@
 				const parseResponse = parseFlashCard(responseJson);
 				if (parseResponse.isValid) {
 					const { data } = parseResponse;
-					$flashCardStore[parseResponse.data.letterPair] = { ...data, fetchedAtMs: Date.now() };
+					updateFlashCard(data);
 
 					history.back();
 				} else {
@@ -181,12 +185,12 @@
 			<input
 				type="hidden"
 				name="lastQuizUnix"
-				value={flashCardOrDefault($flashCardStore, letterPair).lastQuizUnix}
+				value={getFlashCard(letterPair, flashCardType).lastQuizUnix}
 			/>
 			<input
 				type="hidden"
 				name="confidence"
-				value={flashCardOrDefault($flashCardStore, letterPair).confidence}
+				value={getFlashCard(letterPair, flashCardType).confidence}
 			/>
 			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
 				<tbody>

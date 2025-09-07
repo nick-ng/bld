@@ -4,10 +4,11 @@
 	import LetterPairEditor from "./letter-pair-editor.svelte";
 
 	let letterPair = $derived(page.url.searchParams.get("lp"));
+	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 </script>
 
 {#if letterPair?.length == 2}
-	<LetterPairEditor {letterPair} />
+	<LetterPairEditor {letterPair} {flashCardType} />
 {:else}
 	<AllFlashCards />
 {/if}
