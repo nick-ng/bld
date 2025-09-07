@@ -3,7 +3,7 @@
 	import { goto, replaceState } from "$app/navigation";
 	import { page } from "$app/state";
 	import { USERNAME_STORE_KEY } from "$lib/constants";
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { getFlashCard, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { arrayToCsvRow, isBuffer, isTwist, parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
@@ -97,7 +97,9 @@
 					);
 				})
 	);
-	let filteredCommutators = $derived(filteredLetterPairs.map((lp) => $flashCardStore[lp]));
+	let filteredCommutators = $derived(
+		filteredLetterPairs.map((lp) => getFlashCard(lp, flashCardType))
+	);
 	const now = new Date();
 	const formattedDate = [
 		now.getFullYear(),
@@ -106,7 +108,7 @@
 	].join("");
 	const owner = localStorage.getItem(USERNAME_STORE_KEY) || "user";
 	let flashCardCsv = $derived(
-		Object.values($flashCardStore)
+		getAllFlashCardsOfType(flashCardType)
 			.sort((a, b) => a.letterPair.localeCompare(b.letterPair))
 			.map((fc) => {
 				return arrayToCsvRow([

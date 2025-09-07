@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { getFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { isTwist, isBuffer } from "$lib/utils";
 
 	// @todo(nick-ng): parent should decide if the square is blank or not
 	interface Props {
-		letterPair?: string;
-		flashCardType?: string;
+		letterPair: string;
+		flashCardType: string;
 	}
 
 	const fullColour = 60 * 60 * 24 * $optionsStore.leitnerRetiredMaxAgeDays;
@@ -23,17 +23,13 @@
 		return rgb;
 	};
 
-	let { letterPair = "", flashCardType = "corner" }: Props = $props();
-	let flashCard = $derived($flashCardStore[letterPair]);
-
-	const getIndicators = (letterPair: string, store: typeof $flashCardStore) => {
-		const letterPairObject = store[letterPair];
-		return [
-			!letterPairObject?.memo && "#ff0000ff",
-			!letterPairObject?.commutator && "#00aa00ff",
-			!letterPairObject?.image && "#0000ffff"
-		];
-	};
+	let { letterPair, flashCardType }: Props = $props();
+	let flashCard = $derived(getFlashCard(letterPair, flashCardType));
+	let indicators = $derived([
+		!flashCard?.memo ? "#ff0000ff" : "#ffffff00",
+		!flashCard?.commutator ? "#00aa00ff" : "#ffffff00",
+		!flashCard?.image ? "#0000ffff" : "#ffffff00"
+	]);
 
 	let isHidden = $derived(
 		isTwist(letterPair, $optionsStore.flashCardTypes[flashCardType].samePieces) ||
@@ -56,11 +52,8 @@
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
 		<div class="flex h-2 flex-row justify-center gap-0.5 px-0.5 pb-0.5">
-			{#each getIndicators(letterPair, $flashCardStore) as colorHex, i (`${i}-${colorHex}`)}
-				<div
-					class="block flex-1 rounded-full"
-					style={`background-color: ${colorHex || "#ffffff00"};}`}
-				></div>
+			{#each indicators as colorHex, i (`${i}-${colorHex}`)}
+				<div class="block flex-1 rounded-full" style={`background-color: ${colorHex};}`}></div>
 			{/each}
 		</div>
 	</a>

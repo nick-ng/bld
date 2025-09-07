@@ -22,6 +22,17 @@ export const flashCardStoreStatus = writable<{
 export const getFlashCardKey = (letterPair: string, flashCardType: string) => {
 	return `${letterPair}-${flashCardType}`.toLowerCase();
 };
+
+export const updateFlashCard = (flashCard: FlashCard) => {
+	const flashCardKey = getFlashCardKey(flashCard.letterPair, flashCard.type);
+
+	flashCardStore.update((prev) => {
+		prev[flashCardKey] = { ...flashCard, fetchedAtMs: Date.now() };
+
+		return prev;
+	});
+};
+
 export const fetchFlashCards = async (
 	cache: RequestCache = "default"
 ): Promise<FlashCardStoreType> => {
@@ -151,19 +162,7 @@ export const getFlashCard = (letterPair: string, flashCardType: string): FlashCa
 		return temp;
 	}
 
-	return {
-		commConfidence: 0,
-		commutator: "",
-		confidence: 0,
-		image: "",
-		lastQuizUnix: 0,
-		letterPair,
-		memo: "",
-		memoConfidence: 0,
-		tags: "",
-		isPublic: false,
-		type: "corner"
-	};
+	return defaultFlashCard(letterPair, flashCardType);
 };
 
 export const getAllFlashCardsOfType = (flashCardType: string): FlashCard[] => {
