@@ -98,7 +98,7 @@
 		const myAc = new AbortController();
 		let fetchComplete = false;
 		(async () => {
-			await loadFlashCard(letterPair, myAc.signal);
+			await loadFlashCard(letterPair, flashCardType, myAc.signal);
 			fetchComplete = true;
 		})();
 

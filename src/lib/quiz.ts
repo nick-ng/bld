@@ -1,7 +1,7 @@
 import type { FlashCard } from "$lib/types";
 
 import { get } from "svelte/store";
-import { flashCardStore } from "$lib/stores/flash-cards";
+import { updateFlashCard } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
@@ -22,15 +22,9 @@ export const putQuiz = async (letterPair: string, formData: FormData) => {
 	}
 
 	const responseJson = await response.json();
-	const parseResponse = parseFlashCard(responseJson);
-	if (parseResponse.isValid) {
-		const { data } = parseResponse;
-		flashCardStore.update((prevFlashCards) => {
-			return {
-				...prevFlashCards,
-				[data.letterPair]: { ...data, fetchedAtMs: Date.now() }
-			};
-		});
+	const parsedResponse = parseFlashCard(responseJson);
+	if (parsedResponse.isValid) {
+		updateFlashCard(parsedResponse.data);
 	} else {
 		console.error("wrong", responseJson);
 	}
