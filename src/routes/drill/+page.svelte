@@ -3,9 +3,13 @@
 
 	import { onMount } from "svelte";
 	import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
+	import { fetchFlashCards, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { getDrillItems } from "$lib/drill";
+	import { putQuiz } from "$lib/quiz";
 	import FlashCard from "$lib/components/flash-card.svelte";
 	import DrillMaker from "$lib/components/drill-maker.svelte";
+
+	const holdTimeMs = 300;
 
 	// @todo(nick-ng): make drill aware of flash card type
 	let drillLetters = $state<DrillItem[]>([]);
@@ -13,22 +17,16 @@
 	let showCorners = $state(false);
 	let showMemo = $state(false);
 	let showImage = $state(false);
-	let spaceIsAccept = $state(false);
-	let drillIndex = $derived.by(() => {
-		if (drillLetters.length === 0) {
-			return 0;
-		}
-
-		return drillLetters.findIndex((dl) => !dl.quizzed);
-	});
+	let drillIndex = $state(0);
 	let quizState = $state("stand-by"); // stand-by, ready, timing, review
 	let pressedAtMs = $state(Date.now());
 	let timerStartMs = $state(0);
 	let timerStopMs = $state(0);
-	const holdTimeMs = 300;
+	let drillLeft = $derived(drillLetters.filter((dl) => !dl.quizzed).length);
 
 	onMount(() => {
 		drillLetters = getDrillItems();
+		drillIndex = 0;
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			if (event.key !== " ") {
@@ -37,10 +35,10 @@
 
 			if (quizState === "stand-by" || quizState === "review") {
 				quizState = "ready";
-				drillLetters[drillIndex].quizzed = true;
 				pressedAtMs = Date.now();
 			} else if (quizState === "timing") {
 				timerStopMs = Date.now();
+				drillLetters[drillIndex].quizzed = true;
 				drillLetters[drillIndex].timeMs = timerStopMs - timerStartMs;
 				localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 			}
@@ -53,6 +51,7 @@
 
 			if (quizState === "ready") {
 				if (Date.now() - pressedAtMs >= holdTimeMs) {
+					drillIndex = drillLetters.findIndex((dl) => !dl.quizzed);
 					quizState = "timing";
 					timerStartMs = Date.now();
 				} else {
@@ -116,31 +115,36 @@
 						/>
 					</td>
 				</tr>
-				<tr>
-					<td>
-						<label for="drill-space-action">Space Accepts</label>
-					</td>
-					<td>
-						<input
-							class="ml-2"
-							type="checkbox"
-							id="drill-space-action"
-							bind:checked={spaceIsAccept}
-						/>
-					</td>
-				</tr>
 			</tbody>
 		</table>
 	</div>
-	<div class="basis-prose mx-auto">
+	<div class="basis-prose">
 		{#if drillLetters.length === 0}
 			<div>No drill in progress</div>
-		{:else if drillIndex < 0}
+		{/if}
+		{#if drillLetters.length > 0 && drillLetters.every((dl) => dl.quizzed)}
 			<!-- @todo(nick-ng): review drill then flash cards -->
 			<div>
 				<table>
 					<thead>
 						<tr>
+							<th class="border border-gray-500 px-1 text-center"
+								><input
+									type="checkbox"
+									checked={drillLetters.every((dl) => dl.send)}
+									onclick={() => {
+										if (drillLetters.every((dl) => dl.send)) {
+											drillLetters.forEach((dl) => {
+												dl.send = false;
+											});
+										} else {
+											drillLetters.forEach((dl) => {
+												dl.send = true;
+											});
+										}
+									}}
+								/></th
+							>
 							<th class="border border-gray-500 px-1 text-left">Letter Pair</th>
 							<th class="border border-gray-500 px-1 text-right">Time (s)</th>
 						</tr>
@@ -148,6 +152,9 @@
 					<tbody>
 						{#each drillLetters as drillLetter (drillLetter.letterPair)}
 							<tr>
+								<td class="border border-gray-500 px-1 text-center"
+									><input type="checkbox" bind:checked={drillLetter.send} /></td
+								>
 								<td class="border border-gray-500 px-1 text-left uppercase"
 									>{drillLetter.letterPair}</td
 								>
@@ -158,19 +165,52 @@
 						{/each}
 					</tbody>
 				</table>
+				<button
+					type="button"
+					disabled={!drillLetters.every((dl) => dl.send)}
+					onclick={async () => {
+						await fetchFlashCards();
+
+						for (let i = 0; i < drillLetters.length; i++) {
+							const drillLetter = drillLetters[i];
+							if (!drillLetter.send) {
+								continue;
+							}
+
+							const flashCard = getFlashCard(
+								drillLetter.letterPair,
+								drillLetter.flashCardType,
+								$flashCardStore
+							);
+
+							const drillTimeDs = Math.min(255, Math.round(drillLetter.timeMs / 100));
+							const packedConfidence =
+								(drillTimeDs << 4) + (flashCard.commConfidence << 2) + flashCard.memoConfidence;
+
+							const formData = new FormData();
+							formData.set("type", drillLetter.flashCardType);
+							formData.set("confidence", packedConfidence.toString(10));
+							await putQuiz(drillLetter.letterPair, formData);
+						}
+
+						drillLetters = [];
+						localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+					}}>Send</button
+				>
 			</div>
-		{:else if quizState === "timing" || quizState === "review"}
+		{/if}
+		{#if drillLetters[drillIndex]?.letterPair && (quizState === "timing" || quizState === "review")}
 			<FlashCard
 				letterPair={drillLetters[drillIndex].letterPair}
-				flashCardType="corner"
+				flashCardType={drillLetters[drillIndex].flashCardType}
 				showCorners={quizState === "review"}
 				quizShowAnswer={quizState === "review"}
 			/>
 		{/if}
-		{#if quizState !== "timing"}
+		{#if quizState !== "timing" && drillLeft > 0}
 			<div class="text-center">
-				<p>Hold space for 0.5 seconds then release</p>
-				<p>{drillLetters.filter((d) => !d.quizzed).length} left</p>
+				<p>Hold space for {holdTimeMs / 1000} seconds then release</p>
+				<p>{drillLetters.filter((dl) => !dl.quizzed).length} left</p>
 				<div class={`${quizState === "ready" ? "border" : ""} relative h-4`}>
 					<div
 						class={`${quizState === "ready" ? "animate" : ""} absolute top-0 left-0 h-full bg-red-500`}
