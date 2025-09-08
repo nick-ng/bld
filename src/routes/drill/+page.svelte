@@ -27,28 +27,6 @@
 	let timerStopMs = $state(0);
 	const holdTimeMs = 300;
 
-	const skipDrillResult = (index: number) => {
-		if (index < 0 || !drillLetters[index]) {
-			return;
-		}
-
-		drillLetters[index].quizzed = true;
-		drillLetters[index].skipped = true;
-		drillLetters[index].timeMs = timerStopMs - timerStartMs;
-		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
-	};
-
-	const acceptDrillResult = (index: number) => {
-		if (index < 0) {
-			return;
-		}
-
-		drillLetters[index].quizzed = true;
-		drillLetters[index].skipped = false;
-		drillLetters[index].timeMs = timerStopMs - timerStartMs;
-		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
-	};
-
 	onMount(() => {
 		drillLetters = getDrillItems();
 
@@ -57,31 +35,22 @@
 				return;
 			}
 
-			if (event.shiftKey) {
-				if (quizState === "review") {
-					if (spaceIsAccept) {
-						acceptDrillResult(drillIndex);
-					} else {
-						skipDrillResult(drillIndex);
-					}
-
-					quizState = "stand-by";
-					pressedAtMs = Date.now();
-				}
-
-				return;
-			}
-
-			if (quizState === "stand-by") {
+			if (quizState === "stand-by" || quizState === "review") {
 				quizState = "ready";
+				drillLetters[drillIndex].quizzed = true;
 				pressedAtMs = Date.now();
 			} else if (quizState === "timing") {
-				quizState = "review";
 				timerStopMs = Date.now();
+				drillLetters[drillIndex].timeMs = timerStopMs - timerStartMs;
+				localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 			}
 		};
 
 		const handleKeyUp = (event: KeyboardEvent) => {
+			if (event.key !== " ") {
+				return;
+			}
+
 			if (quizState === "ready") {
 				if (Date.now() - pressedAtMs >= holdTimeMs) {
 					quizState = "timing";
@@ -89,21 +58,8 @@
 				} else {
 					quizState = "stand-by";
 				}
-			} else if (quizState === "review" && event.shiftKey) {
-				switch (event.key.toLowerCase()) {
-					case "a": {
-						console.log("accept");
-						acceptDrillResult(drillIndex);
-						quizState = "stand-by";
-						break;
-					}
-					case "s": {
-						console.log("skip");
-						skipDrillResult(drillIndex);
-						quizState = "stand-by";
-						break;
-					}
-				}
+			} else if (quizState === "timing") {
+				quizState = "review";
 			}
 		};
 
@@ -210,36 +166,15 @@
 				showCorners={quizState === "review"}
 				quizShowAnswer={quizState === "review"}
 			/>
-		{:else}
-			<div>
+		{/if}
+		{#if quizState !== "timing"}
+			<div class="text-center">
 				<p>Hold space for 0.5 seconds then release</p>
 				<p>{drillLetters.filter((d) => !d.quizzed).length} left</p>
 				<div class={`${quizState === "ready" ? "border" : ""} relative h-4`}>
 					<div
 						class={`${quizState === "ready" ? "animate" : ""} absolute top-0 left-0 h-full bg-red-500`}
 					></div>
-				</div>
-			</div>
-		{/if}
-		{#if quizState === "review"}
-			{@const timerElapsedMs = timerStopMs - timerStartMs}
-			<div class="flex flex-col items-center">
-				<div class="text-xl">Took {(timerElapsedMs / 1000).toFixed(1)}s</div>
-				<div class="flex flex-row gap-2">
-					<button
-						type="button"
-						onclick={() => {
-							acceptDrillResult(drillIndex);
-							quizState = "stand-by";
-						}}>Accept (Shift + A)</button
-					>
-					<button
-						type="button"
-						onclick={() => {
-							skipDrillResult(drillIndex);
-							quizState = "stand-by";
-						}}>Skip (Shift + S)</button
-					>
 				</div>
 			</div>
 		{/if}
