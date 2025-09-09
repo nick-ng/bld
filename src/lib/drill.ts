@@ -2,6 +2,7 @@ import z from "zod";
 import { get } from "svelte/store";
 import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
 import { fetchFlashCards, flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
+import { getLeitnerTag } from "$lib/quiz";
 import { shuffleArray } from "$lib/utils";
 
 const drillItemSchema = z.object({
@@ -64,17 +65,33 @@ const letters = [
 
 export const drillSets = [
 	{
-		type: "random",
-		key: "random-5",
-		value: 5,
-		label: "Random 5"
+		type: "slow",
+		filter: "retired",
+		key: "slow-retired-10",
+		value: 10,
+		label: "Slowest, Retired - 10"
+	},
+	{
+		type: "slow",
+		filter: "all",
+		key: "slow-10",
+		value: 10,
+		label: "Slowest - 10"
 	},
 	...letters.map((l) => ({
 		type: "starts-with",
+		filter: l,
 		key: `$starts-with-${l}`,
-		value: l,
+		value: 9999,
 		label: `Starts with ${l}`
-	}))
+	})),
+	{
+		type: "random",
+		filter: "all",
+		key: "random-5",
+		value: 5,
+		label: "Random 5"
+	}
 ];
 
 export const makeDrillSet = async (key: string, flashCardType: string): Promise<DrillItem[]> => {
@@ -86,48 +103,54 @@ export const makeDrillSet = async (key: string, flashCardType: string): Promise<
 	await fetchFlashCards();
 	const flashCards = shuffleArray(getAllFlashCardsOfType(flashCardType, get(flashCardStore)));
 
-	const value = drillSet.value;
+	let drillItems: DrillItem[] = [];
 	switch (drillSet.type) {
-		case "random": {
-			if (typeof value !== "number") {
-				console.error("random value must be number");
+		case "slow": {
+			const tempFlashCards =
+				drillSet.filter === "retired"
+					? flashCards.filter((fc) => getLeitnerTag(fc.tags).leitnerDeck === "R")
+					: flashCards;
+			tempFlashCards.sort((a, b) => b.drillTimeDs - a.drillTimeDs);
 
-				return [];
-			}
-
-			return flashCards.slice(0, value).map((fc) => ({
+			drillItems = tempFlashCards.slice(0, drillSet.value).map((fc) => ({
 				letterPair: fc.letterPair,
 				flashCardType,
 				quizzed: false,
 				send: true,
-				timeMs: 25_500 // 255 tenths of a second in milliseconds
+				timeMs: fc.drillTimeDs
 			}));
+			break;
+		}
+		case "random": {
+			drillItems = flashCards.slice(0, drillSet.value).map((fc) => ({
+				letterPair: fc.letterPair,
+				flashCardType,
+				quizzed: false,
+				send: true,
+				timeMs: fc.drillTimeDs
+			}));
+			break;
 		}
 		case "starts-with": {
-			if (typeof value !== "string") {
-				console.error("starts-with value must be string");
-
-				return [];
-			}
-
 			const matchingFlashCards = flashCards.filter((f) =>
-				f.letterPair.toLowerCase().startsWith(value.toLowerCase())
+				f.letterPair.toLowerCase().startsWith(drillSet.filter)
 			);
 
-			const newDrill = matchingFlashCards.map((fc) => ({
+			drillItems = matchingFlashCards.map((fc) => ({
 				letterPair: fc.letterPair,
 				flashCardType,
 				quizzed: false,
 				send: true,
-				timeMs: 25_500 // 255 tenths of a second in milliseconds
+				timeMs: fc.drillTimeDs
 			}));
 
-			localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(newDrill));
-
-			return newDrill;
+			break;
 		}
 		default: {
-			return [];
+			// noop
 		}
 	}
+
+	localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillItems));
+	return drillItems;
 };
