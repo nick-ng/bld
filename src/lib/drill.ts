@@ -1,9 +1,12 @@
+import type { FlashCard } from "$lib/types";
+
 import z from "zod";
 import { get } from "svelte/store";
 import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
 import { fetchFlashCards, flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
+import { optionsStore } from "$lib/stores/options";
 import { getLeitnerTag } from "$lib/quiz";
-import { shuffleArray } from "$lib/utils";
+import { shuffleArray, isTwist, isBuffer } from "$lib/utils";
 
 const drillItemSchema = z.object({
 	letterPair: z.string(),
@@ -65,91 +68,95 @@ const letters = [
 
 export const drillSets = [
 	{
-		type: "slow",
-		filter: "retired",
-		key: "slow-retired-10",
-		value: 10,
-		label: "Slowest, Retired - 10"
+		key: "slow",
+		filters: ["all", "retired"],
+		defaultSize: 10,
+		label: "Slow"
 	},
 	{
-		type: "slow",
-		filter: "all",
-		key: "slow-10",
-		value: 10,
-		label: "Slowest - 10"
+		key: "starts-with",
+		filters: letters,
+		defaultSize: 0,
+		label: "Starts with"
 	},
-	...letters.map((l) => ({
-		type: "starts-with",
-		filter: l,
-		key: `$starts-with-${l}`,
-		value: 9999,
-		label: `Starts with ${l}`
-	})),
 	{
-		type: "random",
-		filter: "all",
-		key: "random-5",
-		value: 5,
-		label: "Random 5"
+		key: "random",
+		filters: ["all", "retired"],
+		defaultSize: 10,
+		label: "Random"
 	}
 ];
 
-export const makeDrillSet = async (key: string, flashCardType: string): Promise<DrillItem[]> => {
+export const makeDrillSet = async (
+	key: string,
+	flashCardType: string,
+	filter: string,
+	size: number
+): Promise<DrillItem[]> => {
 	const drillSet = drillSets.find((s) => s.key === key);
 	if (!drillSet) {
 		return [];
 	}
 
 	await fetchFlashCards();
-	const flashCards = shuffleArray(getAllFlashCardsOfType(flashCardType, get(flashCardStore)));
+	let flashCards = getAllFlashCardsOfType(flashCardType, get(flashCardStore));
+	const options = get(optionsStore);
+	const typeInfo = options.flashCardTypes[flashCardType];
+	if (typeInfo) {
+		flashCards = flashCards.filter((fc) => {
+			if (isTwist(fc.letterPair, typeInfo.samePieces)) {
+				return false;
+			}
 
-	let drillItems: DrillItem[] = [];
-	switch (drillSet.type) {
-		case "slow": {
-			const tempFlashCards =
-				drillSet.filter === "retired"
-					? flashCards.filter((fc) => getLeitnerTag(fc.tags).leitnerDeck === "R")
-					: flashCards;
-			tempFlashCards.sort((a, b) => b.drillTimeDs - a.drillTimeDs);
+			if (isBuffer(fc.letterPair, typeInfo.bufferPiece)) {
+				return false;
+			}
 
-			drillItems = tempFlashCards.slice(0, drillSet.value).map((fc) => ({
-				letterPair: fc.letterPair,
-				flashCardType,
-				quizzed: false,
-				send: true,
-				timeMs: fc.drillTimeDs
-			}));
+			return true;
+		});
+	}
+
+	let possibleFlashCards: FlashCard[] = [];
+	let selectedFlashCards: FlashCard[] = [];
+	// filter possible flash cards
+	switch (filter) {
+		case "all": {
+			possibleFlashCards = flashCards;
 			break;
 		}
-		case "random": {
-			drillItems = flashCards.slice(0, drillSet.value).map((fc) => ({
-				letterPair: fc.letterPair,
-				flashCardType,
-				quizzed: false,
-				send: true,
-				timeMs: fc.drillTimeDs
-			}));
-			break;
-		}
-		case "starts-with": {
-			const matchingFlashCards = flashCards.filter((f) =>
-				f.letterPair.toLowerCase().startsWith(drillSet.filter)
-			);
-
-			drillItems = matchingFlashCards.map((fc) => ({
-				letterPair: fc.letterPair,
-				flashCardType,
-				quizzed: false,
-				send: true,
-				timeMs: fc.drillTimeDs
-			}));
-
+		case "retired": {
+			possibleFlashCards = flashCards.filter((fc) => getLeitnerTag(fc.tags).leitnerDeck === "R");
 			break;
 		}
 		default: {
-			// noop
+			if (drillSet.key === "starts-with") {
+				possibleFlashCards = flashCards.filter((flashCard) =>
+					flashCard.letterPair.startsWith(filter)
+				);
+			} else {
+				possibleFlashCards = flashCards;
+			}
 		}
 	}
+	if (drillSet.key === "random") {
+		possibleFlashCards = shuffleArray(possibleFlashCards);
+	}
+
+	if (drillSet.defaultSize <= 0) {
+		selectedFlashCards = possibleFlashCards;
+	} else {
+		selectedFlashCards = possibleFlashCards.slice(0, size);
+	}
+
+	const drillItems = shuffleArray(
+		selectedFlashCards.map((fc) => ({
+			letterPair: fc.letterPair,
+			flashCardType,
+			quizzed: false,
+			send: true,
+			timeMs: fc.drillTimeDs
+		}))
+	);
 
 	localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillItems));
 	return drillItems;
