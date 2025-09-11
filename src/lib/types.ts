@@ -70,7 +70,7 @@ export const parseFlashCard = (
 
 	let drillTimeDs = (confidence >> 4) & 255;
 	if (drillTimeDs === 0) {
-		drillTimeDs = 255;
+		drillTimeDs = 200;
 	}
 
 	return {
