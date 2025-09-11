@@ -123,8 +123,7 @@
 			<div>No drill in progress</div>
 		{/if}
 		{#if drillLetters.length > 0 && drillLetters.every((dl) => dl.quizzed)}
-			<!-- @todo(nick-ng): review drill then flash cards -->
-			<div>
+			<div class="text-center">
 				<table>
 					<thead>
 						<tr>
@@ -167,7 +166,7 @@
 				</table>
 				<button
 					type="button"
-					disabled={!drillLetters.every((dl) => dl.send)}
+					disabled={drillLetters.every((dl) => !dl.send)}
 					onclick={async () => {
 						await fetchFlashCards();
 
@@ -206,6 +205,7 @@
 				showCorners={quizState === "review"}
 				quizShowAnswer={quizState === "review"}
 			/>
+			<div class="text-center">Took {drillLetters[drillIndex].timeMs / 1000}s</div>
 		{/if}
 		{#if quizState !== "timing" && drillLeft > 0}
 			<div class="text-center">
