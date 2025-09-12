@@ -2,6 +2,7 @@
 	import { page } from "$app/state";
 	import type { DrillItem } from "$lib/drill";
 	import { drillSets, makeDrillSet } from "$lib/drill";
+	import { capFirst } from "$lib/utils";
 
 	interface Props {
 		onMakeDrill?: (newDrillLetters: DrillItem[]) => Promise<void> | void;
@@ -39,7 +40,7 @@
 		{#if drillSet && drillSet.filters.length > 1}
 			<select class="block capitalize" bind:value={drillFilter}>
 				{#each drillSet.filters as drillFilterItem (drillFilterItem)}
-					<option class="capitalize" value={drillFilterItem}>{drillFilterItem}</option>
+					<option value={drillFilterItem}>{capFirst(drillFilterItem)}</option>
 				{/each}
 			</select>
 		{/if}

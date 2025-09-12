@@ -15,6 +15,10 @@ export const getRandomSequence = (seed: number, count: number) => {
 	return randomNumbers;
 };
 
+export const capFirst = (str: string) => {
+	return `${str[0].toUpperCase()}${str.slice(1)}`;
+};
+
 export const joinUrl = (...args: string[]) => {
 	return args
 		.map((fragment, i) => {
