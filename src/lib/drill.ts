@@ -69,8 +69,8 @@ const letters = [
 export const drillSets = [
 	{
 		key: "slow",
-		filters: ["all", "retired"],
-		defaultSize: 10,
+		filters: ["retired", "all"],
+		defaultSize: 5,
 		label: "Slow"
 	},
 	{
@@ -81,8 +81,8 @@ export const drillSets = [
 	},
 	{
 		key: "random",
-		filters: ["all", "retired"],
-		defaultSize: 10,
+		filters: ["retired", "all"],
+		defaultSize: 5,
 		label: "Random"
 	}
 ];
