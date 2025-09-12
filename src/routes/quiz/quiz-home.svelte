@@ -76,8 +76,8 @@
 						>
 					</div>
 				{/each}
-				<hr />
-				<h2 class="text-center">Drill</h2>
+				<hr class="hidden lg:block" />
+				<h2 class="hidden text-center lg:block">Drill</h2>
 				<DrillMaker
 					onMakeDrill={() => {
 						goto("/drill");

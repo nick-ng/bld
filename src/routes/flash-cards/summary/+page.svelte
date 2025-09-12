@@ -43,6 +43,7 @@
 		const setups: { [setup: string]: string[] } = {};
 		const memoConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
 		const commConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
+		const drillSpeedGroups: { seconds: number; letters: string[] }[] = [];
 		const missingComms: string[] = [];
 		const missingMemos: string[] = [];
 		const quizAges: {
@@ -172,6 +173,19 @@
 			}
 		}
 
+		const drillTimes = flashCards.map((fc) => fc.drillTimeDs / 10);
+		const fastestDrillS = Math.floor(Math.min(...drillTimes));
+		const slowestDrillS = Math.floor(Math.max(...drillTimes));
+		for (let s = fastestDrillS; s <= slowestDrillS; s++) {
+			const times = {
+				seconds: s,
+				letters: flashCards
+					.filter((fc) => Math.floor(fc.drillTimeDs / 10) === s)
+					.map((fc) => fc.letterPair)
+			};
+			drillSpeedGroups.push(times);
+		}
+
 		return {
 			inserts,
 			interchanges,
@@ -179,6 +193,7 @@
 			memoConfidences,
 			missingMemos,
 			commConfidences,
+			drillSpeedGroups,
 			missingComms,
 			quizAges,
 			total
@@ -315,6 +330,30 @@
 			confidences={summary.memoConfidences}
 			total={summary.total}
 		/>
+		<table class="summary-tables block w-full lg:max-w-lg">
+			<thead>
+				<tr>
+					<th></th>
+					<th class="w-full text-left">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each summary.drillSpeedGroups as drillSpeedGroup (drillSpeedGroup.seconds)}
+					<tr>
+						<td class="p-1 text-right font-mono whitespace-nowrap">{drillSpeedGroup.seconds}</td>
+						<td>
+							<div
+								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+							>
+								{#each drillSpeedGroup.letters as letters (letters)}
+									<a href={`/flash-cards?f=${letters}`} class="p-0.5 uppercase">{letters}</a>
+								{/each}
+							</div>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
 		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>
