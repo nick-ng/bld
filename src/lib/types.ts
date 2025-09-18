@@ -68,9 +68,9 @@ export const parseFlashCard = (
 		commConfidence = 0;
 	}
 
-	let drillTimeDs = (confidence >> 4) & 255;
+	let drillTimeDs = ((confidence >> 4) & 255) * 2;
 	if (drillTimeDs === 0) {
-		drillTimeDs = 200;
+		drillTimeDs = 300;
 	}
 
 	return {

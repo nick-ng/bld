@@ -182,7 +182,8 @@
 								$flashCardStore
 							);
 
-							const drillTimeDs = Math.min(255, Math.round(drillLetter.timeMs / 100));
+							// divide by 200 because actual seconds is double the time in the database
+							const drillTimeDs = Math.min(255, Math.round(drillLetter.timeMs / 200));
 							const packedConfidence =
 								(drillTimeDs << 4) + (flashCard.commConfidence << 2) + flashCard.memoConfidence;
 
