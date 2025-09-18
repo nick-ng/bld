@@ -110,13 +110,12 @@ export const makeLeitnerQuiz = (settings: {
 
 	const standByLetterPairs = flashCardsWithLeitnerDeck
 		.filter((fc) => fc.leitnerDeck === "S")
+		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+	const oldRetiredCards = flashCardsWithLeitnerDeck
 		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
-		.map((fc) => fc.letterPair);
-	const oldRetiredCards = shuffleArray(
-		flashCardsWithLeitnerDeck.filter(
+		.filter(
 			(fc) => fc.leitnerDeck === "R" && fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10
-		)
-	);
+		);
 
 	if (standByLetterPairs.length > 0) {
 		// if deck is less than double the minimum stand-by size, add one stand-by card and one card that has been retired for over 10 days
@@ -124,8 +123,8 @@ export const makeLeitnerQuiz = (settings: {
 			const options = get(optionsStore);
 			for (let i = 0; i < (options.leitnerBonusStandby || 0); i++) {
 				const bonusCard = standByLetterPairs.shift();
-				if (typeof bonusCard === "string") {
-					quizDeck.push(bonusCard);
+				if (bonusCard) {
+					quizDeck.push(bonusCard.letterPair);
 				} else {
 					break;
 				}
@@ -144,7 +143,7 @@ export const makeLeitnerQuiz = (settings: {
 		// cards from stand-by deck until the minimum stand-by is reached
 		if (quizDeck.length < minStandBy) {
 			const missingCardCount = minStandBy - quizDeck.length;
-			quizDeck.push(...standByLetterPairs.slice(0, missingCardCount));
+			quizDeck.push(...standByLetterPairs.slice(0, missingCardCount).map((fc) => fc.letterPair));
 		}
 	}
 
