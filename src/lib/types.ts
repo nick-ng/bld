@@ -102,7 +102,7 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 		confidence: 0,
 		commConfidence: -1,
 		memoConfidence: -1,
-		drillTimeDs: 255,
+		drillTimeDs: 300,
 		tags: "",
 		isPublic: false,
 		lastQuizUnix: 0
