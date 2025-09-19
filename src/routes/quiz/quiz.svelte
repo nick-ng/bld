@@ -68,7 +68,8 @@
 		const formData = new FormData();
 		formData.set("type", flashCard.type);
 
-		const packedConfidence = (flashCard.drillTimeDs << 4) + (commConfidence << 2) + memoConfidence;
+		const packedConfidence =
+			((flashCard.drillTimeDs * 2) << 4) + (commConfidence << 2) + memoConfidence;
 		formData.set("confidence", packedConfidence.toString(10));
 
 		if ($quizTypeStore === "leitner") {
