@@ -76,7 +76,7 @@ export const drillSets = [
 	{
 		key: "starts-with",
 		filters: letters,
-		defaultSize: 0,
+		defaultSize: -1,
 		label: "Starts with"
 	},
 	{
@@ -131,7 +131,7 @@ export const makeDrillSet = async (
 		default: {
 			if (drillSet.key === "starts-with") {
 				possibleFlashCards = flashCards.filter((flashCard) =>
-					flashCard.letterPair.startsWith(filter)
+					flashCard.letterPair.toLowerCase().startsWith(filter.toLowerCase())
 				);
 			} else {
 				possibleFlashCards = flashCards;
