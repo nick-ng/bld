@@ -182,10 +182,14 @@
 								$flashCardStore
 							);
 
-							// divide by 200 because actual seconds is double the time in the database
-							const drillTimeDs = Math.min(255, Math.round(drillLetter.timeMs / 200));
+							let drillTimeDs = drillLetter.timeMs / 100;
+							if (drillTimeDs < flashCard.drillTimeDs) {
+								drillTimeDs = 0.5 * drillTimeDs + 0.5 * flashCard.drillTimeDs;
+							}
+
+							const drillConfidence = Math.min(255, Math.round(drillTimeDs / 2));
 							const packedConfidence =
-								(drillTimeDs << 4) + (flashCard.commConfidence << 2) + flashCard.memoConfidence;
+								(drillConfidence << 4) + (flashCard.commConfidence << 2) + flashCard.memoConfidence;
 
 							const formData = new FormData();
 							formData.set("type", drillLetter.flashCardType);
