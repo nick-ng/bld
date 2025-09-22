@@ -15,6 +15,33 @@ export const CURRENT_QUIZ_AGE_STORE_KEY = "PUX_BLD_CURRENT_QUIZ_AGE";
 export const CURRENT_QUIZ_TYPE_STORE_KEY = "PUX_BLD_CURRENT_QUIZ_TYPE";
 export const OPTIONS_STORE_PREFIX = "PUX_OPTIONS";
 
+export const SPEFFZ_LETTERS = [
+	"A",
+	"B",
+	"C",
+	"D",
+	"E",
+	"F",
+	"G",
+	"H",
+	"I",
+	"J",
+	"K",
+	"L",
+	"M",
+	"N",
+	"O",
+	"P",
+	"Q",
+	"R",
+	"S",
+	"T",
+	"U",
+	"V",
+	"W",
+	"X"
+];
+
 export const SPEFFZ_UBL = ["a", "e", "r"];
 export const SPEFFZ_UFR = ["c", "j", "m"];
 export const SPEFFZ_SAME_PIECES = [

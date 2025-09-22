@@ -2,7 +2,7 @@ import type { FlashCard } from "$lib/types";
 
 import z from "zod";
 import { get } from "svelte/store";
-import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
+import { DRILL_ITEMS_STORE_KEY, SPEFFZ_LETTERS } from "$lib/constants";
 import { fetchFlashCards, flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { getLeitnerTag } from "$lib/quiz";
@@ -39,33 +39,6 @@ export const getDrillItems = (): DrillItem[] => {
 	return [];
 };
 
-const letters = [
-	"A",
-	"B",
-	"C",
-	"D",
-	"E",
-	"F",
-	"G",
-	"H",
-	"I",
-	"J",
-	"K",
-	"L",
-	"M",
-	"N",
-	"O",
-	"P",
-	"Q",
-	"R",
-	"S",
-	"T",
-	"U",
-	"V",
-	"W",
-	"X"
-];
-
 export const drillSets = [
 	{
 		key: "slow",
@@ -75,7 +48,7 @@ export const drillSets = [
 	},
 	{
 		key: "starts-with",
-		filters: letters,
+		filters: SPEFFZ_LETTERS,
 		defaultSize: -1,
 		label: "Starts with"
 	},
