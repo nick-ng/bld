@@ -81,7 +81,7 @@
 
 			if (commConfidence >= 2 && memoConfidence >= 2) {
 				const leitnerDeckInfo = getLeitnerTag(flashCard.tags);
-				// if last deck, change to L:R:YYYY-MM
+				// if last deck, change to L:R:YYYY-MM-DD
 				// if expired from retired deck, put back in retired deck
 				if (leitnerDeckInfo.leitnerDeck === "S" || leitnerDeckInfo.leitnerDeck === "C") {
 					formData.set("tags", updateTags(flashCard.tags, "L:", `L:${sessionNumber}`));
@@ -95,7 +95,7 @@
 						updateTags(
 							flashCard.tags,
 							"L:",
-							`L:R:${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}`
+							`L:R:${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")}`
 						)
 					);
 				}
