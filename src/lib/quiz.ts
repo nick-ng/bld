@@ -6,12 +6,26 @@ import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
 import { parseFlashCard } from "$lib/types";
+import { goto } from "$app/navigation";
 
 export const putQuiz = async (letterPair: string, formData: FormData) => {
 	touchCurrentQuiz();
 	// go to next question on next frame
 	setTimeout(() => {
-		quizStore.update((prevQuiz) => prevQuiz.filter((lp) => lp != letterPair));
+		let redirect = false;
+		quizStore.update((prevQuiz) => {
+			const nextQuiz = prevQuiz.filter((lp) => lp != letterPair);
+
+			if (nextQuiz.length === 0) {
+				redirect = true;
+			}
+
+			return nextQuiz;
+		});
+
+		if (redirect) {
+			goto("/flash-cards/summary");
+		}
 	});
 	const response = await authFetch(joinServerPath("quiz", letterPair), {
 		method: "PUT",
@@ -72,9 +86,15 @@ export const getLeitnerTag = (
 	const leitnerDeck = tagParts[1];
 	let leitnerAgeDays = 0;
 	if (tagParts[1] === "R" && tagParts.length === 3) {
-		const cardAge = new Date(`${tagParts[2]}-01`);
+		const cardDateParts = tagParts[2].split("-");
+		if (cardDateParts.length < 3) {
+			cardDateParts.push("28");
+		}
+		const cardAge = new Date(cardDateParts.join("-"));
 		leitnerAgeDays = (Date.now() - cardAge.valueOf()) / (1000 * 60 * 60 * 24);
+		console.log(cardAge);
 	}
+
 	return { leitnerDeck, leitnerAgeDays };
 };
 
@@ -114,7 +134,9 @@ export const makeLeitnerQuiz = (settings: {
 	const oldRetiredCards = flashCardsWithLeitnerDeck
 		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
 		.filter(
-			(fc) => fc.leitnerDeck === "R" && fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10
+			(fc) =>
+				fc.leitnerDeck === "R" &&
+				(fc.lastQuizUnix < Date.now() / 1000 - 60 * 60 * 24 * 10 || fc.leitnerAgeDays >= 10)
 		);
 
 	if (standByLetterPairs.length > 0) {
