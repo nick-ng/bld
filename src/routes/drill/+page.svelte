@@ -187,9 +187,16 @@
 								drillTimeDs = 0.5 * drillTimeDs + 0.5 * flashCard.drillTimeDs;
 							}
 
+							let newCommConfidence = flashCard.commConfidence;
+							if (drillLetter.timeMs < 15000) {
+								newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
+							} else if (drillLetter.timeMs < 5000) {
+								newCommConfidence = 3;
+							}
+
 							const drillConfidence = Math.min(255, Math.round(drillTimeDs / 2));
 							const packedConfidence =
-								(drillConfidence << 4) + (flashCard.commConfidence << 2) + flashCard.memoConfidence;
+								(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
 
 							const formData = new FormData();
 							formData.set("type", drillLetter.flashCardType);
@@ -221,6 +228,13 @@
 						class={`${quizState === "ready" ? "animate" : ""} absolute top-0 left-0 h-full bg-red-500`}
 					></div>
 				</div>
+			</div>
+		{/if}
+		{#if drillLeft > 0 && drillLetters[drillIndex]?.letterPair && quizState === "review"}
+			<div class="flex flex-row justify-center gap-2">
+				<button class="inline-block">Not OK</button><button class="inline-block"
+					>OK (spacebar)</button
+				>
 			</div>
 		{/if}
 	</div>
