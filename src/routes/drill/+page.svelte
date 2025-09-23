@@ -232,8 +232,19 @@
 		{/if}
 		{#if drillLeft > 0 && drillLetters[drillIndex]?.letterPair && quizState === "review"}
 			<div class="flex flex-row justify-center gap-2">
-				<button class="inline-block">Not OK</button><button class="inline-block"
-					>OK (spacebar)</button
+				<button
+					class="inline-block"
+					type="button"
+					onclick={() => {
+						drillLetters[drillIndex].send = false;
+						quizState = "stand-by";
+					}}>Not OK</button
+				><button
+					class="inline-block"
+					type="button"
+					onclick={() => {
+						quizState = "stand-by";
+					}}>OK (spacebar)</button
 				>
 			</div>
 		{/if}
