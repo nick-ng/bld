@@ -130,9 +130,17 @@ export const makeLeitnerQuiz = (settings: {
 
 	const standByLetterPairs = flashCardsWithLeitnerDeck
 		.filter((fc) => fc.leitnerDeck === "S")
-		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+		.sort((a, b) => {
+			if (a.memoConfidence !== b.memoConfidence) {
+				return a.memoConfidence - b.memoConfidence;
+			}
+
+			return a.lastQuizUnix - b.lastQuizUnix;
+		});
 	const oldRetiredCards = flashCardsWithLeitnerDeck
-		.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
+		.sort((a, b) => {
+			return a.lastQuizUnix - b.lastQuizUnix;
+		})
 		.filter(
 			(fc) =>
 				fc.leitnerDeck === "R" &&
@@ -173,7 +181,6 @@ export const makeLeitnerQuiz = (settings: {
 		const missingCardCount = minRetired - quizDeck.length;
 		const retiredDeck = oldRetiredCards
 			.filter((fc) => fc.leitnerDeck === "R" && fc.leitnerAgeDays > retiredMaxAgeDays)
-			.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix)
 			.map((fc) => fc.letterPair);
 		quizDeck.push(...retiredDeck.slice(0, missingCardCount));
 	}
