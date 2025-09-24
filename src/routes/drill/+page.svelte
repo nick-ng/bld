@@ -2,6 +2,7 @@
 	import type { DrillItem } from "$lib/drill";
 
 	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
 	import { fetchFlashCards, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { getDrillItems } from "$lib/drill";
@@ -170,42 +171,45 @@
 					onclick={async () => {
 						await fetchFlashCards();
 
-						for (let i = 0; i < drillLetters.length; i++) {
-							const drillLetter = drillLetters[i];
-							if (!drillLetter.send) {
-								continue;
-							}
+						await Promise.all(
+							drillLetters.map((drillLetter) => {
+								if (!drillLetter.send) {
+									return;
+								}
 
-							const flashCard = getFlashCard(
-								drillLetter.letterPair,
-								drillLetter.flashCardType,
-								$flashCardStore
-							);
+								const flashCard = getFlashCard(
+									drillLetter.letterPair,
+									drillLetter.flashCardType,
+									$flashCardStore
+								);
 
-							let drillTimeDs = drillLetter.timeMs / 100;
-							if (drillTimeDs < flashCard.drillTimeDs) {
-								drillTimeDs = 0.5 * drillTimeDs + 0.5 * flashCard.drillTimeDs;
-							}
+								let drillTimeDs = drillLetter.timeMs / 100;
+								if (drillTimeDs < flashCard.drillTimeDs) {
+									drillTimeDs = 0.5 * drillTimeDs + 0.5 * flashCard.drillTimeDs;
+								}
 
-							let newCommConfidence = flashCard.commConfidence;
-							if (drillLetter.timeMs < 15000) {
-								newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
-							} else if (drillLetter.timeMs < 5000) {
-								newCommConfidence = 3;
-							}
+								let newCommConfidence = flashCard.commConfidence;
+								if (drillLetter.timeMs < 15000) {
+									newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
+								} else if (drillLetter.timeMs < 5000) {
+									newCommConfidence = 3;
+								}
 
-							const drillConfidence = Math.min(255, Math.round(drillTimeDs / 2));
-							const packedConfidence =
-								(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
+								const drillConfidence = Math.min(255, Math.round(drillTimeDs / 2));
+								const packedConfidence =
+									(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
 
-							const formData = new FormData();
-							formData.set("type", drillLetter.flashCardType);
-							formData.set("confidence", packedConfidence.toString(10));
-							await putQuiz(drillLetter.letterPair, formData);
-						}
+								const formData = new FormData();
+								formData.set("type", drillLetter.flashCardType);
+								formData.set("confidence", packedConfidence.toString(10));
+								return putQuiz(drillLetter.letterPair, formData, true);
+							})
+						);
 
 						drillLetters = [];
 						localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+
+						goto("/flash-cards/summary");
 					}}>Send</button
 				>
 			</div>

@@ -1,14 +1,14 @@
 import type { FlashCard } from "$lib/types";
 
 import { get } from "svelte/store";
+import { goto } from "$app/navigation";
 import { updateFlashCard } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
 import { parseFlashCard } from "$lib/types";
-import { goto } from "$app/navigation";
 
-export const putQuiz = async (letterPair: string, formData: FormData) => {
+export const putQuiz = async (letterPair: string, formData: FormData, skipRedirect = false) => {
 	touchCurrentQuiz();
 	// go to next question on next frame
 	setTimeout(() => {
@@ -16,7 +16,7 @@ export const putQuiz = async (letterPair: string, formData: FormData) => {
 		quizStore.update((prevQuiz) => {
 			const nextQuiz = prevQuiz.filter((lp) => lp != letterPair);
 
-			if (nextQuiz.length === 0) {
+			if (!skipRedirect && nextQuiz.length === 0) {
 				redirect = true;
 			}
 
