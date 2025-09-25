@@ -119,8 +119,12 @@
 	{#if $quizStore.length > 0 && $flashCardStoreStatus.status === "loaded"}
 		<FlashCard
 			letterPair={flashCard.letterPair}
+			{flashCardType}
 			quizLeft={$quizStore.length}
-			quizShowAnswer={showAnswer}
+			showCorners={showAnswer}
+			showMemo={showAnswer}
+			showCommutator={showAnswer}
+			showImage={showAnswer}
 			onQuizEnd={() => {
 				$quizStore = [];
 			}}

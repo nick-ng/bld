@@ -12,7 +12,15 @@
 </script>
 
 {#if typeof letterPair === "string" && letterPair.length === 2}
-	<FlashCard {letterPair} showInverseLink />
+	<FlashCard
+		{letterPair}
+		{flashCardType}
+		showCorners
+		showMemo
+		showCommutator
+		showImage
+		showInverseLink
+	/>
 	<div class="mx-auto mt-1 flex max-w-prose flex-row justify-between gap-8">
 		<button
 			class="flex-grow"

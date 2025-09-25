@@ -16,8 +16,8 @@
 	let drillLetters = $state<DrillItem[]>([]);
 	// @todo(nick-ng): save these to local storage
 	let showCorners = $state(false);
-	let showMemo = $state(false);
-	let showImage = $state(false);
+	let showMemo = $state(true);
+	let showImage = $state(true);
 	let drillIndex = $state(0);
 	let quizState = $state("stand-by"); // stand-by, ready, timing, review
 	let pressedAtMs = $state(Date.now());
@@ -219,7 +219,9 @@
 				letterPair={drillLetters[drillIndex].letterPair}
 				flashCardType={drillLetters[drillIndex].flashCardType}
 				showCorners={quizState === "review"}
-				quizShowAnswer={quizState === "review"}
+				{showMemo}
+				showCommutator={quizState === "review"}
+				{showImage}
 			/>
 			<div class="text-center">Took {drillLetters[drillIndex].timeMs / 1000}s</div>
 		{/if}
