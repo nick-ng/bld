@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from "$app/state";
+	import { flashCardStore } from "$lib/stores/flash-cards";
 	import type { DrillItem } from "$lib/drill";
-	import { drillSets, makeDrillSet } from "$lib/drill";
+	import { makeDrill, getDrillSets } from "$lib/drill";
 	import { capFirst } from "$lib/utils";
 
 	interface Props {
@@ -10,6 +11,7 @@
 
 	let { onMakeDrill }: Props = $props();
 	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
+	let drillSets = $derived(getDrillSets(flashCardType, $flashCardStore));
 
 	let drillSetKey = $state("none");
 	let drillSet = $state<(typeof drillSets)[0]>();
@@ -52,7 +54,7 @@
 		class="py-2 text-xl leading-none"
 		type="button"
 		onclick={async () => {
-			const drillLetters = await makeDrillSet(drillSetKey, flashCardType, drillFilter, drillSize);
+			const drillLetters = await makeDrill(drillSetKey, flashCardType, drillFilter, drillSize);
 
 			if (typeof onMakeDrill === "function") {
 				onMakeDrill(drillLetters);

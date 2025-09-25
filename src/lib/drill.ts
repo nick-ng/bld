@@ -1,4 +1,5 @@
 import type { FlashCard } from "$lib/types";
+import type { FlashCardStoreType } from "$lib/stores/flash-cards";
 
 import z from "zod";
 import { get } from "svelte/store";
@@ -6,7 +7,7 @@ import { DRILL_ITEMS_STORE_KEY, SPEFFZ_LETTERS } from "$lib/constants";
 import { fetchFlashCards, flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { getLeitnerTag } from "$lib/quiz";
-import { shuffleArray, isTwist, isBuffer } from "$lib/utils";
+import { shuffleArray, isTwist, isBuffer, parseCommutator } from "$lib/utils";
 
 const drillItemSchema = z.object({
 	letterPair: z.string(),
@@ -39,40 +40,59 @@ export const getDrillItems = (): DrillItem[] => {
 	return [];
 };
 
-export const drillSets = [
-	{
-		key: "slow",
-		filters: ["retired", "all"],
-		defaultSize: 5,
-		label: "Slow"
-	},
-	{
-		key: "starts-with",
-		filters: SPEFFZ_LETTERS,
-		defaultSize: -1,
-		label: "Starts with"
-	},
-	{
-		key: "random",
-		filters: ["retired", "all"],
-		defaultSize: 5,
-		label: "Random"
+export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCardStoreType) => {
+	const flashCards = getAllFlashCardsOfType(flashCardType, localFlashCardStore);
+	const interchangeFaces = new Set<string>();
+	for (let i = 0; i < flashCards.length; i++) {
+		const commutator = parseCommutator(flashCards[i].commutator);
+		if (commutator.interchange) {
+			interchangeFaces.add(commutator.interchange[0]);
+		}
 	}
-];
 
-export const makeDrillSet = async (
+	return [
+		{
+			key: "slow",
+			filters: ["retired", "all"],
+			defaultSize: 5,
+			label: "Slow"
+		},
+		{
+			key: "starts-with",
+			filters: SPEFFZ_LETTERS,
+			defaultSize: -1,
+			label: "Starts with"
+		},
+		{
+			key: "interchange",
+			filters: [...interchangeFaces].sort((a, b) => a.localeCompare(b)),
+			defaultSize: -1,
+			label: "Interchange"
+		},
+		{
+			key: "random",
+			filters: ["retired", "all"],
+			defaultSize: 5,
+			label: "Random"
+		}
+	];
+};
+
+export const makeDrill = async (
 	key: string,
 	flashCardType: string,
 	filter: string,
 	size: number
 ): Promise<DrillItem[]> => {
+	const localFlashCardStore = get(flashCardStore);
+	const drillSets = getDrillSets(flashCardType, localFlashCardStore);
 	const drillSet = drillSets.find((s) => s.key === key);
 	if (!drillSet) {
 		return [];
 	}
 
 	await fetchFlashCards();
-	let flashCards = getAllFlashCardsOfType(flashCardType, get(flashCardStore));
+	let flashCards = getAllFlashCardsOfType(flashCardType, localFlashCardStore);
 	const options = get(optionsStore);
 	const typeInfo = options.flashCardTypes[flashCardType];
 	if (typeInfo) {
@@ -106,6 +126,11 @@ export const makeDrillSet = async (
 				possibleFlashCards = flashCards.filter((flashCard) =>
 					flashCard.letterPair.toLowerCase().startsWith(filter.toLowerCase())
 				);
+			} else if (drillSet.key === "interchange") {
+				possibleFlashCards = flashCards.filter((flashCard) => {
+					const commutator = parseCommutator(flashCard.commutator);
+					return commutator.interchange.startsWith(filter);
+				});
 			} else {
 				possibleFlashCards = flashCards;
 			}
