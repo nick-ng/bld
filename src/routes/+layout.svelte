@@ -20,7 +20,7 @@
 </svelte:head>
 
 {#if showNav}
-	<div class="mx-2 my-2 flex flex-row items-start gap-2">
+	<div class="m-1 flex flex-row items-start gap-2">
 		<a class="like-button" href={`/flash-cards?t=${currentFlashCardType}`}>Browse</a>
 		<a class="like-button" href="/quiz">Study</a>
 		<a class="like-button" href="/flash-cards/summary">Stats</a>

@@ -92,7 +92,6 @@ export const getLeitnerTag = (
 		}
 		const cardAge = new Date(cardDateParts.join("-"));
 		leitnerAgeDays = (Date.now() - cardAge.valueOf()) / (1000 * 60 * 60 * 24);
-		console.log(cardAge);
 	}
 
 	return { leitnerDeck, leitnerAgeDays };

@@ -199,7 +199,15 @@
 				<div
 					class="flex w-68 flex-col justify-between rounded border border-gray-300 dark:border-gray-500"
 				>
-					<FlashCard {letterPair} {flashCardType} extraClass="mx-2" />
+					<FlashCard
+						{letterPair}
+						{flashCardType}
+						showCorners
+						showMemo
+						showCommutator
+						showImage
+						extraClass="mx-2"
+					/>
 					<a
 						class="block self-stretch border-t border-gray-300 text-center dark:border-gray-500"
 						href={`/flash-cards/edit?t=${flashCardType}&lp=${letterPair}`}>Edit</a

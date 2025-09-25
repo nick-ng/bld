@@ -9,8 +9,10 @@
 	interface Props {
 		letterPair?: string;
 		quizLeft?: number;
-		quizShowAnswer?: boolean;
 		showCorners?: boolean;
+		showMemo: boolean;
+		showCommutator: boolean;
+		showImage: boolean;
 		extraClass?: string;
 		onQuizEnd?: () => void | Promise<void>;
 		showInverseLink?: boolean;
@@ -20,8 +22,10 @@
 	let {
 		letterPair = "",
 		quizLeft = 0,
-		quizShowAnswer = true,
 		showCorners = true,
+		showMemo,
+		showCommutator,
+		showImage,
 		onQuizEnd,
 		extraClass = "",
 		showInverseLink = false,
@@ -37,7 +41,7 @@
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
 			<div class="m-0 flex flex-row justify-center self-stretch">
 				<h2 class="m-0 uppercase">
-					{#if quizShowAnswer && flashCard.isPublic && $optionsStore.isUserAuthenticated}
+					{#if (showMemo || showImage) && showCommutator && flashCard.isPublic && $optionsStore.isUserAuthenticated}
 						👀
 					{/if}
 					{flashCard.letterPair}
@@ -61,10 +65,12 @@
 			{#if showCorners}
 				<Corners letterPair={flashCard.letterPair} />
 			{/if}
-			{#if quizShowAnswer}
+			{#if showMemo}
 				<div class="max-w-64 truncate text-center text-2xl">
 					{flashCard.memo}
 				</div>
+			{/if}
+			{#if showCommutator}
 				<div class="text-xl">
 					{#if flashCard.commutator}
 						{@const commutatorDetails = parseCommutator(flashCard.commutator)}
@@ -88,6 +94,8 @@
 						<span> No Commutator </span>
 					{/if}
 				</div>
+			{/if}
+			{#if showImage}
 				<Image
 					imageUri={flashCard.image}
 					alt={`${flashCard.letterPair.toUpperCase()} visualisation`}
