@@ -183,10 +183,10 @@
 									$flashCardStore
 								);
 
-								let drillTimeDs = drillLetter.timeMs / 100;
-								if (drillTimeDs < flashCard.drillTimeDs) {
-									drillTimeDs = 0.5 * drillTimeDs + 0.5 * flashCard.drillTimeDs;
-								}
+								const drillTimeDs = drillLetter.timeMs / 100;
+								const adjustedDrillTimeDs =
+									Math.min(drillTimeDs, flashCard.drillTimeDs) * 0.6 +
+									Math.max(drillTimeDs, flashCard.drillTimeDs) * 0.4;
 
 								let newCommConfidence = flashCard.commConfidence;
 								if (drillLetter.timeMs < 15000) {
@@ -195,7 +195,7 @@
 									newCommConfidence = 3;
 								}
 
-								const drillConfidence = Math.min(255, Math.round(drillTimeDs / 2));
+								const drillConfidence = Math.min(255, Math.round(adjustedDrillTimeDs / 2));
 								const packedConfidence =
 									(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
 
