@@ -185,13 +185,15 @@ const jbPerm = "R U R' F' R U R' U' R' F R2 U' R' U'";
 const tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
 const opSwap = "R' F R2 U' R' U' R U R' F' R U R' U'";
 const leftJbPerm = "L' U' L F L' U' L U L F' L2 U L U";
+const yPerm = `F ${opSwap} F'`;
 export const hydrateAlgorithms = (rawAlg: string) => {
 	const hydratedAlg = rawAlg
 		.replaceAll(/<jb-perm>/gi, jbPerm)
 		.replaceAll(/<op-swap>/gi, opSwap)
 		.replaceAll(/<left jb-perm>/gi, leftJbPerm)
 		.replaceAll(/<ljb-perm>/gi, leftJbPerm)
-		.replaceAll(/<t-perm>/gi, tPerm);
+		.replaceAll(/<t-perm>/gi, tPerm)
+		.replaceAll(/<y-perm>/gi, yPerm);
 
 	return hydratedAlg;
 };
