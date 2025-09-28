@@ -1,3 +1,5 @@
+import type { FlashCard } from "$lib/types";
+
 import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
 import { optionsStore } from "$lib/stores/options";
 
@@ -558,4 +560,179 @@ export const updateTags = (previousTags: string, tagPrefix: string, newFullTag: 
 	newTags.push(newFullTag);
 
 	return newTags.join("; ");
+};
+
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const WEEK_MS = 7 * DAY_MS;
+const MONTH_MS = 30 * DAY_MS;
+const YEAR_MS = 365 * DAY_MS;
+
+export const summariseFlashCards = (
+	flashCards: FlashCard[],
+	flashCardTypeInfo: {
+		samePieces: string[][];
+		bufferPiece: string[];
+	}
+) => {
+	const inserts: { [insert: string]: string[] } = {};
+	const interchanges: { [interchange: string]: string[] } = {};
+	const setups: { [setup: string]: string[] } = {};
+	const memoConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
+	const commConfidences: { [confidence: number]: string[] } = { 0: [], 1: [], 2: [], 3: [] };
+	const drillSpeedGroups: { seconds: number[]; letters: string[] }[] = [];
+	const missingComms: string[] = [];
+	const missingMemos: string[] = [];
+	const quizAges: {
+		letterPair: string;
+		lastQuizUnix: number;
+		hidden?: boolean;
+		isMarker?: boolean;
+	}[] = flashCards.toSorted((a, b) => b.lastQuizUnix - a.lastQuizUnix);
+	if (quizAges.length > 0) {
+		const nowMs = Date.now();
+		const newest = quizAges[0].lastQuizUnix;
+		const newestDate = new Date(newest * 1000);
+		const oldest = quizAges[quizAges.length - 1].lastQuizUnix;
+		const oldestDate = new Date(oldest * 1000);
+		const historyMarkers = [
+			{ label: "1 Year", unixTimestamp: (nowMs - YEAR_MS) / 1000 },
+			{ label: "6 Months", unixTimestamp: (nowMs - 6 * MONTH_MS) / 1000 },
+			{ label: "1 Month", unixTimestamp: (nowMs - MONTH_MS) / 1000 },
+			{ label: "1 Week", unixTimestamp: (nowMs - WEEK_MS) / 1000 },
+			{ label: "1 Day", unixTimestamp: (nowMs - DAY_MS) / 1000 },
+			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 }
+		];
+		for (let i = 0; i < historyMarkers.length; i++) {
+			if (oldest < historyMarkers[i].unixTimestamp && newest > historyMarkers[i].unixTimestamp) {
+				quizAges.push({
+					lastQuizUnix: historyMarkers[i].unixTimestamp,
+					letterPair: historyMarkers[i].label,
+					isMarker: true
+				});
+			}
+		}
+		quizAges.push({
+			lastQuizUnix: oldest - 1,
+			letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`,
+			isMarker: true
+		});
+		if (newest * 1000 > nowMs - DAY_MS) {
+			quizAges.push({
+				lastQuizUnix: quizAges[0].lastQuizUnix + 1,
+				letterPair: `${newestDate.getHours()}:${newestDate.getMinutes().toString().padStart(2, "0")}`,
+				isMarker: true
+			});
+		} else {
+			quizAges.push({
+				lastQuizUnix: newest + 1,
+				letterPair: `${newestDate.getFullYear()}-${(newestDate.getMonth() + 1).toString().padStart(2, "0")}-${newestDate.getDate().toString().padStart(2, "0")}`,
+				isMarker: true
+			});
+		}
+
+		quizAges.sort((a, b) => {
+			const ageDifference = a.lastQuizUnix - b.lastQuizUnix;
+			if (ageDifference !== 0) {
+				return ageDifference;
+			}
+
+			return a.letterPair.localeCompare(b.letterPair);
+		});
+
+		for (let i = 1; i < quizAges.length - 1; i++) {
+			if (quizAges[i].isMarker && quizAges[i - 1].isMarker && quizAges[i + 1].isMarker) {
+				quizAges[i].hidden = true;
+			}
+		}
+	}
+	let total = 0;
+	for (let letter0 = 0; letter0 < 24; letter0++) {
+		for (let letter1 = 0; letter1 < 24; letter1++) {
+			const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
+			if (
+				isBuffer(letterPair, flashCardTypeInfo.bufferPiece) ||
+				isTwist(letterPair, flashCardTypeInfo.samePieces)
+			) {
+				continue;
+			}
+
+			total += 1;
+			const flashCard = flashCards.find((fc) => fc.letterPair === letterPair);
+			if (flashCard) {
+				if (!memoConfidences[flashCard.memoConfidence]) {
+					memoConfidences[flashCard.memoConfidence] = [];
+				}
+				if (flashCard.memo) {
+					memoConfidences[flashCard.memoConfidence].push(letterPair);
+				} else {
+					missingMemos.push(letterPair);
+				}
+
+				if (!commConfidences[flashCard.commConfidence]) {
+					commConfidences[flashCard.commConfidence] = [];
+				}
+				if (flashCard.commutator) {
+					commConfidences[flashCard.commConfidence].push(letterPair);
+				} else {
+					missingComms.push(letterPair);
+				}
+
+				const { insert, interchange, setup } = parseCommutator(flashCard.commutator);
+				if (!insert) {
+					continue;
+				}
+
+				if (!inserts[insert]) {
+					inserts[insert] = [];
+				}
+				inserts[insert].push(flashCard.letterPair);
+
+				if (!interchanges[interchange]) {
+					interchanges[interchange] = [];
+				}
+				interchanges[interchange].push(flashCard.letterPair);
+
+				if (!setups[setup]) {
+					setups[setup] = [];
+				}
+				setups[setup].push(flashCard.letterPair);
+			} else {
+				missingComms.push(letterPair);
+				missingMemos.push(letterPair);
+			}
+		}
+	}
+
+	const drillTimes = flashCards.map((fc) => fc.drillTimeDs / 10);
+	const fastestDrillS = Math.min(...drillTimes);
+	const slowestDrillS = Math.max(...drillTimes);
+	const drillDifferenceS = slowestDrillS - fastestDrillS;
+	const drillStep = drillDifferenceS / 10;
+	for (let i = 1; i < 10; i++) {
+		const low = fastestDrillS + (i - 1) * drillStep;
+		const high = fastestDrillS + i * drillStep;
+		const times = {
+			seconds: [low, high],
+			letters: flashCards
+				.filter(
+					(fc) => Math.floor(fc.drillTimeDs / 10) >= low && Math.floor(fc.drillTimeDs / 10) < high
+				)
+				.map((fc) => fc.letterPair)
+		};
+		drillSpeedGroups.push(times);
+	}
+
+	return {
+		inserts,
+		interchanges,
+		setups,
+		memoConfidences,
+		missingMemos,
+		commConfidences,
+		drillSpeedGroups,
+		missingComms,
+		quizAges,
+		total
+	};
 };
