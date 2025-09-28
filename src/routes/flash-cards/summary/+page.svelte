@@ -8,7 +8,7 @@
 		flashCardStore
 	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import { parseCommutator, sortAlgs, isBuffer, isTwist, summariseFlashCards } from "$lib/utils";
+	import { sortAlgs, isBuffer, isTwist, summariseFlashCards } from "$lib/utils";
 	import { leitnerDecks, getLeitnerTag } from "$lib/quiz";
 	import ConfidenceTable from "./confidence-table.svelte";
 	import LetterPair from "./letter-pair.svelte";
