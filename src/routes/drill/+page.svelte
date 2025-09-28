@@ -302,7 +302,7 @@
 
 <style>
 	.timer-button {
-		height: calc(100vh - 38px - 16px - 20px);
+		height: calc(80vh - 38px - 16px - 20px);
 	}
 
 	@keyframes bar-grow {
