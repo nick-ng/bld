@@ -7,11 +7,16 @@ export default {
 				"can-hover": { raw: "(hover: hover)" },
 				"cannot-hover": { raw: "(hover: none)" }
 			},
+			maxWidth: {
+				prose2: "130ch"
+			},
 			width: {
-				prose: "65ch"
+				prose: "65ch",
+				prose2: "130ch"
 			},
 			flexBasis: {
-				prose: "65ch"
+				prose: "65ch",
+				prose2: "130ch"
 			},
 			fontFamily: {
 				good: '"Comic Sans MS", sans-serif'
