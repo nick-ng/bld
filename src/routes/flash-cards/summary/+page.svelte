@@ -175,7 +175,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each summary.drillSpeedGroups as drillSpeedGroup (drillSpeedGroup.seconds[0])}
+				{#each summary.drillSpeedGroups as drillSpeedGroup, i (`${i}-${drillSpeedGroup.seconds[0]}-${drillSpeedGroup.seconds[1]}`)}
 					<tr>
 						<td class="p-1 text-right whitespace-nowrap"
 							>{drillSpeedGroup.seconds[0].toFixed(1)} - {drillSpeedGroup.seconds[1].toFixed(

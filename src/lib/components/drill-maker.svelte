@@ -14,25 +14,26 @@
 	let drillSets = $derived(getDrillSets(flashCardType, $flashCardStore));
 
 	let drillSetKey = $state("none");
-	let drillSet = $state<(typeof drillSets)[0]>();
+	let drillSet = $state<(typeof drillSets)[0] | null>(null);
 	let drillFilter = $state("");
 	let drillSize = $state(0);
 </script>
 
-<div class="hidden flex-col gap-1 lg:flex">
-	<div class="flex flex-row gap-2">
-		<label class="block" for="drillSetSelect">Drill Set:</label>
+<div class="flex flex-col gap-1">
+	<div class="flex flex-col gap-y-1 lg:flex-row lg:gap-2">
+		<label class="hidden lg:block" for="drillSetSelect">Drill Set:</label>
 		<select
 			id="drillSetSelect"
-			class="block"
+			class="block px-1 py-1 lg:py-0"
 			onchange={(event) => {
 				drillSetKey = event.currentTarget.value;
-				drillSet = drillSets.find((ds) => ds.key === drillSetKey);
+				drillSet = drillSets.find((ds) => ds.key === drillSetKey) || null;
 				if (drillSet) {
 					drillFilter = drillSet.filters[0];
 					drillSize = drillSet.defaultSize;
 				}
 			}}
+			value={drillSetKey}
 		>
 			<option value="none">Choose a set</option>
 			{#each drillSets as drillSetItem (drillSetItem.key)}
@@ -40,14 +41,34 @@
 			{/each}
 		</select>
 		{#if drillSet && drillSet.filters.length > 1}
-			<select class="block capitalize" bind:value={drillFilter}>
+			<select class="block px-1 py-1 capitalize lg:py-0" bind:value={drillFilter}>
 				{#each drillSet.filters as drillFilterItem (drillFilterItem)}
 					<option value={drillFilterItem}>{capFirst(drillFilterItem)}</option>
 				{/each}
 			</select>
 		{/if}
 		{#if drillSet && drillSet.defaultSize > 0}
-			<input class="block shrink basis-2 text-right" type="number" bind:value={drillSize} />
+			<div class="flex flex-row gap-1">
+				<button
+					type="button"
+					class="px-4 lg:hidden"
+					onclick={() => {
+						drillSize = drillSize - 1;
+					}}>-1</button
+				>
+				<input
+					class="block w-16 shrink grow basis-1 text-right"
+					type="number"
+					bind:value={drillSize}
+				/>
+				<button
+					type="button"
+					class="px-4 lg:hidden"
+					onclick={() => {
+						drillSize = drillSize + 1;
+					}}>+1</button
+				>
+			</div>
 		{/if}
 	</div>
 	<button
@@ -55,6 +76,10 @@
 		type="button"
 		onclick={async () => {
 			const drillLetters = await makeDrill(drillSetKey, flashCardType, drillFilter, drillSize);
+			drillSetKey = "none";
+			drillSet = null;
+			drillFilter = "";
+			drillSize = 0;
 
 			if (typeof onMakeDrill === "function") {
 				onMakeDrill(drillLetters);

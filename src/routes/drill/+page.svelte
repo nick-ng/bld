@@ -25,41 +25,49 @@
 	let timerStopMs = $state(0);
 	let drillLeft = $derived(drillLetters.filter((dl) => !dl.quizzed).length);
 
+	const onButtonDown = () => {
+		if (quizState === "stand-by" || (quizState === "review" && drillLeft > 0)) {
+			quizState = "ready";
+			pressedAtMs = Date.now();
+		} else if (quizState === "timing") {
+			timerStopMs = Date.now();
+			drillLetters[drillIndex].quizzed = true;
+			drillLetters[drillIndex].timeMs = timerStopMs - timerStartMs;
+			localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+		}
+	};
+
+	const onButtonUp = () => {
+		if (quizState === "ready") {
+			if (Date.now() - pressedAtMs >= holdTimeMs) {
+				drillIndex = drillLetters.findIndex((dl) => !dl.quizzed);
+				quizState = "timing";
+				timerStartMs = Date.now();
+			} else {
+				quizState = "stand-by";
+			}
+		} else if (quizState === "timing") {
+			quizState = "review";
+		}
+	};
+
 	onMount(() => {
 		drillLetters = getDrillItems();
 		drillIndex = 0;
 
 		const handleKeyDown = (event: KeyboardEvent) => {
-			if (event.key !== " ") {
-				return;
-			}
+			if (event.key === " ") {
+				onButtonDown();
 
-			if (quizState === "stand-by" || quizState === "review") {
-				quizState = "ready";
-				pressedAtMs = Date.now();
-			} else if (quizState === "timing") {
-				timerStopMs = Date.now();
-				drillLetters[drillIndex].quizzed = true;
-				drillLetters[drillIndex].timeMs = timerStopMs - timerStartMs;
-				localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+				return;
 			}
 		};
 
 		const handleKeyUp = (event: KeyboardEvent) => {
-			if (event.key !== " ") {
-				return;
-			}
+			if (event.key === " ") {
+				onButtonUp();
 
-			if (quizState === "ready") {
-				if (Date.now() - pressedAtMs >= holdTimeMs) {
-					drillIndex = drillLetters.findIndex((dl) => !dl.quizzed);
-					quizState = "timing";
-					timerStartMs = Date.now();
-				} else {
-					quizState = "stand-by";
-				}
-			} else if (quizState === "timing") {
-				quizState = "review";
+				return;
 			}
 		};
 
@@ -73,8 +81,8 @@
 	});
 </script>
 
-<div class="flex justify-between">
-	<div>
+<div class="flex flex-col justify-between lg:flex-row">
+	<div class="hidden lg:block">
 		<table>
 			<tbody>
 				<tr>
@@ -119,12 +127,12 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="basis-prose">
+	<div class="basis-prose lg:flex lg:flex-row lg:justify-center lg:gap-2">
 		{#if drillLetters.length === 0}
 			<div>No drill in progress</div>
 		{/if}
 		{#if drillLetters.length > 0 && drillLetters.every((dl) => dl.quizzed)}
-			<div class="text-center">
+			<div class="border border-gray-300 p-2 text-center dark:border-gray-500">
 				<table>
 					<thead>
 						<tr>
@@ -166,103 +174,137 @@
 					</tbody>
 				</table>
 				<button
+					class="mt-2 w-full"
 					type="button"
-					disabled={drillLetters.every((dl) => !dl.send)}
 					onclick={async () => {
-						await fetchFlashCards();
+						if (drillLetters.some((dl) => dl.send)) {
+							await fetchFlashCards();
 
-						await Promise.all(
-							drillLetters.map((drillLetter) => {
-								if (!drillLetter.send) {
-									return;
-								}
+							await Promise.all(
+								drillLetters.map((drillLetter) => {
+									if (!drillLetter.send) {
+										return;
+									}
 
-								const flashCard = getFlashCard(
-									drillLetter.letterPair,
-									drillLetter.flashCardType,
-									$flashCardStore
-								);
+									const flashCard = getFlashCard(
+										drillLetter.letterPair,
+										drillLetter.flashCardType,
+										$flashCardStore
+									);
 
-								const drillTimeDs = drillLetter.timeMs / 100;
-								const adjustedDrillTimeDs =
-									Math.min(drillTimeDs, flashCard.drillTimeDs) * 0.6 +
-									Math.max(drillTimeDs, flashCard.drillTimeDs) * 0.4;
+									const drillTimeDs = drillLetter.timeMs / 100;
+									const adjustedDrillTimeDs =
+										Math.min(drillTimeDs, flashCard.drillTimeDs) * 0.6 +
+										Math.max(drillTimeDs, flashCard.drillTimeDs) * 0.4;
 
-								let newCommConfidence = flashCard.commConfidence;
-								if (drillLetter.timeMs < 15000) {
-									newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
-								} else if (drillLetter.timeMs < 5000) {
-									newCommConfidence = 3;
-								}
+									let newCommConfidence = flashCard.commConfidence;
+									if (drillLetter.timeMs < 15000) {
+										newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
+									} else if (drillLetter.timeMs < 5000) {
+										newCommConfidence = 3;
+									}
 
-								const drillConfidence = Math.min(255, Math.round(adjustedDrillTimeDs / 2));
-								const packedConfidence =
-									(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
+									const drillConfidence = Math.min(255, Math.round(adjustedDrillTimeDs / 2));
+									const packedConfidence =
+										(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
 
-								const formData = new FormData();
-								formData.set("type", drillLetter.flashCardType);
-								formData.set("confidence", packedConfidence.toString(10));
-								return putQuiz(drillLetter.letterPair, formData, true);
-							})
-						);
+									const formData = new FormData();
+									formData.set("type", drillLetter.flashCardType);
+									formData.set("confidence", packedConfidence.toString(10));
+									return putQuiz(drillLetter.letterPair, formData, true);
+								})
+							);
+						}
 
 						drillLetters = [];
 						localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 
 						goto("/flash-cards/summary");
-					}}>Send</button
+					}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
 				>
 			</div>
 		{/if}
-		{#if drillLetters[drillIndex]?.letterPair && (quizState === "timing" || quizState === "review")}
-			<FlashCard
-				letterPair={drillLetters[drillIndex].letterPair}
-				flashCardType={drillLetters[drillIndex].flashCardType}
-				showCorners={quizState === "review"}
-				{showMemo}
-				showCommutator={quizState === "review"}
-				{showImage}
-			/>
-			<div class="text-center">Took {drillLetters[drillIndex].timeMs / 1000}s</div>
-		{/if}
-		{#if quizState !== "timing" && drillLeft > 0}
-			<div class="text-center">
-				<p>Hold space for {holdTimeMs / 1000} seconds then release</p>
-				<p>{drillLetters.filter((dl) => !dl.quizzed).length} left</p>
+		<div>
+			{#if drillLeft > 0 && drillLetters[drillIndex]?.letterPair && quizState === "review"}
+				<div class="flex flex-row items-center justify-center gap-2">
+					<label class="like-button"
+						><input type="checkbox" bind:checked={drillLetters[drillIndex].send} /> OK</label
+					>
+					<button
+						class="inline-block"
+						type="button"
+						onclick={() => {
+							quizState = "stand-by";
+						}}
+						><span class="hidden lg:inline">Next (space)</span><span class="lg:hidden">Next</span
+						></button
+					>
+				</div>
+			{/if}
+			{#if (quizState === "timing" || quizState === "review") && drillLetters[drillIndex]?.letterPair}
+				<FlashCard
+					letterPair={drillLetters[drillIndex].letterPair}
+					flashCardType={drillLetters[drillIndex].flashCardType}
+					showCorners={quizState === "review"}
+					{showMemo}
+					showCommutator={quizState === "review"}
+					{showImage}
+					extraClass={quizState === "timing" ? "hidden lg:block" : ""}
+				/>
+				<div class={`text-center ${quizState === "timing" ? "hidden lg:block" : ""}`}>
+					Took {drillLetters[drillIndex].timeMs / 1000}s
+				</div>
+			{/if}
+			{#if quizState !== "review" && drillLeft > 0}
+				<div class="self-stretch lg:hidden">
+					<button
+						type="button"
+						class="timer-button mb-1 w-full"
+						ontouchstart={onButtonDown}
+						ontouchend={onButtonUp}
+					>
+						{#if quizState === "timing" && drillLetters[drillIndex]?.letterPair}
+							<FlashCard
+								letterPair={drillLetters[drillIndex].letterPair}
+								flashCardType={drillLetters[drillIndex].flashCardType}
+								showCorners={false}
+								{showMemo}
+								showCommutator={false}
+								{showImage}
+							/>
+						{:else}
+							Hold for {holdTimeMs / 1000} seconds then release
+						{/if}
+					</button>
+				</div>
+			{/if}
+			{#if quizState !== "timing" && drillLeft > 0}
+				<div class="hidden text-center lg:block">
+					<p>Hold space for {holdTimeMs / 1000} seconds then release</p>
+					<p>{drillLetters.filter((dl) => !dl.quizzed).length} left</p>
+				</div>
 				<div class={`${quizState === "ready" ? "border" : ""} relative h-4`}>
 					<div
 						class={`${quizState === "ready" ? "animate" : ""} absolute top-0 left-0 h-full bg-red-500`}
+						style={`animation-duration: ${holdTimeMs + 5}ms;`}
 					></div>
 				</div>
-			</div>
-		{/if}
-		{#if drillLeft > 0 && drillLetters[drillIndex]?.letterPair && quizState === "review"}
-			<div class="flex flex-row justify-center gap-2">
-				<button
-					class="inline-block"
-					type="button"
-					onclick={() => {
-						drillLetters[drillIndex].send = false;
-						quizState = "stand-by";
-					}}>Not OK</button
-				><button
-					class="inline-block"
-					type="button"
-					onclick={() => {
-						quizState = "stand-by";
-					}}>OK (spacebar)</button
-				>
-			</div>
-		{/if}
+			{/if}
+		</div>
 	</div>
 	<DrillMaker
 		onMakeDrill={(newDrillLetters) => {
 			drillLetters = newDrillLetters;
+			quizState = "stand-by";
 		}}
 	/>
 </div>
 
 <style>
+	.timer-button {
+		height: calc(100vh - 38px - 16px - 20px);
+	}
+
 	@keyframes bar-grow {
 		0% {
 			background-color: #ff0000;
@@ -281,7 +323,6 @@
 	}
 
 	.animate {
-		animation-duration: 305ms;
 		animation-name: bar-grow;
 		animation-timing-function: linear;
 		animation-iteration-count: 1;
