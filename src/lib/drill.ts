@@ -136,18 +136,27 @@ export const makeDrill = async (
 			}
 		}
 	}
-	if (drillSet.key === "random") {
-		possibleFlashCards = shuffleArray(possibleFlashCards);
-	} else if (drillSet.key === "slow") {
-		possibleFlashCards.sort((a, b) => {
-			const aRounded = Math.round(a.drillTimeDs / 10);
-			const bRounded = Math.round(b.drillTimeDs / 10);
-			if (aRounded !== bRounded) {
-				return bRounded - aRounded;
-			}
 
-			return a.commConfidence - b.commConfidence;
-		});
+	switch (drillSet.key) {
+		case "random": {
+			possibleFlashCards = shuffleArray(possibleFlashCards);
+			break;
+		}
+		case "slow": {
+			possibleFlashCards.sort((a, b) => {
+				const aRounded = Math.round(a.drillTimeDs / 10);
+				const bRounded = Math.round(b.drillTimeDs / 10);
+				if (aRounded !== bRounded) {
+					return bRounded - aRounded;
+				}
+
+				return a.commConfidence - b.commConfidence;
+			});
+			break;
+		}
+		default: {
+			// noop
+		}
 	}
 
 	if (drillSet.defaultSize <= 0) {
