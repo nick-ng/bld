@@ -93,7 +93,7 @@ export const daysAgo = (date: Date | number) => {
 	targetDate.setMinutes(0);
 	targetDate.setSeconds(0);
 
-	const differenceDays = (startOfToday.valueOf() - targetDate.valueOf()) / (1000 * 60 * 60);
+	const differenceDays = (startOfToday.valueOf() - targetDate.valueOf()) / (1000 * 60 * 60 * 24);
 
 	if (differenceDays < 1) {
 		return "Today";
