@@ -83,6 +83,29 @@ export const addCredentialsToHeaders = (
 	};
 };
 
+export const daysAgo = (date: Date | number) => {
+	const startOfToday = new Date();
+	startOfToday.setHours(0);
+	startOfToday.setMinutes(0);
+	startOfToday.setSeconds(0);
+	const targetDate = new Date(date);
+	targetDate.setHours(0);
+	targetDate.setMinutes(0);
+	targetDate.setSeconds(0);
+
+	const differenceDays = (startOfToday.valueOf() - targetDate.valueOf()) / (1000 * 60 * 60);
+
+	if (differenceDays < 1) {
+		return "Today";
+	}
+
+	if (differenceDays < 2) {
+		return `${differenceDays.toFixed(0)} Day ago`;
+	}
+
+	return `${differenceDays.toFixed(0)} Days ago`;
+};
+
 export const authFetch = (url: string, init?: RequestInit) => {
 	const newInit = { ...init };
 	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);
