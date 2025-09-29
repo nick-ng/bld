@@ -709,9 +709,9 @@ export const summariseFlashCards = (
 	const slowestDrillS = Math.max(...drillTimes);
 	const drillDifferenceS = slowestDrillS - fastestDrillS;
 	const drillStep = drillDifferenceS / 10;
-	for (let i = 1; i < 10; i++) {
-		const low = fastestDrillS + (i - 1) * drillStep;
-		const high = fastestDrillS + i * drillStep;
+	for (let i = 0; i < 9; i++) {
+		const low = fastestDrillS + i * drillStep;
+		const high = fastestDrillS + (i + 1) * drillStep;
 		const times = {
 			seconds: [low, high],
 			letters: flashCards
@@ -722,6 +722,18 @@ export const summariseFlashCards = (
 		};
 		drillSpeedGroups.push(times);
 	}
+
+	const low = fastestDrillS + 9 * drillStep;
+	const high = fastestDrillS + 10 * drillStep;
+	const times = {
+		seconds: [low, high],
+		letters: flashCards
+			.filter(
+				(fc) => Math.floor(fc.drillTimeDs / 10) >= low && Math.floor(fc.drillTimeDs / 10) <= high
+			)
+			.map((fc) => fc.letterPair)
+	};
+	drillSpeedGroups.push(times);
 
 	return {
 		inserts,
