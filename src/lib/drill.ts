@@ -69,6 +69,7 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 			defaultSize: -1,
 			label: "Interchange"
 		},
+		{ key: "old", filters: ["retired", "all"], defaultSize: 5, label: "Old" },
 		{
 			key: "random",
 			filters: ["retired", "all"],
@@ -138,10 +139,6 @@ export const makeDrill = async (
 	}
 
 	switch (drillSet.key) {
-		case "random": {
-			possibleFlashCards = shuffleArray(possibleFlashCards);
-			break;
-		}
 		case "slow": {
 			possibleFlashCards.sort((a, b) => {
 				const aRounded = Math.round(a.drillTimeDs / 10);
@@ -154,8 +151,13 @@ export const makeDrill = async (
 			});
 			break;
 		}
+		case "old": {
+			possibleFlashCards.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+			break;
+		}
+		case "random":
 		default: {
-			// noop
+			possibleFlashCards = shuffleArray(possibleFlashCards);
 		}
 	}
 
