@@ -24,6 +24,8 @@
 	let timerStartMs = $state(0);
 	let timerStopMs = $state(0);
 	let drillLeft = $derived(drillLetters.filter((dl) => !dl.quizzed).length);
+	let drillWeight = $state(0.7);
+	let actualDrillWeight = $derived(Math.max(0.0001, Math.min(1, drillWeight)));
 
 	const onButtonDown = () => {
 		if (quizState === "stand-by" || (quizState === "review" && drillLeft > 0)) {
@@ -155,10 +157,16 @@
 							>
 							<th class="border border-gray-500 px-1 text-left">Letter Pair</th>
 							<th class="border border-gray-500 px-1 text-right">Time (s)</th>
+							<th class="border border-gray-500 px-1 text-right">Change (s)</th>
 						</tr>
 					</thead>
 					<tbody>
 						{#each drillLetters as drillLetter (drillLetter.letterPair)}
+							{@const flashCard = getFlashCard(
+								drillLetter.letterPair,
+								drillLetter.flashCardType,
+								$flashCardStore
+							)}
 							<tr>
 								<td class="border border-gray-500 px-1 text-center"
 									><input type="checkbox" bind:checked={drillLetter.send} /></td
@@ -169,59 +177,73 @@
 								<td class="border border-gray-500 px-1 text-right"
 									>{(drillLetter.timeMs / 1000).toFixed(1)}</td
 								>
+								<td class="border border-gray-500 px-1 text-right"
+									>{(flashCard.drillTimeDs / 10).toFixed(1)}s → {(
+										Math.min(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
+											actualDrillWeight +
+										Math.max(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
+											(1 - actualDrillWeight)
+									).toFixed(1)}s</td
+								>
 							</tr>
 						{/each}
 					</tbody>
 				</table>
-				<button
-					class="mt-2 w-full"
-					type="button"
-					onclick={async () => {
-						if (drillLetters.some((dl) => dl.send)) {
-							await fetchFlashCards();
+				<div class="mt-2 flex flex-row items-stretch gap-2">
+					<input class="block w-16 text-right" type="number" bind:value={drillWeight} step={0.1} />
+					<button
+						class="grow"
+						type="button"
+						onclick={async () => {
+							if (drillLetters.some((dl) => dl.send)) {
+								await fetchFlashCards();
 
-							await Promise.all(
-								drillLetters.map((drillLetter) => {
-									if (!drillLetter.send) {
-										return;
-									}
+								await Promise.all(
+									drillLetters.map((drillLetter) => {
+										if (!drillLetter.send) {
+											return;
+										}
 
-									const flashCard = getFlashCard(
-										drillLetter.letterPair,
-										drillLetter.flashCardType,
-										$flashCardStore
-									);
+										const flashCard = getFlashCard(
+											drillLetter.letterPair,
+											drillLetter.flashCardType,
+											$flashCardStore
+										);
 
-									const drillTimeDs = drillLetter.timeMs / 100;
-									const adjustedDrillTimeDs =
-										Math.min(drillTimeDs, flashCard.drillTimeDs) * 0.6 +
-										Math.max(drillTimeDs, flashCard.drillTimeDs) * 0.4;
+										const drillTimeDs = drillLetter.timeMs / 100;
+										const adjustedDrillTimeDs =
+											Math.min(drillTimeDs, flashCard.drillTimeDs) * actualDrillWeight +
+											Math.max(drillTimeDs, flashCard.drillTimeDs) * (1 - actualDrillWeight);
 
-									let newCommConfidence = flashCard.commConfidence;
-									if (drillLetter.timeMs < 15000) {
-										newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
-									} else if (drillLetter.timeMs < 5000) {
-										newCommConfidence = 3;
-									}
+										let newCommConfidence = flashCard.commConfidence;
+										if (drillLetter.timeMs < 15000) {
+											newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
+										} else if (drillLetter.timeMs < 5000) {
+											newCommConfidence = 3;
+										}
 
-									const drillConfidence = Math.min(255, Math.round(adjustedDrillTimeDs / 2));
-									const packedConfidence =
-										(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
+										const drillConfidence = Math.max(
+											0,
+											Math.min(255, Math.round(adjustedDrillTimeDs / 2))
+										);
+										const packedConfidence =
+											(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
 
-									const formData = new FormData();
-									formData.set("type", drillLetter.flashCardType);
-									formData.set("confidence", packedConfidence.toString(10));
-									return putQuiz(drillLetter.letterPair, formData, true);
-								})
-							);
-						}
+										const formData = new FormData();
+										formData.set("type", drillLetter.flashCardType);
+										formData.set("confidence", packedConfidence.toString(10));
+										return putQuiz(drillLetter.letterPair, formData, true);
+									})
+								);
+							}
 
-						drillLetters = [];
-						localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+							drillLetters = [];
+							localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 
-						goto("/flash-cards/summary");
-					}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
-				>
+							goto("/flash-cards/summary");
+						}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
+					>
+				</div>
 			</div>
 		{/if}
 		<div>
