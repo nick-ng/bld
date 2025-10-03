@@ -63,7 +63,7 @@ export const parseFlashCard = (
 
 	const confidence = getFromUnknown("confidence", 0);
 	const memoConfidence = confidence & 3;
-	let commConfidence = (confidence >> 2) & 3;
+	const commConfidence = (confidence >> 2) & 3;
 	let drillTimeDs = ((confidence >> 4) & 255) * 2;
 	if (drillTimeDs === 0) {
 		drillTimeDs = 509;
