@@ -747,13 +747,10 @@ export const summariseFlashCards = (
 	}
 
 	const low = fastestDrillS + 9 * drillStep;
-	const high = fastestDrillS + 10 * drillStep;
 	const times = {
 		seconds: [low, high],
 		letters: flashCards
-			.filter(
-				(fc) => Math.floor(fc.drillTimeDs / 10) >= low && Math.floor(fc.drillTimeDs / 10) <= high
-			)
+			.filter((fc) => Math.floor(fc.drillTimeDs / 10) >= low)
 			.map((fc) => fc.letterPair)
 	};
 	drillSpeedGroups.push(times);
