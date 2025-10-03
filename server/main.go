@@ -3,7 +3,7 @@ package main
 import (
 	"bld-server/routes"
 	"bld-server/utils"
-	"log"
+	"fmt"
 	"net/http"
 )
 
@@ -33,6 +33,6 @@ func main() {
 	http.HandleFunc("OPTIONS /", optionsHandler)
 	http.HandleFunc("/", rootHandler)
 
+	fmt.Println("server is running")
 	http.ListenAndServe(":27945", nil)
-	log.Println("server is running")
 }
