@@ -226,6 +226,7 @@ export const hydrateAlgorithms = (rawAlg: string) => {
 // @todo(nick-ng): handle cube rotations (x y z)
 export const parseCommutator = (rawCommutator: string) => {
 	const hydratedCommutator = hydrateAlgorithms(rawCommutator);
+	const neededHydration = rawCommutator !== hydratedCommutator;
 	let regripEmoji = "";
 	for (let i = 0; i < regripEmojis.length; i++) {
 		if (hydratedCommutator.includes(regripEmojis[i])) {
@@ -270,7 +271,7 @@ export const parseCommutator = (rawCommutator: string) => {
 
 		return {
 			rawCommutator,
-			normalisedCommutator: conjugatePlusCommutator,
+			normalisedCommutator: neededHydration ? rawCommutator : conjugatePlusCommutator,
 			commutator,
 			conjugatePlusCommutator,
 			setup,
@@ -309,7 +310,7 @@ export const parseCommutator = (rawCommutator: string) => {
 
 		return {
 			rawCommutator,
-			normalisedCommutator: conjugatePlusCommutator,
+			normalisedCommutator: neededHydration ? rawCommutator : conjugatePlusCommutator,
 			commutator,
 			conjugatePlusCommutator,
 			setup,
@@ -340,7 +341,7 @@ export const parseCommutator = (rawCommutator: string) => {
 
 		return {
 			rawCommutator,
-			normalisedCommutator: `[${setup}:${algorithm}]`,
+			normalisedCommutator: neededHydration ? rawCommutator : `[${setup}:${algorithm}]`,
 			commutator: "",
 			conjugatePlusCommutator: "",
 			setup,

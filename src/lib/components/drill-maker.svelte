@@ -6,10 +6,11 @@
 	import { capFirst } from "$lib/utils";
 
 	interface Props {
+		extraClass?: string;
 		onMakeDrill?: (newDrillLetters: DrillItem[]) => Promise<void> | void;
 	}
 
-	let { onMakeDrill }: Props = $props();
+	let { extraClass, onMakeDrill }: Props = $props();
 	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
 	let drillSets = $derived(getDrillSets(flashCardType, $flashCardStore));
 
@@ -19,7 +20,7 @@
 	let drillSize = $state(0);
 </script>
 
-<div class="flex flex-col gap-1">
+<div class={`${extraClass} flex flex-col gap-1`}>
 	<div class="flex flex-col gap-y-1 lg:flex-row lg:gap-2">
 		<label class="hidden lg:block" for="drillSetSelect">Drill Set:</label>
 		<select
