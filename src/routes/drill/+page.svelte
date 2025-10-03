@@ -7,6 +7,7 @@
 	import { fetchFlashCards, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { getDrillItems } from "$lib/drill";
 	import { putQuiz } from "$lib/quiz";
+	import { parseCommutator } from "$lib/utils";
 	import FlashCard from "$lib/components/flash-card.svelte";
 	import DrillMaker from "$lib/components/drill-maker.svelte";
 
@@ -135,7 +136,7 @@
 		{/if}
 		{#if drillLetters.length > 0 && drillLetters.every((dl) => dl.quizzed)}
 			<div class="border border-gray-300 p-2 text-center dark:border-gray-500">
-				<table>
+				<table class="w-full">
 					<thead>
 						<tr>
 							<th class="border border-gray-500 px-1 text-center"
@@ -155,9 +156,7 @@
 									}}
 								/></th
 							>
-							<th class="border border-gray-500 px-1 text-left">Letter Pair</th>
-							<th class="border border-gray-500 px-1 text-right">Time (s)</th>
-							<th class="border border-gray-500 px-1 text-right">Change (s)</th>
+							<th class="border border-gray-500 px-1 text-center" colspan="3">Letter Pair</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -171,19 +170,20 @@
 								<td class="border border-gray-500 px-1 text-center"
 									><input type="checkbox" bind:checked={drillLetter.send} /></td
 								>
-								<td class="border border-gray-500 px-1 text-left uppercase"
-									>{drillLetter.letterPair}</td
+								<td class="border border-gray-500 px-1 text-center"
+									><span class="uppercase">{drillLetter.letterPair}</span>
+									<span>{parseCommutator(flashCard.commutator).normalisedCommutator}</span></td
 								>
 								<td class="border border-gray-500 px-1 text-right"
 									>{(drillLetter.timeMs / 1000).toFixed(1)}</td
 								>
 								<td class="border border-gray-500 px-1 text-right"
-									>{(flashCard.drillTimeDs / 10).toFixed(1)}s → {(
+									>{(flashCard.drillTimeDs / 10).toFixed(0)} → {(
 										Math.min(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
 											actualDrillWeight +
 										Math.max(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
 											(1 - actualDrillWeight)
-									).toFixed(1)}s</td
+									).toFixed(0)}</td
 								>
 							</tr>
 						{/each}
@@ -315,6 +315,7 @@
 		</div>
 	</div>
 	<DrillMaker
+		extraClass="hidden lg:block"
 		onMakeDrill={(newDrillLetters) => {
 			drillLetters = newDrillLetters;
 			quizState = "stand-by";
