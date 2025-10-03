@@ -64,13 +64,9 @@ export const parseFlashCard = (
 	const confidence = getFromUnknown("confidence", 0);
 	const memoConfidence = confidence & 3;
 	let commConfidence = (confidence >> 2) & 3;
-	if (unknown.lastQuizUnix < 1737104110) {
-		commConfidence = 0;
-	}
-
 	let drillTimeDs = ((confidence >> 4) & 255) * 2;
 	if (drillTimeDs === 0) {
-		drillTimeDs = 300;
+		drillTimeDs = 509;
 	}
 
 	return {
@@ -100,9 +96,9 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 		image: "",
 		commutator: "",
 		confidence: 0,
-		commConfidence: -1,
-		memoConfidence: -1,
-		drillTimeDs: 300,
+		commConfidence: 0,
+		memoConfidence: 0,
+		drillTimeDs: 509,
 		tags: "",
 		isPublic: false,
 		lastQuizUnix: 0

@@ -727,34 +727,43 @@ export const summariseFlashCards = (
 		}
 	}
 
-	const drillTimes = flashCards.map((fc) => fc.drillTimeDs / 10);
-	const fastestDrillS = Math.min(...drillTimes);
-	const slowestDrillS = Math.max(...drillTimes);
-	const drillDifferenceS = slowestDrillS - fastestDrillS;
-	const drillStep = drillDifferenceS / 10;
+	flashCards.sort((a, b) => {
+		if (a.drillTimeDs !== b.drillTimeDs) {
+			return a.drillTimeDs - b.drillTimeDs;
+		}
+
+		return a.letterPair.localeCompare(b.letterPair);
+	});
+	const drillTimesDs = flashCards.map((fc) => fc.drillTimeDs);
+	const fastestDrillDs = Math.min(...drillTimesDs);
+	const slowestDrillDs = Math.max(...drillTimesDs);
+	const drillDifferenceDs = slowestDrillDs - fastestDrillDs;
+	const drillStep = drillDifferenceDs / 10;
 	for (let i = 0; i < 9; i++) {
-		const low = fastestDrillS + i * drillStep;
-		const high = fastestDrillS + (i + 1) * drillStep;
+		const low = fastestDrillDs + i * drillStep;
+		const high = fastestDrillDs + (i + 1) * drillStep;
+		const flashCardGroup = flashCards.filter(
+			(fc) => Math.floor(fc.drillTimeDs) >= low && Math.floor(fc.drillTimeDs) < high
+		);
+
 		const times = {
-			seconds: [low, high],
-			letters: flashCards
-				.filter(
-					(fc) => Math.floor(fc.drillTimeDs / 10) >= low && Math.floor(fc.drillTimeDs / 10) < high
-				)
-				.map((fc) => fc.letterPair)
+			seconds: [
+				Math.min(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10,
+				Math.max(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10
+			],
+			letters: flashCardGroup.map((fc) => fc.letterPair)
 		};
 		drillSpeedGroups.push(times);
 	}
 
-	const low = fastestDrillS + 9 * drillStep;
-	const high = fastestDrillS + 10 * drillStep;
+	const low = fastestDrillDs + 9 * drillStep;
+	const flashCardGroup = flashCards.filter((fc) => Math.floor(fc.drillTimeDs) >= low);
 	const times = {
-		seconds: [low, high],
-		letters: flashCards
-			.filter(
-				(fc) => Math.floor(fc.drillTimeDs / 10) >= low && Math.floor(fc.drillTimeDs / 10) <= high
-			)
-			.map((fc) => fc.letterPair)
+		seconds: [
+			Math.min(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10,
+			Math.max(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10
+		],
+		letters: flashCardGroup.map((fc) => fc.letterPair)
 	};
 	drillSpeedGroups.push(times);
 
