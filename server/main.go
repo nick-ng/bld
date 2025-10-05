@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bld-server/database"
 	"bld-server/routes"
 	"bld-server/utils"
 	"fmt"
@@ -27,6 +28,10 @@ func optionsHandler(writer http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
+	// get the db singleton and close it when main returns
+	db := database.GetDb()
+	defer db.Close()
+
 	routes.AddMiscRoutes()
 	routes.AddFlashCardsRoutes()
 	routes.AddImageRoutes()
