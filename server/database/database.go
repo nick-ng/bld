@@ -2,8 +2,10 @@ package database
 
 import (
 	"bufio"
+	"database/sql"
 	"errors"
 	"fmt"
+	_ "github.com/mattn/go-sqlite3"
 	"io"
 	"io/fs"
 	"os"
@@ -34,14 +36,16 @@ const LOG_SIZE_FACTOR = 3
 
 var FlashCardData = map[string]FlashCard{}
 var lastSnapshotFileSize int64 = 1000
+var db1 *sql.DB
 
 func init() {
 	err := os.Mkdir(USER_DATA_DIRECTORY, 0755)
-
 	if err != nil && !errors.Is(err, fs.ErrExist) {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	migrateDb()
 
 	FlashCardData, err = loadData("")
 	if err != nil {
@@ -50,6 +54,55 @@ func init() {
 		os.Exit(1)
 	}
 
+}
+
+func GetDb() *sql.DB {
+	if db1 == nil {
+		sqliteDb, err := sql.Open("sqlite3", filepath.Join(USER_DATA_DIRECTORY, "bld.db"))
+		if err != nil {
+			fmt.Println("error opening sqlite3 db", err)
+			os.Exit(1)
+		}
+
+		db1 = sqliteDb
+	}
+
+	return db1
+}
+
+func migrateDb() {
+	db := GetDb()
+
+	query := "SELECT name FROM sqlite_master WHERE type='table' AND name='migration';"
+
+	tableExistsRows, err := db.Query(query)
+	if err != nil {
+		fmt.Println("error executing sql statement", err)
+		return
+	}
+	defer tableExistsRows.Close()
+
+	migrationTableExists := false
+	for tableExistsRows.Next() {
+		var name string
+		err = tableExistsRows.Scan(&name)
+		fmt.Println("name", name)
+		if name == "migration" {
+			migrationTableExists = true
+		}
+	}
+
+	if !migrationTableExists {
+		createMigrationTableQuery := "CREATE TABLE migration (filename string)"
+		_, err := db.Exec(createMigrationTableQuery)
+		if err != nil {
+			fmt.Println("error creating migration table:", err)
+			return
+		}
+	}
+
+	// @todo(nick-ng): list migration files
+	// @todo(nick-ng): apply migration files that haven't been applied
 }
 
 func loadData(finalFilename string) (map[string]FlashCard, error) {
