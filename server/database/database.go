@@ -31,6 +31,7 @@ type FlashCard struct {
 
 const VERSION_PREFIX = "v2"
 const USER_DATA_DIRECTORY = "user-data"
+const MIGRATIONS_DIRECTORY = "migrations"
 const SYNC_ALL_WRITES = false
 const LOG_SIZE_FACTOR = 3
 
@@ -78,7 +79,8 @@ func migrateDb() {
 	tableExistsRows, err := db.Query(query)
 	if err != nil {
 		fmt.Println("error executing sql statement", err)
-		return
+		db.Close()
+		os.Exit(1)
 	}
 	defer tableExistsRows.Close()
 
@@ -86,23 +88,121 @@ func migrateDb() {
 	for tableExistsRows.Next() {
 		var name string
 		err = tableExistsRows.Scan(&name)
-		fmt.Println("name", name)
 		if name == "migration" {
 			migrationTableExists = true
 		}
 	}
 
 	if !migrationTableExists {
-		createMigrationTableQuery := "CREATE TABLE migration (filename string)"
+		createMigrationTableQuery := "CREATE TABLE migration (filename TEXT)"
 		_, err := db.Exec(createMigrationTableQuery)
 		if err != nil {
 			fmt.Println("error creating migration table:", err)
-			return
+			db.Close()
+			os.Exit(1)
 		}
 	}
 
-	// @todo(nick-ng): list migration files
-	// @todo(nick-ng): apply migration files that haven't been applied
+	dirEntries, err := os.ReadDir(MIGRATIONS_DIRECTORY)
+	if err != nil {
+		fmt.Println("error getting migration files:", err)
+		return
+	}
+
+	slices.SortFunc(dirEntries, func(a, b os.DirEntry) int {
+		aName := a.Name()
+		bName := b.Name()
+
+		return strings.Compare(aName, bName)
+	})
+
+	for _, dirEntry := range dirEntries {
+		filename := dirEntry.Name()
+		if !strings.HasSuffix(filename, ".sql") {
+			continue
+		}
+
+		tx, err := db.Begin()
+		if err != nil {
+			fmt.Println("error getting database transaction:", err)
+			db.Close()
+			os.Exit(1)
+		}
+
+		query := "SELECT filename FROM migration WHERE filename = ?"
+		migrationExistsRows, err := tx.Query(query, filename)
+		migrationExists := false
+		for migrationExistsRows.Next() {
+			var tempFilename string
+			err = migrationExistsRows.Scan(&tempFilename)
+			if tempFilename == filename {
+				err = tx.Commit()
+				if err != nil {
+					fmt.Println("error committing database transaction:", err)
+					db.Close()
+					os.Exit(1)
+				}
+
+				migrationExists = true
+				continue
+			}
+		}
+
+		if migrationExists {
+			fmt.Printf("%s already applied. skipping\n", filename)
+			continue
+		}
+
+		fullPath := filepath.Join(MIGRATIONS_DIRECTORY, filename)
+		contentBytes, err := os.ReadFile(fullPath)
+		if err != nil {
+			fmt.Println("error reading", fullPath, err)
+			err := tx.Rollback()
+			if err != nil {
+				fmt.Println("error rolling back database transaction:", err)
+			}
+
+			db.Close()
+			os.Exit(1)
+		}
+
+		content := string(contentBytes)
+		sqlQueries := strings.Split(content, "-- split")
+
+		for i, sqlQuery := range sqlQueries {
+			fmt.Printf("applying query %d from %s\n", i, fullPath)
+			_, err := tx.Exec(sqlQuery)
+			if err != nil {
+				fmt.Println("error applying sql query:", sqlQuery)
+				err := tx.Rollback()
+				if err != nil {
+					fmt.Println("error rolling back database transaction:", err)
+				}
+
+				db.Close()
+				os.Exit(1)
+			}
+		}
+
+		recordMigrationQuery := "INSERT INTO migration (filename) VALUES (?)"
+		_, err = tx.Exec(recordMigrationQuery, filename)
+		if err != nil {
+			fmt.Println("error recording migration completion:", err)
+			err := tx.Rollback()
+			if err != nil {
+				fmt.Println("error rolling back database transaction:", err)
+				db.Close()
+				os.Exit(1)
+			}
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			fmt.Println("error committing database transaction:", err)
+			db.Close()
+			os.Exit(1)
+		}
+	}
 }
 
 func loadData(finalFilename string) (map[string]FlashCard, error) {
