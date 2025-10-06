@@ -358,6 +358,14 @@
 				>
 				<button class="flex-grow">Save</button>
 			</div>
+			<details class="can-hover:block hidden">
+				<summary>Debug</summary>
+				<pre>{JSON.stringify(
+						getFlashCard(letterPair, flashCardType, $flashCardStore),
+						null,
+						2
+					)}</pre>
+			</details>
 		</form>
 	{/if}
 </div>
