@@ -17,16 +17,20 @@ import (
 )
 
 type FlashCard struct {
-	Type         string `json:"type"`
-	Owner        string `json:"owner"`
-	LetterPair   string `json:"letterPair"`
-	Memo         string `json:"memo"`
-	Image        string `json:"image"`
-	Commutator   string `json:"commutator"`
-	Tags         string `json:"tags"`
-	LastQuizUnix int64  `json:"lastQuizUnix"`
-	Confidence   int    `json:"confidence"`
-	IsPublic     bool   `json:"isPublic"`
+	Type           string `json:"type"`
+	Owner          string `json:"owner"`
+	LetterPair     string `json:"letterPair"`
+	Memo           string `json:"memo"`
+	Image          string `json:"image"`
+	Commutator     string `json:"commutator"`
+	Tags           string `json:"tags"`
+	LastQuizUnix   int64  `json:"lastQuizUnix"`
+	Confidence     int    `json:"confidence"`
+	MemoConfidence int    `json:"memoConfidence"`
+	CommConfidence int    `json:"commConfidence"`
+	DrillTimeMs    int    `json:"drillTimeMs"`
+	LastDrillUnix  int64  `json:"lastDrillUnix"`
+	IsPublic       bool   `json:"isPublic"`
 }
 
 const VERSION_PREFIX = "v2"
@@ -55,6 +59,60 @@ func init() {
 		os.Exit(1)
 	}
 
+	// migrate from old db to sqlite
+	db := GetDb()
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("error getting database transaction", err)
+		os.Exit(1)
+	}
+	statement, err := tx.Prepare(`INSERT INTO flash_card(
+		owner,
+		type,
+		letter_pair,
+		memo,
+		image,
+		commutator,
+		tags,
+		last_quiz_unix,
+		last_drill_unix,
+		memo_confidence,
+		comm_confidence,
+		drill_time_ms,
+		is_public
+		) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+	if err != nil {
+		fmt.Println("error preparing insert statement", err)
+		os.Exit(1)
+	}
+
+	defer statement.Close()
+	for pk, flashCard := range FlashCardData {
+		_, err = statement.Exec(
+			flashCard.Owner,
+			flashCard.Type,
+			flashCard.LetterPair,
+			flashCard.Memo,
+			flashCard.Image,
+			flashCard.Commutator,
+			flashCard.Tags,
+			flashCard.LastQuizUnix,
+			flashCard.LastDrillUnix,
+			flashCard.MemoConfidence,
+			flashCard.CommConfidence,
+			flashCard.DrillTimeMs,
+			flashCard.IsPublic,
+		)
+
+		if err != nil {
+			fmt.Println("error inserting", pk, err)
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		fmt.Println("error committing transaction", err)
+	}
 }
 
 func GetDb() *sql.DB {
@@ -515,17 +573,27 @@ func rowV1ToFlashCard(row string) (FlashCard, error) {
 	}
 
 	flashCardType := normaliseFlashCardType(items[6])
+	memoConfidence := confidence & 3
+	commConfidence := (confidence >> 2) & 3
+	drillTimeDs := ((confidence >> 4) & 255) * 2
+	if drillTimeDs == 0 {
+		drillTimeDs = 509
+	}
 	flashCard := FlashCard{
-		Owner:        items[0],
-		LetterPair:   items[1],
-		Memo:         items[2],
-		Image:        items[3],
-		Commutator:   items[4],
-		Tags:         items[5],
-		Type:         flashCardType,
-		Confidence:   int(confidence),
-		IsPublic:     false,
-		LastQuizUnix: lastQuizUnix,
+		Owner:          items[0],
+		LetterPair:     items[1],
+		Memo:           items[2],
+		Image:          items[3],
+		Commutator:     items[4],
+		Tags:           items[5],
+		Type:           flashCardType,
+		Confidence:     int(confidence),
+		MemoConfidence: int(memoConfidence),
+		CommConfidence: int(commConfidence),
+		DrillTimeMs:    int(drillTimeDs * 100),
+		IsPublic:       false,
+		LastQuizUnix:   lastQuizUnix,
+		LastDrillUnix:  lastQuizUnix,
 	}
 
 	return flashCard, nil
@@ -555,17 +623,27 @@ func rowV2ToFlashCard(row string) (FlashCard, error) {
 	}
 
 	flashCardType := normaliseFlashCardType(items[6])
+	memoConfidence := confidence & 3
+	commConfidence := (confidence >> 2) & 3
+	drillTimeDs := ((confidence >> 4) & 255) * 2
+	if drillTimeDs == 0 {
+		drillTimeDs = 509
+	}
 	flashCard := FlashCard{
-		Owner:        items[0],
-		LetterPair:   items[1],
-		Memo:         items[2],
-		Image:        items[3],
-		Commutator:   items[4],
-		Tags:         items[5],
-		Type:         flashCardType,
-		Confidence:   int(confidence),
-		IsPublic:     isPublic,
-		LastQuizUnix: lastQuizUnix,
+		Owner:          items[0],
+		LetterPair:     items[1],
+		Memo:           items[2],
+		Image:          items[3],
+		Commutator:     items[4],
+		Tags:           items[5],
+		Type:           flashCardType,
+		Confidence:     int(confidence),
+		MemoConfidence: int(memoConfidence),
+		CommConfidence: int(commConfidence),
+		DrillTimeMs:    int(drillTimeDs * 100),
+		IsPublic:       isPublic,
+		LastQuizUnix:   lastQuizUnix,
+		LastDrillUnix:  lastQuizUnix,
 	}
 
 	return flashCard, nil
@@ -625,8 +703,9 @@ func rowToItems(row string) []string {
 	return items
 }
 
+// @todo(nick-ng): make partial update method for quiz/drill
 func WriteFlashCard(flashCard FlashCard) error {
-	// @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
+	// @todo(nick-ng): write flash cards to database
 	primaryKey, err := flashCardToPrimaryKey(flashCard)
 	if err != nil {
 		return err
@@ -662,6 +741,7 @@ func WriteFlashCard(flashCard FlashCard) error {
 }
 
 func ReadAllFlashCards(owner string) ([]FlashCard, error) {
+	// @todo(nick-ng): get cards from database
 	allFlashCards := []FlashCard{}
 
 	for _, flashCard := range FlashCardData {
@@ -674,6 +754,7 @@ func ReadAllFlashCards(owner string) ([]FlashCard, error) {
 }
 
 func ReadFlashCard(owner string, flashCardType string, letterPair string) (FlashCard, error) {
+	// @todo(nick-ng): get cards from database
 	primaryKey, err := getPrimaryKey(owner, flashCardType, letterPair)
 
 	if err != nil {
@@ -687,15 +768,19 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 	}
 
 	return FlashCard{
-		Type:         "corner",
-		Owner:        owner,
-		LetterPair:   letterPair,
-		Memo:         "",
-		Image:        "",
-		Commutator:   "",
-		Tags:         "",
-		LastQuizUnix: 0,
-		Confidence:   0,
-		IsPublic:     false,
+		Type:           "corner",
+		Owner:          owner,
+		LetterPair:     letterPair,
+		Memo:           "",
+		Image:          "",
+		Commutator:     "",
+		Tags:           "",
+		LastQuizUnix:   0,
+		Confidence:     0,
+		LastDrillUnix:  0,
+		CommConfidence: 0,
+		MemoConfidence: 0,
+		DrillTimeMs:    5000,
+		IsPublic:       false,
 	}, nil
 }
