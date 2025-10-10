@@ -1,22 +1,22 @@
 import z from "zod";
 
-export type FlashCard = {
-	letterPair: string;
-	type: string; // corner, edge
-	memo: string;
-	image: string;
-	commutator: string;
-	confidence: number; // packed commutator and memo confidence. comm = high
-	commConfidence: number;
-	memoConfidence: number;
-	drillTimeDs: number; // deciseconds (10 deciseconds = 1 second)
-	tags: string;
-	lastQuizUnix: number;
-	isPublic: boolean;
-	fetchedAtMs?: number;
-};
+export const flashCardSchema = z.object({
+	letterPair: z.string(),
+	type: z.string(), // corner, edge, etc.
+	memo: z.string(),
+	image: z.string(),
+	commutator: z.string(),
+	commConfidence: z.number(),
+	memoConfidence: z.number(),
+	drillTimeMs: z.number(),
+	tags: z.string(),
+	lastQuizUnix: z.number(),
+	lastDrillUnix: z.number(),
+	isPublic: z.boolean()
+});
 
-export const getPropertyOrDefault =
+export type FlashCard = z.infer<typeof flashCardSchema>;
+const getPropertyOrDefault =
 	(unknown: unknown) =>
 	<T>(propertyName: string, defaultValue: T): T => {
 		if (!unknown || typeof unknown !== "object" || !(propertyName in unknown)) {
@@ -31,63 +31,6 @@ export const getPropertyOrDefault =
 		return value as typeof defaultValue;
 	};
 
-// @todo(nick-ng): change to zod
-export const parseFlashCard = (
-	unknown: unknown
-): { isValid: true; data: FlashCard } | { isValid: false } => {
-	if (!unknown || typeof unknown !== "object") {
-		return {
-			isValid: false
-		};
-	}
-
-	if (!("letterPair" in unknown && typeof unknown.letterPair === "string")) {
-		return {
-			isValid: false
-		};
-	}
-
-	if (!("type" in unknown && typeof unknown.type === "string")) {
-		return {
-			isValid: false
-		};
-	}
-
-	if (!("lastQuizUnix" in unknown && typeof unknown.lastQuizUnix === "number")) {
-		return {
-			isValid: false
-		};
-	}
-
-	const getFromUnknown = getPropertyOrDefault(unknown);
-
-	const confidence = getFromUnknown("confidence", 0);
-	const memoConfidence = confidence & 3;
-	const commConfidence = (confidence >> 2) & 3;
-	let drillTimeDs = ((confidence >> 4) & 255) * 2;
-	if (drillTimeDs === 0) {
-		drillTimeDs = 509;
-	}
-
-	return {
-		isValid: true,
-		data: {
-			letterPair: unknown.letterPair,
-			type: unknown.type,
-			memo: getFromUnknown("memo", ""),
-			image: getFromUnknown("image", ""),
-			commutator: getFromUnknown("commutator", ""),
-			confidence,
-			commConfidence,
-			memoConfidence,
-			drillTimeDs,
-			tags: getFromUnknown("tags", ""),
-			isPublic: getFromUnknown("isPublic", false),
-			lastQuizUnix: unknown.lastQuizUnix
-		}
-	};
-};
-
 export const defaultFlashCard = (letterPair: string, cardType: string = "corner"): FlashCard => {
 	return {
 		letterPair,
@@ -95,13 +38,13 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 		memo: "",
 		image: "",
 		commutator: "",
-		confidence: 0,
 		commConfidence: 0,
 		memoConfidence: 0,
-		drillTimeDs: 509,
+		drillTimeMs: 5000,
 		tags: "",
 		isPublic: false,
-		lastQuizUnix: 0
+		lastQuizUnix: 0,
+		lastDrillUnix: 0
 	};
 };
 

@@ -153,20 +153,6 @@
 				</tr>
 			</tbody>
 		</table>
-		<ConfidenceTable
-			tableType="Comm"
-			missing={summary.missingComms}
-			cardType={flashCardType}
-			confidences={summary.commConfidences}
-			total={summary.total}
-		/>
-		<ConfidenceTable
-			tableType="Memo"
-			missing={summary.missingMemos}
-			cardType={flashCardType}
-			confidences={summary.memoConfidences}
-			total={summary.total}
-		/>
 		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>
@@ -195,6 +181,49 @@
 				{/each}
 			</tbody>
 		</table>
+		<table class="quiz-history block w-full lg:max-w-lg">
+			<thead>
+				<tr>
+					<th class="w-full text-left whitespace-nowrap">Drill History</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<div
+							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+						>
+							{#each summary.drillAges as drillAge (drillAge.letterPair)}
+								{#if !drillAge.isMarker}
+									<a href={`/flash-cards?f=${drillAge.letterPair}`} class="p-0.5 uppercase"
+										>{drillAge.letterPair}</a
+									>
+								{:else if !drillAge.hidden}
+									<span
+										class="dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100 dark:bg-white"
+										>{drillAge.letterPair}</span
+									>
+								{/if}
+							{/each}
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<ConfidenceTable
+			tableType="Comm"
+			missing={summary.missingComms}
+			cardType={flashCardType}
+			confidences={summary.commConfidences}
+			total={summary.total}
+		/>
+		<ConfidenceTable
+			tableType="Memo"
+			missing={summary.missingMemos}
+			cardType={flashCardType}
+			confidences={summary.memoConfidences}
+			total={summary.total}
+		/>
 		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>

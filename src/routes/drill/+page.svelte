@@ -6,7 +6,7 @@
 	import { DRILL_ITEMS_STORE_KEY } from "$lib/constants";
 	import { fetchFlashCards, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { getDrillItems } from "$lib/drill";
-	import { putQuiz } from "$lib/quiz";
+	import { patchQuiz } from "$lib/quiz";
 	import { parseCommutator } from "$lib/utils";
 	import FlashCard from "$lib/components/flash-card.svelte";
 	import DrillMaker from "$lib/components/drill-maker.svelte";
@@ -178,10 +178,10 @@
 									>{(drillLetter.timeMs / 1000).toFixed(1)}</td
 								>
 								<td class="border border-gray-500 px-1 text-right"
-									>{(flashCard.drillTimeDs / 10).toFixed(0)} → {(
-										Math.min(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
+									>{(flashCard.drillTimeMs / 1000).toFixed(0)}→{(
+										Math.min(flashCard.drillTimeMs / 1000, drillLetter.timeMs / 1000) *
 											actualDrillWeight +
-										Math.max(flashCard.drillTimeDs / 10, drillLetter.timeMs / 1000) *
+										Math.max(flashCard.drillTimeMs / 1000, drillLetter.timeMs / 1000) *
 											(1 - actualDrillWeight)
 									).toFixed(0)}</td
 								>
@@ -210,10 +210,10 @@
 											$flashCardStore
 										);
 
-										const drillTimeDs = drillLetter.timeMs / 100;
-										const adjustedDrillTimeDs =
-											Math.min(drillTimeDs, flashCard.drillTimeDs) * actualDrillWeight +
-											Math.max(drillTimeDs, flashCard.drillTimeDs) * (1 - actualDrillWeight);
+										const drillTimeMs = drillLetter.timeMs;
+										const adjustedDrillTimeMs =
+											Math.min(drillTimeMs, flashCard.drillTimeMs) * actualDrillWeight +
+											Math.max(drillTimeMs, flashCard.drillTimeMs) * (1 - actualDrillWeight);
 
 										let newCommConfidence = flashCard.commConfidence;
 										if (drillLetter.timeMs < 15000) {
@@ -222,17 +222,10 @@
 											newCommConfidence = 3;
 										}
 
-										const drillConfidence = Math.max(
-											0,
-											Math.min(255, Math.round(adjustedDrillTimeDs / 2))
-										);
-										const packedConfidence =
-											(drillConfidence << 4) + (newCommConfidence << 2) + flashCard.memoConfidence;
-
 										const formData = new FormData();
 										formData.set("type", drillLetter.flashCardType);
-										formData.set("confidence", packedConfidence.toString(10));
-										return putQuiz(drillLetter.letterPair, formData, true);
+										formData.set("drillTimeMs", adjustedDrillTimeMs.toFixed(0));
+										return patchQuiz(drillLetter.letterPair, formData, true);
 									})
 								);
 							}

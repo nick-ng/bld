@@ -141,8 +141,8 @@ export const makeDrill = async (
 	switch (drillSet.key) {
 		case "slow": {
 			possibleFlashCards.sort((a, b) => {
-				const aRounded = Math.round(a.drillTimeDs / 10);
-				const bRounded = Math.round(b.drillTimeDs / 10);
+				const aRounded = Math.round(a.drillTimeMs / 1000);
+				const bRounded = Math.round(b.drillTimeMs / 1000);
 				if (aRounded !== bRounded) {
 					return bRounded - aRounded;
 				}
@@ -173,7 +173,7 @@ export const makeDrill = async (
 			flashCardType,
 			quizzed: false,
 			send: true,
-			timeMs: fc.drillTimeDs
+			timeMs: fc.drillTimeMs
 		}))
 	);
 

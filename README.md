@@ -62,13 +62,12 @@ css:
 - server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
 - server/routes/flash-cards.go:82: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
-- server/routes/flash-cards.go:401: @todo(nick-ng): handle cleaning up images
+- server/routes/flash-cards.go:400: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
-- src/lib/types.ts:34: @todo(nick-ng): change to zod
 - src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:385: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:16: @todo(nick-ng): make drill aware of flash card type

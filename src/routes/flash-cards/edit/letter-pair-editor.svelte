@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { parseFlashCard } from "$lib/types";
+	import { flashCardSchema } from "$lib/types";
 	import {
 		joinServerPath,
 		upperCaseFirst,
@@ -172,8 +172,8 @@
 				}
 
 				const responseJson = await response.json();
-				const parseResponse = parseFlashCard(responseJson);
-				if (parseResponse.isValid) {
+				const parseResponse = flashCardSchema.safeParse(responseJson);
+				if (parseResponse.success) {
 					const { data } = parseResponse;
 					updateFlashCard(data);
 
@@ -190,14 +190,24 @@
 			/>
 			<input
 				type="hidden"
-				name="confidence"
-				value={getFlashCard(letterPair, flashCardType, $flashCardStore).confidence}
+				name="lastDrillUnix"
+				value={getFlashCard(letterPair, flashCardType, $flashCardStore).lastDrillUnix}
+			/>
+			<input
+				type="hidden"
+				name="memoConfidence"
+				value={getFlashCard(letterPair, flashCardType, $flashCardStore).memoConfidence}
+			/>
+			<input
+				type="hidden"
+				name="commConfidence"
+				value={getFlashCard(letterPair, flashCardType, $flashCardStore).commConfidence}
 			/>
 			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
 				<tbody>
 					<tr>
 						<td class="text-right"
-							><a href="https://bestsiteever.ru/colpi/" target="pux_bld_colpi">Memo</a></td
+							><a href="https://bestsiteever.net/colpi/" target="pux_bld_colpi">Memo</a></td
 						>
 						<td
 							><input

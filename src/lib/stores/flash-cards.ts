@@ -3,7 +3,7 @@ import type { FlashCard } from "$lib/types";
 import { writable } from "svelte/store";
 import { browser } from "$app/environment";
 import { authFetch, joinServerPath } from "$lib/utils";
-import { defaultFlashCard, parseFlashCard } from "$lib/types";
+import { defaultFlashCard, flashCardSchema } from "$lib/types";
 
 const MAX_AGE_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -77,8 +77,8 @@ export const fetchFlashCards = async (
 		const flashCards: FlashCardStoreType = {};
 		const nowMs = Date.now();
 		for (let i = 0; i < flashCardsArray.length; i++) {
-			const result = parseFlashCard(flashCardsArray[i]);
-			if (result.isValid) {
+			const result = flashCardSchema.safeParse(flashCardsArray[i]);
+			if (result.success) {
 				const flashCardKey = getFlashCardKey(result.data.letterPair, result.data.type);
 				flashCards[flashCardKey] = {
 					...result.data,
@@ -140,8 +140,8 @@ export const loadFlashCard = async (
 		}
 
 		const resJson = await res.json();
-		const parseResult = parseFlashCard(resJson);
-		if (parseResult.isValid) {
+		const parseResult = flashCardSchema.safeParse(resJson);
+		if (parseResult.success) {
 			updateFlashCard(parseResult.data);
 
 			return parseResult.data;

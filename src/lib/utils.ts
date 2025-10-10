@@ -613,6 +613,12 @@ export const summariseFlashCards = (
 		hidden?: boolean;
 		isMarker?: boolean;
 	}[] = flashCards.toSorted((a, b) => b.lastQuizUnix - a.lastQuizUnix);
+	const drillAges: {
+		letterPair: string;
+		lastDrillUnix: number;
+		hidden?: boolean;
+		isMarker?: boolean;
+	}[] = flashCards.toSorted((a, b) => b.lastDrillUnix - a.lastDrillUnix);
 	if (quizAges.length > 0) {
 		const nowMs = Date.now();
 		const newest = quizAges[0].lastQuizUnix;
@@ -667,6 +673,63 @@ export const summariseFlashCards = (
 		for (let i = 1; i < quizAges.length - 1; i++) {
 			if (quizAges[i].isMarker && quizAges[i - 1].isMarker && quizAges[i + 1].isMarker) {
 				quizAges[i].hidden = true;
+			}
+		}
+	}
+	if (drillAges.length > 0) {
+		const nowMs = Date.now();
+		const newest = drillAges[0].lastDrillUnix;
+		const newestDate = new Date(newest * 1000);
+		const oldest = drillAges[drillAges.length - 1].lastDrillUnix;
+		const oldestDate = new Date(oldest * 1000);
+		const historyMarkers = [
+			{ label: "1 Year", unixTimestamp: (nowMs - YEAR_MS) / 1000 },
+			{ label: "6 Months", unixTimestamp: (nowMs - 6 * MONTH_MS) / 1000 },
+			{ label: "1 Month", unixTimestamp: (nowMs - MONTH_MS) / 1000 },
+			{ label: "1 Week", unixTimestamp: (nowMs - WEEK_MS) / 1000 },
+			{ label: "1 Day", unixTimestamp: (nowMs - DAY_MS) / 1000 },
+			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 }
+		];
+		for (let i = 0; i < historyMarkers.length; i++) {
+			if (oldest < historyMarkers[i].unixTimestamp && newest > historyMarkers[i].unixTimestamp) {
+				drillAges.push({
+					lastDrillUnix: historyMarkers[i].unixTimestamp,
+					letterPair: historyMarkers[i].label,
+					isMarker: true
+				});
+			}
+		}
+		drillAges.push({
+			lastDrillUnix: oldest - 1,
+			letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`,
+			isMarker: true
+		});
+		if (newest * 1000 > nowMs - DAY_MS) {
+			drillAges.push({
+				lastDrillUnix: drillAges[0].lastDrillUnix + 1,
+				letterPair: `${newestDate.getHours()}:${newestDate.getMinutes().toString().padStart(2, "0")}`,
+				isMarker: true
+			});
+		} else {
+			drillAges.push({
+				lastDrillUnix: newest + 1,
+				letterPair: `${newestDate.getFullYear()}-${(newestDate.getMonth() + 1).toString().padStart(2, "0")}-${newestDate.getDate().toString().padStart(2, "0")}`,
+				isMarker: true
+			});
+		}
+
+		drillAges.sort((a, b) => {
+			const ageDifference = a.lastDrillUnix - b.lastDrillUnix;
+			if (ageDifference !== 0) {
+				return ageDifference;
+			}
+
+			return a.letterPair.localeCompare(b.letterPair);
+		});
+
+		for (let i = 1; i < drillAges.length - 1; i++) {
+			if (drillAges[i].isMarker && drillAges[i - 1].isMarker && drillAges[i + 1].isMarker) {
+				drillAges[i].hidden = true;
 			}
 		}
 	}
@@ -729,40 +792,40 @@ export const summariseFlashCards = (
 	}
 
 	flashCards.sort((a, b) => {
-		if (a.drillTimeDs !== b.drillTimeDs) {
-			return a.drillTimeDs - b.drillTimeDs;
+		if (a.drillTimeMs !== b.drillTimeMs) {
+			return a.drillTimeMs - b.drillTimeMs;
 		}
 
 		return a.letterPair.localeCompare(b.letterPair);
 	});
-	const drillTimesDs = flashCards.map((fc) => fc.drillTimeDs);
-	const fastestDrillDs = Math.min(...drillTimesDs);
-	const slowestDrillDs = Math.max(...drillTimesDs);
-	const drillDifferenceDs = slowestDrillDs - fastestDrillDs;
-	const drillStep = drillDifferenceDs / 10;
+	const drillTimesMs = flashCards.map((fc) => fc.drillTimeMs);
+	const fastestDrillMs = Math.min(...drillTimesMs);
+	const slowestDrillMs = Math.max(...drillTimesMs);
+	const drillDifferenceMs = slowestDrillMs - fastestDrillMs;
+	const drillStep = drillDifferenceMs / 10;
 	for (let i = 0; i < 9; i++) {
-		const low = fastestDrillDs + i * drillStep;
-		const high = fastestDrillDs + (i + 1) * drillStep;
+		const low = fastestDrillMs + i * drillStep;
+		const high = fastestDrillMs + (i + 1) * drillStep;
 		const flashCardGroup = flashCards.filter(
-			(fc) => Math.floor(fc.drillTimeDs) >= low && Math.floor(fc.drillTimeDs) < high
+			(fc) => Math.floor(fc.drillTimeMs) >= low && Math.floor(fc.drillTimeMs) < high
 		);
 
 		const times = {
 			seconds: [
-				Math.min(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10,
-				Math.max(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10
+				Math.min(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
+				Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000
 			],
 			letters: flashCardGroup.map((fc) => fc.letterPair)
 		};
 		drillSpeedGroups.push(times);
 	}
 
-	const low = fastestDrillDs + 9 * drillStep;
-	const flashCardGroup = flashCards.filter((fc) => Math.floor(fc.drillTimeDs) >= low);
+	const low = fastestDrillMs + 9 * drillStep;
+	const flashCardGroup = flashCards.filter((fc) => Math.floor(fc.drillTimeMs) >= low);
 	const times = {
 		seconds: [
-			Math.min(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10,
-			Math.max(...flashCardGroup.map((fc) => fc.drillTimeDs)) / 10
+			Math.min(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
+			Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000
 		],
 		letters: flashCardGroup.map((fc) => fc.letterPair)
 	};
@@ -778,6 +841,7 @@ export const summariseFlashCards = (
 		drillSpeedGroups,
 		missingComms,
 		quizAges,
+		drillAges,
 		total
 	};
 };
