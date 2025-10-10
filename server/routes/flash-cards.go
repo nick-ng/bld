@@ -71,6 +71,7 @@ func AddFlashCardsRoutes() {
 	http.HandleFunc("GET /flash-cards/{letterPair}", handleGetFlashCard)
 	http.HandleFunc("PUT /flash-cards/{letterPair}", handlePutFlashCard)
 	http.HandleFunc("PUT /quiz/{letterPair}", handlePutQuizAnswer)
+	http.HandleFunc("PATCH /quiz/{letterPair}", handlePatchQuiz)
 }
 
 func handleGetFlashCard(writer http.ResponseWriter, req *http.Request) {
@@ -160,6 +161,100 @@ func handleGetFlashCards(writer http.ResponseWriter, req *http.Request) {
 	writer.Write(jsonBytes)
 }
 
+func parseIntOrZero(str string) int64 {
+	value, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return 0
+	}
+
+	return value
+}
+
+func parseIntOrNegative(str string) int64 {
+	if len(str) < 1 {
+		return -1
+	}
+
+	value, err := strconv.ParseInt(str, 10, 64)
+	if err != nil {
+		return -1
+	}
+
+	return value
+}
+
+var validFlashCardTypes = map[string]bool{
+	"corner":  true,
+	"edge":    true,
+	"xcenter": true,
+	"center":  true,
+	"wing":    true,
+}
+
+func handlePatchQuiz(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	writer.Header().Add("X-Access-Token", accessToken)
+
+	letterPair := req.PathValue("letterPair")
+	if len(letterPair) == 0 {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte("no letter pair provided"))
+		return
+	}
+	flashCardType := req.FormValue("type")
+	_, ok := validFlashCardTypes[flashCardType]
+	if !ok {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte("invalid type"))
+		return
+	}
+
+	partialFlashCard := make(map[string]any)
+	partialFlashCard["Owner"] = authenticatedUsername
+	partialFlashCard["Type"] = flashCardType
+	partialFlashCard["LetterPair"] = letterPair
+
+	memoConfidence := parseIntOrNegative(req.FormValue("memoConfidence"))
+	commConfidence := parseIntOrNegative(req.FormValue("commConfidence"))
+	drillTimeMs := parseIntOrNegative(req.FormValue("drillTimeMs"))
+
+	if memoConfidence >= 0 {
+		partialFlashCard["MemoConfidence"] = memoConfidence
+		partialFlashCard["LastQuizUnix"] = time.Now().Unix()
+	}
+	if commConfidence >= 0 {
+		partialFlashCard["CommConfidence"] = commConfidence
+		partialFlashCard["LastQuizUnix"] = time.Now().Unix()
+	}
+	if drillTimeMs >= 0 {
+		partialFlashCard["DrillTimeMs"] = drillTimeMs
+		partialFlashCard["LastDrillUnix"] = time.Now().Unix()
+	}
+
+	returnedFlashCard, err := database.WritePartialFlashCard(partialFlashCard)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "error saving flash card to database: %s", err)
+		return
+	}
+
+	flashCardJsonBytes, err := json.Marshal(returnedFlashCard)
+	if err != nil {
+		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.WriteHeader(http.StatusOK)
+	writer.Write(flashCardJsonBytes)
+}
+
 func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
@@ -183,7 +278,10 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	imageUrl := req.FormValue("imageUrl")
 	lastQuizUnixString := req.FormValue("lastQuizUnix")
 	confidenceString := req.FormValue("confidence")
-	isPublic := req.FormValue("isPublic")
+	memoConfidence := parseIntOrZero(req.FormValue("memoConfidence"))
+	commConfidence := parseIntOrZero(req.FormValue("commConfidence"))
+	drillTimeMs := parseIntOrZero(req.FormValue("drillTimeMs"))
+	isPublic := req.FormValue("isPublic") == "1"
 
 	lastQuizUnix, err := strconv.ParseInt(lastQuizUnixString, 10, 64)
 	if err != nil {
@@ -195,7 +293,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 		confidence = 0
 	}
 
-	imageChanged := false
+	// imageChanged := false
 	filename := imageUrl
 	err = req.ParseMultipartForm(32 << 20)
 	if err != nil {
@@ -219,7 +317,7 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 		}
 
 		filename = fmt.Sprintf("%s.jpg", utils.RandomId())
-		imageChanged = true
+		// imageChanged = true
 		filePath, err := GetImageFullPath(filename)
 		if err != nil {
 			writer.WriteHeader(http.StatusInternalServerError)
@@ -268,21 +366,29 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	flashCard := database.FlashCard{
-		Type:         "corner",
-		Owner:        authenticatedUsername,
-		LetterPair:   letterPair,
-		Memo:         memo,
-		Image:        filename,
-		Commutator:   commutator,
-		Tags:         tags,
-		LastQuizUnix: lastQuizUnix,
-		Confidence:   int(confidence),
-		IsPublic:     isPublic == "1",
+		Type:           "corner",
+		Owner:          authenticatedUsername,
+		LetterPair:     letterPair,
+		Memo:           memo,
+		Image:          filename,
+		Commutator:     commutator,
+		Tags:           tags,
+		LastQuizUnix:   lastQuizUnix,
+		Confidence:     int(confidence),
+		MemoConfidence: int(memoConfidence),
+		CommConfidence: int(commConfidence),
+		DrillTimeMs:    int(drillTimeMs),
+		IsPublic:       isPublic,
 	}
 
-	database.WriteFlashCard(flashCard)
+	returnedFlashCard, err := database.WriteFlashCard(flashCard)
+	if err != nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		fmt.Fprintf(writer, "error saving flash card to database: %s", err)
+		return
+	}
 
-	flashCardJsonBytes, err := json.Marshal(flashCard)
+	flashCardJsonBytes, err := json.Marshal(returnedFlashCard)
 	if err != nil {
 		fmt.Fprintf(writer, "error when converting flash card to json string: %s", err)
 	}
@@ -292,9 +398,10 @@ func handlePutFlashCard(writer http.ResponseWriter, req *http.Request) {
 	writer.WriteHeader(http.StatusOK)
 	writer.Write(flashCardJsonBytes)
 
-	if imageChanged {
-		go cleanUpImages()
-	}
+	// @todo(nick-ng): handle cleaning up images
+	// if imageChanged {
+	// 	go cleanUpImages()
+	// }
 
 }
 

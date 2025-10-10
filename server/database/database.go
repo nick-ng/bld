@@ -5,15 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	_ "github.com/mattn/go-sqlite3"
 	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"time"
+
+	_ "github.com/mattn/go-sqlite3"
 )
 
 type FlashCard struct {
@@ -31,6 +33,7 @@ type FlashCard struct {
 	DrillTimeMs    int    `json:"drillTimeMs"`
 	LastDrillUnix  int64  `json:"lastDrillUnix"`
 	IsPublic       bool   `json:"isPublic"`
+	ModifiedAt     int64  `json:"modifiedAt"`
 }
 
 const VERSION_PREFIX = "v2"
@@ -66,7 +69,7 @@ func init() {
 		fmt.Println("error getting database transaction", err)
 		os.Exit(1)
 	}
-	statement, err := tx.Prepare(`INSERT INTO flash_card(
+	statement, err := tx.Prepare(`INSERT OR IGNORE INTO flash_card(
 		owner,
 		type,
 		letter_pair,
@@ -703,72 +706,84 @@ func rowToItems(row string) []string {
 	return items
 }
 
-// @todo(nick-ng): make partial update method for quiz/drill
-func WriteFlashCard(flashCard FlashCard) error {
-	// @todo(nick-ng): write flash cards to database
-	primaryKey, err := flashCardToPrimaryKey(flashCard)
-	if err != nil {
-		return err
-	}
-
-	FlashCardData[primaryKey] = flashCard
-
-	changeLogPath := getCurrentChangeLogFullPath()
-	f, err := os.OpenFile(changeLogPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
-	if err != nil {
-		f.Close()
-		return err
-	}
-	defer f.Close()
-
-	row, err := flashCardToRow(flashCard)
-	if err != nil {
-		return err
-	}
-
-	_, err = f.Write([]byte(row))
-	if err != nil {
-		return err
-	}
-	if SYNC_ALL_WRITES {
-		err = f.Sync()
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
+var flashCardKeyColumnMap = map[string]string{
+	"Owner":          "owner",
+	"Type":           "type",
+	"LetterPair":     "letter_pair",
+	"Memo":           "memo",
+	"Image":          "image",
+	"Commutator":     "commutator",
+	"Tags":           "tags",
+	"LastQuizUnix":   "last_quiz_unix",
+	"LastDrillUnix":  "last_drill_unix",
+	"MemoConfidence": "memo_confidence",
+	"CommConfidence": "comm_confidence",
+	"DrillTimeMs":    "drill_time_ms",
+	"IsPublic":       "is_public",
+	"IsDeleted":      "is_deleted",
 }
 
-func ReadAllFlashCards(owner string) ([]FlashCard, error) {
-	// @todo(nick-ng): get cards from database
-	allFlashCards := []FlashCard{}
-
-	for _, flashCard := range FlashCardData {
-		if flashCard.Owner == owner {
-			allFlashCards = append(allFlashCards, flashCard)
+func prepareFlashCardFragments(flashCard FlashCard) ([]string, []any, string, string, string, string) {
+	v := reflect.ValueOf(flashCard)
+	typeOfV := v.Type()
+	columns := []string{}
+	updateColumns := []string{}
+	upsertColumns := []string{}
+	values := []any{}
+	placeHolders := []string{}
+	for i := 0; i < v.NumField(); i++ {
+		key := typeOfV.Field(i).Name
+		column, ok := flashCardKeyColumnMap[key]
+		if !ok {
+			continue
 		}
+
+		value := v.Field(i).Interface()
+		columns = append(columns, column)
+		placeHolders = append(placeHolders, "?")
+		updateColumns = append(updateColumns, fmt.Sprintf("%s = ?", column))
+		upsertColumns = append(upsertColumns, fmt.Sprintf("%s = excluded.%s", column, column))
+		values = append(values, value)
 	}
 
-	return allFlashCards, nil
+	placeHoldersString := strings.Join(placeHolders, ", ")
+	insertString := strings.Join(columns, ", ")
+	updateString := strings.Join(updateColumns, ", ")
+	upsertString := strings.Join(upsertColumns, ", ")
+
+	return columns, values, placeHoldersString, insertString, updateString, upsertString
 }
 
-func ReadFlashCard(owner string, flashCardType string, letterPair string) (FlashCard, error) {
-	// @todo(nick-ng): get cards from database
-	primaryKey, err := getPrimaryKey(owner, flashCardType, letterPair)
+func preparePartialFlashCardFragments(flashCardProperties map[string]any) ([]string, []any, string, string, string, string) {
+	columns := []string{}
+	updateColumns := []string{}
+	upsertColumns := []string{}
+	values := []any{}
+	placeHolders := []string{}
+	for key, columnName := range flashCardKeyColumnMap {
+		value, ok := flashCardProperties[key]
+		if !ok {
+			continue
+		}
 
-	if err != nil {
-		return FlashCard{}, err
+		columns = append(columns, columnName)
+		placeHolders = append(placeHolders, "?")
+		updateColumns = append(updateColumns, fmt.Sprintf("%s = ?", columnName))
+		upsertColumns = append(upsertColumns, fmt.Sprintf("%s = excluded.%s", columnName, columnName))
+		values = append(values, value)
 	}
 
-	flashCard, ok := FlashCardData[primaryKey]
+	placeHoldersString := strings.Join(placeHolders, ", ")
+	insertString := strings.Join(columns, ", ")
+	updateString := strings.Join(updateColumns, ", ")
+	upsertString := strings.Join(upsertColumns, ", ")
 
-	if ok {
-		return flashCard, nil
-	}
+	return columns, values, placeHoldersString, insertString, updateString, upsertString
+}
 
+func getDefaultFlashCard(owner string, flashCardType string, letterPair string) FlashCard {
 	return FlashCard{
-		Type:           "corner",
+		Type:           flashCardType,
 		Owner:          owner,
 		LetterPair:     letterPair,
 		Memo:           "",
@@ -776,11 +791,278 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 		Commutator:     "",
 		Tags:           "",
 		LastQuizUnix:   0,
-		Confidence:     0,
 		LastDrillUnix:  0,
 		CommConfidence: 0,
 		MemoConfidence: 0,
-		DrillTimeMs:    5000,
+		DrillTimeMs:    50000,
 		IsPublic:       false,
-	}, nil
+	}
+}
+
+var flashCardSelectColumns = `owner,
+type,
+letter_pair,
+memo, 
+image,
+commutator,
+tags,
+last_quiz_unix,
+last_drill_unix,
+memo_confidence,
+comm_confidence,
+drill_time_ms,
+is_public`
+
+func WriteFlashCard(flashCard FlashCard) (FlashCard, error) {
+	db := GetDb()
+
+	_, values, placeHoldersString, insertString, _, upsertString := prepareFlashCardFragments(flashCard)
+	query := fmt.Sprintf(`INSERT INTO flash_card (%s)
+		VALUES (%s),
+		ON CONFLICT (owner, type, letter_pair) DO UPDATE SET %s
+		RETURNING %s`,
+		insertString, placeHoldersString, upsertString, flashCardSelectColumns)
+	insertStatement, err := db.Prepare(query)
+	if err != nil {
+		fmt.Println("error preparing flash card insert statement:", err)
+		return getDefaultFlashCard(flashCard.Owner, flashCard.Type, flashCard.LetterPair), err
+	}
+
+	rows, err := insertStatement.Query(values...)
+	if err != nil {
+		fmt.Println("error executing flash card insert statement:", err)
+		return getDefaultFlashCard(flashCard.Owner, flashCard.Type, flashCard.LetterPair), err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var owner string
+		var flashCardType string
+		var letterPair string
+		var memo string
+		var image string
+		var commutator string
+		var tags string
+		var lastQuizUnix int64
+		var lastDrillUnix int64
+		var memoConfidence int
+		var commConfidence int
+		var drillTimeMs int
+		var isPublic int
+
+		rows.Scan(&owner, &flashCardType, &letterPair, &memo, &image, &commutator, &tags, &lastQuizUnix, &lastDrillUnix, &memoConfidence, &commConfidence, &drillTimeMs, &isPublic)
+
+		flashCardFromDb := FlashCard{
+			Owner:          owner,
+			Type:           flashCardType,
+			LetterPair:     letterPair,
+			Memo:           memo,
+			Image:          image,
+			Commutator:     commutator,
+			Tags:           tags,
+			LastQuizUnix:   lastQuizUnix,
+			LastDrillUnix:  lastDrillUnix,
+			MemoConfidence: memoConfidence,
+			CommConfidence: commConfidence,
+			DrillTimeMs:    drillTimeMs,
+			IsPublic:       isPublic > 0,
+		}
+
+		return flashCardFromDb, nil
+	}
+
+	return getDefaultFlashCard(flashCard.Owner, flashCard.Type, flashCard.LetterPair), err
+}
+
+func WritePartialFlashCard(flashCardProperties map[string]any) (FlashCard, error) {
+	temp1, ok := flashCardProperties["Owner"]
+	owner, ok2 := temp1.(string)
+	if !ok || !ok2 {
+		return FlashCard{}, errors.New("no owner provided")
+	}
+
+	temp2, ok := flashCardProperties["Type"]
+	flashCardType, ok2 := temp2.(string)
+	if !ok || !ok2 {
+		return FlashCard{}, errors.New("no type provided")
+	}
+
+	temp3, ok := flashCardProperties["LetterPair"]
+	letterPair, ok2 := temp3.(string)
+	if !ok || !ok2 {
+		return FlashCard{}, errors.New("no letter pair provided")
+	}
+
+	db := GetDb()
+
+	_, values, placeHoldersString, insertString, _, upsertString := preparePartialFlashCardFragments(flashCardProperties)
+	query := fmt.Sprintf(`INSERT INTO flash_card (%s)
+		VALUES (%s),
+		ON CONFLICT (owner, type, letter_pair) DO UPDATE SET %s
+		RETURNING %s`,
+		insertString, placeHoldersString, upsertString, flashCardSelectColumns)
+	insertStatement, err := db.Prepare(query)
+	if err != nil {
+		fmt.Println("error preparing flash card insert statement:", err)
+		return getDefaultFlashCard(owner, flashCardType, letterPair), err
+	}
+
+	rows, err := insertStatement.Query(values...)
+	if err != nil {
+		fmt.Println("error executing flash card insert statement:", err)
+		return getDefaultFlashCard(owner, flashCardType, letterPair), err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var owner string
+		var flashCardType string
+		var letterPair string
+		var memo string
+		var image string
+		var commutator string
+		var tags string
+		var lastQuizUnix int64
+		var lastDrillUnix int64
+		var memoConfidence int
+		var commConfidence int
+		var drillTimeMs int
+		var isPublic int
+
+		rows.Scan(&owner, &flashCardType, &letterPair, &memo, &image, &commutator, &tags, &lastQuizUnix, &lastDrillUnix, &memoConfidence, &commConfidence, &drillTimeMs, &isPublic)
+
+		flashCardFromDb := FlashCard{
+			Owner:          owner,
+			Type:           flashCardType,
+			LetterPair:     letterPair,
+			Memo:           memo,
+			Image:          image,
+			Commutator:     commutator,
+			Tags:           tags,
+			LastQuizUnix:   lastQuizUnix,
+			LastDrillUnix:  lastDrillUnix,
+			MemoConfidence: memoConfidence,
+			CommConfidence: commConfidence,
+			DrillTimeMs:    drillTimeMs,
+			IsPublic:       isPublic > 0,
+		}
+
+		return flashCardFromDb, nil
+	}
+
+	return getDefaultFlashCard(owner, flashCardType, letterPair), err
+}
+
+func ReadAllFlashCards(owner string) ([]FlashCard, error) {
+	allFlashCards := []FlashCard{}
+
+	db := GetDb()
+
+	query := fmt.Sprintf(`SELECT %s FROM flash_card WHERE owner = ?`, flashCardSelectColumns)
+	selectStatement, err := db.Prepare(query)
+	if err != nil {
+		fmt.Println("error preparing flash card select statement:", err)
+		return allFlashCards, err
+	}
+
+	rows, err := selectStatement.Query(owner)
+	if err != nil {
+		fmt.Println("error executing flash card insert statement:", err)
+		return allFlashCards, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var owner string
+		var flashCardType string
+		var letterPair string
+		var memo string
+		var image string
+		var commutator string
+		var tags string
+		var lastQuizUnix int64
+		var lastDrillUnix int64
+		var memoConfidence int
+		var commConfidence int
+		var drillTimeMs int
+		var isPublic int
+
+		rows.Scan(&owner, &flashCardType, &letterPair, &memo, &image, &commutator, &tags, &lastQuizUnix, &lastDrillUnix, &memoConfidence, &commConfidence, &drillTimeMs, &isPublic)
+
+		flashCardFromDb := FlashCard{
+			Owner:          owner,
+			Type:           flashCardType,
+			LetterPair:     letterPair,
+			Memo:           memo,
+			Image:          image,
+			Commutator:     commutator,
+			Tags:           tags,
+			LastQuizUnix:   lastQuizUnix,
+			LastDrillUnix:  lastDrillUnix,
+			MemoConfidence: memoConfidence,
+			CommConfidence: commConfidence,
+			DrillTimeMs:    drillTimeMs,
+			IsPublic:       isPublic > 0,
+		}
+
+		allFlashCards = append(allFlashCards, flashCardFromDb)
+	}
+
+	return allFlashCards, nil
+}
+
+func ReadFlashCard(owner string, flashCardType string, letterPair string) (FlashCard, error) {
+	db := GetDb()
+
+	query := fmt.Sprintf(`SELECT %s FROM flash_card WHERE owner = ? AND type = ? AND letter_pair = ?`, flashCardSelectColumns)
+	selectStatement, err := db.Prepare(query, flashCardType, letterPair)
+	if err != nil {
+		fmt.Println("error preparing flash card select statement:", err)
+		return getDefaultFlashCard(owner, flashCardType, letterPair), err
+	}
+
+	rows, err := selectStatement.Query(owner)
+	if err != nil {
+		fmt.Println("error executing flash card insert statement:", err)
+		return getDefaultFlashCard(owner, flashCardType, letterPair), err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var owner string
+		var flashCardType string
+		var letterPair string
+		var memo string
+		var image string
+		var commutator string
+		var tags string
+		var lastQuizUnix int64
+		var lastDrillUnix int64
+		var memoConfidence int
+		var commConfidence int
+		var drillTimeMs int
+		var isPublic int
+
+		rows.Scan(&owner, &flashCardType, &letterPair, &memo, &image, &commutator, &tags, &lastQuizUnix, &lastDrillUnix, &memoConfidence, &commConfidence, &drillTimeMs, &isPublic)
+
+		flashCardFromDb := FlashCard{
+			Owner:          owner,
+			Type:           flashCardType,
+			LetterPair:     letterPair,
+			Memo:           memo,
+			Image:          image,
+			Commutator:     commutator,
+			Tags:           tags,
+			LastQuizUnix:   lastQuizUnix,
+			LastDrillUnix:  lastDrillUnix,
+			MemoConfidence: memoConfidence,
+			CommConfidence: commConfidence,
+			DrillTimeMs:    drillTimeMs,
+			IsPublic:       isPublic > 0,
+		}
+
+		return flashCardFromDb, nil
+	}
+
+	return getDefaultFlashCard(owner, flashCardType, letterPair), err
 }

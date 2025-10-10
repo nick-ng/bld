@@ -15,7 +15,7 @@ CREATE TABLE flash_card (
 	is_public INTEGER DEFAULT 0,
 	is_deleted INTEGER DEFAULT 0,
 	modified_at INTEGER DEFAULT (unixepoch()),
-	UNIQUE (owner, type, letter_pair) ON CONFLICT IGNORE
+	UNIQUE (owner, type, letter_pair) ON CONFLICT ABORT
 )
 ;
 
