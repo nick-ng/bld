@@ -16,20 +16,6 @@ export const flashCardSchema = z.object({
 });
 
 export type FlashCard = z.infer<typeof flashCardSchema>;
-const getPropertyOrDefault =
-	(unknown: unknown) =>
-	<T>(propertyName: string, defaultValue: T): T => {
-		if (!unknown || typeof unknown !== "object" || !(propertyName in unknown)) {
-			return defaultValue;
-		}
-
-		const value = (unknown as { [k: string]: unknown })[propertyName];
-		if (typeof value !== typeof defaultValue) {
-			return defaultValue;
-		}
-
-		return value as typeof defaultValue;
-	};
 
 export const defaultFlashCard = (letterPair: string, cardType: string = "corner"): FlashCard => {
 	return {

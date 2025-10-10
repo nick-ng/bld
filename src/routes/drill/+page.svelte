@@ -215,16 +215,15 @@
 											Math.min(drillTimeMs, flashCard.drillTimeMs) * actualDrillWeight +
 											Math.max(drillTimeMs, flashCard.drillTimeMs) * (1 - actualDrillWeight);
 
-										let newCommConfidence = flashCard.commConfidence;
-										if (drillLetter.timeMs < 15000) {
-											newCommConfidence = 2; // if comm confidence was more than 2, reduce to 2
-										} else if (drillLetter.timeMs < 5000) {
-											newCommConfidence = 3;
-										}
-
 										const formData = new FormData();
 										formData.set("type", drillLetter.flashCardType);
 										formData.set("drillTimeMs", adjustedDrillTimeMs.toFixed(0));
+										if (drillLetter.timeMs < 15000) {
+											formData.set("commConfidence", "2");
+										} else if (drillLetter.timeMs < 5000) {
+											formData.set("commConfidence", "3");
+										}
+
 										return patchQuiz(drillLetter.letterPair, formData, true);
 									})
 								);
