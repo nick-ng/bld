@@ -723,7 +723,7 @@ var flashCardKeyColumnMap = map[string]string{
 	"IsDeleted":      "is_deleted",
 }
 
-func prepareFlashCardFragments(flashCard FlashCard) ([]string, []any, string, string, string, string) {
+func prepareFlashCardFragments(flashCard FlashCard, ignoredColumns []string) ([]string, []any, string, string, string, string) {
 	v := reflect.ValueOf(flashCard)
 	typeOfV := v.Type()
 	columns := []string{}
@@ -734,7 +734,7 @@ func prepareFlashCardFragments(flashCard FlashCard) ([]string, []any, string, st
 	for i := 0; i < v.NumField(); i++ {
 		key := typeOfV.Field(i).Name
 		column, ok := flashCardKeyColumnMap[key]
-		if !ok {
+		if !ok || slices.Contains(ignoredColumns, column) {
 			continue
 		}
 
@@ -816,7 +816,14 @@ is_public`
 func WriteFlashCard(flashCard FlashCard) (FlashCard, error) {
 	db := GetDb()
 
-	_, values, placeHoldersString, insertString, _, upsertString := prepareFlashCardFragments(flashCard)
+	ignoredColumns := []string{
+		"last_quiz_unix",
+		"last_drill_unix",
+		"memo_confidence",
+		"comm_confidence",
+		"drill_time_ms",
+	}
+	_, values, placeHoldersString, insertString, _, upsertString := prepareFlashCardFragments(flashCard, ignoredColumns)
 	query := fmt.Sprintf(`INSERT INTO flash_card (%s)
 		VALUES (%s)
 		ON CONFLICT (owner, type, letter_pair) DO UPDATE SET %s

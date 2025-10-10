@@ -183,26 +183,6 @@
 				}
 			}}
 		>
-			<input
-				type="hidden"
-				name="lastQuizUnix"
-				value={getFlashCard(letterPair, flashCardType, $flashCardStore).lastQuizUnix}
-			/>
-			<input
-				type="hidden"
-				name="lastDrillUnix"
-				value={getFlashCard(letterPair, flashCardType, $flashCardStore).lastDrillUnix}
-			/>
-			<input
-				type="hidden"
-				name="memoConfidence"
-				value={getFlashCard(letterPair, flashCardType, $flashCardStore).memoConfidence}
-			/>
-			<input
-				type="hidden"
-				name="commConfidence"
-				value={getFlashCard(letterPair, flashCardType, $flashCardStore).commConfidence}
-			/>
 			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
 				<tbody>
 					<tr>
