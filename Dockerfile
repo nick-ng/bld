@@ -11,7 +11,7 @@ WORKDIR /app/server
 
 RUN go mod download
 
-RUN go build -o server
+RUN CGO_ENABLED=1 go build -o server
 
 RUN ls
 
