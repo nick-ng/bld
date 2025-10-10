@@ -6,9 +6,9 @@ import { updateFlashCard } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
 import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
-import { parseFlashCard } from "$lib/types";
+import { flashCardSchema } from "$lib/types";
 
-export const putQuiz = async (letterPair: string, formData: FormData, skipRedirect = false) => {
+export const patchQuiz = async (letterPair: string, formData: FormData, skipRedirect = false) => {
 	touchCurrentQuiz();
 	// go to next question on next frame
 	setTimeout(() => {
@@ -28,7 +28,7 @@ export const putQuiz = async (letterPair: string, formData: FormData, skipRedire
 		}
 	});
 	const response = await authFetch(joinServerPath("quiz", letterPair), {
-		method: "PUT",
+		method: "PATCH",
 		body: formData
 	});
 	if (!response) {
@@ -36,8 +36,8 @@ export const putQuiz = async (letterPair: string, formData: FormData, skipRedire
 	}
 
 	const responseJson = await response.json();
-	const parsedResponse = parseFlashCard(responseJson);
-	if (parsedResponse.isValid) {
+	const parsedResponse = flashCardSchema.safeParse(responseJson);
+	if (parsedResponse.success) {
 		updateFlashCard(parsedResponse.data);
 	} else {
 		console.error("wrong", responseJson);

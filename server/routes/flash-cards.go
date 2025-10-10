@@ -230,7 +230,6 @@ func handlePatchQuiz(writer http.ResponseWriter, req *http.Request) {
 	}
 	if commConfidence >= 0 {
 		partialFlashCard["CommConfidence"] = commConfidence
-		partialFlashCard["LastQuizUnix"] = time.Now().Unix()
 	}
 	if drillTimeMs >= 0 {
 		partialFlashCard["DrillTimeMs"] = drillTimeMs

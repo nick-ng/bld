@@ -818,7 +818,7 @@ func WriteFlashCard(flashCard FlashCard) (FlashCard, error) {
 
 	_, values, placeHoldersString, insertString, _, upsertString := prepareFlashCardFragments(flashCard)
 	query := fmt.Sprintf(`INSERT INTO flash_card (%s)
-		VALUES (%s),
+		VALUES (%s)
 		ON CONFLICT (owner, type, letter_pair) DO UPDATE SET %s
 		RETURNING %s`,
 		insertString, placeHoldersString, upsertString, flashCardSelectColumns)
@@ -897,7 +897,7 @@ func WritePartialFlashCard(flashCardProperties map[string]any) (FlashCard, error
 
 	_, values, placeHoldersString, insertString, _, upsertString := preparePartialFlashCardFragments(flashCardProperties)
 	query := fmt.Sprintf(`INSERT INTO flash_card (%s)
-		VALUES (%s),
+		VALUES (%s)
 		ON CONFLICT (owner, type, letter_pair) DO UPDATE SET %s
 		RETURNING %s`,
 		insertString, placeHoldersString, upsertString, flashCardSelectColumns)
@@ -1015,13 +1015,13 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 	db := GetDb()
 
 	query := fmt.Sprintf(`SELECT %s FROM flash_card WHERE owner = ? AND type = ? AND letter_pair = ?`, flashCardSelectColumns)
-	selectStatement, err := db.Prepare(query, flashCardType, letterPair)
+	selectStatement, err := db.Prepare(query)
 	if err != nil {
 		fmt.Println("error preparing flash card select statement:", err)
 		return getDefaultFlashCard(owner, flashCardType, letterPair), err
 	}
 
-	rows, err := selectStatement.Query(owner)
+	rows, err := selectStatement.Query(owner, flashCardType, letterPair)
 	if err != nil {
 		fmt.Println("error executing flash card insert statement:", err)
 		return getDefaultFlashCard(owner, flashCardType, letterPair), err

@@ -9,7 +9,7 @@
 	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { updateTags } from "$lib/utils";
-	import { putQuiz, isLastLeitnerSession, getLeitnerTag } from "$lib/quiz";
+	import { patchQuiz, isLastLeitnerSession, getLeitnerTag } from "$lib/quiz";
 	import FlashCard from "$lib/components/flash-card.svelte";
 
 	let flashCardType = page.url.searchParams.get("t") || "corner";
@@ -68,9 +68,8 @@
 		const formData = new FormData();
 		formData.set("type", flashCard.type);
 
-		const packedConfidence =
-			((flashCard.drillTimeDs * 2) << 4) + (commConfidence << 2) + memoConfidence;
-		formData.set("confidence", packedConfidence.toString(10));
+		formData.set("memoConfidence", memoConfidence.toString(10));
+		formData.set("commConfidence", commConfidence.toString(10));
 
 		if ($quizTypeStore === "leitner") {
 			const sessionNumber = $optionsStore.flashCardTypes[flashCardType].leitnerSession || 0;
@@ -109,7 +108,7 @@
 		commConfidence = -1;
 		memoConfidence = -1;
 		showAnswer = false;
-		await putQuiz(letterPair, formData);
+		await patchQuiz(letterPair, formData);
 
 		submittingQuizAnswer = false;
 	};
