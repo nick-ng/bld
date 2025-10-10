@@ -59,20 +59,20 @@ css:
 
 ### ToDo Comments
 
-- server/database/database.go:476: @todo(nick-ng): make sure owner doesn't have a colon (doesn't matter?)
 - server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
-- server/routes/flash-cards.go:81: @todo(nick-ng): only show default user's flash cards if no user provided
-- server/routes/flash-cards.go:127: @todo(nick-ng): only show default user's flash cards if no user provided
+- server/routes/flash-cards.go:82: @todo(nick-ng): only show default user's flash cards if no user provided
+- server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
+- server/routes/flash-cards.go:401: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
 - src/lib/types.ts:34: @todo(nick-ng): change to zod
-- src/lib/utils.ts:201: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:359: @todo(nick-ng): is the loop necessary?
-- src/routes/drill/+page.svelte:15: @todo(nick-ng): make drill aware of flash card type
-- src/routes/drill/+page.svelte:17: @todo(nick-ng): save these to local storage
+- src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:385: @todo(nick-ng): is the loop necessary?
+- src/routes/drill/+page.svelte:16: @todo(nick-ng): make drill aware of flash card type
+- src/routes/drill/+page.svelte:18: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable
