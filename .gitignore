@@ -46,4 +46,5 @@ server/user-images
 server/user-data/*
 server/server
 server/serverbin
+server/volumes/*
 !server/user-data/users.sample.json
