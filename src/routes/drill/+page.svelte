@@ -7,7 +7,7 @@
 	import { fetchFlashCards, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { getDrillItems } from "$lib/drill";
 	import { patchQuiz } from "$lib/quiz";
-	import { parseCommutator } from "$lib/utils";
+	import { parseCommutator, shuffleArray } from "$lib/utils";
 	import FlashCard from "$lib/components/flash-card.svelte";
 	import DrillMaker from "$lib/components/drill-maker.svelte";
 
@@ -27,6 +27,65 @@
 	let drillLeft = $derived(drillLetters.filter((dl) => !dl.quizzed).length);
 	let drillWeight = $state(0.7);
 	let actualDrillWeight = $derived(Math.max(0.0001, Math.min(1, drillWeight)));
+
+	const submitDrill = async (repeat = false) => {
+		if (drillLetters.some((dl) => dl.send)) {
+			await fetchFlashCards();
+
+			await Promise.all(
+				drillLetters.map((drillLetter) => {
+					if (!drillLetter.send) {
+						return;
+					}
+
+					const flashCard = getFlashCard(
+						drillLetter.letterPair,
+						drillLetter.flashCardType,
+						$flashCardStore
+					);
+
+					const drillTimeMs = drillLetter.timeMs;
+					const adjustedDrillTimeMs =
+						Math.min(drillTimeMs, flashCard.drillTimeMs) * actualDrillWeight +
+						Math.max(drillTimeMs, flashCard.drillTimeMs) * (1 - actualDrillWeight);
+
+					const formData = new FormData();
+					formData.set("type", drillLetter.flashCardType);
+					formData.set("drillTimeMs", adjustedDrillTimeMs.toFixed(0));
+					if (drillLetter.timeMs < 15000) {
+						formData.set("commConfidence", "2");
+					} else if (drillLetter.timeMs < 5000) {
+						formData.set("commConfidence", "3");
+					}
+
+					return patchQuiz(drillLetter.letterPair, formData, true);
+				})
+			);
+		}
+
+		if (repeat) {
+			const temp = drillLetters.map((drillLetter) => {
+				const flashCard = getFlashCard(
+					drillLetter.letterPair,
+					drillLetter.flashCardType,
+					$flashCardStore
+				);
+				return {
+					...drillLetter,
+					quizzed: false,
+					send: true,
+					timeMs: flashCard.drillTimeMs
+				};
+			});
+
+			drillLetters = shuffleArray(temp);
+		} else {
+			drillLetters = [];
+			goto("/flash-cards/summary");
+		}
+
+		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+	};
 
 	const onButtonDown = () => {
 		if (quizState === "stand-by" || (quizState === "review" && drillLeft > 0)) {
@@ -195,44 +254,15 @@
 						class="grow"
 						type="button"
 						onclick={async () => {
-							if (drillLetters.some((dl) => dl.send)) {
-								await fetchFlashCards();
-
-								await Promise.all(
-									drillLetters.map((drillLetter) => {
-										if (!drillLetter.send) {
-											return;
-										}
-
-										const flashCard = getFlashCard(
-											drillLetter.letterPair,
-											drillLetter.flashCardType,
-											$flashCardStore
-										);
-
-										const drillTimeMs = drillLetter.timeMs;
-										const adjustedDrillTimeMs =
-											Math.min(drillTimeMs, flashCard.drillTimeMs) * actualDrillWeight +
-											Math.max(drillTimeMs, flashCard.drillTimeMs) * (1 - actualDrillWeight);
-
-										const formData = new FormData();
-										formData.set("type", drillLetter.flashCardType);
-										formData.set("drillTimeMs", adjustedDrillTimeMs.toFixed(0));
-										if (drillLetter.timeMs < 15000) {
-											formData.set("commConfidence", "2");
-										} else if (drillLetter.timeMs < 5000) {
-											formData.set("commConfidence", "3");
-										}
-
-										return patchQuiz(drillLetter.letterPair, formData, true);
-									})
-								);
-							}
-
-							drillLetters = [];
-							localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
-
-							goto("/flash-cards/summary");
+							submitDrill(true);
+							quizState = "stand-by";
+						}}>Again</button
+					>
+					<button
+						class="grow"
+						type="button"
+						onclick={() => {
+							submitDrill(false);
 						}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
 					>
 				</div>
@@ -265,9 +295,11 @@
 					{showImage}
 					extraClass={quizState === "timing" ? "hidden lg:block" : ""}
 				/>
-				<div class={`text-center ${quizState === "timing" ? "hidden lg:block" : ""}`}>
-					Took {drillLetters[drillIndex].timeMs / 1000}s
-				</div>
+				{#if quizState !== "timing"}
+					<div class="text-center">
+						Took {drillLetters[drillIndex].timeMs / 1000}s
+					</div>
+				{/if}
 			{/if}
 			{#if quizState !== "review" && drillLeft > 0}
 				<div class="self-stretch lg:hidden">
