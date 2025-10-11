@@ -152,7 +152,7 @@ export const makeDrill = async (
 			break;
 		}
 		case "old": {
-			possibleFlashCards.sort((a, b) => a.lastQuizUnix - b.lastQuizUnix);
+			possibleFlashCards.sort((a, b) => a.lastDrillUnix - b.lastDrillUnix);
 			break;
 		}
 		case "random":
