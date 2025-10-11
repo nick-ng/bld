@@ -1,5 +1,5 @@
 # stage build
-FROM golang:1.25.0-alpine3.22
+FROM golang:1.25.2-trixie
 
 RUN mkdir /app
 
