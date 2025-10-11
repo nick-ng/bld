@@ -10,12 +10,12 @@
 	}
 
 	const fullColour = 60 * 60 * 24 * $optionsStore.leitnerRetiredMaxAgeDays;
-	const getAgeColour = (lastQuizUnix?: number) => {
-		if (typeof lastQuizUnix !== "number") {
+	const getAgeColour = (lastUnix?: number) => {
+		if (typeof lastUnix !== "number") {
 			return "#FFFFFF";
 		}
 		const nowSeconds = Date.now() / 1000;
-		const age = nowSeconds - lastQuizUnix;
+		const age = nowSeconds - lastUnix;
 		const fraction = Math.max(fullColour - age, 0) / fullColour;
 		const blue = Math.ceil(255 * fraction);
 		const green = 230 + Math.ceil(25 * fraction);
@@ -47,7 +47,7 @@
 {:else}
 	<a
 		class={`relative block border border-gray-800 p-0 text-center ${flashCard?.isPublic ? "underline" : "no-underline"}`}
-		style={`background-color:${getAgeColour(flashCard?.lastQuizUnix)};`}
+		style={`background-color:${getAgeColour(flashCard?.lastDrillUnix)};`}
 		href={`/flash-cards?t=${flashCardType}&f=${letterPair.toUpperCase()}`}
 	>
 		<div class="mb-1 p-0 leading-none uppercase">{letterPair}</div>
