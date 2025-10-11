@@ -7,5 +7,5 @@ services:
     ports:
       - "${PORT}:27945"
     volumes:
-      - ./volumes/user-images:/app/user-images
-      - ./volumes/user-data:/app/user-data
+      - ./volumes/user-images:/user-images
+      - ./volumes/user-data:/user-data
