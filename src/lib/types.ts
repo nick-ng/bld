@@ -59,3 +59,14 @@ export const optionsSchema = z.object({
 });
 
 export type Options = z.infer<typeof optionsSchema>;
+
+export const authenticationOptionsSchema = z.object({
+	isUserAuthenticated: z.boolean(),
+	isGuest: z.boolean(),
+	username: z.string(),
+	password: z.string(),
+	accessToken: z.string(),
+	accessTokenExpiry: z.string()
+});
+
+export type AuthenticationOptions = z.infer<typeof authenticationOptionsSchema>;

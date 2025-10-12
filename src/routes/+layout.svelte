@@ -1,7 +1,8 @@
 <script lang="ts">
-	import type { Snippet } from "svelte";
+	import { onMount, type Snippet } from "svelte";
 	import { page } from "$app/state";
 	import { optionsStore } from "$lib/stores/options";
+	import { authenticationStore } from "$lib/stores/authentication";
 	import "../app.css";
 
 	interface Props {
@@ -13,6 +14,11 @@
 	let currentFlashCardType = $derived(
 		page.url.searchParams.get("t") || $optionsStore.defaultFlashCardType
 	);
+	let showLogin = $derived(
+		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest
+	);
+
+	onMount(() => {});
 </script>
 
 <svelte:head>
@@ -29,5 +35,9 @@
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>
-	{@render children?.()}
+	{#if showLogin}
+		<div>Login!</div>
+	{:else}
+		{@render children?.()}
+	{/if}
 </div>

@@ -67,7 +67,7 @@ css:
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:6: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
-- src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
+- src/lib/stores/options.ts:47: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:385: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:16: @todo(nick-ng): make drill aware of flash card type
