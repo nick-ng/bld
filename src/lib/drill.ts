@@ -4,7 +4,7 @@ import type { FlashCardStoreType } from "$lib/stores/flash-cards";
 import z from "zod";
 import { get } from "svelte/store";
 import { DRILL_ITEMS_STORE_KEY, SPEFFZ_LETTERS } from "$lib/constants";
-import { fetchFlashCards, flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
+import { flashCardStore, getAllFlashCardsOfType } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { getLeitnerTag } from "$lib/quiz";
 import { shuffleArray, isTwist, isBuffer, parseCommutator } from "$lib/utils";
@@ -40,7 +40,15 @@ export const getDrillItems = (): DrillItem[] => {
 	return [];
 };
 
-export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCardStoreType) => {
+export const getDrillSets = (
+	flashCardType: string,
+	localFlashCardStore: FlashCardStoreType
+): {
+	key: string;
+	filters: string[];
+	defaultSize: number;
+	label: string;
+}[] => {
 	const flashCards = getAllFlashCardsOfType(flashCardType, localFlashCardStore);
 	const interchangeFaces = new Set<string>();
 	for (let i = 0; i < flashCards.length; i++) {
@@ -57,6 +65,7 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 			defaultSize: 5,
 			label: "Slow"
 		},
+		{ key: "old", filters: ["all", "retired"], defaultSize: 5, label: "Old" },
 		{
 			key: "starts-with",
 			filters: SPEFFZ_LETTERS,
@@ -64,12 +73,17 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 			label: "Starts with"
 		},
 		{
+			key: "insert",
+			filters: ["3-move", "4-move", "full-domino", "half-domino"],
+			defaultSize: -1,
+			label: "Insert type"
+		},
+		{
 			key: "interchange",
 			filters: [...interchangeFaces].sort((a, b) => a.localeCompare(b)),
 			defaultSize: -1,
 			label: "Interchange"
 		},
-		{ key: "old", filters: ["retired", "all"], defaultSize: 5, label: "Old" },
 		{
 			key: "random",
 			filters: ["all", "retired"],
@@ -79,12 +93,12 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 	];
 };
 
-export const makeDrill = async (
+export const makeDrill = (
 	key: string,
 	flashCardType: string,
 	filter: string,
 	size: number
-): Promise<DrillItem[]> => {
+): DrillItem[] => {
 	const localFlashCardStore = get(flashCardStore);
 	const drillSets = getDrillSets(flashCardType, localFlashCardStore);
 	const drillSet = drillSets.find((s) => s.key === key);
@@ -92,7 +106,6 @@ export const makeDrill = async (
 		return [];
 	}
 
-	await fetchFlashCards();
 	let flashCards = getAllFlashCardsOfType(flashCardType, localFlashCardStore);
 	const options = get(optionsStore);
 	const typeInfo = options.flashCardTypes[flashCardType];
@@ -123,17 +136,47 @@ export const makeDrill = async (
 			break;
 		}
 		default: {
-			if (drillSet.key === "starts-with") {
-				possibleFlashCards = flashCards.filter((flashCard) =>
-					flashCard.letterPair.toLowerCase().startsWith(filter.toLowerCase())
-				);
-			} else if (drillSet.key === "interchange") {
-				possibleFlashCards = flashCards.filter((flashCard) => {
-					const commutator = parseCommutator(flashCard.commutator);
-					return commutator.interchange.startsWith(filter);
-				});
-			} else {
-				possibleFlashCards = flashCards;
+			switch (drillSet.key) {
+				case "starts-with": {
+					possibleFlashCards = flashCards.filter((flashCard) =>
+						flashCard.letterPair.toLowerCase().startsWith(filter.toLowerCase())
+					);
+					break;
+				}
+				case "interchange": {
+					possibleFlashCards = flashCards.filter((flashCard) => {
+						const commutator = parseCommutator(flashCard.commutator);
+						return commutator.interchange.startsWith(filter);
+					});
+					break;
+				}
+				case "insert": {
+					possibleFlashCards = flashCards.filter((flashCard) => {
+						const commutator = parseCommutator(flashCard.commutator);
+						switch (filter) {
+							case "3-move": {
+								return commutator.insertLength === 3;
+							}
+							case "4-move": {
+								return commutator.insertLength === 4;
+							}
+							case "full-domino": {
+								const withoutPrime = commutator.insert.replaceAll("'", "");
+								return withoutPrime === "R2 U R2 U R2" || withoutPrime === "R2 D R2 D R2";
+							}
+							case "half-domino": {
+								const withoutPrime = commutator.insert.replaceAll("'", "");
+								return withoutPrime === "R D R U R D R" || withoutPrime === "R U R D R U R";
+							}
+						}
+
+						return commutator.interchange.startsWith(filter);
+					});
+					break;
+				}
+				default: {
+					possibleFlashCards = flashCards;
+				}
 			}
 		}
 	}
