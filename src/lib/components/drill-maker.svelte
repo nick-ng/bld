@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { flashCardStore } from "$lib/stores/flash-cards";
+	import { flashCardStore, fetchFlashCards } from "$lib/stores/flash-cards";
 	import type { DrillItem } from "$lib/drill";
 	import { makeDrill, getDrillSets } from "$lib/drill";
 	import { capFirst } from "$lib/utils";
@@ -44,7 +44,18 @@
 		{#if drillSet && drillSet.filters.length > 1}
 			<select class="block px-1 py-1 capitalize lg:py-0" bind:value={drillFilter}>
 				{#each drillSet.filters as drillFilterItem (drillFilterItem)}
-					<option value={drillFilterItem}>{capFirst(drillFilterItem)}</option>
+					{@const projectedDrillSize = makeDrill(
+						drillSetKey,
+						flashCardType,
+						drillFilterItem,
+						drillSize
+					).length}
+					{@const drillSizeString = drillSet.defaultSize > 0 ? "" : ` (${projectedDrillSize})`}
+					{#if drillSet.defaultSize > 0 || projectedDrillSize > 0}
+						<option value={drillFilterItem}
+							>{capFirst(drillFilterItem.replaceAll("-", " "))}{drillSizeString}</option
+						>
+					{/if}
 				{/each}
 			</select>
 		{/if}
@@ -76,7 +87,8 @@
 		class="py-2 text-xl leading-none"
 		type="button"
 		onclick={async () => {
-			const drillLetters = await makeDrill(drillSetKey, flashCardType, drillFilter, drillSize);
+			await fetchFlashCards();
+			const drillLetters = makeDrill(drillSetKey, flashCardType, drillFilter, drillSize);
 			drillSetKey = "none";
 			drillSet = null;
 			drillFilter = "";

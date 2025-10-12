@@ -69,7 +69,7 @@ css:
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:47: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:385: @todo(nick-ng): is the loop necessary?
+- src/lib/utils.ts:389: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:16: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:18: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?

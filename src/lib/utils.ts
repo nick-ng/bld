@@ -276,6 +276,7 @@ export const parseCommutator = (rawCommutator: string) => {
 			conjugatePlusCommutator,
 			setup,
 			insert,
+			insertLength: insert.split(" ").length,
 			interchange,
 			regripEmoji,
 			expansion: [
@@ -315,6 +316,7 @@ export const parseCommutator = (rawCommutator: string) => {
 			conjugatePlusCommutator,
 			setup,
 			insert,
+			insertLength: insert.split(" ").length,
 			interchange: interchange2,
 			expansion: [
 				setup,
@@ -346,6 +348,7 @@ export const parseCommutator = (rawCommutator: string) => {
 			conjugatePlusCommutator: "",
 			setup,
 			insert: "",
+			insertLength: 0,
 			interchange: "",
 			expansion: [setup, algorithm, reverseMoves(setup)].filter((a) => a).join(" ")
 		};
@@ -358,6 +361,7 @@ export const parseCommutator = (rawCommutator: string) => {
 		conjugatePlusCommutator: "",
 		setup: "",
 		insert: "",
+		insertLength: 0,
 		interchange: "",
 		expansion: hydratedCommutator
 	};
