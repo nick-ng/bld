@@ -7,7 +7,7 @@ import { optionsSchema } from "$lib/types";
 import { OPTIONS_STORE_PREFIX, SPEFFZ_SAME_PIECES, SPEFFZ_UFR } from "$lib/constants";
 
 // @todo(nick-ng): store options on server
-const options: Options = {
+export const optionsStore = writable<Options>({
 	isUserAuthenticated: false,
 	flashCardTypes: {
 		corner: {
@@ -25,9 +25,7 @@ const options: Options = {
 	leitnerQuizCooldownHours: 12,
 	leitnerBonusStandby: 2,
 	leitnerBonusRetired: 2
-};
-
-export const optionsStore = writable(options);
+});
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;
 

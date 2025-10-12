@@ -53,7 +53,7 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 	return [
 		{
 			key: "slow",
-			filters: ["retired", "all"],
+			filters: ["all", "retired"],
 			defaultSize: 5,
 			label: "Slow"
 		},
@@ -72,7 +72,7 @@ export const getDrillSets = (flashCardType: string, localFlashCardStore: FlashCa
 		{ key: "old", filters: ["retired", "all"], defaultSize: 5, label: "Old" },
 		{
 			key: "random",
-			filters: ["retired", "all"],
+			filters: ["all", "retired"],
 			defaultSize: 5,
 			label: "Random"
 		}

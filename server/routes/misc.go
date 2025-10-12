@@ -4,12 +4,14 @@ import (
 	"bld-server/utils"
 	"io"
 	"net/http"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
 func AddMiscRoutes() {
 	http.HandleFunc("POST /misc/hash-password", hashPasswordRoute)
+	http.HandleFunc("POST /login", handlePostLogin)
 }
 
 func hashPasswordRoute(writer http.ResponseWriter, req *http.Request) {
@@ -32,4 +34,16 @@ func hashPasswordRoute(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	writer.Write(hashedPasswordBytes)
+}
+
+func handlePostLogin(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, _, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	writer.Header().Add("X-Access-Token", accessToken)
+	writer.Write([]byte("ok"))
 }
