@@ -66,7 +66,7 @@ export const authenticationOptionsSchema = z.object({
 	username: z.string(),
 	password: z.string(),
 	accessToken: z.string(),
-	accessTokenExpiry: z.string()
+	accessTokenExpiry: z.number()
 });
 
 export type AuthenticationOptions = z.infer<typeof authenticationOptionsSchema>;

@@ -6,10 +6,9 @@ import {
 	USERNAME_STORE_KEY,
 	PASSWORD_STORE_KEY,
 	ACCESS_TOKEN_STORE_KEY,
-	ACCESS_TOKEN_EXPIRY_STORE_KEY,
 	IS_GUEST_STORE_KEY
 } from "$lib/constants";
-import { authFetch } from "$lib/utils";
+import { authFetch, joinServerPath } from "$lib/utils";
 
 export const authenticationStore = writable<AuthenticationOptions>({
 	isUserAuthenticated: false,
@@ -17,13 +16,22 @@ export const authenticationStore = writable<AuthenticationOptions>({
 	username: "",
 	password: "",
 	accessToken: "",
-	accessTokenExpiry: "0"
+	accessTokenExpiry: 0
 });
 
 const updateIfDifferent = (storeKey: string, value?: string) => {
 	if (typeof value === "string" && localStorage.getItem(storeKey) !== value) {
 		localStorage.setItem(storeKey, value);
 	}
+};
+
+const parseAccessTokenExpiry = (accessToken?: string | null) => {
+	if (typeof accessToken !== "string") {
+		return 0;
+	}
+
+	const accessTokenExpiry = parseInt(accessToken.split(":")[0] || "0", 10) * 1000;
+	return accessTokenExpiry;
 };
 
 if (browser) {
@@ -42,7 +50,6 @@ if (browser) {
 			password
 		}));
 	}
-	console.log("hi");
 	const isGuest = localStorage.getItem(IS_GUEST_STORE_KEY)?.toLowerCase() === "yes";
 	if (isGuest) {
 		authenticationStore.update((prev) => ({
@@ -51,10 +58,9 @@ if (browser) {
 		}));
 	} else {
 		// only check access token if guest is false
-		const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY);
-		const accessTokenExpiry = localStorage.getItem(ACCESS_TOKEN_EXPIRY_STORE_KEY) || "0";
-		if (accessToken && parseInt(accessTokenExpiry, 10) < Date.now()) {
-			console.log("up to date");
+		const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY) || "";
+		const accessTokenExpiry = parseAccessTokenExpiry(accessToken);
+		if (accessToken && accessTokenExpiry < Date.now()) {
 			authenticationStore.update((prev) => ({
 				...prev,
 				accessToken,
@@ -63,12 +69,22 @@ if (browser) {
 			}));
 		} else {
 			// try and login
-			authFetch("/login").then((res) => {
-				console.log("hi2");
+			authFetch(joinServerPath("/login"), {
+				method: "POST"
+			}).then((res) => {
 				if (res.ok) {
-					console.log("ok!", res);
+					const accessToken = res.headers.get("x-access-token");
+					const accessTokenExpiry = parseAccessTokenExpiry(accessToken);
+					if (accessToken && accessTokenExpiry) {
+						authenticationStore.update((prev) => ({
+							...prev,
+							accessToken,
+							accessTokenExpiry,
+							isUserAuthenticated: true
+						}));
+					}
 				} else {
-					console.log("not ok", res);
+					console.error("error during login", res);
 				}
 			});
 		}
@@ -78,7 +94,6 @@ if (browser) {
 		updateIfDifferent(USERNAME_STORE_KEY, newAuthOptions.username);
 		updateIfDifferent(PASSWORD_STORE_KEY, newAuthOptions.password);
 		updateIfDifferent(ACCESS_TOKEN_STORE_KEY, newAuthOptions.accessToken);
-		updateIfDifferent(ACCESS_TOKEN_EXPIRY_STORE_KEY, newAuthOptions.accessTokenExpiry);
 		updateIfDifferent(IS_GUEST_STORE_KEY, newAuthOptions.isGuest ? "yes" : "no");
 	});
 }
