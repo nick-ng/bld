@@ -5,6 +5,8 @@
 	import { authenticationStore } from "$lib/stores/authentication";
 	import "../app.css";
 
+	import Login from "$lib/components/login.svelte";
+
 	interface Props {
 		children?: Snippet;
 	}
@@ -32,11 +34,25 @@
 		<a class="like-button" href="/flash-cards/summary">Stats</a>
 		<div class="grow"></div>
 		<a class="like-button" href="/settings">Settings</a>
+		{#if !showLogin}
+			<button
+				onclick={() => {
+					$authenticationStore.isUserAuthenticated = false;
+					$authenticationStore.isGuest = false;
+					$authenticationStore.username = "";
+					$authenticationStore.password = "";
+					$authenticationStore.accessToken = "";
+				}}>Logout</button
+			>
+		{/if}
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>
 	{#if showLogin}
-		<div>Login!</div>
+		<div class="mx-auto max-w-prose">
+			<h2>Login</h2>
+			<Login />
+		</div>
 	{:else}
 		{@render children?.()}
 	{/if}

@@ -16,7 +16,8 @@ export const authenticationStore = writable<AuthenticationOptions>({
 	username: "",
 	password: "",
 	accessToken: "",
-	accessTokenExpiry: 0
+	accessTokenExpiry: 0,
+	isAuthenticating: false
 });
 
 const updateIfDifferent = (storeKey: string, value?: string) => {
@@ -25,7 +26,7 @@ const updateIfDifferent = (storeKey: string, value?: string) => {
 	}
 };
 
-const parseAccessTokenExpiry = (accessToken?: string | null) => {
+export const parseAccessTokenExpiry = (accessToken?: string | null) => {
 	if (typeof accessToken !== "string") {
 		return 0;
 	}
@@ -69,6 +70,10 @@ if (browser) {
 			}));
 		} else {
 			// try and login
+			authenticationStore.update((prev) => ({
+				...prev,
+				isAuthenticating: true
+			}));
 			authFetch(joinServerPath("/login"), {
 				method: "POST"
 			}).then((res) => {
@@ -80,11 +85,16 @@ if (browser) {
 							...prev,
 							accessToken,
 							accessTokenExpiry,
-							isUserAuthenticated: true
+							isUserAuthenticated: true,
+							isAuthenticating: false
 						}));
 					}
 				} else {
 					console.error("error during login", res);
+					authenticationStore.update((prev) => ({
+						...prev,
+						isAuthenticating: false
+					}));
 				}
 			});
 		}

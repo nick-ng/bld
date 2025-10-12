@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { flashCardStore, getFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
+	import { authenticationStore } from "$lib/stores/authentication";
 	import { isTwist, isBuffer } from "$lib/utils";
 
 	// @todo(nick-ng): parent should decide if the square is blank or not
@@ -11,7 +12,7 @@
 
 	const fullColour = 60 * 60 * 24 * $optionsStore.leitnerRetiredMaxAgeDays;
 	const getAgeColour = (lastUnix?: number) => {
-		if (typeof lastUnix !== "number") {
+		if (typeof lastUnix !== "number" || $authenticationStore.isGuest) {
 			return "#FFFFFF";
 		}
 		const nowSeconds = Date.now() / 1000;
