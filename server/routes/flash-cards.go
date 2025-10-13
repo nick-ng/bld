@@ -223,6 +223,7 @@ func handlePatchQuiz(writer http.ResponseWriter, req *http.Request) {
 	memoConfidence := parseIntOrNegative(req.FormValue("memoConfidence"))
 	commConfidence := parseIntOrNegative(req.FormValue("commConfidence"))
 	drillTimeMs := parseIntOrNegative(req.FormValue("drillTimeMs"))
+	tags := req.FormValue("tags")
 
 	if memoConfidence >= 0 {
 		partialFlashCard["MemoConfidence"] = memoConfidence
@@ -234,6 +235,9 @@ func handlePatchQuiz(writer http.ResponseWriter, req *http.Request) {
 	if drillTimeMs >= 0 {
 		partialFlashCard["DrillTimeMs"] = drillTimeMs
 		partialFlashCard["LastDrillUnix"] = time.Now().Unix()
+	}
+	if len(tags) > 0 {
+		partialFlashCard["Tags"] = tags
 	}
 
 	returnedFlashCard, err := database.WritePartialFlashCard(partialFlashCard)

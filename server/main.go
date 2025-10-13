@@ -39,5 +39,8 @@ func main() {
 	http.HandleFunc("/", rootHandler)
 
 	fmt.Println("server is running")
-	http.ListenAndServe(":27945", nil)
+	err := http.ListenAndServe(":27945", nil)
+	if err != nil {
+		fmt.Println(err)
+	}
 }
