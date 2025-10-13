@@ -104,7 +104,6 @@
 				</td>
 			</tr>
 			{#if $optionsStore.flashCardTypes[flashCardType]}
-				{@const flashCardDetails = $optionsStore.flashCardTypes[flashCardType]}
 				<tr>
 					<td>
 						<label for="optionsLeitnerQuizSession">Leitner Quiz Session</label>
