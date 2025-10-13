@@ -79,7 +79,7 @@
 						}}>-</button
 					>
 					<input
-						class="w-16 text-right"
+						class="inline-block w-16 text-right"
 						id="optionsBonusRetired"
 						type="number"
 						bind:value={$optionsStore.leitnerBonusRetired}
@@ -103,6 +103,38 @@
 					</select>
 				</td>
 			</tr>
+			{#if $optionsStore.flashCardTypes[flashCardType]}
+				{@const flashCardDetails = $optionsStore.flashCardTypes[flashCardType]}
+				<tr>
+					<td>
+						<label for="optionsLeitnerQuizSession">Leitner Quiz Session</label>
+					</td>
+					<td class="text-right">
+						<button
+							type="button"
+							class="inline-block py-1"
+							onclick={() => {
+								$optionsStore.flashCardTypes[flashCardType].leitnerSession =
+									($optionsStore.flashCardTypes[flashCardType].leitnerSession || 0) - 1;
+							}}>-</button
+						>
+						<input
+							class="inline-block w-16 text-right"
+							id="optionsLeitnerQuizSession"
+							type="number"
+							bind:value={$optionsStore.flashCardTypes[flashCardType].leitnerSession}
+						/>
+						<button
+							type="button"
+							class="inline-block py-1"
+							onclick={() => {
+								$optionsStore.flashCardTypes[flashCardType].leitnerSession =
+									($optionsStore.flashCardTypes[flashCardType].leitnerSession || 0) + 1;
+							}}>+</button
+						>
+					</td>
+				</tr>
+			{/if}
 		</tbody>
 	</table>
 </div>
