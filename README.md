@@ -62,7 +62,7 @@ css:
 - server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
 - server/routes/flash-cards.go:82: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
-- server/routes/flash-cards.go:400: @todo(nick-ng): handle cleaning up images
+- server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/components/flash-card-chooser.svelte:7: @todo(nick-ng): parent should decide if the square is blank or not

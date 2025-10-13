@@ -13,7 +13,6 @@ import (
 	"slices"
 	"strconv"
 	"strings"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -363,129 +362,6 @@ func loadData(finalFilename string) (map[string]FlashCard, error) {
 	return newFlashCardData, nil
 }
 
-func logsToSnapshot(finalFilename string) {
-	now := time.Now()
-	snapshotFilename := fmt.Sprintf("%s-%s-snap.csv", VERSION_PREFIX, now.Format("20060102-150405"))
-	snapshotFullPath := filepath.Join(USER_DATA_DIRECTORY, snapshotFilename)
-
-	newFlashCards, err := loadData(finalFilename)
-	if err != nil {
-		fmt.Println("error when making snapshot", err)
-		return
-	}
-
-	var snapshotRows []string
-	for _, flashCard := range newFlashCards {
-		flashCardRow, err := flashCardToRow(flashCard)
-		if err != nil {
-			fmt.Println("error when making snapshot", err)
-			return
-		}
-
-		snapshotRows = append(snapshotRows, flashCardRow)
-	}
-
-	snapshotString := strings.Join(snapshotRows, "")
-	err = os.WriteFile(snapshotFullPath, []byte(snapshotString), 0666)
-	if err != nil {
-		fmt.Println("error when making snapshot", err)
-		return
-	}
-
-	f, err := os.OpenFile(snapshotFullPath, os.O_RDONLY, 0666)
-	if err != nil {
-		fmt.Println("error when opening snapshot", err)
-		return
-	}
-	defer f.Close()
-	fileStats, err := f.Stat()
-	if err != nil {
-		fmt.Println("error when getting snapshot stats", err)
-	}
-
-	lastSnapshotFileSize = fileStats.Size()
-
-	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	for _, dirEntry := range dirEntries {
-		filename := dirEntry.Name()
-		if snapshotFilename == filename {
-			return
-		}
-
-		if finalFilename == filename {
-			return
-		}
-
-		if !strings.HasSuffix(filename, ".csv") {
-			continue
-		}
-
-		fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
-		err := os.Remove(fullPath)
-		if err != nil {
-			fmt.Println("error when deleting old database log files:", err)
-		}
-	}
-}
-
-func getCurrentChangeLogFullPath() string {
-	dirEntries, err := os.ReadDir(USER_DATA_DIRECTORY)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	actualLogFilenames := []string{}
-	for _, dirEntry := range dirEntries {
-		filename := dirEntry.Name()
-		if strings.HasPrefix(filename, fmt.Sprintf("%s-", VERSION_PREFIX)) && strings.HasSuffix(filename, "-log.csv") {
-			actualLogFilenames = append(actualLogFilenames, filename)
-		}
-	}
-
-	if len(actualLogFilenames) > 0 {
-		slices.Sort(actualLogFilenames)
-		newestLogFilename := actualLogFilenames[len(actualLogFilenames)-1]
-		fullPath := filepath.Join(USER_DATA_DIRECTORY, newestLogFilename)
-		f, err := os.OpenFile(fullPath, os.O_RDONLY, 0666)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		defer f.Close()
-		fileStats, err := f.Stat()
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-
-		fileSize := fileStats.Size()
-		if fileSize < int64(lastSnapshotFileSize*LOG_SIZE_FACTOR) {
-			return fullPath
-		}
-	}
-
-	now := time.Now()
-	filenameStart := fmt.Sprintf("%s-%s", VERSION_PREFIX, now.Format("20060102-150405"))
-	matchingFileCount := 0
-	for _, filename := range actualLogFilenames {
-		if strings.HasPrefix(filename, filenameStart) {
-			matchingFileCount += 1
-		}
-	}
-
-	filename := fmt.Sprintf("%s-zz-%d-log.csv", filenameStart, matchingFileCount)
-	fullPath := filepath.Join(USER_DATA_DIRECTORY, filename)
-	go logsToSnapshot(filename)
-
-	return fullPath
-}
-
 func getPrimaryKey(owner string, flashCardType string, letterPair string) (string, error) {
 	if len(owner) == 0 {
 		return "", errors.New("flash card has no owner")
@@ -518,43 +394,6 @@ func normaliseFlashCardType(flashCardType string) string {
 
 	// wings and centres or something
 	return flashCardType
-}
-
-func flashCardToRow(flashCard FlashCard) (string, error) {
-	flashCardType := normaliseFlashCardType(flashCard.Type)
-	isPublicString := "0"
-	if flashCard.IsPublic {
-		isPublicString = "1"
-	}
-
-	row := []string{
-		flashCard.Owner,
-		flashCard.LetterPair,
-		flashCard.Memo,
-		flashCard.Image,
-		flashCard.Commutator,
-		flashCard.Tags,
-		flashCardType,
-		fmt.Sprintf("%d", flashCard.Confidence),
-		isPublicString,
-		fmt.Sprintf("%d", flashCard.LastQuizUnix),
-	}
-
-	row2 := []string{}
-	for _, item := range row {
-		rowItem := item
-		if strings.ContainsAny(item, ",") {
-			cleanItem := strings.ReplaceAll(item, "\"", "\"\"")
-			rowItem = fmt.Sprintf("\"%s\"", cleanItem)
-		}
-
-		row2 = append(row2, rowItem)
-	}
-
-	rowString := strings.Join(row2, ",")
-	rowString = strings.ReplaceAll(rowString, "\n", " ")
-	rowString = strings.ReplaceAll(rowString, "\r", "")
-	return fmt.Sprintf("%s\n", rowString), nil
 }
 
 func rowV1ToFlashCard(row string) (FlashCard, error) {
