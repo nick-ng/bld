@@ -53,6 +53,34 @@
 		<table class="summary-tables block w-full lg:max-w-lg">
 			<thead>
 				<tr>
+					<th class="text-right">Speed</th>
+					<th class="w-full text-left">Letter Pairs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each summary.drillSpeedGroups as drillSpeedGroup, i (`${i}-${drillSpeedGroup.seconds[0]}-${drillSpeedGroup.seconds[1]}`)}
+					<tr>
+						<td class="p-1 text-right whitespace-nowrap"
+							>{drillSpeedGroup.seconds[0].toFixed(1)} - {drillSpeedGroup.seconds[1].toFixed(
+								1
+							)}s</td
+						>
+						<td>
+							<div
+								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+							>
+								{#each drillSpeedGroup.letters as letters (letters)}
+									<a href={`/flash-cards?f=${letters}`} class="p-0.5 uppercase">{letters}</a>
+								{/each}
+							</div>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+		<table class="summary-tables block w-full lg:max-w-lg">
+			<thead>
+				<tr>
 					<td colspan="2" class="p-1 text-left">
 						Next Session: {$optionsStore.flashCardTypes[flashCardType].leitnerSession || 0}, Cards
 						in Decks: {flashCards.filter((fc) => {
@@ -127,63 +155,6 @@
 		<table class="quiz-history block w-full lg:max-w-lg">
 			<thead>
 				<tr>
-					<th class="w-full text-left whitespace-nowrap">Quiz History</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td>
-						<div
-							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
-						>
-							{#each summary.quizAges as quizAge (quizAge.letterPair)}
-								{#if !quizAge.isMarker}
-									<a href={`/flash-cards?f=${quizAge.letterPair}`} class="p-0.5 uppercase"
-										>{quizAge.letterPair}</a
-									>
-								{:else if !quizAge.hidden}
-									<span
-										class="dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100 dark:bg-white"
-										>{quizAge.letterPair}</span
-									>
-								{/if}
-							{/each}
-						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
-		<table class="summary-tables block w-full lg:max-w-lg">
-			<thead>
-				<tr>
-					<th class="text-right">Speed</th>
-					<th class="w-full text-left">Letter Pairs</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each summary.drillSpeedGroups as drillSpeedGroup, i (`${i}-${drillSpeedGroup.seconds[0]}-${drillSpeedGroup.seconds[1]}`)}
-					<tr>
-						<td class="p-1 text-right whitespace-nowrap"
-							>{drillSpeedGroup.seconds[0].toFixed(1)} - {drillSpeedGroup.seconds[1].toFixed(
-								1
-							)}s</td
-						>
-						<td>
-							<div
-								class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
-							>
-								{#each drillSpeedGroup.letters as letters (letters)}
-									<a href={`/flash-cards?f=${letters}`} class="p-0.5 uppercase">{letters}</a>
-								{/each}
-							</div>
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-		<table class="quiz-history block w-full lg:max-w-lg">
-			<thead>
-				<tr>
 					<th class="w-full text-left whitespace-nowrap">Drill History</th>
 				</tr>
 			</thead>
@@ -202,6 +173,35 @@
 									<span
 										class="dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100 dark:bg-white"
 										>{drillAge.letterPair}</span
+									>
+								{/if}
+							{/each}
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<table class="quiz-history block w-full lg:max-w-lg">
+			<thead>
+				<tr>
+					<th class="w-full text-left whitespace-nowrap">Quiz History</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>
+						<div
+							class="flex flex-row flex-wrap items-start justify-start p-0.5 font-mono leading-none"
+						>
+							{#each summary.quizAges as quizAge (quizAge.letterPair)}
+								{#if !quizAge.isMarker}
+									<a href={`/flash-cards?f=${quizAge.letterPair}`} class="p-0.5 uppercase"
+										>{quizAge.letterPair}</a
+									>
+								{:else if !quizAge.hidden}
+									<span
+										class="dark: mx-0.5 bg-gray-800 p-0.5 text-black text-gray-100 dark:bg-white"
+										>{quizAge.letterPair}</span
 									>
 								{/if}
 							{/each}
