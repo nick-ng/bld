@@ -70,8 +70,8 @@ css:
 - src/lib/stores/options.ts:47: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:389: @todo(nick-ng): is the loop necessary?
-- src/routes/drill/+page.svelte:16: @todo(nick-ng): make drill aware of flash card type
-- src/routes/drill/+page.svelte:18: @todo(nick-ng): save these to local storage
+- src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
+- src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:421: @todo: make size adjustable

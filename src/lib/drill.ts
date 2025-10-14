@@ -80,7 +80,7 @@ export const getDrillSets = (
 		},
 		{
 			key: "interchange",
-			filters: [...interchangeFaces].sort((a, b) => a.localeCompare(b)),
+			filters: [...interchangeFaces, "slash"].sort((a, b) => a.localeCompare(b)),
 			defaultSize: -1,
 			label: "Interchange"
 		},
@@ -144,10 +144,16 @@ export const makeDrill = (
 					break;
 				}
 				case "interchange": {
-					possibleFlashCards = flashCards.filter((flashCard) => {
-						const commutator = parseCommutator(flashCard.commutator);
-						return commutator.interchange.startsWith(filter);
-					});
+					if (filter === "slash") {
+						possibleFlashCards = flashCards.filter((flashCard) => {
+							return flashCard.commutator.includes("/");
+						});
+					} else {
+						possibleFlashCards = flashCards.filter((flashCard) => {
+							const commutator = parseCommutator(flashCard.commutator);
+							return commutator.interchange.startsWith(filter);
+						});
+					}
 					break;
 				}
 				case "insert": {
