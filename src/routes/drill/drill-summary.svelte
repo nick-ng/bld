@@ -163,16 +163,16 @@
 			class="grow"
 			type="button"
 			onclick={async () => {
-				submitDrill(drillLetters, true);
-				afterSubmit("stand-by");
+				const newDrillLetters = await submitDrill(drillLetters, true);
+				afterSubmit("stand-by", newDrillLetters);
 			}}>Again</button
 		>
 		<button
 			class="grow"
 			type="button"
-			onclick={() => {
-				submitDrill(drillLetters, false);
-				afterSubmit("stand-by");
+			onclick={async () => {
+				const newDrillLetters = await submitDrill(drillLetters, false);
+				afterSubmit("stand-by", newDrillLetters);
 			}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
 		>
 	</div>
