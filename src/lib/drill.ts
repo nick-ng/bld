@@ -222,7 +222,7 @@ export const makeDrill = (
 			flashCardType,
 			quizzed: false,
 			send: true,
-			timeMs: fc.drillTimeMs
+			timeMs: -1
 		}))
 	);
 

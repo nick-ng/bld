@@ -9,7 +9,10 @@
 
 	interface Props {
 		drillLetters: DrillItem[];
-		afterSubmit: (newQuizState: string) => void | Promise<void>;
+		afterSubmit: (
+			newQuizState: string,
+			newDrillLetters: DrillItem[] | null
+		) => void | Promise<void>;
 	}
 
 	let { drillLetters, afterSubmit }: Props = $props();
@@ -17,7 +20,7 @@
 	let drillWeight = $state(0.7);
 	let actualDrillWeight = $derived(Math.max(0.0001, Math.min(1, drillWeight)));
 
-	const submitDrill = async (drillLetters: DrillItem[], repeat = false) => {
+	const submitDrill = async (drillLetters: DrillItem[], repeat = false): Promise<DrillItem[]> => {
 		if (drillLetters.some((dl) => dl.send)) {
 			await fetchFlashCards();
 
@@ -54,16 +57,11 @@
 
 		if (repeat) {
 			const temp = drillLetters.map((drillLetter) => {
-				const flashCard = getFlashCard(
-					drillLetter.letterPair,
-					drillLetter.flashCardType,
-					$flashCardStore
-				);
 				return {
 					...drillLetter,
 					quizzed: false,
 					send: true,
-					timeMs: flashCard.drillTimeMs
+					timeMs: -1
 				};
 			});
 
@@ -74,6 +72,7 @@
 		}
 
 		localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
+		return drillLetters;
 	};
 </script>
 
@@ -84,16 +83,16 @@
 			class="grow"
 			type="button"
 			onclick={async () => {
-				submitDrill(drillLetters, true);
-				afterSubmit("stand-by");
+				const newDrillLetters = await submitDrill(drillLetters, true);
+				afterSubmit("stand-by", newDrillLetters);
 			}}>Again</button
 		>
 		<button
 			class="grow"
 			type="button"
-			onclick={() => {
-				submitDrill(drillLetters, false);
-				afterSubmit("stand-by");
+			onclick={async () => {
+				const newDrillLetters = await submitDrill(drillLetters, false);
+				afterSubmit("stand-by", newDrillLetters);
 			}}>{drillLetters.every((dl) => !dl.send) ? "End Quiz" : "Send"}</button
 		>
 	</div>

@@ -132,8 +132,11 @@
 		{#if drillLetters.length > 0 && drillLetters.every((dl) => dl.quizzed)}
 			<DrillSummary
 				{drillLetters}
-				afterSubmit={(newQuizState) => {
+				afterSubmit={(newQuizState, newDrillLetters) => {
 					quizState = newQuizState;
+					if (newDrillLetters) {
+						drillLetters = newDrillLetters;
+					}
 				}}
 			/>
 		{/if}
@@ -196,7 +199,6 @@
 			{#if quizState !== "timing" && drillLeft > 0}
 				<div class="hidden text-center lg:block">
 					<p>Hold space for {holdTimeMs / 1000} seconds then release</p>
-					<p>{drillLetters.filter((dl) => !dl.quizzed).length} left</p>
 				</div>
 				<div class={`${quizState === "ready" ? "border" : ""} relative h-4`}>
 					<div
@@ -205,7 +207,7 @@
 					></div>
 				</div>
 			{/if}
-			{#if drillLetters.some((dl) => !dl.quizzed)}
+			{#if quizState !== "timing" && quizState !== "ready" && drillLetters.some((dl) => !dl.quizzed)}
 				<button
 					class="mx-auto"
 					onclick={() => {
@@ -218,6 +220,8 @@
 							drillLetters[i].send = false;
 							drillLetters[i].timeMs = -1;
 						}
+
+						localStorage.setItem(DRILL_ITEMS_STORE_KEY, JSON.stringify(drillLetters));
 					}}
 					>End Drill {drillLetters.filter((dl) => dl.quizzed).length}/{drillLetters.length}</button
 				>
