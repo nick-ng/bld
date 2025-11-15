@@ -29,11 +29,19 @@
 
 {#if showNav}
 	<div class="m-1 flex flex-row items-start gap-2">
-		<a class="like-button" href={`/flash-cards?t=${currentFlashCardType}`}>Browse</a>
-		<a class="like-button" href="/quiz">Study</a>
-		<a class="like-button" href="/flash-cards/summary">Stats</a>
-		<div class="grow"></div>
-		<a class="like-button" href="/settings">Settings</a>
+		<a class="like-button grow lg:grow-0" href={`/flash-cards?t=${currentFlashCardType}`}
+			><span class="hidden lg:inline">Browse</span><span class="lg:hidden">📖</span></a
+		>
+		<a class="like-button grow lg:grow-0" href="/quiz"
+			><span class="hidden lg:inline">Study</span><span class="lg:hidden">🎓</span></a
+		>
+		<a class="like-button grow lg:grow-0" href="/flash-cards/summary"
+			><span class="hidden lg:inline">Stats</span><span class="lg:hidden">📊</span></a
+		>
+		<div class="grow-0 lg:grow"></div>
+		<a class="like-button grow lg:grow-0" href="/settings"
+			><span class="hidden lg:inline">Settings</span><span class="lg:hidden">⚙️</span></a
+		>
 		{#if !showLogin}
 			<button
 				onclick={() => {
@@ -42,7 +50,7 @@
 					$authenticationStore.username = "";
 					$authenticationStore.password = "";
 					$authenticationStore.accessToken = "";
-				}}>Logout</button
+				}}><span class="hidden lg:inline">Logout</span><span class="lg:hidden">🔒</span></button
 			>
 		{/if}
 	</div>
