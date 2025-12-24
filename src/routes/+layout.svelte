@@ -17,7 +17,7 @@
 		page.url.searchParams.get("t") || $optionsStore.defaultFlashCardType
 	);
 	let showLogin = $derived(
-		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest
+		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest && showNav
 	);
 
 	onMount(() => {});

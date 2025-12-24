@@ -74,4 +74,4 @@ css:
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
-- static/cstimer-violentmonkey.js:421: @todo: make size adjustable
+- static/cstimer-violentmonkey.js:415: @todo: make size adjustable
