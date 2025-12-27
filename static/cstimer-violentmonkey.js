@@ -3,7 +3,7 @@
 // @namespace   Violentmonkey Scripts
 // @match       https://cstimer.net/
 // @grant       none
-// @version     1.36
+// @version     1.37
 // @author      https://bld.pux.one
 // @description aaaa
 // @downloadURL https://bld.pux.one/cstimer-violentmonkey.js
@@ -310,12 +310,24 @@
 			}
 		}
 
+		const halfSolves = Math.ceil(solves.length / 2);
+		let woX = 0;
+		const sortedSolves = solves.toSorted((a, b) => a.hundredths - b.hundredths);
+		for (let i = 0; i < halfSolves; i++) {
+			const solve = sortedSolves[i];
+			woX = woX + solve.hundredths / halfSolves;
+		}
+		if (woX === 0) {
+			woX = null;
+		}
+
 		return {
 			maxHundredths: solves.length > 0 && Math.max(...solves.map((s) => s.hundredths)),
 			minHundredths: solves.length > 0 && Math.min(...solves.map((s) => s.hundredths)),
 			aoNonDNF: calculateAoN(solves.filter((s) => !s.dnf)),
 			bestAo5,
-			bestAo12
+			bestAo12,
+			woX
 		};
 	};
 
@@ -328,26 +340,6 @@
 
 		const todaySolves = solvesStats.filter((s) => s.id > todayStartId);
 		const lastNSolves = solvesStats.slice(0, getSavedData().lastNSolvesMax);
-
-		let bestAo5 = null;
-		let bestAo12 = null;
-		for (let i = 0; i < todaySolves.length; i++) {
-			if (i >= 4) {
-				const tempSolves = todaySolves.slice(i - 4, i + 1);
-				const ao5 = calculateAoN(tempSolves);
-				if (ao5 < bestAo5 || typeof bestAo5 !== "number") {
-					bestAo5 = ao5;
-				}
-			}
-
-			if (i >= 11) {
-				const tempSolves = todaySolves.slice(i - 11, i + 1);
-				const ao12 = calculateAoN(tempSolves);
-				if (ao12 < bestAo12 || typeof bestAo12 !== "number") {
-					bestAo12 = ao12;
-				}
-			}
-		}
 
 		return {
 			lastNSolves: {
@@ -378,6 +370,7 @@
 					<div>Best:</div><div id="today_best_${ID}" class="number"></div>
 					<div>Best Ao5:</div><div id="today_best_ao5_${ID}" class="number"></div>
 					<div>Best Ao12:</div><div id="today_best_ao12_${ID}" class="number"></div>
+					<div id="today_wox_label_${ID}">Wo0:</div><div id="today_wox_${ID}" class="number"></div>
 				</div>
 				<div id="big_scramble_${ID}">Test</div>
 			</div>
@@ -391,6 +384,7 @@
 						<div>Best:</div><div id="last_n_best_${ID}" class="number"></div>
 						<div>Best Ao5:</div><div id="last_n_best_ao5_${ID}" class="number"></div>
 						<div>Best Ao12:</div><div id="last_n_best_ao12_${ID}" class="number"></div>
+						<div id="last_n_wox_label">Wo50:</div><div id="last_n_wox_${ID}" class="number"></div>
 				</div>
 			</div>
 			`,
@@ -622,6 +616,7 @@
 	const updateAgregateStats = (prefix, groupStats) => {
 		if (groupStats.solves.length === 0) {
 			updateElement(`${prefix}_count`, "0/0");
+			updateElement(`${prefix}_wox_label`, "Wo0");
 		} else {
 			updateElement(
 				`${prefix}_count`,
@@ -630,12 +625,14 @@
 					100
 				).toFixed(0)}%)`
 			);
+			updateElement(`${prefix}_wox_label`, `Wo${groupStats.solves.length}`);
 		}
 
 		updateElement(`${prefix}_aonondnf`, formatHundredths(groupStats.aoNonDNF));
 		updateElement(`${prefix}_best`, formatHundredths(groupStats.minHundredths));
 		updateElement(`${prefix}_best_ao5`, formatHundredths(groupStats.bestAo5));
 		updateElement(`${prefix}_best_ao12`, formatHundredths(groupStats.bestAo12));
+		updateElement(`${prefix}_wox`, formatHundredths(groupStats.woX));
 	};
 
 	const updateBigScramble = () => {
