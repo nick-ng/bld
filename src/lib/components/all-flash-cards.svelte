@@ -223,7 +223,6 @@
 					<FlashCard
 						{letterPair}
 						{flashCardType}
-						showCorners
 						showMemo
 						showCommutator
 						showImage
