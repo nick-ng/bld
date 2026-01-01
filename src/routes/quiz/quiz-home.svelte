@@ -5,7 +5,7 @@
 		fetchFlashCards,
 		flashCardStoreStatus,
 		getAllFlashCardsOfType,
-		flashCardStore
+		flashCardStore,
 	} from "$lib/stores/flash-cards";
 	import { quizStore, quizTypeStore, touchCurrentQuiz } from "$lib/stores/quiz";
 	import { optionsStore } from "$lib/stores/options";
@@ -68,7 +68,7 @@
 										minStandBy: $optionsStore.leitnerMinReviewStandBy,
 										minRetired: $optionsStore.leitnerMinReviewRetired,
 										retiredMaxAgeDays: $optionsStore.leitnerRetiredMaxAgeDays,
-										sessionNumber: $optionsStore.flashCardTypes[flashCardType].leitnerSession || 0
+										sessionNumber: $optionsStore.flashCardTypes[flashCardType].leitnerSession || 0,
 									});
 									$quizStore = quizLetterPairs;
 									$quizTypeStore = "leitner";

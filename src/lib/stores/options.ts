@@ -4,7 +4,7 @@ import localforage from "localforage";
 
 import { browser } from "$app/environment";
 import { optionsSchema } from "$lib/types";
-import { OPTIONS_STORE_PREFIX, SPEFFZ_SAME_PIECES, SPEFFZ_UFR } from "$lib/constants";
+import { OPTIONS_STORE_PREFIX, SPEFFZ_CORNER_SAME_PIECES, SPEFFZ_CORNER_UFR } from "$lib/constants";
 
 // @todo(nick-ng): store options on server
 export const optionsStore = writable<Options>({
@@ -12,11 +12,11 @@ export const optionsStore = writable<Options>({
 	flashCardTypes: {
 		corner: {
 			name: "Corner",
-			samePieces: SPEFFZ_SAME_PIECES,
-			bufferPiece: SPEFFZ_UFR,
+			samePieces: SPEFFZ_CORNER_SAME_PIECES,
+			bufferPiece: SPEFFZ_CORNER_UFR,
 			leitnerSession: 0,
-			leitnerLastQuizUnix: 0
-		}
+			leitnerLastQuizUnix: 0,
+		},
 	},
 	defaultFlashCardType: "corner",
 	leitnerMinReviewStandBy: 10,
@@ -24,14 +24,18 @@ export const optionsStore = writable<Options>({
 	leitnerRetiredMaxAgeDays: 60,
 	leitnerQuizCooldownHours: 12,
 	leitnerBonusStandby: 2,
-	leitnerBonusRetired: 2
+	leitnerBonusRetired: 2,
+	flashCardVisibility: {
+		corners: true,
+		m2edges: true,
+	},
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;
 
 if (browser) {
 	const optionsForage = localforage.createInstance({
-		name: `${OPTIONS_STORE_PREFIX}_INDEXDB`
+		name: `${OPTIONS_STORE_PREFIX}_INDEXDB`,
 	});
 	const loadOptions = async () => {
 		const tempOptions = await optionsForage.getItem(optionsStorageKey);
@@ -42,7 +46,7 @@ if (browser) {
 			optionsStore.update((prev) => {
 				const { leitnerSessionNumbers, leitnerLastQuizUnix, ...newOptions } = {
 					...prev,
-					...parsedOptions.data
+					...parsedOptions.data,
 				};
 				// @todo(nick-ng): remove migration code later
 				if (leitnerSessionNumbers) {

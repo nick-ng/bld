@@ -65,11 +65,10 @@ css:
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
-- src/lib/components/flash-card-chooser.svelte:7: @todo(nick-ng): parent should decide if the square is blank or not
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
-- src/lib/stores/options.ts:47: @todo(nick-ng): remove migration code later
-- src/lib/utils.ts:226: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:389: @todo(nick-ng): is the loop necessary?
+- src/lib/stores/options.ts:51: @todo(nick-ng): remove migration code later
+- src/lib/utils.ts:250: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:413: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?

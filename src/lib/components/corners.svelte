@@ -48,7 +48,7 @@
 			pieceAsticker3,
 			pieceBsticker1,
 			pieceBsticker2,
-			pieceBsticker3
+			pieceBsticker3,
 		});
 	}
 </script>

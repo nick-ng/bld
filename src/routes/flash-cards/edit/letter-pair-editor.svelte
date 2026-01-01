@@ -6,7 +6,7 @@
 		upperCaseFirst,
 		authFetch,
 		getOperatingSystem,
-		cornerSpeffzToLocation
+		cornerSpeffzToLocation,
 	} from "$lib/utils";
 	import {
 		getFlashCard,
@@ -14,7 +14,7 @@
 		loadFlashCard,
 		fetchFlashCards,
 		updateFlashCard,
-		flashCardStore
+		flashCardStore,
 	} from "$lib/stores/flash-cards";
 	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
@@ -165,7 +165,7 @@
 
 				const response = await authFetch(joinServerPath("flash-cards", letterPair), {
 					method: "PUT",
-					body: formData
+					body: formData,
 				});
 				if (!response) {
 					return;

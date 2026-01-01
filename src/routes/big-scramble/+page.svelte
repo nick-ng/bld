@@ -19,7 +19,7 @@
 					isDouble,
 					isPrime: move.includes("'") && !isDouble,
 					isWide,
-					side: move[0]
+					side: move[0],
 				};
 			});
 	};
@@ -27,7 +27,7 @@
 	const getMoveStyle = ({
 		fontOutline,
 		outlineColor,
-		size
+		size,
 	}: {
 		fontOutline: number;
 		outlineColor: string;
@@ -37,7 +37,7 @@
 			`flex-basis: ${size * 1.7}px`,
 			`font-size:${size}px`,
 			`height: ${size * 1.25}px`,
-			`text-shadow: -${fontOutline}px -${fontOutline}px 0 ${outlineColor}, ${fontOutline}px -${fontOutline}px 0 ${outlineColor}, -${fontOutline}px ${fontOutline}px 0 ${outlineColor}, ${fontOutline}px ${fontOutline}px 0 ${outlineColor}`
+			`text-shadow: -${fontOutline}px -${fontOutline}px 0 ${outlineColor}, ${fontOutline}px -${fontOutline}px 0 ${outlineColor}, -${fontOutline}px ${fontOutline}px 0 ${outlineColor}, ${fontOutline}px ${fontOutline}px 0 ${outlineColor}`,
 		].join(";");
 
 	const getClockStyle = ({ size }: { size: number }) =>
@@ -100,7 +100,7 @@
 					style={getMoveStyle({
 						outlineColor: scrambleMove.isPrime ? "#fff" : "#000",
 						fontOutline,
-						size
+						size,
 					})}
 				>
 					{#if scrambleMove.isDouble}
@@ -109,7 +109,7 @@
 							style={getMoveStyle({
 								outlineColor: "#FFF",
 								fontOutline,
-								size
+								size,
 							})}>2</span
 						>
 					{:else}

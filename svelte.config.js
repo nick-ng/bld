@@ -16,10 +16,10 @@ const config = {
 			pages: "build",
 			assets: "build",
 			precompress: false,
-			strict: true
+			strict: true,
 		}),
-		paths: {}
-	}
+		paths: {},
+	},
 };
 
 export default config;

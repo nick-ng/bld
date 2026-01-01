@@ -68,7 +68,7 @@
 				opacity: (arr.length - i) / arr.length,
 				padding: [padTop, padRight, padBottom, padLeft]
 					.map((p) => `${p * PADDING_STEP}px`)
-					.join(" ")
+					.join(" "),
 			};
 		});
 	};

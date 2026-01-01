@@ -13,7 +13,7 @@ export const getMethodFilters = () => {
 
 		return {
 			hideNon3Style,
-			hideNonOP
+			hideNonOP,
 		};
 	}
 

@@ -2,7 +2,6 @@
 	import { upperCaseFirst, parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	import { flashCardStoreStatus, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import Corners from "$lib/components/corners.svelte";
 	import Image from "$lib/components/image.svelte";
 	import Step from "$lib/components/step.svelte";
 
@@ -22,14 +21,13 @@
 	let {
 		letterPair = "",
 		quizLeft = 0,
-		showCorners = true,
 		showMemo,
 		showCommutator,
 		showImage,
 		onQuizEnd,
 		extraClass = "",
 		showInverseLink = false,
-		flashCardType: cardType = "corner"
+		flashCardType: cardType = "corner",
 	}: Props = $props();
 	let flashCard = $derived(getFlashCard(letterPair, cardType, $flashCardStore));
 </script>
@@ -61,9 +59,6 @@
 					class="cannot-hover:py-2 absolute top-0 right-0 block rounded border border-gray-600 px-2 py-0 uppercase dark:border-gray-300"
 					href={`/flash-cards?t=${flashCard.type}&f=${inverseLetterPair}`}>{inverseLetterPair}</a
 				>
-			{/if}
-			{#if showCorners}
-				<Corners letterPair={flashCard.letterPair} />
 			{/if}
 			{#if showMemo}
 				<div class="max-w-64 truncate text-center text-2xl">

@@ -72,7 +72,7 @@
 
 		return {
 			sessions: {},
-			lastNSolvesMax: 50
+			lastNSolvesMax: 50,
 		};
 	};
 
@@ -103,7 +103,7 @@
 	const updateSavedData = (partialData) => {
 		const newData = {
 			...getSavedData(),
-			...partialData
+			...partialData,
 		};
 
 		const nowMinusOneDayMs = Date.now() - oneDayMs;
@@ -121,7 +121,7 @@
 			"devData",
 			JSON.stringify({
 				...prevDevData,
-				[localStorageKey]: newData
+				[localStorageKey]: newData,
 			})
 		);
 
@@ -146,7 +146,7 @@
 					id: solveId,
 					dnf: false,
 					plus2: false,
-					hundredths: -1
+					hundredths: -1,
 				};
 
 				const cellsContents = [...statsRows[i].children].map((el) => el.textContent);
@@ -203,14 +203,14 @@
 		if (!savedData.sessions[sessionName]) {
 			savedData.sessions[sessionName] = {
 				countAdjustment: getCurrentSolveIndex(),
-				startOfDay: 0
+				startOfDay: 0,
 			};
 		}
 
 		if (Date.now() - oneDayMs > savedData.sessions[sessionName].startOfDay) {
 			savedData.sessions[sessionName] = {
 				countAdjustment: getCurrentSolveIndex(),
-				startOfDay: getStartOfTodayMs()
+				startOfDay: getStartOfTodayMs(),
 			};
 
 			updateSavedData(savedData);
@@ -220,7 +220,7 @@
 
 		return {
 			...savedData.sessions[sessionName],
-			solveCount
+			solveCount,
 		};
 	};
 
@@ -327,7 +327,7 @@
 			aoNonDNF: calculateAoN(solves.filter((s) => !s.dnf)),
 			bestAo5,
 			bestAo12,
-			woX
+			woX,
 		};
 	};
 
@@ -335,7 +335,7 @@
 		const todayStartId = getSessionStats().countAdjustment;
 		const solvesStats = getSolveStats({
 			maxCount: getSavedData().lastNSolvesMax,
-			minId: todayStartId
+			minId: todayStartId,
 		});
 
 		const todaySolves = solvesStats.filter((s) => s.id > todayStartId);
@@ -345,13 +345,13 @@
 			lastNSolves: {
 				...getAgregateStats(lastNSolves),
 				dnfs: lastNSolves.filter((s) => s.dnf).length,
-				solves: lastNSolves
+				solves: lastNSolves,
 			},
 			todaySolves: {
 				...getAgregateStats(todaySolves),
 				dnfs: todaySolves.filter((s) => s.dnf).length,
-				solves: todaySolves
-			}
+				solves: todaySolves,
+			},
 		};
 	};
 
@@ -389,7 +389,7 @@
 			</div>
 			`,
 			{
-				id: `display_root_${ID}`
+				id: `display_root_${ID}`,
 			}
 		);
 		if (!displayElements.displayRoot) {
@@ -405,8 +405,8 @@
 				{
 					popup: true,
 					windowFeatures: {
-						resizable: true
-					}
+						resizable: true,
+					},
 				}
 			);
 		});
@@ -566,11 +566,11 @@
 		);
 
 		displayElements.lastNStyle = makeElement("style", null, "", {
-			id: `last_n_style_${ID}`
+			id: `last_n_style_${ID}`,
 		});
 
 		displayElements.bigPreviewStyle = makeElement("style", null, "", {
-			id: `big_preview_style_${ID}`
+			id: `big_preview_style_${ID}`,
 		});
 
 		if (!getElement("last_n_max_button")) {
@@ -645,7 +645,7 @@
 
 		if (windows.bigScramble) {
 			windows.bigScramble.postMessage(scramble, {
-				targetOrigin: "*"
+				targetOrigin: "*",
 			});
 		}
 
@@ -665,7 +665,7 @@
 						'<span class="two">2</span>'
 					)}</div>`;
 				}),
-				`<div class="clock_div_${ID}"><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe></div>`
+				`<div class="clock_div_${ID}"><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock"></iframe><iframe class="clock_frame_${ID}" src="https://bld.pux.one/clock?unit=minutes"></iframe></div>`,
 			].join(""),
 			true
 		);
@@ -719,7 +719,7 @@
 
 				if (!isNaN(newValue)) {
 					updateSavedData({
-						lastNSolvesMax: newValue
+						lastNSolvesMax: newValue,
 					});
 
 					setTimeout(updateDisplay, 500);
@@ -731,13 +731,13 @@
 	const mutationObserver = new MutationObserver(updateDisplay);
 	mutationObserver.observe(document.querySelector("#stats table"), {
 		childList: true,
-		subtree: true
+		subtree: true,
 	});
 
 	const bigScrambleObserver = new MutationObserver(updateBigScramble);
 	bigScrambleObserver.observe(document.querySelector("#scrambleDiv"), {
 		childList: true,
-		subtree: true
+		subtree: true,
 	});
 
 	setTimeout(updateDisplay, 2000);

@@ -40,18 +40,35 @@ export const SPEFFZ_LETTERS = [
 	"U",
 	"V",
 	"W",
-	"X"
+	"X",
 ];
 
-export const SPEFFZ_UBL = ["a", "e", "r"];
-export const SPEFFZ_UFR = ["c", "j", "m"];
-export const SPEFFZ_SAME_PIECES = [
-	SPEFFZ_UBL,
+export const SPEFFZ_CORNER_UBL = ["a", "e", "r"];
+export const SPEFFZ_CORNER_UFR = ["c", "j", "m"];
+export const SPEFFZ_CORNER_SAME_PIECES = [
+	SPEFFZ_CORNER_UBL,
 	["b", "n", "q"],
-	SPEFFZ_UFR,
+	SPEFFZ_CORNER_UFR,
 	["d", "f", "i"],
 	["g", "l", "u"],
 	["h", "s", "x"],
 	["k", "p", "v"],
-	["o", "t", "w"]
+	["o", "t", "w"],
+];
+
+export const SPEFFZ_EDGE_DF = ["u", "k"];
+export const SPEFFZ_EDGE_UF = ["c", "i"];
+export const SPEFFZ_EDGE_SAME_PIECES = [
+	["a", "q"], // UB
+	["b", "m"], // UR
+	SPEFFZ_EDGE_UF,
+	["d", "e"], // UL
+	["f", "l"], // LF
+	["g", "x"], // LD
+	["h", "r"], // LB
+	["j", "p"], // FR
+	SPEFFZ_EDGE_DF,
+	["n", "t"], // RB
+	["o", "v"], // RD
+	["s", "w"], // BD
 ];
