@@ -1,9 +1,7 @@
 <script lang="ts">
 	import type { FlashCard as FlashCardType } from "$lib/types";
-	import { flashCardStore, getFlashCard } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { authenticationStore } from "$lib/stores/authentication";
-	import { isTwist, isBuffer } from "$lib/utils";
 
 	interface Props {
 		flashCard: FlashCardType | null;
