@@ -120,7 +120,6 @@
 			letterPair={flashCard.letterPair}
 			{flashCardType}
 			quizLeft={$quizStore.length}
-			showCorners={showAnswer}
 			showMemo={showAnswer}
 			showCommutator={showAnswer}
 			showImage={showAnswer}
