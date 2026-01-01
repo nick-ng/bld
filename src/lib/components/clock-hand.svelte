@@ -21,9 +21,9 @@
 	};
 
 	const handColour = "#ccc";
-	let timeFraction = isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12;
+	let timeFraction = $derived(isMinutes ? getMinutes() / 60 : get12HourTimeHours() / 12);
 	let intervalId: number | null = null;
-	let gradientStyle = $state(
+	let gradientStyle = $derived(
 		`background: conic-gradient(${handColour} 0%, ${handColour} ${timeFraction * 100}%, black ${timeFraction * 100}%), black 100%;`
 	);
 
