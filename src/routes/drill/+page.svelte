@@ -161,7 +161,6 @@
 				<FlashCard
 					letterPair={drillLetters[drillIndex].letterPair}
 					flashCardType={drillLetters[drillIndex].flashCardType}
-					showCorners={quizState === "review"}
 					{showMemo}
 					showCommutator={quizState === "review"}
 					{showImage}
@@ -185,7 +184,6 @@
 							<FlashCard
 								letterPair={drillLetters[drillIndex].letterPair}
 								flashCardType={drillLetters[drillIndex].flashCardType}
-								showCorners={false}
 								{showMemo}
 								showCommutator={false}
 								{showImage}

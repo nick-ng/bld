@@ -8,7 +8,6 @@
 	interface Props {
 		letterPair?: string;
 		quizLeft?: number;
-		showCorners?: boolean;
 		showMemo: boolean;
 		showCommutator: boolean;
 		showImage: boolean;
