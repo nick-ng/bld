@@ -53,7 +53,7 @@
 			pieceAsticker3,
 			pieceBsticker1,
 			pieceBsticker2,
-			pieceBsticker3
+			pieceBsticker3,
 		});
 	}
 
@@ -135,7 +135,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>
@@ -155,7 +155,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>
@@ -175,7 +175,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>
@@ -198,7 +198,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>
@@ -218,7 +218,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>
@@ -238,7 +238,7 @@
 									pieceAsticker3,
 									pieceBsticker1,
 									pieceBsticker2,
-									pieceBsticker3
+									pieceBsticker3,
 								});
 							}}>{colour}</button
 						>

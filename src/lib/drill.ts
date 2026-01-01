@@ -14,7 +14,7 @@ const drillItemSchema = z.object({
 	flashCardType: z.string(),
 	quizzed: z.boolean(),
 	send: z.boolean(),
-	timeMs: z.number()
+	timeMs: z.number(),
 });
 
 export type DrillItem = z.infer<typeof drillItemSchema>;
@@ -63,33 +63,33 @@ export const getDrillSets = (
 			key: "slow",
 			filters: ["all", "retired"],
 			defaultSize: 5,
-			label: "Slow"
+			label: "Slow",
 		},
 		{ key: "old", filters: ["all", "retired"], defaultSize: 5, label: "Old" },
 		{
 			key: "starts-with",
 			filters: SPEFFZ_LETTERS,
 			defaultSize: -1,
-			label: "Starts with"
+			label: "Starts with",
 		},
 		{
 			key: "insert",
 			filters: ["3-move", "4-move", "full-domino", "half-domino"],
 			defaultSize: -1,
-			label: "Insert type"
+			label: "Insert type",
 		},
 		{
 			key: "interchange",
 			filters: [...interchangeFaces, "slash"].sort((a, b) => a.localeCompare(b)),
 			defaultSize: -1,
-			label: "Interchange"
+			label: "Interchange",
 		},
 		{
 			key: "random",
 			filters: ["all", "retired"],
 			defaultSize: 5,
-			label: "Random"
-		}
+			label: "Random",
+		},
 	];
 };
 
@@ -222,7 +222,7 @@ export const makeDrill = (
 			flashCardType,
 			quizzed: false,
 			send: true,
-			timeMs: -1
+			timeMs: -1,
 		}))
 	);
 

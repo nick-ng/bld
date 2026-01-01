@@ -19,13 +19,13 @@ export const COLOURS = {
 	COLOUR_ORANGE,
 	COLOUR_RED,
 	COLOUR_WHITE,
-	COLOUR_YELLOW
+	COLOUR_YELLOW,
 };
 
 export const UNKNOWN_CORNER = {
 	a: COLOUR_GREY,
 	b: COLOUR_GREY,
-	c: COLOUR_GREY
+	c: COLOUR_GREY,
 };
 
 const u = "u";
@@ -195,7 +195,7 @@ function getCornerColour(faces: string[]): CornerColours {
 	return {
 		a: getFaceColour(a),
 		b: getFaceColour(b),
-		c: getFaceColour(c)
+		c: getFaceColour(c),
 	};
 }
 
@@ -288,7 +288,7 @@ export function makeHtmlString({
 	pieceAsticker3,
 	pieceBsticker1,
 	pieceBsticker2,
-	pieceBsticker3
+	pieceBsticker3,
 }: {
 	pieceAsticker1: string;
 	pieceAsticker2: string;

@@ -6,7 +6,7 @@ import {
 	USERNAME_STORE_KEY,
 	PASSWORD_STORE_KEY,
 	ACCESS_TOKEN_STORE_KEY,
-	IS_GUEST_STORE_KEY
+	IS_GUEST_STORE_KEY,
 } from "$lib/constants";
 import { authFetch, joinServerPath } from "$lib/utils";
 
@@ -17,7 +17,7 @@ export const authenticationStore = writable<AuthenticationOptions>({
 	password: "",
 	accessToken: "",
 	accessTokenExpiry: 0,
-	isAuthenticating: false
+	isAuthenticating: false,
 });
 
 const updateIfDifferent = (storeKey: string, value?: string) => {
@@ -40,7 +40,7 @@ if (browser) {
 	if (username) {
 		authenticationStore.update((prev) => ({
 			...prev,
-			username
+			username,
 		}));
 	}
 
@@ -48,14 +48,14 @@ if (browser) {
 	if (password) {
 		authenticationStore.update((prev) => ({
 			...prev,
-			password
+			password,
 		}));
 	}
 	const isGuest = localStorage.getItem(IS_GUEST_STORE_KEY)?.toLowerCase() === "yes";
 	if (isGuest) {
 		authenticationStore.update((prev) => ({
 			...prev,
-			isGuest: true
+			isGuest: true,
 		}));
 	} else {
 		// only check access token if guest is false
@@ -66,16 +66,16 @@ if (browser) {
 				...prev,
 				accessToken,
 				accessTokenExpiry,
-				isUserAuthenticated: true
+				isUserAuthenticated: true,
 			}));
 		} else {
 			// try and login
 			authenticationStore.update((prev) => ({
 				...prev,
-				isAuthenticating: true
+				isAuthenticating: true,
 			}));
 			authFetch(joinServerPath("/login"), {
-				method: "POST"
+				method: "POST",
 			}).then((res) => {
 				if (res.ok) {
 					const accessToken = res.headers.get("x-access-token");
@@ -86,14 +86,14 @@ if (browser) {
 							accessToken,
 							accessTokenExpiry,
 							isUserAuthenticated: true,
-							isAuthenticating: false
+							isAuthenticating: false,
 						}));
 					}
 				} else {
 					console.error("error during login", res);
 					authenticationStore.update((prev) => ({
 						...prev,
-						isAuthenticating: false
+						isAuthenticating: false,
 					}));
 				}
 			});

@@ -20,7 +20,7 @@
 		$authenticationStore.password = password;
 		$authenticationStore.isAuthenticating = true;
 		authFetch(joinServerPath("/login"), {
-			method: "POST"
+			method: "POST",
 		}).then((res) => {
 			if (res.ok) {
 				const accessToken = res.headers.get("x-access-token");
@@ -31,7 +31,7 @@
 						accessToken,
 						accessTokenExpiry,
 						isUserAuthenticated: true,
-						isAuthenticating: false
+						isAuthenticating: false,
 					}));
 				}
 			} else {

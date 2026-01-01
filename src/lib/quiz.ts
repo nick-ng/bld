@@ -29,7 +29,7 @@ export const patchQuiz = async (letterPair: string, formData: FormData, skipRedi
 	});
 	const response = await authFetch(joinServerPath("quiz", letterPair), {
 		method: "PATCH",
-		body: formData
+		body: formData,
 	});
 	if (!response) {
 		return;
@@ -107,7 +107,7 @@ export const makeLeitnerQuiz = (settings: {
 	const { flashCardArray, sessionNumber, minStandBy, minRetired, retiredMaxAgeDays } = settings;
 	const flashCardsWithLeitnerDeck = flashCardArray.map((fc) => ({
 		...fc,
-		...getLeitnerTag(fc.tags)
+		...getLeitnerTag(fc.tags),
 	}));
 	const deckList = leitnerSessionToDeckList(sessionNumber);
 

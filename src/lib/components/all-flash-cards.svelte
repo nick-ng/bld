@@ -5,7 +5,13 @@
 	import { USERNAME_STORE_KEY } from "$lib/constants";
 	import { getFlashCard, getAllFlashCardsOfType, flashCardStore } from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
-	import { arrayToCsvRow, isBuffer, isTwist, parseCommutator, simplifyAlgorithm } from "$lib/utils";
+	import {
+		arrayToCsvRow,
+		is3styleCorner,
+		isM2Edge,
+		parseCommutator,
+		simplifyAlgorithm,
+	} from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
 	import Step from "$lib/components/step.svelte";
@@ -13,7 +19,6 @@
 	// eslint-disable-next-line svelte/prefer-writable-derived
 	let letterPairFilter = $state(page.url.searchParams.get("f") || "");
 	let flashCardType = $derived(page.url.searchParams.get("t") || "corner");
-	let flashCardTypeInfo = $derived($optionsStore.flashCardTypes[flashCardType]);
 	let filterInputElement = $derived<HTMLInputElement | null>(null);
 	let allLetterPairs = $derived.by(() => {
 		const tempLetterPairs: string[] = [];
@@ -67,34 +72,42 @@
 	let filteredLetterPairs = $derived(
 		letterPairFilter && processedLetterPairFilter.every((lp) => lp.length === 2)
 			? processedLetterPairFilter.filter((lp) => {
-					if (
-						isTwist(lp, flashCardTypeInfo.samePieces) ||
-						isBuffer(lp, flashCardTypeInfo.bufferPiece)
-					) {
-						return false;
+					if ($optionsStore.flashCardVisibility.corners && is3styleCorner(lp)) {
+						return true;
 					}
 
-					return true;
+					if ($optionsStore.flashCardVisibility.m2edges && isM2Edge(lp)) {
+						return true;
+					}
+
+					return false;
 				})
 			: allLetterPairs.filter((lp) => {
 					if (processedLetterPairFilter.length < 1) {
 						return true;
 					}
 
-					if (
-						isTwist(lp, flashCardTypeInfo.samePieces) ||
-						isBuffer(lp, flashCardTypeInfo.bufferPiece)
-					) {
+					if (processedLetterPairFilter.length === 1 && processedLetterPairFilter[0] !== lp[0]) {
 						return false;
 					}
 
-					if (processedLetterPairFilter.length === 1) {
-						return lp.includes(processedLetterPairFilter[0]);
+					if (!lp.includes(processedLetterPairFilter[0])) {
+						return false;
 					}
 
-					return (
-						processedLetterPairFilter.includes(lp[0]) && processedLetterPairFilter.includes(lp[1])
-					);
+					if (processedLetterPairFilter.length > 1 && !processedLetterPairFilter.includes(lp[1])) {
+						return false;
+					}
+
+					if ($optionsStore.flashCardVisibility.corners && is3styleCorner(lp)) {
+						return true;
+					}
+
+					if ($optionsStore.flashCardVisibility.m2edges && isM2Edge(lp)) {
+						return true;
+					}
+
+					return false;
 				})
 	);
 	let filteredCommutators = $derived(
@@ -104,7 +117,7 @@
 	const formattedDate = [
 		now.getFullYear(),
 		(now.getMonth() + 1).toString().padStart(2, "0"),
-		now.getDate().toString().padStart(2, "0")
+		now.getDate().toString().padStart(2, "0"),
 	].join("");
 	const owner = localStorage.getItem(USERNAME_STORE_KEY) || "user";
 	let flashCardCsv = $derived(
@@ -121,7 +134,7 @@
 					fc.type,
 					`${fc.commConfidence * 4 + fc.memoConfidence}`,
 					fc.isPublic ? "1" : "0",
-					fc.lastQuizUnix.toString()
+					fc.lastQuizUnix.toString(),
 				]);
 			})
 			.join("\n")
@@ -151,7 +164,7 @@
 
 <div class="m-auto lg:w-min">
 	<div class="flex flex-row items-end justify-center">
-		<h1>Corner Flash Cards</h1>
+		<h1>Flash Cards</h1>
 	</div>
 	<div class="mb-1 flex flex-row items-center gap-2">
 		<div class="flex min-w-1/2 flex-row">
@@ -182,9 +195,17 @@
 				}}>Clear</button
 			>
 		</div>
+		<label class="whitespace-nowrap">
+			<input type="checkbox" bind:checked={$optionsStore.flashCardVisibility.corners} />
+			Corners
+		</label>
+		<label class="whitespace-nowrap">
+			<input type="checkbox" bind:checked={$optionsStore.flashCardVisibility.m2edges} />
+			M2 Edges
+		</label>
 		<div class="grow-1"></div>
 		<a
-			class="hidden rounded border border-gray-600 px-2 py-0 lg:inline dark:border-gray-300"
+			class="hidden rounded border border-gray-600 px-2 py-0 whitespace-nowrap lg:inline dark:border-gray-300"
 			href={`data:text/csv;charset=utf-8,${encodeURIComponent(flashCardCsv)}`}
 			download={`v2-${formattedDate}-000000-log.csv`}>Export Flash Cards</a
 		>
@@ -241,7 +262,14 @@
 				.join(" ")}
 		>
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
-				<FlashCardChooser {letterPair} {flashCardType} />
+				{@const flashCard = getFlashCard(letterPair, "corner", $flashCardStore)}
+				{#if $optionsStore.flashCardVisibility.corners && is3styleCorner(letterPair)}
+					<FlashCardChooser flashCard={flashCard || null} />
+				{:else if $optionsStore.flashCardVisibility.m2edges && isM2Edge(letterPair)}
+					<FlashCardChooser flashCard={flashCard || null} />
+				{:else}
+					<FlashCardChooser flashCard={null} />
+				{/if}
 			{/each}
 		</div>
 	{/if}

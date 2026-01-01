@@ -5,7 +5,7 @@
 		flashCardStoreStatus,
 		getFlashCard,
 		loadFlashCard,
-		flashCardStore
+		flashCardStore,
 	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { updateTags } from "$lib/utils";

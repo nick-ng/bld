@@ -1,6 +1,14 @@
 import type { FlashCard } from "$lib/types";
 
-import { ACCESS_TOKEN_STORE_KEY, PASSWORD_STORE_KEY, USERNAME_STORE_KEY } from "$lib/constants";
+import {
+	ACCESS_TOKEN_STORE_KEY,
+	PASSWORD_STORE_KEY,
+	USERNAME_STORE_KEY,
+	SPEFFZ_CORNER_UFR,
+	SPEFFZ_CORNER_SAME_PIECES,
+	SPEFFZ_EDGE_DF,
+	SPEFFZ_EDGE_SAME_PIECES,
+} from "$lib/constants";
 import { optionsStore } from "$lib/stores/options";
 
 const RANDOM_LIMIT = 1_000_000;
@@ -66,7 +74,7 @@ export const addCredentialsToHeaders = (
 		return {
 			headers,
 			isValid: false,
-			previousAccessToken: null
+			previousAccessToken: null,
 		};
 	}
 
@@ -79,7 +87,7 @@ export const addCredentialsToHeaders = (
 	return {
 		headers: headers,
 		isValid: true,
-		previousAccessToken: accessToken
+		previousAccessToken: accessToken,
 	};
 };
 
@@ -120,7 +128,7 @@ export const authFetch = (url: string, init?: RequestInit) => {
 		if (r.ok) {
 			optionsStore.update((prevOptions) => ({
 				...prevOptions,
-				isUserAuthenticated: true
+				isUserAuthenticated: true,
 			}));
 			const newAccessToken = r.headers.get("X-Access-Token");
 			if (newAccessToken && previousAccessToken !== newAccessToken) {
@@ -164,6 +172,22 @@ export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
 	}
 
 	return false;
+};
+
+export const is3styleCorner = (letterPair: string) => {
+	if (isBuffer(letterPair, SPEFFZ_CORNER_UFR) || isTwist(letterPair, SPEFFZ_CORNER_SAME_PIECES)) {
+		return false;
+	}
+
+	return true;
+};
+
+export const isM2Edge = (letterPair: string) => {
+	if (isBuffer(letterPair, SPEFFZ_EDGE_DF) || isTwist(letterPair, SPEFFZ_EDGE_SAME_PIECES)) {
+		return false;
+	}
+
+	return true;
 };
 
 export const getOperatingSystem = (): string => {
@@ -285,10 +309,10 @@ export const parseCommutator = (rawCommutator: string) => {
 				temp[1],
 				reverseMoves(temp[0]),
 				reverseMoves(temp[1]),
-				reverseMoves(setup)
+				reverseMoves(setup),
 			]
 				.filter((a) => a)
-				.join(" ")
+				.join(" "),
 		};
 	}
 
@@ -325,10 +349,10 @@ export const parseCommutator = (rawCommutator: string) => {
 				interchange2,
 				reverseMoves(insert),
 				interchange,
-				reverseMoves(setup)
+				reverseMoves(setup),
 			]
 				.filter((a) => a)
-				.join(" ")
+				.join(" "),
 		};
 	}
 
@@ -350,7 +374,7 @@ export const parseCommutator = (rawCommutator: string) => {
 			insert: "",
 			insertLength: 0,
 			interchange: "",
-			expansion: [setup, algorithm, reverseMoves(setup)].filter((a) => a).join(" ")
+			expansion: [setup, algorithm, reverseMoves(setup)].filter((a) => a).join(" "),
 		};
 	}
 
@@ -363,7 +387,7 @@ export const parseCommutator = (rawCommutator: string) => {
 		insert: "",
 		insertLength: 0,
 		interchange: "",
-		expansion: hydratedCommutator
+		expansion: hydratedCommutator,
 	};
 };
 
@@ -382,7 +406,7 @@ export const simplifyAlgorithm = (alg: string) => {
 			face: move.replaceAll("'", "").replaceAll("2", ""),
 			amount: move.includes("'") ? 3 : move.includes("2") ? 2 : 1,
 			type: "normal",
-			steps: [i]
+			steps: [i],
 		};
 	});
 
@@ -485,7 +509,7 @@ export const simplifyAlgorithm = (alg: string) => {
 		simplified,
 		simplifiedString: simplifiedMoves.join(" "),
 		originalCount: moves.length,
-		simplifiedCount: simplifiedMoves.length
+		simplifiedCount: simplifiedMoves.length,
 	};
 };
 
@@ -511,7 +535,7 @@ export const shuffleArray = <T>(arr: T[]): T[] => {
 		.map((v) => {
 			return {
 				sortValue: Math.random(),
-				v
+				v,
 			};
 		})
 		.sort((a, b) => {
@@ -550,7 +574,7 @@ const cornerSpeffzLocationMap = {
 	w: "DBR",
 	x: "DBL",
 	y: "DBL",
-	z: "DBL"
+	z: "DBL",
 };
 
 export const oneCornerSpeffzToLocation = (speffzLetter: string): string => {
@@ -635,33 +659,33 @@ export const summariseFlashCards = (
 			{ label: "1 Month", unixTimestamp: (nowMs - MONTH_MS) / 1000 },
 			{ label: "1 Week", unixTimestamp: (nowMs - WEEK_MS) / 1000 },
 			{ label: "1 Day", unixTimestamp: (nowMs - DAY_MS) / 1000 },
-			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 }
+			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 },
 		];
 		for (let i = 0; i < historyMarkers.length; i++) {
 			if (oldest < historyMarkers[i].unixTimestamp && newest > historyMarkers[i].unixTimestamp) {
 				quizAges.push({
 					lastQuizUnix: historyMarkers[i].unixTimestamp,
 					letterPair: historyMarkers[i].label,
-					isMarker: true
+					isMarker: true,
 				});
 			}
 		}
 		quizAges.push({
 			lastQuizUnix: oldest - 1,
 			letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`,
-			isMarker: true
+			isMarker: true,
 		});
 		if (newest * 1000 > nowMs - DAY_MS) {
 			quizAges.push({
 				lastQuizUnix: quizAges[0].lastQuizUnix + 1,
 				letterPair: `${newestDate.getHours()}:${newestDate.getMinutes().toString().padStart(2, "0")}`,
-				isMarker: true
+				isMarker: true,
 			});
 		} else {
 			quizAges.push({
 				lastQuizUnix: newest + 1,
 				letterPair: `${newestDate.getFullYear()}-${(newestDate.getMonth() + 1).toString().padStart(2, "0")}-${newestDate.getDate().toString().padStart(2, "0")}`,
-				isMarker: true
+				isMarker: true,
 			});
 		}
 
@@ -692,33 +716,33 @@ export const summariseFlashCards = (
 			{ label: "1 Month", unixTimestamp: (nowMs - MONTH_MS) / 1000 },
 			{ label: "1 Week", unixTimestamp: (nowMs - WEEK_MS) / 1000 },
 			{ label: "1 Day", unixTimestamp: (nowMs - DAY_MS) / 1000 },
-			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 }
+			{ label: "1 Hour", unixTimestamp: (nowMs - HOUR_MS) / 1000 },
 		];
 		for (let i = 0; i < historyMarkers.length; i++) {
 			if (oldest < historyMarkers[i].unixTimestamp && newest > historyMarkers[i].unixTimestamp) {
 				drillAges.push({
 					lastDrillUnix: historyMarkers[i].unixTimestamp,
 					letterPair: historyMarkers[i].label,
-					isMarker: true
+					isMarker: true,
 				});
 			}
 		}
 		drillAges.push({
 			lastDrillUnix: oldest - 1,
 			letterPair: `${oldestDate.getFullYear()}-${(oldestDate.getMonth() + 1).toString().padStart(2, "0")}-${oldestDate.getDate().toString().padStart(2, "0")}`,
-			isMarker: true
+			isMarker: true,
 		});
 		if (newest * 1000 > nowMs - DAY_MS) {
 			drillAges.push({
 				lastDrillUnix: drillAges[0].lastDrillUnix + 1,
 				letterPair: `${newestDate.getHours()}:${newestDate.getMinutes().toString().padStart(2, "0")}`,
-				isMarker: true
+				isMarker: true,
 			});
 		} else {
 			drillAges.push({
 				lastDrillUnix: newest + 1,
 				letterPair: `${newestDate.getFullYear()}-${(newestDate.getMonth() + 1).toString().padStart(2, "0")}-${newestDate.getDate().toString().padStart(2, "0")}`,
-				isMarker: true
+				isMarker: true,
 			});
 		}
 
@@ -817,9 +841,9 @@ export const summariseFlashCards = (
 		const times = {
 			seconds: [
 				Math.min(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
-				Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000
+				Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
 			],
-			letters: flashCardGroup.map((fc) => fc.letterPair)
+			letters: flashCardGroup.map((fc) => fc.letterPair),
 		};
 		drillSpeedGroups.push(times);
 	}
@@ -829,9 +853,9 @@ export const summariseFlashCards = (
 	const times = {
 		seconds: [
 			Math.min(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
-			Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000
+			Math.max(...flashCardGroup.map((fc) => fc.drillTimeMs)) / 1000,
 		],
-		letters: flashCardGroup.map((fc) => fc.letterPair)
+		letters: flashCardGroup.map((fc) => fc.letterPair),
 	};
 	drillSpeedGroups.push(times);
 
@@ -846,6 +870,6 @@ export const summariseFlashCards = (
 		missingComms,
 		quizAges,
 		drillAges,
-		total
+		total,
 	};
 };

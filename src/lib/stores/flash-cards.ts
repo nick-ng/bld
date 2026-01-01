@@ -42,10 +42,10 @@ export const fetchFlashCards = async (
 			status: "loading",
 			message: "loading",
 			fetchStartMs,
-			fetchEndMs: 0
+			fetchEndMs: 0,
 		});
 		const res = await authFetch(joinServerPath("flash-cards"), {
-			cache
+			cache,
 		});
 
 		if (!res) {
@@ -58,7 +58,7 @@ export const fetchFlashCards = async (
 				status: `error`,
 				message: `couldn't get flash cards because ${res.status}, ${res.statusText}`,
 				fetchStartMs,
-				fetchEndMs: Date.now()
+				fetchEndMs: Date.now(),
 			});
 			return {};
 		}
@@ -69,7 +69,7 @@ export const fetchFlashCards = async (
 				status: "error",
 				message: "didn't receive an array",
 				fetchStartMs,
-				fetchEndMs: Date.now()
+				fetchEndMs: Date.now(),
 			});
 			return {};
 		}
@@ -82,7 +82,7 @@ export const fetchFlashCards = async (
 				const flashCardKey = getFlashCardKey(result.data.letterPair, result.data.type);
 				flashCards[flashCardKey] = {
 					...result.data,
-					fetchedAtMs: nowMs
+					fetchedAtMs: nowMs,
 				};
 			}
 		}
@@ -92,7 +92,7 @@ export const fetchFlashCards = async (
 			status: "loaded",
 			message: "loaded",
 			fetchStartMs,
-			fetchEndMs: Date.now()
+			fetchEndMs: Date.now(),
 		});
 
 		return flashCards;
@@ -102,7 +102,7 @@ export const fetchFlashCards = async (
 			status: `error`,
 			message: `error when fetching letter pairs: ${e}`,
 			fetchStartMs,
-			fetchEndMs: Date.now()
+			fetchEndMs: Date.now(),
 		});
 	}
 
@@ -133,7 +133,7 @@ export const loadFlashCard = async (
 	try {
 		const res = await authFetch(joinServerPath("flash-cards", letterPair), {
 			cache: "no-store",
-			signal: abortSignal
+			signal: abortSignal,
 		});
 		if (!res || !res.ok) {
 			return flashCard;

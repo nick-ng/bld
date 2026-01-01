@@ -5,7 +5,7 @@
 		flashCardStoreStatus,
 		fetchFlashCards,
 		getAllFlashCardsOfType,
-		flashCardStore
+		flashCardStore,
 	} from "$lib/stores/flash-cards";
 	import { optionsStore } from "$lib/stores/options";
 	import { sortAlgs, isBuffer, isTwist, summariseFlashCards } from "$lib/utils";

@@ -61,7 +61,7 @@
 					...drillLetter,
 					quizzed: false,
 					send: true,
-					timeMs: -1
+					timeMs: -1,
 				};
 			});
 
