@@ -765,28 +765,34 @@ export const summariseFlashCards = (
 	for (let letter0 = 0; letter0 < 24; letter0++) {
 		for (let letter1 = 0; letter1 < 24; letter1++) {
 			const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
-			if (
-				isBuffer(letterPair, flashCardTypeInfo.bufferPiece) ||
-				isTwist(letterPair, flashCardTypeInfo.samePieces)
-			) {
+			if (!is3styleCorner(letterPair) && !isM2Edge(letterPair)) {
 				continue;
 			}
 
 			total += 1;
 			const flashCard = flashCards.find((fc) => fc.letterPair === letterPair);
 			if (flashCard) {
+				if (!flashCard.memo) {
+					missingMemos.push(letterPair);
+				}
+
+				if (!is3styleCorner(letterPair)) {
+					total -= 1;
+					continue;
+				}
+
 				if (!memoConfidences[flashCard.memoConfidence]) {
 					memoConfidences[flashCard.memoConfidence] = [];
 				}
+
 				if (flashCard.memo) {
 					memoConfidences[flashCard.memoConfidence].push(letterPair);
-				} else {
-					missingMemos.push(letterPair);
 				}
 
 				if (!commConfidences[flashCard.commConfidence]) {
 					commConfidences[flashCard.commConfidence] = [];
 				}
+
 				if (flashCard.commutator) {
 					commConfidences[flashCard.commConfidence].push(letterPair);
 				} else {
@@ -813,8 +819,10 @@ export const summariseFlashCards = (
 				}
 				setups[setup].push(flashCard.letterPair);
 			} else {
-				missingComms.push(letterPair);
 				missingMemos.push(letterPair);
+				if (is3styleCorner(letterPair)) {
+					missingComms.push(letterPair);
+				}
 			}
 		}
 	}
