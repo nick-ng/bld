@@ -620,13 +620,7 @@ const WEEK_MS = 7 * DAY_MS;
 const MONTH_MS = 30 * DAY_MS;
 const YEAR_MS = 365 * DAY_MS;
 
-export const summariseFlashCards = (
-	flashCards: FlashCard[],
-	flashCardTypeInfo: {
-		samePieces: string[][];
-		bufferPiece: string[];
-	}
-) => {
+export const summariseFlashCards = (flashCards: FlashCard[]) => {
 	const inserts: { [insert: string]: string[] } = {};
 	const interchanges: { [interchange: string]: string[] } = {};
 	const setups: { [setup: string]: string[] } = {};
