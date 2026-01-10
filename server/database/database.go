@@ -2,11 +2,10 @@ package database
 
 import (
 	"bufio"
-	"database/sql"
+	"context"
 	"errors"
 	"fmt"
 	"io"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -15,6 +14,8 @@ import (
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type FlashCard struct {
@@ -43,226 +44,33 @@ const LOG_SIZE_FACTOR = 3
 
 var FlashCardData = map[string]FlashCard{}
 var lastSnapshotFileSize int64 = 1000
-var db1 *sql.DB
+var db1 *gorm.DB
+var ctx1 *context.Context
 
-func init() {
-	err := os.Mkdir(USER_DATA_DIRECTORY, 0755)
-	if err != nil && !errors.Is(err, fs.ErrExist) {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	migrateDb()
-
-	FlashCardData, err = loadData("")
-	if err != nil {
-		fmt.Println("couldn't load data")
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// migrate from old db to sqlite
-	db := GetDb()
-	tx, err := db.Begin()
-	if err != nil {
-		fmt.Println("error getting database transaction", err)
-		os.Exit(1)
-	}
-	statement, err := tx.Prepare(`INSERT OR IGNORE INTO flash_card(
-		owner,
-		type,
-		letter_pair,
-		memo,
-		image,
-		commutator,
-		tags,
-		last_quiz_unix,
-		last_drill_unix,
-		memo_confidence,
-		comm_confidence,
-		drill_time_ms,
-		is_public
-		) values(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
-	if err != nil {
-		fmt.Println("error preparing insert statement", err)
-		os.Exit(1)
-	}
-
-	defer statement.Close()
-	for pk, flashCard := range FlashCardData {
-		_, err = statement.Exec(
-			flashCard.Owner,
-			flashCard.Type,
-			flashCard.LetterPair,
-			flashCard.Memo,
-			flashCard.Image,
-			flashCard.Commutator,
-			flashCard.Tags,
-			flashCard.LastQuizUnix,
-			flashCard.LastDrillUnix,
-			flashCard.MemoConfidence,
-			flashCard.CommConfidence,
-			flashCard.DrillTimeMs,
-			flashCard.IsPublic,
-		)
-
-		if err != nil {
-			fmt.Println("error inserting", pk, err)
-		}
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		fmt.Println("error committing transaction", err)
-	}
-}
-
-func GetDb() *sql.DB {
+func InitDb(ctx *context.Context) *gorm.DB {
 	if db1 == nil {
-		sqliteDb, err := sql.Open("sqlite3", filepath.Join(USER_DATA_DIRECTORY, "bld.db"))
+		db, err := gorm.Open(sqlite.Open(filepath.Join(USER_DATA_DIRECTORY, "bld.db")), &gorm.Config{})
 		if err != nil {
-			fmt.Println("error opening sqlite3 db", err)
+			fmt.Println("error opening db", err)
 			os.Exit(1)
 		}
 
-		db1 = sqliteDb
+		db.AutoMigrate(&FlashCard{})
+
+		db1 = db
+		ctx1 = ctx
 	}
 
 	return db1
 }
 
-func migrateDb() {
-	db := GetDb()
-
-	query := "SELECT name FROM sqlite_master WHERE type='table' AND name='migration';"
-
-	tableExistsRows, err := db.Query(query)
-	if err != nil {
-		fmt.Println("error executing sql statement", err)
-		db.Close()
-		os.Exit(1)
-	}
-	defer tableExistsRows.Close()
-
-	migrationTableExists := false
-	for tableExistsRows.Next() {
-		var name string
-		err = tableExistsRows.Scan(&name)
-		if name == "migration" {
-			migrationTableExists = true
-		}
+func GetDb() (*gorm.DB, *context.Context, error) {
+	if db1 == nil || ctx1 == nil {
+		err := errors.New("data base not initialised")
+		return nil, nil, err
 	}
 
-	if !migrationTableExists {
-		createMigrationTableQuery := "CREATE TABLE migration (filename TEXT)"
-		_, err := db.Exec(createMigrationTableQuery)
-		if err != nil {
-			fmt.Println("error creating migration table:", err)
-			db.Close()
-			os.Exit(1)
-		}
-	}
-
-	dirEntries, err := os.ReadDir(MIGRATIONS_DIRECTORY)
-	if err != nil {
-		fmt.Println("error getting migration files:", err)
-		return
-	}
-
-	slices.SortFunc(dirEntries, func(a, b os.DirEntry) int {
-		aName := a.Name()
-		bName := b.Name()
-
-		return strings.Compare(aName, bName)
-	})
-
-	for _, dirEntry := range dirEntries {
-		filename := dirEntry.Name()
-		if !strings.HasSuffix(filename, ".sql") {
-			continue
-		}
-
-		tx, err := db.Begin()
-		if err != nil {
-			fmt.Println("error getting database transaction:", err)
-			db.Close()
-			os.Exit(1)
-		}
-
-		query := "SELECT filename FROM migration WHERE filename = ?"
-		migrationExistsRows, err := tx.Query(query, filename)
-		migrationExists := false
-		for migrationExistsRows.Next() {
-			var tempFilename string
-			err = migrationExistsRows.Scan(&tempFilename)
-			if tempFilename == filename {
-				err = tx.Commit()
-				if err != nil {
-					fmt.Println("error committing database transaction:", err)
-					db.Close()
-					os.Exit(1)
-				}
-
-				migrationExists = true
-				continue
-			}
-		}
-
-		if migrationExists {
-			fmt.Printf("%s already applied. skipping\n", filename)
-			continue
-		}
-
-		fullPath := filepath.Join(MIGRATIONS_DIRECTORY, filename)
-		contentBytes, err := os.ReadFile(fullPath)
-		if err != nil {
-			fmt.Println("error reading", fullPath, err)
-			err := tx.Rollback()
-			if err != nil {
-				fmt.Println("error rolling back database transaction:", err)
-			}
-
-			db.Close()
-			os.Exit(1)
-		}
-
-		content := string(contentBytes)
-		sqlQueries := strings.Split(content, "-- split")
-
-		for i, sqlQuery := range sqlQueries {
-			fmt.Printf("applying query %d from %s\n", i, fullPath)
-			_, err := tx.Exec(sqlQuery)
-			if err != nil {
-				fmt.Println("error applying sql query:", sqlQuery)
-				err := tx.Rollback()
-				if err != nil {
-					fmt.Println("error rolling back database transaction:", err)
-				}
-
-				db.Close()
-				os.Exit(1)
-			}
-		}
-
-		recordMigrationQuery := "INSERT INTO migration (filename) VALUES (?)"
-		_, err = tx.Exec(recordMigrationQuery, filename)
-		if err != nil {
-			fmt.Println("error recording migration completion:", err)
-			err := tx.Rollback()
-			if err != nil {
-				fmt.Println("error rolling back database transaction:", err)
-				db.Close()
-				os.Exit(1)
-			}
-		}
-
-		err = tx.Commit()
-		if err != nil {
-			fmt.Println("error committing database transaction:", err)
-			db.Close()
-			os.Exit(1)
-		}
-	}
+	return db1, ctx1, nil
 }
 
 func loadData(finalFilename string) (map[string]FlashCard, error) {
@@ -653,7 +461,10 @@ drill_time_ms,
 is_public`
 
 func WriteFlashCard(flashCard FlashCard) (FlashCard, error) {
-	db := GetDb()
+	db, ctx, err := GetDb()
+	if err != nil {
+		return getDefaultFlashCard(flashCard.Owner, flashCard.Type, flashCard.LetterPair), err
+	}
 
 	ignoredColumns := []string{
 		"last_quiz_unix",

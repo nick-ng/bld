@@ -4,6 +4,7 @@ import (
 	"bld-server/database"
 	"bld-server/routes"
 	"bld-server/utils"
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -28,9 +29,9 @@ func optionsHandler(writer http.ResponseWriter, _ *http.Request) {
 }
 
 func main() {
-	// get the db singleton and close it when main returns
-	db := database.GetDb()
-	defer db.Close()
+	ctx := context.Background()
+	// get the db to run the migration
+	database.GetDb(&ctx)
 
 	routes.AddMiscRoutes()
 	routes.AddFlashCardsRoutes()
