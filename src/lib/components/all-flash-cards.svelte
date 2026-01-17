@@ -7,10 +7,10 @@
 	import { optionsStore } from "$lib/stores/options";
 	import {
 		arrayToCsvRow,
-		is3styleCorner,
-		isM2Edge,
+		isSpeffzPairValid,
 		parseCommutator,
 		simplifyAlgorithm,
+		getTrueKeys,
 	} from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
@@ -72,15 +72,9 @@
 	let filteredLetterPairs = $derived(
 		letterPairFilter && processedLetterPairFilter.every((lp) => lp.length === 2)
 			? processedLetterPairFilter.filter((lp) => {
-					if ($optionsStore.flashCardVisibility.corners && is3styleCorner(lp)) {
-						return true;
-					}
-
-					if ($optionsStore.flashCardVisibility.m2edges && isM2Edge(lp)) {
-						return true;
-					}
-
-					return false;
+					return getTrueKeys($optionsStore.visibleBuffers).some((buf) =>
+						isSpeffzPairValid(lp, buf)
+					);
 				})
 			: allLetterPairs.filter((lp) => {
 					if (processedLetterPairFilter.length < 1) {
@@ -99,15 +93,9 @@
 						return false;
 					}
 
-					if ($optionsStore.flashCardVisibility.corners && is3styleCorner(lp)) {
-						return true;
-					}
-
-					if ($optionsStore.flashCardVisibility.m2edges && isM2Edge(lp)) {
-						return true;
-					}
-
-					return false;
+					return getTrueKeys($optionsStore.visibleBuffers).some((buf) =>
+						isSpeffzPairValid(lp, buf)
+					);
 				})
 	);
 	let filteredCommutators = $derived(
@@ -195,14 +183,23 @@
 				}}>Clear</button
 			>
 		</div>
-		<label class="whitespace-nowrap">
-			<input type="checkbox" bind:checked={$optionsStore.flashCardVisibility.corners} />
-			Corners
-		</label>
-		<label class="whitespace-nowrap">
-			<input type="checkbox" bind:checked={$optionsStore.flashCardVisibility.m2edges} />
-			M2 Edges
-		</label>
+		<details class="relative">
+			<summary>Buffers</summary>
+			<div class="absolute top-full left-0 z-1 border border-gray-600 bg-white p-1">
+				{#each getTrueKeys($optionsStore.chosenBuffers) as pos (pos)}
+					<label class="block"
+						><input
+							type="checkbox"
+							checked={$optionsStore.visibleBuffers[pos]}
+							onchange={(e) => {
+								$optionsStore.visibleBuffers[pos] = e.currentTarget.checked;
+							}}
+						/>
+						{pos}</label
+					>
+				{/each}
+			</div>
+		</details>
 		<div class="grow-1"></div>
 		<a
 			class="hidden rounded border border-gray-600 px-2 py-0 whitespace-nowrap lg:inline dark:border-gray-300"
@@ -262,9 +259,7 @@
 		>
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				{@const flashCard = getFlashCard(letterPair, "corner", $flashCardStore)}
-				{#if $optionsStore.flashCardVisibility.corners && is3styleCorner(letterPair)}
-					<FlashCardChooser flashCard={flashCard || null} />
-				{:else if $optionsStore.flashCardVisibility.m2edges && isM2Edge(letterPair)}
+				{#if getTrueKeys($optionsStore.visibleBuffers).some( (buf) => isSpeffzPairValid(letterPair, buf) )}
 					<FlashCardChooser flashCard={flashCard || null} />
 				{:else}
 					<FlashCardChooser flashCard={null} />

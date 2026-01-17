@@ -1,4 +1,5 @@
 import z from "zod";
+import { CORNER_POSITIONS, EDGE_POSITIONS } from "$lib/constants";
 
 export const flashCardSchema = z.object({
 	letterPair: z.string(),
@@ -34,6 +35,8 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 	};
 };
 
+const positionsSchema = z.literal([...CORNER_POSITIONS, ...EDGE_POSITIONS]);
+
 export const optionsSchema = z.object({
 	isUserAuthenticated: z.boolean().optional(),
 	flashCardTypes: z.record(
@@ -56,10 +59,11 @@ export const optionsSchema = z.object({
 	leitnerLastQuizUnix: z.record(z.string(), z.number()).optional(),
 	leitnerBonusStandby: z.number().optional(),
 	leitnerBonusRetired: z.number().optional(),
-	flashCardVisibility: z.object({
-		corners: z.boolean().default(true),
-		m2edges: z.boolean().default(true),
-	}),
+	chosenBuffers: z.record(positionsSchema, z.boolean()).optional().default({ UF: true, UFR: true }),
+	visibleBuffers: z
+		.record(positionsSchema, z.boolean())
+		.optional()
+		.default({ UF: true, UFR: true }),
 });
 
 export type Options = z.infer<typeof optionsSchema>;
