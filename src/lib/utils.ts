@@ -4,15 +4,126 @@ import {
 	ACCESS_TOKEN_STORE_KEY,
 	PASSWORD_STORE_KEY,
 	USERNAME_STORE_KEY,
-	SPEFFZ_CORNER_UFR,
 	SPEFFZ_CORNER_SAME_PIECES,
-	SPEFFZ_EDGE_DF,
 	SPEFFZ_EDGE_SAME_PIECES,
 } from "$lib/constants";
 import { optionsStore } from "$lib/stores/options";
 
 const RANDOM_LIMIT = 1_000_000;
 const regripEmojis = ["👍", "👎"];
+
+// @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
+const cornerSpeffzLocationMap: Record<string, string> = {
+	a: "UBL",
+	b: "UBR",
+	c: "UFR",
+	d: "UFL",
+	e: "LUB",
+	f: "LUF",
+	g: "LDF",
+	h: "LDB",
+	i: "FUL",
+	j: "FUR",
+	k: "FDR",
+	l: "FDL",
+	m: "RUF",
+	n: "RUB",
+	o: "RDB",
+	p: "RDF",
+	q: "BUR",
+	r: "BUL",
+	s: "BDL",
+	t: "BDR",
+	u: "DFL",
+	v: "DFR",
+	w: "DBR",
+	x: "DBL",
+	y: "DBL",
+	z: "DBL",
+	UBL: "a",
+	UBR: "b",
+	UFR: "c",
+	UFL: "d",
+	LUB: "e",
+	LUF: "f",
+	LDF: "g",
+	LDB: "h",
+	FUL: "i",
+	FUR: "j",
+	FDR: "k",
+	FDL: "l",
+	RUF: "m",
+	RUB: "n",
+	RDB: "o",
+	RDF: "p",
+	BUR: "q",
+	BUL: "r",
+	BDL: "s",
+	BDR: "t",
+	DFL: "u",
+	DFR: "v",
+	DBR: "w",
+	DBL: "x",
+};
+
+const edgeSpeffzLocationMap: Record<string, string> = {
+	a: "UB",
+	b: "UL",
+	c: "UF",
+	d: "UR",
+	e: "RU",
+	f: "RF",
+	g: "RD",
+	h: "RB",
+	i: "FU",
+	j: "FL",
+	k: "FD",
+	l: "FR",
+	m: "LU",
+	n: "LB",
+	o: "LD",
+	p: "LF",
+	q: "BU",
+	r: "BR",
+	s: "BD",
+	t: "BL",
+	u: "DF",
+	v: "DR",
+	w: "DB",
+	x: "DL",
+	y: "DL",
+	z: "DL",
+	UB: "a",
+	UL: "b",
+	UF: "c",
+	UR: "d",
+	RU: "e",
+	RF: "f",
+	RD: "g",
+	RB: "h",
+	FU: "i",
+	FL: "j",
+	FD: "k",
+	FR: "l",
+	LU: "m",
+	LB: "n",
+	LD: "o",
+	LF: "p",
+	BU: "q",
+	BR: "r",
+	BD: "s",
+	BL: "t",
+	DF: "u",
+	DR: "v",
+	DB: "w",
+	DL: "x",
+};
+
+export const getTrueKeys = (obj: Record<string, boolean>): string[] => {
+	const temp = Object.keys(obj).filter((k) => obj[k]);
+
+	return temp;
+};
 
 export const getRandomSequence = (seed: number, count: number) => {
 	const randomNumbers: number[] = [];
@@ -142,8 +253,82 @@ export const authFetch = (url: string, init?: RequestInit) => {
 	return response;
 };
 
-export const isTwist = (letterPair: string, samePieces: string[][]) => {
-	const letters = letterPair.split("");
+export const positionSortIndex = (positionLetter: string) => {
+	const uppercaseLetter = positionLetter.toUpperCase();
+	switch (uppercaseLetter) {
+		case "U":
+			return 1;
+		case "D":
+			return 2;
+		case "F":
+			return 3;
+		case "B":
+			return 4;
+		case "L":
+			return 5;
+		case "R":
+			return 6;
+		default:
+			return 7;
+	}
+};
+
+export const locationType = (
+	location: string
+):
+	| {
+			isValid: true;
+			name: string;
+			bufferSpeffz: string;
+			samePieces: string[][];
+			speffzLocationMap: Record<string, string>;
+	  }
+	| { isValid: false } => {
+	if (location.toUpperCase() === location) {
+		// all letters are uppercase e.g. UF, UFR
+		if (location.length === 3) {
+			return {
+				isValid: true,
+				name: "corner",
+				bufferSpeffz: cornerSpeffzLocationMap[location],
+				samePieces: SPEFFZ_CORNER_SAME_PIECES,
+				speffzLocationMap: cornerSpeffzLocationMap,
+			};
+		}
+		if (location.length === 2) {
+			return {
+				isValid: true,
+				name: "edge",
+				bufferSpeffz: edgeSpeffzLocationMap[location],
+				samePieces: SPEFFZ_EDGE_SAME_PIECES,
+				speffzLocationMap: edgeSpeffzLocationMap,
+			};
+		}
+	}
+
+	// @todo(nick-ng): handle other piece types (x centre, + centre, wing)
+	return {
+		isValid: false,
+	};
+};
+
+export const normalisePosition = (rawPosition: string) => {
+	const [firstLetter, ...otherLetters] = rawPosition.split("");
+
+	otherLetters.sort((a, b) => positionSortIndex(a) - positionSortIndex(b));
+
+	return [firstLetter, ...otherLetters].join("");
+};
+
+export const areLocationsSame = (locationA: string, locationB: string) => {
+	const tempA = locationA.split("").sort().join("");
+	const tempB = locationB.split("").sort().join("");
+
+	return tempA === tempB;
+};
+
+export const isTwist = (speffzPair: string, samePieces: string[][]) => {
+	const letters = speffzPair.split("");
 	if (letters.length !== 2) {
 		return false;
 	}
@@ -174,16 +359,31 @@ export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
 	return false;
 };
 
-export const is3styleCorner = (letterPair: string) => {
-	if (isBuffer(letterPair, SPEFFZ_CORNER_UFR) || isTwist(letterPair, SPEFFZ_CORNER_SAME_PIECES)) {
+export const isSpeffzPairValid = (speffzPair: string, bufferLocation: string) => {
+	if (speffzPair.length !== 2) {
+		// a speffz pair contains exactly 2 letters
 		return false;
 	}
 
-	return true;
-};
+	const pieceType = locationType(bufferLocation);
+	if (!pieceType.isValid) {
+		return false;
+	}
 
-export const isM2Edge = (letterPair: string) => {
-	if (isBuffer(letterPair, SPEFFZ_EDGE_DF) || isTwist(letterPair, SPEFFZ_EDGE_SAME_PIECES)) {
+	const location1 = pieceType.speffzLocationMap[speffzPair[0]];
+	const location2 = pieceType.speffzLocationMap[speffzPair[1]];
+
+	if (areLocationsSame(bufferLocation, location1) || areLocationsSame(bufferLocation, location2)) {
+		return false;
+	}
+
+	if (speffzPair[0] === speffzPair[1]) {
+		// repeated letters are either parity or long-term twist/flips
+		return true;
+	}
+
+	if (areLocationsSame(location1, location2)) {
+		// same piece means a twist/flip
 		return false;
 	}
 
@@ -547,36 +747,6 @@ export const shuffleArray = <T>(arr: T[]): T[] => {
 
 	return temp;
 };
-
-const cornerSpeffzLocationMap = {
-	a: "UBL",
-	b: "UBR",
-	c: "UFR",
-	d: "UFL",
-	e: "LUB",
-	f: "LUF",
-	g: "LDF",
-	h: "LDB",
-	i: "FUL",
-	j: "FUR",
-	k: "FDR",
-	l: "FDL",
-	m: "RUF",
-	n: "RUB",
-	o: "RDB",
-	p: "RDF",
-	q: "BUR",
-	r: "BUL",
-	s: "BDL",
-	t: "BDR",
-	u: "DFL",
-	v: "DFR",
-	w: "DBR",
-	x: "DBL",
-	y: "DBL",
-	z: "DBL",
-};
-
 export const oneCornerSpeffzToLocation = (speffzLetter: string): string => {
 	const letter = speffzLetter[0].toLowerCase();
 	if (letter && letter in cornerSpeffzLocationMap) {
@@ -620,7 +790,10 @@ const WEEK_MS = 7 * DAY_MS;
 const MONTH_MS = 30 * DAY_MS;
 const YEAR_MS = 365 * DAY_MS;
 
-export const summariseFlashCards = (flashCards: FlashCard[]) => {
+export const summariseFlashCards = (
+	flashCards: FlashCard[],
+	chosenBuffers: Record<string, boolean>
+) => {
 	const inserts: { [insert: string]: string[] } = {};
 	const interchanges: { [interchange: string]: string[] } = {};
 	const setups: { [setup: string]: string[] } = {};
@@ -759,7 +932,7 @@ export const summariseFlashCards = (flashCards: FlashCard[]) => {
 	for (let letter0 = 0; letter0 < 24; letter0++) {
 		for (let letter1 = 0; letter1 < 24; letter1++) {
 			const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
-			if (!is3styleCorner(letterPair) && !isM2Edge(letterPair)) {
+			if (!getTrueKeys(chosenBuffers).some((buf) => isSpeffzPairValid(letterPair, buf))) {
 				continue;
 			}
 
@@ -768,11 +941,6 @@ export const summariseFlashCards = (flashCards: FlashCard[]) => {
 			if (flashCard) {
 				if (!flashCard.memo) {
 					missingMemos.push(letterPair);
-				}
-
-				if (!is3styleCorner(letterPair)) {
-					total -= 1;
-					continue;
 				}
 
 				if (!memoConfidences[flashCard.memoConfidence]) {
@@ -814,7 +982,7 @@ export const summariseFlashCards = (flashCards: FlashCard[]) => {
 				setups[setup].push(flashCard.letterPair);
 			} else {
 				missingMemos.push(letterPair);
-				if (is3styleCorner(letterPair)) {
+				if (isSpeffzPairValid(letterPair, "UFR")) {
 					missingComms.push(letterPair);
 				}
 			}
