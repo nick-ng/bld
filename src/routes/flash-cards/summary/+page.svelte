@@ -37,7 +37,7 @@
 		})
 	);
 
-	let summary = $derived(summariseFlashCards(flashCards));
+	let summary = $derived(summariseFlashCards(flashCards, $optionsStore.chosenBuffers));
 
 	onMount(() => {
 		if (Date.now() - $flashCardStoreStatus.fetchEndMs > STALE_THRESHOLD_MS) {

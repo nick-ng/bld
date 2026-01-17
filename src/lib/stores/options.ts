@@ -25,10 +25,8 @@ export const optionsStore = writable<Options>({
 	leitnerQuizCooldownHours: 12,
 	leitnerBonusStandby: 2,
 	leitnerBonusRetired: 2,
-	flashCardVisibility: {
-		corners: true,
-		m2edges: true,
-	},
+	chosenBuffers: { UF: true, UFR: true },
+	visibleBuffers: { UF: true, UFR: true },
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;

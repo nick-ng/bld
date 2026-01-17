@@ -66,9 +66,11 @@ css:
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
-- src/lib/stores/options.ts:51: @todo(nick-ng): remove migration code later
-- src/lib/utils.ts:250: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:413: @todo(nick-ng): is the loop necessary?
+- src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
+- src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
+- src/lib/utils.ts:309: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
+- src/lib/utils.ts:450: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:613: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?

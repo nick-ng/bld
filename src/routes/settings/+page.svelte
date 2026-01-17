@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CORNER_POSITIONS, EDGE_POSITIONS } from "$lib/constants";
 	import { optionsStore } from "$lib/stores/options";
 
 	let flashCardType = $state($optionsStore.defaultFlashCardType);
@@ -134,6 +135,45 @@
 					</td>
 				</tr>
 			{/if}
+			<tr>
+				<td>Chosen Buffers</td>
+				<td>
+					<details>
+						<summary>Corners</summary>
+						<div class="mt-1">
+							{#each CORNER_POSITIONS as pos (pos)}
+								<label class="block"
+									><input
+										type="checkbox"
+										checked={$optionsStore.chosenBuffers[pos]}
+										onchange={(e) => {
+											$optionsStore.chosenBuffers[pos] = e.currentTarget.checked;
+										}}
+									/>
+									{pos}</label
+								>
+							{/each}
+						</div>
+					</details>
+					<details class="mt-1">
+						<summary>Edges</summary>
+						<div class="mt-1">
+							{#each EDGE_POSITIONS as pos (pos)}
+								<label class="block"
+									><input
+										type="checkbox"
+										checked={$optionsStore.chosenBuffers[pos]}
+										onchange={(e) => {
+											$optionsStore.chosenBuffers[pos] = e.currentTarget.checked;
+										}}
+									/>
+									{pos}</label
+								>
+							{/each}
+						</div>
+					</details>
+				</td>
+			</tr>
 		</tbody>
 	</table>
 </div>
