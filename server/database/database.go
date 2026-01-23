@@ -3,6 +3,7 @@ package database
 import (
 	"bufio"
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"io"
@@ -12,6 +13,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
@@ -36,6 +38,38 @@ type FlashCard struct {
 	ModifiedAt     int64  `json:"modifiedAt"`
 }
 
+type LetterPair struct {
+	gorm.Model
+	ID         uint      `json:"id"`
+	Owner      string    `json:"owner"`
+	SpeffzPair string    `json:"speffz_pair"`
+	Memo       *string   `json:"memo"`
+	Image      *string   `json:"image"`
+	Sm2N       int       `json:"sm_2_n"`
+	Sm2Ef      float32   `json:"sm_2_ef"`
+	Sm2I       float32   `json:"sm_2_i"`
+	LastQuizAt time.Time `json:"last_quiz_at"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type Commutator struct {
+	gorm.Model
+	ID          uint      `json:"id"`
+	Owner       string    `json:"owner"`
+	Buffer      string    `json:"buffer"`
+	Location1   string    `json:"location_1"`
+	Location2   string    `json:"location_2"`
+	SpeffzPair  string    `json:"speffz_pair"`
+	Sm2N        int       `json:"sm_2_n"`
+	Sm2Ef       float32   `json:"sm_2_ef"`
+	Sm2I        float32   `json:"sm_2_i"`
+	DrillTimeMs int       `json:"drillTimeMs"`
+	LastDrillAt time.Time `json:"last_drill_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 const VERSION_PREFIX = "v2"
 const USER_DATA_DIRECTORY = "user-data"
 const MIGRATIONS_DIRECTORY = "migrations"
@@ -44,33 +78,49 @@ const LOG_SIZE_FACTOR = 3
 
 var FlashCardData = map[string]FlashCard{}
 var lastSnapshotFileSize int64 = 1000
-var db1 *gorm.DB
+var db1 *sql.DB
+var orm1 *gorm.DB
 var ctx1 *context.Context
 
-func InitDb(ctx *context.Context) *gorm.DB {
-	if db1 == nil {
-		db, err := gorm.Open(sqlite.Open(filepath.Join(USER_DATA_DIRECTORY, "bld.db")), &gorm.Config{})
+func InitOrm(ctx *context.Context) *gorm.DB {
+	if orm1 == nil {
+		tempOrm, err := gorm.Open(sqlite.Open(filepath.Join(USER_DATA_DIRECTORY, "bld.db")), &gorm.Config{})
 		if err != nil {
 			fmt.Println("error opening db", err)
 			os.Exit(1)
 		}
 
-		db.AutoMigrate(&FlashCard{})
+		tempOrm.AutoMigrate(&LetterPair{})
+		tempOrm.AutoMigrate(&Commutator{})
 
-		db1 = db
+		orm1 = tempOrm
 		ctx1 = ctx
+	}
+
+	return orm1
+}
+
+func GetDb() *sql.DB {
+	if db1 == nil {
+		sqliteDb, err := sql.Open("sqlite3", filepath.Join(USER_DATA_DIRECTORY, "bld.db"))
+		if err != nil {
+			fmt.Println("error opening sqlite3 db", err)
+			os.Exit(1)
+		}
+
+		db1 = sqliteDb
 	}
 
 	return db1
 }
 
-func GetDb() (*gorm.DB, *context.Context, error) {
-	if db1 == nil || ctx1 == nil {
+func GetOrm() (*gorm.DB, *context.Context, error) {
+	if orm1 == nil || ctx1 == nil {
 		err := errors.New("data base not initialised")
 		return nil, nil, err
 	}
 
-	return db1, ctx1, nil
+	return orm1, ctx1, nil
 }
 
 func loadData(finalFilename string) (map[string]FlashCard, error) {
@@ -461,7 +511,7 @@ drill_time_ms,
 is_public`
 
 func WriteFlashCard(flashCard FlashCard) (FlashCard, error) {
-	db, ctx, err := GetDb()
+	db, ctx, err := GetOrm()
 	if err != nil {
 		return getDefaultFlashCard(flashCard.Owner, flashCard.Type, flashCard.LetterPair), err
 	}
