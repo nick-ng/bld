@@ -13,7 +13,7 @@
 		"lint": "prettier --check . && eslint .",
 		"lintd": "prettier --check . && eslint --debug .",
 		"eslintd": "eslint --debug .",
-		"format": "prettier --write .",
+		"format": "prettier --write --list-different .",
 		"l": "npm run format && npm run lint && npm run check"
 	},
 	"devDependencies": {

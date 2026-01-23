@@ -3,6 +3,7 @@ set -euo pipefail
 IFS=$'\n\t'
 
 npm run format
+gofmt -w ./server
 
 sed -i -e '/### ToDo Comments/q' README.md
 
