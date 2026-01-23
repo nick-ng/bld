@@ -4,6 +4,7 @@ import (
 	"bld-server/database"
 	"bld-server/routes"
 	"bld-server/utils"
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -31,6 +32,9 @@ func main() {
 	// get the db singleton and close it when main returns
 	db := database.GetDb()
 	defer db.Close()
+
+	ctx := context.Background()
+	database.InitOrm(&ctx)
 
 	routes.AddMiscRoutes()
 	routes.AddFlashCardsRoutes()

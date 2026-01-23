@@ -2,6 +2,7 @@ package database
 
 import (
 	"bufio"
+	"context"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -13,8 +14,11 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type FlashCard struct {
@@ -35,6 +39,38 @@ type FlashCard struct {
 	ModifiedAt     int64  `json:"modifiedAt"`
 }
 
+type Mnemonic struct {
+	gorm.Model
+	ID         uint      `json:"id"`
+	Owner      string    `json:"owner"`
+	SpeffzPair string    `json:"speffz_pair"`
+	Words      *string   `json:"words"`
+	Image      *string   `json:"image"`
+	Sm2N       int       `json:"sm_2_n"`
+	Sm2Ef      float32   `json:"sm_2_ef"`
+	Sm2I       float32   `json:"sm_2_i"`
+	LastQuizAt time.Time `json:"last_quiz_at"`
+	CreatedAt  time.Time `json:"created_at"`
+	UpdatedAt  time.Time `json:"updated_at"`
+}
+
+type Commutator struct {
+	gorm.Model
+	ID          uint      `json:"id"`
+	Owner       string    `json:"owner"`
+	Buffer      string    `json:"buffer"`
+	Location1   string    `json:"location_1"`
+	Location2   string    `json:"location_2"`
+	SpeffzPair  string    `json:"speffz_pair"`
+	Sm2N        int       `json:"sm_2_n"`
+	Sm2Ef       float32   `json:"sm_2_ef"`
+	Sm2I        float32   `json:"sm_2_i"`
+	DrillTimeMs int       `json:"drillTimeMs"`
+	LastDrillAt time.Time `json:"last_drill_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
+}
+
 const VERSION_PREFIX = "v2"
 const USER_DATA_DIRECTORY = "user-data"
 const MIGRATIONS_DIRECTORY = "migrations"
@@ -44,6 +80,8 @@ const LOG_SIZE_FACTOR = 3
 var FlashCardData = map[string]FlashCard{}
 var lastSnapshotFileSize int64 = 1000
 var db1 *sql.DB
+var orm1 *gorm.DB
+var ctx1 *context.Context
 
 func init() {
 	err := os.Mkdir(USER_DATA_DIRECTORY, 0755)
@@ -117,6 +155,24 @@ func init() {
 	}
 }
 
+func InitOrm(ctx *context.Context) *gorm.DB {
+	if orm1 == nil {
+		tempOrm, err := gorm.Open(sqlite.Open(filepath.Join(USER_DATA_DIRECTORY, "bld.db")), &gorm.Config{})
+		if err != nil {
+			fmt.Println("error opening db", err)
+			os.Exit(1)
+		}
+
+		tempOrm.AutoMigrate(&Mnemonic{})
+		tempOrm.AutoMigrate(&Commutator{})
+
+		orm1 = tempOrm
+		ctx1 = ctx
+	}
+
+	return orm1
+}
+
 func GetDb() *sql.DB {
 	if db1 == nil {
 		sqliteDb, err := sql.Open("sqlite3", filepath.Join(USER_DATA_DIRECTORY, "bld.db"))
@@ -129,6 +185,15 @@ func GetDb() *sql.DB {
 	}
 
 	return db1
+}
+
+func GetOrm() (*gorm.DB, *context.Context, error) {
+	if orm1 == nil || ctx1 == nil {
+		err := errors.New("data base not initialised")
+		return nil, nil, err
+	}
+
+	return orm1, ctx1, nil
 }
 
 func migrateDb() {
