@@ -41,34 +41,37 @@ type FlashCard struct {
 
 type Mnemonic struct {
 	gorm.Model
-	ID         uint      `json:"id"`
-	Owner      string    `json:"owner"`
-	SpeffzPair string    `json:"speffz_pair"`
-	Words      *string   `json:"words"`
-	Image      *string   `json:"image"`
-	Sm2N       int       `json:"sm_2_n"`
-	Sm2Ef      float32   `json:"sm_2_ef"`
-	Sm2I       float32   `json:"sm_2_i"`
-	LastQuizAt time.Time `json:"last_quiz_at"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
+	ID           uint      `json:"id"`
+	Owner        string    `json:"owner" gorm:"index:owner_speffz,unique"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:owner_speffz,unique"`
+	Words        *string   `json:"words"`
+	Image        *string   `json:"image"`
+	Sm2N         int       `json:"sm_2_n"`
+	Sm2Ef        float32   `json:"sm_2_ef"`
+	Sm2I         float32   `json:"sm_2_i"`
+	LastReviewAt time.Time `json:"last_review_at"`
+	NextReviewAt time.Time `json:"next_review_at"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 type Commutator struct {
 	gorm.Model
-	ID          uint      `json:"id"`
-	Owner       string    `json:"owner"`
-	Buffer      string    `json:"buffer"`
-	Location1   string    `json:"location_1"`
-	Location2   string    `json:"location_2"`
-	SpeffzPair  string    `json:"speffz_pair"`
-	Sm2N        int       `json:"sm_2_n"`
-	Sm2Ef       float32   `json:"sm_2_ef"`
-	Sm2I        float32   `json:"sm_2_i"`
-	DrillTimeMs int       `json:"drillTimeMs"`
-	LastDrillAt time.Time `json:"last_drill_at"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID           uint      `json:"id"`
+	Owner        string    `json:"owner" gorm:"index:owner_buffer_speffz,unique"`
+	Buffer       string    `json:"buffer" gorm:"index:owner_buffer_speffz,unique"`
+	Location1    string    `json:"location_1"`
+	Location2    string    `json:"location_2"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:owner_buffer_speffz,unique"`
+	Sm2N         int       `json:"sm_2_n"`
+	Sm2Ef        float32   `json:"sm_2_ef"`
+	Sm2I         float32   `json:"sm_2_i"`
+	DrillTimeMs  int       `json:"drillTimeMs"`
+	LastReviewAt time.Time `json:"last_review_at"`
+	NextReviewAt time.Time `json:"next_review_at"`
+	LastDrillAt  time.Time `json:"last_drill_at"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
 }
 
 const VERSION_PREFIX = "v2"
