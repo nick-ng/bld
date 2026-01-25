@@ -59,11 +59,13 @@ css:
 
 ### ToDo Comments
 
+- server/repositories/flashcard.go:21: @todo(nick-ng): populate commutators map
 - server/routes/flash-cards.go:29: @todo(nick-ng): wait some time before deleting unused images
 - server/routes/flash-cards.go:82: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
+- server/routes/letter-pairs.go:17: @todo(nick-ng): only show default user's letter pairs if no user provided
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
