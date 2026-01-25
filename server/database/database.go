@@ -980,3 +980,71 @@ func ReadFlashCard(owner string, flashCardType string, letterPair string) (Flash
 
 	return getDefaultFlashCard(owner, flashCardType, letterPair), err
 }
+
+func GetAllMnemonics(owner string) ([]Mnemonic, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	mnemonics, err := gorm.G[Mnemonic](orm).Where("owner = ?", owner).Find(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return mnemonics, nil
+}
+
+func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	mnemonic, err := gorm.G[Mnemonic](orm).Where(&Mnemonic{Owner: owner, SpeffzPair: speffzPair}).First(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &mnemonic, err
+}
+
+func PutMnemonic(newMnemonic Mnemonic) error {
+	if len(newMnemonic.Owner) == 0 {
+		return errors.New("no owner")
+	}
+
+	if len(newMnemonic.SpeffzPair) != 2 {
+		return errors.New("invalid speffz pair")
+	}
+
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return err
+	}
+
+	rowsAffected, err := gorm.G[Mnemonic](orm).Where(&Mnemonic{Owner: newMnemonic.Owner, SpeffzPair: newMnemonic.SpeffzPair}).Updates(*ctx, newMnemonic)
+	if err != nil {
+		return err
+	}
+
+	if rowsAffected == 0 {
+		return errors.New("No rows affected")
+	}
+
+	return nil
+}
+
+func GetAllCommutators(owner string) ([]Commutator, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	commutators, err := gorm.G[Commutator](orm).Where("owner = ?", owner).Find(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return commutators, nil
+}
