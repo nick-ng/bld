@@ -42,8 +42,8 @@ type FlashCard struct {
 type Mnemonic struct {
 	gorm.Model
 	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:owner_speffz,unique"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:owner_speffz,unique"`
+	Owner        string    `json:"owner" gorm:"index:idx_owner_speffz,unique"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique"`
 	Words        *string   `json:"words"`
 	Image        *string   `json:"image"`
 	Sm2N         int       `json:"sm_2_n"`
@@ -58,11 +58,11 @@ type Mnemonic struct {
 type Commutator struct {
 	gorm.Model
 	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:owner_buffer_speffz,unique"`
-	Buffer       string    `json:"buffer" gorm:"index:owner_buffer_speffz,unique"`
+	Owner        string    `json:"owner" gorm:"index:idx_owner_buffer_speffz,unique"`
+	Buffer       string    `json:"buffer" gorm:"index:idx_owner_buffer_speffz,unique"`
 	Location1    string    `json:"location_1"`
 	Location2    string    `json:"location_2"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:owner_buffer_speffz,unique"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_buffer_speffz,unique"`
 	Sm2N         int       `json:"sm_2_n"`
 	Sm2Ef        float32   `json:"sm_2_ef"`
 	Sm2I         float32   `json:"sm_2_i"`
