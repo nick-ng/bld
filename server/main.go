@@ -39,6 +39,7 @@ func main() {
 	routes.AddMiscRoutes()
 	routes.AddFlashCardsRoutes()
 	routes.AddImageRoutes()
+	routes.AddLetterPairsRoutes()
 	http.HandleFunc("OPTIONS /", optionsHandler)
 	http.HandleFunc("/", rootHandler)
 

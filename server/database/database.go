@@ -42,8 +42,8 @@ type FlashCard struct {
 type Mnemonic struct {
 	gorm.Model
 	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_speffz,unique"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique"`
+	Owner        string    `json:"owner" gorm:"index:idx_owner_speffz,unique,primaryKey"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique,primaryKey"`
 	Words        *string   `json:"words"`
 	Image        *string   `json:"image"`
 	Sm2N         int       `json:"sm_2_n"`
@@ -55,14 +55,13 @@ type Mnemonic struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
-type Commutator struct {
+type Algorithm struct {
 	gorm.Model
 	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_buffer_speffz,unique"`
-	Buffer       string    `json:"buffer" gorm:"index:idx_owner_buffer_speffz,unique"`
-	Location1    string    `json:"location_1"`
-	Location2    string    `json:"location_2"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_buffer_speffz,unique"`
+	Owner        string    `json:"owner" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Buffer       string    `json:"buffer" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Algorithm    string    `json:"algorithm"`
+	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
 	Sm2N         int       `json:"sm_2_n"`
 	Sm2Ef        float32   `json:"sm_2_ef"`
 	Sm2I         float32   `json:"sm_2_i"`
@@ -167,7 +166,7 @@ func InitOrm(ctx *context.Context) *gorm.DB {
 		}
 
 		tempOrm.AutoMigrate(&Mnemonic{})
-		tempOrm.AutoMigrate(&Commutator{})
+		tempOrm.AutoMigrate(&Algorithm{})
 
 		orm1 = tempOrm
 		ctx1 = ctx
@@ -1023,28 +1022,89 @@ func PutMnemonic(newMnemonic Mnemonic) error {
 		return err
 	}
 
-	rowsAffected, err := gorm.G[Mnemonic](orm).Where(&Mnemonic{Owner: newMnemonic.Owner, SpeffzPair: newMnemonic.SpeffzPair}).Updates(*ctx, newMnemonic)
+	err = orm.Transaction(func(tx *gorm.DB) error {
+		rowsAffected, err := gorm.G[Mnemonic](tx).Where(&Mnemonic{
+			Owner:      newMnemonic.Owner,
+			SpeffzPair: newMnemonic.SpeffzPair,
+		}).Updates(*ctx, newMnemonic)
+		if err != nil {
+			return err
+		}
+
+		if rowsAffected == 0 {
+			result := gorm.WithResult()
+			err := gorm.G[Mnemonic](tx, result).Create(*ctx, &newMnemonic)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
 	if err != nil {
 		return err
-	}
-
-	if rowsAffected == 0 {
-		return errors.New("No rows affected")
 	}
 
 	return nil
 }
 
-func GetAllCommutators(owner string) ([]Commutator, error) {
+func GetAllAlgorithms(owner string) ([]Algorithm, error) {
 	orm, ctx, err := GetOrm()
 	if err != nil {
 		return nil, err
 	}
 
-	commutators, err := gorm.G[Commutator](orm).Where("owner = ?", owner).Find(*ctx)
+	algorithms, err := gorm.G[Algorithm](orm).Where("owner = ?", owner).Find(*ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return commutators, nil
+	return algorithms, nil
+}
+
+func PutAlgorithm(newAlgorithm Algorithm) error {
+	if len(newAlgorithm.Owner) == 0 {
+		return errors.New("no owner")
+	}
+
+	if len(newAlgorithm.SpeffzPair) != 2 {
+		return errors.New("invalid speffz pair")
+	}
+
+	if len(newAlgorithm.Buffer) == 0 {
+		return errors.New("no buffer")
+	}
+
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return err
+	}
+
+	err = orm.Transaction(func(tx *gorm.DB) error {
+		rowsAffected, err := gorm.G[Algorithm](tx).Where(&Algorithm{
+			Owner:      newAlgorithm.Owner,
+			SpeffzPair: newAlgorithm.SpeffzPair,
+			Buffer:     newAlgorithm.Buffer,
+		}).Updates(*ctx, newAlgorithm)
+		if err != nil {
+			return err
+		}
+
+		if rowsAffected == 0 {
+			result := gorm.WithResult()
+			err := gorm.G[Algorithm](tx, result).Create(*ctx, &newAlgorithm)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
