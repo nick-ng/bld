@@ -1,0 +1,1 @@
+import{A as t,B as S,F as b,G as h,S as k}from"./CEnJTs3f.js";function u(r,i){return r===i||r?.[k]===i}function T(r={},i,a,A){return t(()=>{var f,s;return S(()=>{f=s,s=[],b(()=>{r!==a(...s)&&(i(r,...s),f&&u(a(...f),r)&&i(null,...f))})}),()=>{h(()=>{s&&u(a(...s),r)&&i(null,...s)})}}),r}export{T as b};
