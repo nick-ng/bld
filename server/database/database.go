@@ -1008,6 +1008,28 @@ func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	return &mnemonic, err
 }
 
+func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]interface{}) (int, error) {
+	if len(owner) == 0 {
+		return -1, errors.New("error: no owner")
+	}
+
+	if len(speffzPair) != 2 {
+		return -1, errors.New("error: invalid speffz pair")
+	}
+
+	orm, _, err := GetOrm()
+	if err != nil {
+		return -2, err
+	}
+
+	a := orm.Model(&Mnemonic{}).Where("owner = ? AND speffz_pair = ?", owner, speffzPair).Updates(partialMnemonic)
+	if a.Error != nil {
+		return -2, err
+	}
+
+	return int(a.RowsAffected), nil
+}
+
 func PutMnemonic(newMnemonic Mnemonic) error {
 	if len(newMnemonic.Owner) == 0 {
 		return errors.New("no owner")
