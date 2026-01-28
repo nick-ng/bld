@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { migrateLetterPairs } from "$lib/letter-pair";
+	import { authFetch, joinServerPath } from "$lib/utils";
 
 	let message = $state("");
 </script>
@@ -18,5 +19,15 @@
 	>
 		Migrate Data
 	</button>
+	<button
+		onclick={async () => {
+			const a = { speffz_pair: "sx", words: "wife", sm2_i: 3 };
+			authFetch(joinServerPath("/mnemonic"), {
+				method: "PATCH",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify(a),
+			});
+		}}>Put Mnemonic</button
+	>
 	<p>{message}</p>
 </div>

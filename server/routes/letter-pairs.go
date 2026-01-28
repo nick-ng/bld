@@ -3,6 +3,7 @@ package routes
 import (
 	"bld-server/database"
 	"bld-server/utils"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,7 @@ import (
 func AddLetterPairsRoutes() {
 	// http.HandleFunc("GET /letter-pair", handleGetAllLetterPairs)
 	http.HandleFunc("POST /migrate-letter-pairs", handleMigrateLetterPairs)
+	http.HandleFunc("PATCH /mnemonic", handlePatchMnemonic)
 }
 
 // func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
@@ -25,12 +27,91 @@ func AddLetterPairsRoutes() {
 // 	}
 // }
 
+func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
+	}
+
+	var partialMnemonic map[string]any
+	err := json.NewDecoder(req.Body).Decode(&partialMnemonic)
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var speffzPair string
+	sp, ok := partialMnemonic["speffz_pair"]
+	if !ok {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte("error: no speffz_pair provided"))
+	}
+
+	switch v := sp.(type) {
+	case string:
+		{
+			speffzPair = sp.(string)
+		}
+	default:
+		{
+			writer.WriteHeader(http.StatusBadRequest)
+			writer.Write(fmt.Appendf(
+				[]byte{},
+				"error: speffz_pair is not a string. got %s",
+				v,
+			))
+		}
+	}
+
+	// @todo(nick-ng): figure out how and where to validate partialMnemonic
+	rowsUpdated, err := database.UpdateMnemonic(authenticatedUsername, speffzPair, partialMnemonic)
+
+	if err != nil {
+		switch rowsUpdated {
+		case -2:
+			{
+				writer.WriteHeader(http.StatusInternalServerError)
+			}
+		default:
+			{
+				writer.WriteHeader(http.StatusBadRequest)
+			}
+		}
+
+		writer.Write(fmt.Appendf(
+			[]byte{},
+			"error updating mnemonic for %s %s",
+			speffzPair,
+			err,
+		))
+		return
+	}
+
+	if rowsUpdated == 0 {
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Write([]byte("mnemonic not found"))
+		return
+	}
+
+	writer.Write(fmt.Appendf(
+		[]byte{},
+		"hello %s",
+		authenticatedUsername,
+	))
+}
+
 func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
 	if !haveAccess {
-		authenticatedUsername = utils.GetDefaultUser()
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
 	} else {
 		writer.Header().Add("X-Access-Token", accessToken)
 	}
@@ -58,7 +139,6 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 		}
 		err := database.PutMnemonic(newMnemonic)
 		if err != nil {
-			fmt.Println("error putting mnemonic")
 			writer.Write(fmt.Appendf(
 				[]byte{},
 				"error migrating flash card to mnemonic for %s %s",
@@ -83,7 +163,6 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 			}
 			err := database.PutAlgorithm(newAlgorithm)
 			if err != nil {
-				fmt.Println("error putting algorithm")
 				writer.Write(fmt.Appendf(
 					[]byte{},
 					"error migrating flash card to algorithm for %s %s",
