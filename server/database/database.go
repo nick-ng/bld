@@ -46,9 +46,9 @@ type Mnemonic struct {
 	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique,primaryKey"`
 	Words        *string   `json:"words"`
 	Image        *string   `json:"image"`
-	Sm2N         int       `json:"sm_2_n"`
-	Sm2Ef        float32   `json:"sm_2_ef"`
-	Sm2I         float32   `json:"sm_2_i"`
+	Sm2N         int       `json:"sm2_n"`
+	Sm2Ef        float32   `json:"sm2_ef"`
+	Sm2I         float32   `json:"sm2_i"`
 	LastReviewAt time.Time `json:"last_review_at"`
 	NextReviewAt time.Time `json:"next_review_at"`
 	CreatedAt    time.Time `json:"created_at"`

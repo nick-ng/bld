@@ -55,7 +55,7 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 	switch v := sp.(type) {
 	case string:
 		{
-			speffzPair = sp.(string)
+			speffzPair = v
 		}
 	default:
 		{
