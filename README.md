@@ -65,8 +65,7 @@ css:
 - server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
-- server/routes/letter-pairs.go:23: @todo(nick-ng): only show default user's letter pairs if no user provided
-- server/routes/letter-pairs.go:71: @todo(nick-ng): figure out how and where to validate partialMnemonic
+- server/routes/letter-pairs.go:24: @todo(nick-ng): only show default user's letter pairs if no user provided
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:49: @todo(nick-ng): remove migration code later
