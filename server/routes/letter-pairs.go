@@ -5,6 +5,7 @@ import (
 	"bld-server/utils"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 )
@@ -38,71 +39,53 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 		writer.Header().Add("X-Access-Token", accessToken)
 	}
 
-	var partialMnemonic map[string]any
-	err := json.NewDecoder(req.Body).Decode(&partialMnemonic)
+	var tempMnemonic map[string]any
+	err := json.NewDecoder(req.Body).Decode(&tempMnemonic)
 	if err != nil {
 		writer.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	var speffzPair string
-	sp, ok := partialMnemonic["speffz_pair"]
-	if !ok {
+	partialMnemonic, speffzPair := utils.MakePartialMnemonic(tempMnemonic)
+
+	if len(speffzPair) != 2 {
 		writer.WriteHeader(http.StatusBadRequest)
-		writer.Write([]byte("error: no speffz_pair provided"))
+		writer.Write([]byte("error: invalid speffz_pair"))
+		return
 	}
 
-	switch v := sp.(type) {
-	case string:
-		{
-			speffzPair = v
-		}
-	default:
-		{
-			writer.WriteHeader(http.StatusBadRequest)
-			writer.Write(fmt.Appendf(
-				[]byte{},
-				"error: speffz_pair is not a string. got %s",
-				v,
-			))
-		}
-	}
-
-	// @todo(nick-ng): figure out how and where to validate partialMnemonic
-	rowsUpdated, err := database.UpdateMnemonic(authenticatedUsername, speffzPair, partialMnemonic)
-
+	updatedMnemonics, err := database.UpdateMnemonic(authenticatedUsername, speffzPair, partialMnemonic)
 	if err != nil {
-		switch rowsUpdated {
-		case -2:
-			{
-				writer.WriteHeader(http.StatusInternalServerError)
-			}
-		default:
-			{
-				writer.WriteHeader(http.StatusBadRequest)
-			}
+		slog.Error("error updating mnemonic",
+			"user", authenticatedUsername,
+			"speffzPair", speffzPair,
+			"err", "err",
+		)
+
+		if updatedMnemonics == nil {
+			writer.WriteHeader(http.StatusInternalServerError)
+			return
+		} else if len(updatedMnemonics) == 0 {
+			writer.WriteHeader(http.StatusNotFound)
+			writer.Write([]byte("mnemonic not found"))
+			return
 		}
+	}
 
-		writer.Write(fmt.Appendf(
-			[]byte{},
-			"error updating mnemonic for %s %s",
-			speffzPair,
-			err,
-		))
+	jsonBytes, err := utils.MnemonicsToResponseJsonBytes(updatedMnemonics)
+	if err != nil {
+		slog.Error("error updating mnemonic",
+			"user", authenticatedUsername,
+			"speffzPair", speffzPair,
+			"err", "err",
+		)
+		writer.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
-	if rowsUpdated == 0 {
-		writer.WriteHeader(http.StatusNotFound)
-		writer.Write([]byte("mnemonic not found"))
-		return
-	}
-
-	writer.Write(fmt.Appendf(
-		[]byte{},
-		"hello %s",
-		authenticatedUsername,
-	))
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.Write(jsonBytes)
 }
 
 func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {

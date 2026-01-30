@@ -19,6 +19,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type FlashCard struct {
@@ -41,36 +42,36 @@ type FlashCard struct {
 
 type Mnemonic struct {
 	gorm.Model
-	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_speffz,unique,primaryKey"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique,primaryKey"`
-	Words        *string   `json:"words"`
-	Image        *string   `json:"image"`
-	Sm2N         int       `json:"sm2_n"`
-	Sm2Ef        float32   `json:"sm2_ef"`
-	Sm2I         float32   `json:"sm2_i"`
-	LastReviewAt time.Time `json:"last_review_at"`
-	NextReviewAt time.Time `json:"next_review_at"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint
+	Owner        string `gorm:"index:idx_owner_speffz,unique,primaryKey"`
+	SpeffzPair   string `gorm:"index:idx_owner_speffz,unique,primaryKey"`
+	Words        *string
+	Image        *string
+	Sm2N         int
+	Sm2Ef        float32
+	Sm2I         float32
+	LastReviewAt time.Time
+	NextReviewAt time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type Algorithm struct {
 	gorm.Model
-	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Buffer       string    `json:"buffer" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Algorithm    string    `json:"algorithm"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Sm2N         int       `json:"sm_2_n"`
-	Sm2Ef        float32   `json:"sm_2_ef"`
-	Sm2I         float32   `json:"sm_2_i"`
-	DrillTimeMs  int       `json:"drillTimeMs"`
-	LastReviewAt time.Time `json:"last_review_at"`
-	NextReviewAt time.Time `json:"next_review_at"`
-	LastDrillAt  time.Time `json:"last_drill_at"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint
+	Owner        string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	SpeffzPair   string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Buffer       string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Algorithm    string
+	Sm2N         int
+	Sm2Ef        float32
+	Sm2I         float32
+	DrillTimeMs  int
+	LastReviewAt time.Time
+	NextReviewAt time.Time
+	LastDrillAt  time.Time
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 const VERSION_PREFIX = "v2"
@@ -1008,26 +1009,24 @@ func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	return &mnemonic, err
 }
 
-func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]interface{}) (int, error) {
-	if len(owner) == 0 {
-		return -1, errors.New("error: no owner")
-	}
-
-	if len(speffzPair) != 2 {
-		return -1, errors.New("error: invalid speffz pair")
+func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]interface{}) ([]Mnemonic, error) {
+	if len(owner) == 0 || len(speffzPair) != 2 {
+		return nil, nil
 	}
 
 	orm, _, err := GetOrm()
 	if err != nil {
-		return -2, err
+		return nil, err
 	}
 
-	a := orm.Model(&Mnemonic{}).Where("owner = ? AND speffz_pair = ?", owner, speffzPair).Updates(partialMnemonic)
+	var mnemonics []Mnemonic
+
+	a := orm.Model(&mnemonics).Clauses(clause.Returning{}).Where("owner = ? AND speffz_pair = ?", owner, speffzPair).Updates(partialMnemonic)
 	if a.Error != nil {
-		return -2, err
+		return nil, err
 	}
 
-	return int(a.RowsAffected), nil
+	return mnemonics, nil
 }
 
 func PutMnemonic(newMnemonic Mnemonic) error {
