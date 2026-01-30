@@ -48,6 +48,20 @@ var validMnemonicKeys = []string{
 	"next_review_at",
 }
 
+var validAlgorithmKeys = []string{
+	"owner",
+	"speffz_pair",
+	"buffer",
+	"algorithm",
+	"sm2_n",
+	"sm2_ef",
+	"sm2_i",
+	"drill_time_ms",
+	"last_drill_at",
+	"last_review_at",
+	"next_review_at",
+}
+
 func MakePartialMnemonic(partialMnemonic map[string]any) (map[string]any, string) {
 	validMnemonic := map[string]any{}
 	speffzPair := ""
@@ -90,4 +104,64 @@ func MnemonicsToResponseJsonBytes(mnemonics []database.Mnemonic) ([]byte, error)
 	}
 
 	return json.Marshal(responseMnemonics)
+}
+
+func MakePartialAlgorithm(partialAlgorithm map[string]any) (map[string]any, string, string) {
+	validAlgorithm := map[string]any{}
+	speffzPair := ""
+	bufferLocation := ""
+	for _, k := range validAlgorithmKeys {
+		v, ok := partialAlgorithm[k]
+		if ok {
+			validAlgorithm[k] = v
+			switch k {
+			case "speffz_pair":
+				{
+					switch vv := v.(type) {
+					case string:
+						{
+							speffzPair = vv
+						}
+					}
+				}
+			case "buffer":
+				{
+					switch vv := v.(type) {
+					case string:
+						{
+							bufferLocation = vv
+						}
+					}
+
+				}
+			}
+		}
+	}
+
+	return validAlgorithm, speffzPair, bufferLocation
+}
+
+func AlgorithmsToResponseJsonBytes(algorithms []database.Algorithm) ([]byte, error) {
+	responseAlgorithms := []ResponseAlgorithm{}
+	for _, algorithm := range algorithms {
+		responseAlgorithm := ResponseAlgorithm{
+			Owner:        algorithm.Owner,
+			SpeffzPair:   algorithm.SpeffzPair,
+			Buffer:       algorithm.Buffer,
+			Algorithm:    algorithm.Algorithm,
+			Sm2N:         algorithm.Sm2N,
+			Sm2Ef:        algorithm.Sm2Ef,
+			Sm2I:         algorithm.Sm2I,
+			DrillTimeMs:  algorithm.DrillTimeMs,
+			LastDrillAt:  algorithm.LastDrillAt,
+			LastReviewAt: algorithm.LastReviewAt,
+			NextReviewAt: algorithm.NextReviewAt,
+			CreatedAt:    algorithm.CreatedAt,
+			UpdatedAt:    algorithm.UpdatedAt,
+		}
+
+		responseAlgorithms = append(responseAlgorithms, responseAlgorithm)
+	}
+
+	return json.Marshal(responseAlgorithms)
 }

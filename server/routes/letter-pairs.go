@@ -14,6 +14,7 @@ func AddLetterPairsRoutes() {
 	// http.HandleFunc("GET /letter-pair", handleGetAllLetterPairs)
 	http.HandleFunc("POST /migrate-letter-pairs", handleMigrateLetterPairs)
 	http.HandleFunc("PATCH /mnemonic", handlePatchMnemonic)
+	http.HandleFunc("PATCH /algorithm", handlePatchAlgorithm)
 }
 
 // func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
@@ -61,15 +62,15 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 			"speffzPair", speffzPair,
 			"err", "err",
 		)
+	}
 
-		if updatedMnemonics == nil {
-			writer.WriteHeader(http.StatusInternalServerError)
-			return
-		} else if len(updatedMnemonics) == 0 {
-			writer.WriteHeader(http.StatusNotFound)
-			writer.Write([]byte("mnemonic not found"))
-			return
-		}
+	if updatedMnemonics == nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	} else if len(updatedMnemonics) == 0 {
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Write([]byte("mnemonic not found"))
+		return
 	}
 
 	jsonBytes, err := utils.MnemonicsToResponseJsonBytes(updatedMnemonics)
@@ -77,6 +78,68 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 		slog.Error("error updating mnemonic",
 			"user", authenticatedUsername,
 			"speffzPair", speffzPair,
+			"err", "err",
+		)
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.Write(jsonBytes)
+}
+
+func handlePatchAlgorithm(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
+	}
+
+	var tempAlgorithm map[string]any
+	err := json.NewDecoder(req.Body).Decode(&tempAlgorithm)
+	if err != nil {
+		writer.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	partialAlgorithm, speffzPair, bufferLocation := utils.MakePartialAlgorithm(tempAlgorithm)
+
+	if len(speffzPair) != 2 {
+		writer.WriteHeader(http.StatusBadRequest)
+		writer.Write([]byte("error: invalid speffz_pair"))
+		return
+	}
+
+	updatedAlgorithms, err := database.UpdateAlgorithm(authenticatedUsername, speffzPair, bufferLocation, partialAlgorithm)
+	if err != nil {
+		slog.Error("error updating algorithm",
+			"user", authenticatedUsername,
+			"speffzPair", speffzPair,
+			"buffer", bufferLocation,
+			"err", "err",
+		)
+	}
+
+	if updatedAlgorithms == nil {
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	} else if len(updatedAlgorithms) == 0 {
+		writer.WriteHeader(http.StatusNotFound)
+		writer.Write([]byte("algorithm not found"))
+		return
+	}
+
+	jsonBytes, err := utils.AlgorithmsToResponseJsonBytes(updatedAlgorithms)
+	if err != nil {
+		slog.Error("error updating algorithm",
+			"user", authenticatedUsername,
+			"speffzPair", speffzPair,
+			"buffer", bufferLocation,
 			"err", "err",
 		)
 		writer.WriteHeader(http.StatusInternalServerError)
