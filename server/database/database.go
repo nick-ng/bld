@@ -1009,7 +1009,7 @@ func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	return &mnemonic, err
 }
 
-func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]interface{}) ([]Mnemonic, error) {
+func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]any) ([]Mnemonic, error) {
 	if len(owner) == 0 || len(speffzPair) != 2 {
 		return nil, nil
 	}
@@ -1020,7 +1020,6 @@ func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]
 	}
 
 	var mnemonics []Mnemonic
-
 	a := orm.Model(&mnemonics).Clauses(clause.Returning{}).Where("owner = ? AND speffz_pair = ?", owner, speffzPair).Updates(partialMnemonic)
 	if a.Error != nil {
 		return nil, err
@@ -1078,6 +1077,25 @@ func GetAllAlgorithms(owner string) ([]Algorithm, error) {
 
 	algorithms, err := gorm.G[Algorithm](orm).Where("owner = ?", owner).Find(*ctx)
 	if err != nil {
+		return nil, err
+	}
+
+	return algorithms, nil
+}
+
+func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgorithm map[string]any) ([]Algorithm, error) {
+	if len(owner) == 0 || len(speffzPair) != 2 || len(buffer) == 0 {
+		return nil, nil
+	}
+
+	orm, _, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	var algorithms []Algorithm
+	a := orm.Model(&algorithms).Clauses(clause.Returning{}).Where("owner = ? AND speffz_pair = ? AND buffer = ?", owner, speffzPair, buffer).Updates(partialAlgorithm)
+	if a.Error != nil {
 		return nil, err
 	}
 
