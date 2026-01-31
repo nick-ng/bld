@@ -18,6 +18,14 @@ export const flashCardSchema = z.object({
 
 export type FlashCard = z.infer<typeof flashCardSchema>;
 
+const dateOrDateStringSchema = z.preprocess((u) => {
+	if (typeof u === "string") {
+		return new Date(u);
+	}
+
+	return u;
+}, z.date());
+
 export const defaultFlashCard = (letterPair: string, cardType: string = "corner"): FlashCard => {
 	return {
 		letterPair,
@@ -34,6 +42,73 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 		lastDrillUnix: 0,
 	};
 };
+
+export const algorithmSchema = z.object({
+	speffz_pair: z.string(),
+	buffer: z.string(),
+	moves: z.string(),
+	sm2_n: z.number(),
+	sm2_ef: z.number(),
+	sm2_i: z.number(),
+	drill_time_ms: z.number(),
+	last_drill_at: dateOrDateStringSchema,
+	last_review_at: dateOrDateStringSchema,
+	next_review_at: dateOrDateStringSchema,
+});
+
+export type Algorithm = z.infer<typeof algorithmSchema>;
+
+export const getDefaultAlgorithm = (speffzPair: string, buffer: string): Algorithm => {
+	return {
+		speffz_pair: speffzPair,
+		buffer,
+		moves: "",
+		sm2_n: 0,
+		sm2_ef: 2.5,
+		sm2_i: 0,
+		drill_time_ms: 20_000,
+		last_drill_at: new Date(0),
+		last_review_at: new Date(0),
+		next_review_at: new Date(),
+	};
+};
+
+export const mnemonicSchema = z.object({
+	speffz_pair: z.string(),
+	words: z.string(),
+	image: z.string(),
+	sm2_n: z.number(),
+	sm2_ef: z.number(),
+	sm2_i: z.number(),
+	is_public: z.boolean(),
+	last_review_at: dateOrDateStringSchema,
+	next_review_at: dateOrDateStringSchema,
+});
+
+export type Mnemonic = z.infer<typeof mnemonicSchema>;
+
+export const getDefaultMnemonic = (speffzPair: string): Mnemonic => {
+	return {
+		speffz_pair: speffzPair,
+		words: "",
+		image: "",
+		sm2_n: 0,
+		sm2_ef: 2.5,
+		sm2_i: 0,
+		is_public: false,
+		last_review_at: new Date(0),
+		next_review_at: new Date(),
+	};
+};
+
+export const letterPairSchema = z.intersection(
+	mnemonicSchema,
+	z.object({
+		algorithms: z.record(z.string(), algorithmSchema),
+	})
+);
+
+export type LetterPair = z.infer<typeof letterPairSchema>;
 
 const positionsSchema = z.literal([...CORNER_POSITIONS, ...EDGE_POSITIONS]);
 
