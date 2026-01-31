@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount, type Snippet } from "svelte";
 	import { page } from "$app/state";
-	import { optionsStore } from "$lib/stores/options";
 	import { authenticationStore } from "$lib/stores/authentication";
 	import "../app.css";
 
@@ -13,9 +12,6 @@
 
 	let { children }: Props = $props();
 	let showNav = $derived(["big-scramble", "clock"].every((a) => page.route.id !== `/${a}`));
-	let currentFlashCardType = $derived(
-		page.url.searchParams.get("t") || $optionsStore.defaultFlashCardType
-	);
 	let showLogin = $derived(
 		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest && showNav
 	);
@@ -29,7 +25,7 @@
 
 {#if showNav}
 	<div class="m-1 flex flex-row items-start gap-2">
-		<a class="like-button grow lg:grow-0" href={`/flash-cards?t=${currentFlashCardType}`}
+		<a class="like-button grow lg:grow-0" href={`/`}
 			><span class="hidden lg:inline">Browse</span><span class="lg:hidden">📖</span></a
 		>
 		<a class="like-button grow lg:grow-0" href="/quiz"
