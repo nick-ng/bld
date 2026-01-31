@@ -11,6 +11,7 @@
 		parseCommutator,
 		simplifyAlgorithm,
 		getTrueKeys,
+		isSpeffzPairValid1,
 	} from "$lib/utils";
 	import FlashCardChooser from "./flash-card-chooser.svelte";
 	import FlashCard from "./flash-card.svelte";
@@ -73,7 +74,7 @@
 		letterPairFilter && processedLetterPairFilter.every((lp) => lp.length === 2)
 			? processedLetterPairFilter.filter((lp) => {
 					return getTrueKeys($optionsStore.visibleBuffers).some((buf) =>
-						isSpeffzPairValid(lp, buf)
+						isSpeffzPairValid1(lp, buf)
 					);
 				})
 			: allLetterPairs.filter((lp) => {
@@ -94,7 +95,7 @@
 					}
 
 					return getTrueKeys($optionsStore.visibleBuffers).some((buf) =>
-						isSpeffzPairValid(lp, buf)
+						isSpeffzPairValid1(lp, buf)
 					);
 				})
 	);
@@ -259,7 +260,7 @@
 		>
 			{#each filteredLetterPairs as letterPair, i (`${letterPair}-${i}`)}
 				{@const flashCard = getFlashCard(letterPair, "corner", $flashCardStore)}
-				{#if getTrueKeys($optionsStore.visibleBuffers).some( (buf) => isSpeffzPairValid(letterPair, buf) )}
+				{#if getTrueKeys($optionsStore.visibleBuffers).some( (buf) => isSpeffzPairValid1(letterPair, buf) )}
 					<FlashCardChooser flashCard={flashCard || null} />
 				{:else}
 					<FlashCardChooser flashCard={null} />

@@ -359,7 +359,7 @@ export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
 	return false;
 };
 
-export const isSpeffzPairValid = (speffzPair: string, bufferLocation: string) => {
+export const isSpeffzPairValid1 = (speffzPair: string, bufferLocation: string) => {
 	if (speffzPair.length !== 2) {
 		// a speffz pair contains exactly 2 letters
 		return false;
@@ -388,6 +388,14 @@ export const isSpeffzPairValid = (speffzPair: string, bufferLocation: string) =>
 	}
 
 	return true;
+};
+
+export const isSpeffzPairValid = (speffzPair: string, bufferLocations: string[]) => {
+	if (bufferLocations.length === 0) {
+		return true;
+	}
+
+	return bufferLocations.some((buf) => isSpeffzPairValid1(speffzPair, buf));
 };
 
 export const getOperatingSystem = (): string => {
