@@ -207,6 +207,7 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 			Sm2N:         0,
 			Sm2Ef:        2.5,
 			Sm2I:         0,
+			IsPublic:     flashCard.IsPublic,
 			LastReviewAt: time.Unix(flashCard.LastQuizUnix, 0),
 			NextReviewAt: time.Now(),
 		}

@@ -14,6 +14,7 @@ type ResponseMnemonic struct {
 	Sm2N         int       `json:"sm2_n"`
 	Sm2Ef        float32   `json:"sm2_ef"`
 	Sm2I         float32   `json:"sm2_i"`
+	IsPublic     bool      `json:"is_public"`
 	LastReviewAt time.Time `json:"last_review_at"`
 	NextReviewAt time.Time `json:"next_review_at"`
 	CreatedAt    time.Time `json:"created_at"`
@@ -49,6 +50,7 @@ var validMnemonicKeys = []string{
 	"sm2_n",
 	"sm2_ef",
 	"sm2_i",
+	"is_public",
 	"last_review_at",
 	"next_review_at",
 }
@@ -99,6 +101,7 @@ func convertMnemonics(mnemonics []database.Mnemonic) []ResponseMnemonic {
 			Sm2N:         mnemonic.Sm2N,
 			Sm2Ef:        mnemonic.Sm2Ef,
 			Sm2I:         mnemonic.Sm2I,
+			IsPublic:     mnemonic.IsPublic,
 			LastReviewAt: mnemonic.LastReviewAt,
 			NextReviewAt: mnemonic.NextReviewAt,
 			CreatedAt:    mnemonic.CreatedAt,

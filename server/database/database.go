@@ -50,6 +50,7 @@ type Mnemonic struct {
 	Sm2N         int
 	Sm2Ef        float32
 	Sm2I         float32
+	IsPublic     bool
 	LastReviewAt time.Time
 	NextReviewAt time.Time
 	CreatedAt    time.Time
