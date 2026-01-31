@@ -42,6 +42,16 @@ func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if !haveAccess {
+		emptyString := ""
+		for i := range mnemonics {
+			if !mnemonics[i].IsPublic {
+				mnemonics[i].Words = &emptyString
+				mnemonics[i].Image = &emptyString
+			}
+		}
+	}
+
 	jsonBytes, err := utils.MnemonicsAndAlgorithmsResponseJsonBytes(mnemonics, algorithms)
 	if err != nil {
 		slog.Error("error converting mnemonics and algorithms",

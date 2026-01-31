@@ -81,6 +81,7 @@
 			type="button"
 			disabled={$authenticationStore.isAuthenticating}
 			onclick={() => {
+				$authenticationStore.isUserAuthenticated = false;
 				$authenticationStore.isGuest = true;
 			}}>Guest</button
 		>

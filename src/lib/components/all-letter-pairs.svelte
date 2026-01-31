@@ -6,7 +6,8 @@
 	import { optionsStore } from "$lib/stores/options";
 	import { isSpeffzPairValid, getTrueKeys } from "$lib/utils";
 	import { getDefaultMnemonic } from "$lib/types";
-	import LetterPairChooser from "./letter-pair-chooser.svelte";
+	import LetterPairChooser from "$lib/components/letter-pair-chooser.svelte";
+	import LetterPair from "$lib/components/letter-pair.svelte";
 
 	const allSpeffzPairs = (() => {
 		const tempLetterPairs: string[] = [];
@@ -20,7 +21,7 @@
 		return tempLetterPairs;
 	})();
 
-	let speffzPairFilter = $state(page.url.searchParams.get("f") || "");
+	let speffzPairFilter = $derived(page.url.searchParams.get("f") || "");
 	let filterInputElement = $derived<HTMLInputElement | null>(null);
 	let processedSpeffzPairFilter = $derived.by(() => {
 		const lowerCaseFilter = speffzPairFilter
@@ -129,7 +130,7 @@
 				type="button"
 				onclick={() => {
 					page.url.searchParams.delete("f");
-					goto(`/flash-cards?${page.url.searchParams.toString()}`);
+					goto(`/?${page.url.searchParams.toString()}`);
 				}}>Clear</button
 			>
 		</div>
@@ -159,10 +160,14 @@
 	{:else if filteredSpeffzPairs.length <= 25}
 		<div class="flashCards lg:min-w-120">
 			{#each filteredSpeffzPairs as speffzPair, i (`${speffzPair}-${i}`)}
+				{@const letterPair = $letterPairStore[speffzPair] || {
+					...getDefaultMnemonic(speffzPair),
+					algorithms: {},
+				}}
 				<div
 					class="flex w-68 flex-col justify-between rounded border border-gray-300 dark:border-gray-500"
 				>
-					<div>{speffzPair}</div>
+					<LetterPair {letterPair} selectedBuffers={getTrueKeys($optionsStore.visibleBuffers)} />
 					<a
 						class="block self-stretch border-t border-gray-300 text-center dark:border-gray-500"
 						href={`/letter-pair/edit?lp=${speffzPair}`}>Edit</a

@@ -7,7 +7,6 @@
 	import { optionsStore } from "$lib/stores/options";
 	import {
 		arrayToCsvRow,
-		isSpeffzPairValid,
 		parseCommutator,
 		simplifyAlgorithm,
 		getTrueKeys,
