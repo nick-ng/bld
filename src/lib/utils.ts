@@ -940,7 +940,7 @@ export const summariseFlashCards = (
 	for (let letter0 = 0; letter0 < 24; letter0++) {
 		for (let letter1 = 0; letter1 < 24; letter1++) {
 			const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
-			if (!getTrueKeys(chosenBuffers).some((buf) => isSpeffzPairValid(letterPair, buf))) {
+			if (!getTrueKeys(chosenBuffers).some((buf) => isSpeffzPairValid1(letterPair, buf))) {
 				continue;
 			}
 
@@ -990,7 +990,7 @@ export const summariseFlashCards = (
 				setups[setup].push(flashCard.letterPair);
 			} else {
 				missingMemos.push(letterPair);
-				if (isSpeffzPairValid(letterPair, "UFR")) {
+				if (isSpeffzPairValid1(letterPair, "UFR")) {
 					missingComms.push(letterPair);
 				}
 			}

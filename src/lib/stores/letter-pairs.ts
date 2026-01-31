@@ -104,6 +104,7 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 					sm2_n: 0,
 					sm2_ef: 2.5,
 					sm2_i: 0,
+					is_public: false,
 					last_review_at: new Date(0),
 					next_review_at: new Date(),
 					algorithms: {},
@@ -140,8 +141,10 @@ if (browser) {
 
 export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>) => {
 	// @todo(nick-ng): implement
+	console.log("partialMnemonic", partialMnemonic);
 };
 
 export const saveAlgorithm = async (partialAlgorithm: Partial<Algorithm>) => {
 	// @todo(nick-ng): implement
+	console.log("partialAlgorithm", partialAlgorithm);
 };

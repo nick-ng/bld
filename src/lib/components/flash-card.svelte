@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { upperCaseFirst, parseCommutator, simplifyAlgorithm } from "$lib/utils";
 	import { flashCardStoreStatus, getFlashCard, flashCardStore } from "$lib/stores/flash-cards";
-	import { optionsStore } from "$lib/stores/options";
+	import { authenticationStore } from "$lib/stores/authentication";
 	import Image from "$lib/components/image.svelte";
 	import Step from "$lib/components/step.svelte";
 
@@ -38,7 +38,7 @@
 		<div class={`relative flex flex-col items-center gap-1 ${extraClass}`}>
 			<div class="m-0 flex flex-row justify-center self-stretch">
 				<h2 class="m-0 uppercase">
-					{#if (showMemo || showImage) && showCommutator && flashCard.isPublic && $optionsStore.isUserAuthenticated}
+					{#if (showMemo || showImage) && showCommutator && flashCard.isPublic && $authenticationStore.isUserAuthenticated}
 						👀
 					{/if}
 					{flashCard.letterPair}

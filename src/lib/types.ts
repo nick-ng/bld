@@ -113,7 +113,6 @@ export type LetterPair = z.infer<typeof letterPairSchema>;
 const positionsSchema = z.literal([...CORNER_POSITIONS, ...EDGE_POSITIONS]);
 
 export const optionsSchema = z.object({
-	isUserAuthenticated: z.boolean().optional(),
 	flashCardTypes: z.record(
 		z.string(),
 		z.object({

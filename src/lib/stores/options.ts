@@ -8,7 +8,6 @@ import { OPTIONS_STORE_PREFIX, SPEFFZ_CORNER_SAME_PIECES, SPEFFZ_CORNER_UFR } fr
 
 // @todo(nick-ng): store options on server
 export const optionsStore = writable<Options>({
-	isUserAuthenticated: false,
 	flashCardTypes: {
 		corner: {
 			name: "Corner",
@@ -66,8 +65,7 @@ if (browser) {
 
 	loadOptions();
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	optionsStore.subscribe(({ isUserAuthenticated, ...newOptions }) => {
+	optionsStore.subscribe((newOptions) => {
 		optionsForage.setItem(optionsStorageKey, newOptions);
 	});
 }
