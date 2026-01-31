@@ -170,7 +170,7 @@
 					<LetterPair {letterPair} selectedBuffers={getTrueKeys($optionsStore.visibleBuffers)} />
 					<a
 						class="block self-stretch border-t border-gray-300 text-center dark:border-gray-500"
-						href={`/letter-pair/edit?lp=${speffzPair}`}>Edit</a
+						href={`/letter-pair/edit?sp=${speffzPair}`}>Edit</a
 					>
 				</div>
 			{/each}

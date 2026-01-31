@@ -18,44 +18,46 @@ const letterPairsResponseSchema = z.object({
 export const letterPairStore = writable<LetterPairStoreType>({});
 export const letterPairStoreStatus = writable<{
 	status: string;
+	source: string;
 	message: string;
 	fetchStartMs: number;
 	fetchEndMs: number;
-}>({ status: "stand-by", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
+}>({ status: "empty", source: "empty", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
 
 export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 	const fetchStartMs = Date.now();
 	try {
-		letterPairStoreStatus.set({
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
 			status: "loading",
-			message: "loading",
-			fetchStartMs,
+			message: "Loading",
+			fetchStartMs: Date.now(),
 			fetchEndMs: 0,
-		});
+		}));
 		const res = await authFetch(joinServerPath("letter-pairs"), {
 			cache: "default",
 		});
 
 		if (!res) {
-			letterPairStoreStatus.set({
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
 				status: "error",
-				message: "no response",
-				fetchStartMs,
+				message: "No response",
 				fetchEndMs: Date.now(),
-			});
+			}));
 
 			return {};
 		}
 
 		if (!res.ok && res.status !== 401) {
-			const message = `couldn't get letter pairs: ${res.status}, ${res.statusText}`;
+			const message = `Couldn't get letter pairs: ${res.status}, ${res.statusText}`;
 			console.warn(message);
-			letterPairStoreStatus.set({
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
 				status: "error",
 				message,
-				fetchStartMs,
 				fetchEndMs: Date.now(),
-			});
+			}));
 
 			return {};
 		}
@@ -63,13 +65,13 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 		const contentType = res.headers.get("Content-Type")?.toLowerCase();
 		if (!contentType?.includes("application/json")) {
 			const resText = await res.text();
-			console.warn("incorrect letter pair content type:", contentType);
-			letterPairStoreStatus.set({
+			console.warn("Incorrect letter pair content type:", contentType);
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
 				status: "error",
-				message: `incorrect letter pair content type: ${contentType}, instead, got: ${resText}`,
-				fetchStartMs,
+				message: `Incorrect letter pair content type: ${contentType}, instead, got: ${resText}`,
 				fetchEndMs: Date.now(),
-			});
+			}));
 
 			return {};
 		}
@@ -78,12 +80,12 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 		const letterPairResult = letterPairsResponseSchema.safeParse(unknownLetterPairs);
 		if (!letterPairResult.success) {
 			console.error("unexpected response", letterPairResult.error);
-			letterPairStoreStatus.set({
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
 				status: "error",
-				message: `invalid letter pair response`,
-				fetchStartMs,
+				message: `Invalid letter pair response`,
 				fetchEndMs: Date.now(),
-			});
+			}));
 
 			return {};
 		}
@@ -115,22 +117,23 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 		});
 
 		letterPairStore.set(letterPairs);
-		letterPairStoreStatus.set({
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
 			status: "loaded",
+			source: "kerver",
 			message: "",
-			fetchStartMs,
 			fetchEndMs: Date.now(),
-		});
+		}));
 
 		return letterPairs;
 	} catch (err) {
 		console.error("error when fetching letter pairs", err);
-		letterPairStoreStatus.set({
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
 			status: `error`,
-			message: `error when fetching letter pairs: ${err}`,
-			fetchStartMs,
+			message: `Error when fetching letter pairs: ${err}`,
 			fetchEndMs: Date.now(),
-		});
+		}));
 		return {};
 	}
 };
@@ -139,12 +142,14 @@ if (browser) {
 	fetchLetterPairs();
 }
 
-export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>) => {
+export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<string | void> => {
 	// @todo(nick-ng): implement
-	console.log("partialMnemonic", partialMnemonic);
+	console.log("trying to save partialMnemonic", partialMnemonic);
 };
 
-export const saveAlgorithm = async (partialAlgorithm: Partial<Algorithm>) => {
+export const saveAlgorithm = async (
+	partialAlgorithm: Partial<Algorithm>
+): Promise<string | void> => {
 	// @todo(nick-ng): implement
-	console.log("partialAlgorithm", partialAlgorithm);
+	console.log("trying to save partialAlgorithm", partialAlgorithm);
 };
