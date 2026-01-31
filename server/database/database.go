@@ -62,14 +62,14 @@ type Algorithm struct {
 	Owner        string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
 	SpeffzPair   string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
 	Buffer       string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Algorithm    string
+	Moves        string
 	Sm2N         int
 	Sm2Ef        float32
 	Sm2I         float32
 	DrillTimeMs  int
+	LastDrillAt  time.Time
 	LastReviewAt time.Time
 	NextReviewAt time.Time
-	LastDrillAt  time.Time
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }

@@ -24,16 +24,21 @@ type ResponseAlgorithm struct {
 	Owner        string    `json:"owner"`
 	SpeffzPair   string    `json:"speffz_pair"`
 	Buffer       string    `json:"buffer"`
-	Algorithm    string    `json:"algorithm"`
+	Moves        string    `json:"moves"`
 	Sm2N         int       `json:"sm2_n"`
 	Sm2Ef        float32   `json:"sm2_ef"`
 	Sm2I         float32   `json:"sm2_i"`
-	DrillTimeMs  int       `json:"drillTimeMs"`
+	DrillTimeMs  int       `json:"drill_time_ms"`
+	LastDrillAt  time.Time `json:"last_drill_at"`
 	LastReviewAt time.Time `json:"last_review_at"`
 	NextReviewAt time.Time `json:"next_review_at"`
-	LastDrillAt  time.Time `json:"last_drill_at"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type CombinedMnemonicsAlgorithms struct {
+	Mnemonics  []ResponseMnemonic  `json:"mnemonics"`
+	Algorithms []ResponseAlgorithm `json:"algorithms"`
 }
 
 var validMnemonicKeys = []string{
@@ -83,7 +88,7 @@ func MakePartialMnemonic(partialMnemonic map[string]any) (map[string]any, string
 	return validMnemonic, speffzPair
 }
 
-func MnemonicsToResponseJsonBytes(mnemonics []database.Mnemonic) ([]byte, error) {
+func convertMnemonics(mnemonics []database.Mnemonic) []ResponseMnemonic {
 	responseMnemonics := []ResponseMnemonic{}
 	for _, mnemonic := range mnemonics {
 		responseMnemonic := ResponseMnemonic{
@@ -103,7 +108,15 @@ func MnemonicsToResponseJsonBytes(mnemonics []database.Mnemonic) ([]byte, error)
 		responseMnemonics = append(responseMnemonics, responseMnemonic)
 	}
 
-	return json.Marshal(responseMnemonics)
+	return responseMnemonics
+}
+
+func MnemonicsToResponseJsonBytes(mnemonics []database.Mnemonic) ([]byte, error) {
+	responseMnemonics := convertMnemonics(mnemonics)
+
+	jsonB, err := json.Marshal(responseMnemonics)
+
+	return jsonB, err
 }
 
 func MakePartialAlgorithm(partialAlgorithm map[string]any) (map[string]any, string, string) {
@@ -141,14 +154,14 @@ func MakePartialAlgorithm(partialAlgorithm map[string]any) (map[string]any, stri
 	return validAlgorithm, speffzPair, bufferLocation
 }
 
-func AlgorithmsToResponseJsonBytes(algorithms []database.Algorithm) ([]byte, error) {
+func convertAlgorithms(algorithms []database.Algorithm) []ResponseAlgorithm {
 	responseAlgorithms := []ResponseAlgorithm{}
 	for _, algorithm := range algorithms {
 		responseAlgorithm := ResponseAlgorithm{
 			Owner:        algorithm.Owner,
 			SpeffzPair:   algorithm.SpeffzPair,
 			Buffer:       algorithm.Buffer,
-			Algorithm:    algorithm.Algorithm,
+			Moves:        algorithm.Moves,
 			Sm2N:         algorithm.Sm2N,
 			Sm2Ef:        algorithm.Sm2Ef,
 			Sm2I:         algorithm.Sm2I,
@@ -163,5 +176,26 @@ func AlgorithmsToResponseJsonBytes(algorithms []database.Algorithm) ([]byte, err
 		responseAlgorithms = append(responseAlgorithms, responseAlgorithm)
 	}
 
-	return json.Marshal(responseAlgorithms)
+	return responseAlgorithms
+}
+
+func AlgorithmsToResponseJsonBytes(algorithms []database.Algorithm) ([]byte, error) {
+	responseAlgorithms := convertAlgorithms(algorithms)
+
+	jsonB, err := json.Marshal(responseAlgorithms)
+
+	return jsonB, err
+}
+
+func MnemonicsAndAlgorithmsResponseJsonBytes(mnemonics []database.Mnemonic, algorithms []database.Algorithm) ([]byte, error) {
+	responseMnemonics := convertMnemonics(mnemonics)
+	responseAlgorithms := convertAlgorithms(algorithms)
+
+	combinedResponse := CombinedMnemonicsAlgorithms{
+		Mnemonics:  responseMnemonics,
+		Algorithms: responseAlgorithms,
+	}
+	jsonB, err := json.Marshal(combinedResponse)
+
+	return jsonB, err
 }
