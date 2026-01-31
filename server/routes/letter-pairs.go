@@ -11,23 +11,50 @@ import (
 )
 
 func AddLetterPairsRoutes() {
-	// http.HandleFunc("GET /letter-pair", handleGetAllLetterPairs)
+	http.HandleFunc("GET /letter-pairs", handleGetAllLetterPairs)
 	http.HandleFunc("POST /migrate-letter-pairs", handleMigrateLetterPairs)
 	http.HandleFunc("PATCH /mnemonic", handlePatchMnemonic)
 	http.HandleFunc("PATCH /algorithm", handlePatchAlgorithm)
 }
 
-// func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
-// 	utils.AddCorsHeaders(writer)
-//
-// 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
-// 	if !haveAccess {
-// @todo(nick-ng): only show default user's letter pairs if no user provided
-// 		authenticatedUsername = utils.GetDefaultUser()
-// 	} else {
-// 		writer.Header().Add("X-Access-Token", accessToken)
-// 	}
-// }
+func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		authenticatedUsername = utils.GetDefaultUser()
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
+	}
+
+	mnemonics, mnemonicsErr := database.GetAllMnemonics(authenticatedUsername)
+	algorithms, algorithmsErr := database.GetAllAlgorithms(authenticatedUsername)
+	if mnemonicsErr != nil || algorithmsErr != nil {
+		slog.Error("error getting all mnemonics/algorithms",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"mnemonicsErr", mnemonicsErr,
+			"algorithmsErr", algorithmsErr,
+		)
+
+		writer.WriteHeader(http.StatusInternalServerError)
+		writer.Write([]byte("error: couldn't get data"))
+		return
+	}
+
+	jsonBytes, err := utils.MnemonicsAndAlgorithmsResponseJsonBytes(mnemonics, algorithms)
+	if err != nil {
+		slog.Error("error converting mnemonics and algorithms",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"err", err,
+		)
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.Write(jsonBytes)
+}
 
 func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
@@ -199,7 +226,7 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 				Owner:        authenticatedUsername,
 				SpeffzPair:   flashCard.LetterPair,
 				Buffer:       "UFR",
-				Algorithm:    flashCard.Commutator,
+				Moves:        flashCard.Commutator,
 				Sm2N:         0,
 				Sm2Ef:        2.5,
 				Sm2I:         0,
