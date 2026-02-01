@@ -26,6 +26,14 @@ const dateOrDateStringSchema = z.preprocess((u) => {
 	return u;
 }, z.date());
 
+const stringOrEmptyString = z.preprocess((u) => {
+	if (!u) {
+		return "";
+	}
+
+	return u;
+}, z.string());
+
 export const defaultFlashCard = (letterPair: string, cardType: string = "corner"): FlashCard => {
 	return {
 		letterPair,
@@ -46,7 +54,7 @@ export const defaultFlashCard = (letterPair: string, cardType: string = "corner"
 export const algorithmSchema = z.object({
 	speffz_pair: z.string(),
 	buffer: z.string(),
-	moves: z.string(),
+	moves: stringOrEmptyString,
 	sm2_n: z.number(),
 	sm2_ef: z.number(),
 	sm2_i: z.number(),
@@ -75,8 +83,8 @@ export const getDefaultAlgorithm = (speffzPair: string, buffer: string): Algorit
 
 export const mnemonicSchema = z.object({
 	speffz_pair: z.string(),
-	words: z.string(),
-	image: z.string(),
+	words: stringOrEmptyString,
+	image: stringOrEmptyString,
 	sm2_n: z.number(),
 	sm2_ef: z.number(),
 	sm2_i: z.number(),
