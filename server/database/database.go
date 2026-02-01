@@ -1028,14 +1028,24 @@ func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]
 	}
 
 	if upsert && len(mnemonics) == 0 {
+		partialMnemonic["owner"] = owner
+		partialMnemonic["speffz_pair"] = speffzPair
 		slog.Info("need to create",
 			"partialMnemonic", partialMnemonic,
 		)
 
-		a = orm.Model(&mnemonics).Clauses(clause.Returning{}).Create(partialMnemonic)
+		a = orm.Model(&Mnemonic{}).Create(partialMnemonic)
 		if a.Error != nil {
 			return nil, err
 		}
+
+		var mnemonic Mnemonic
+		a = orm.Where("owner = ? AND speffz_pair = ?", owner, speffzPair).First(&mnemonic)
+		if a.Error != nil {
+			return nil, err
+		}
+
+		return []Mnemonic{mnemonic}, nil
 	}
 
 	return mnemonics, nil
@@ -1072,14 +1082,25 @@ func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgo
 	}
 
 	if upsert && len(algorithms) == 0 {
+		partialAlgorithm["owner"] = owner
+		partialAlgorithm["speffz_pair"] = speffzPair
+		partialAlgorithm["buffer"] = buffer
 		slog.Info("need to create",
 			"partialAlgorithm", partialAlgorithm,
 		)
 
-		a = orm.Model(&algorithms).Clauses(clause.Returning{}).Create(partialAlgorithm)
+		a = orm.Model(&algorithms).Create(partialAlgorithm)
 		if a.Error != nil {
 			return nil, err
 		}
+
+		var algorithm Algorithm
+		a = orm.Where("owner = ? AND speffz_pair = ? AND buffer = ?", owner, speffzPair, buffer).First(&algorithm)
+		if a.Error != nil {
+			return nil, err
+		}
+
+		return []Algorithm{algorithm}, nil
 	}
 
 	return algorithms, nil
