@@ -13,8 +13,10 @@ import (
 func AddLetterPairsRoutes() {
 	http.HandleFunc("GET /letter-pairs", handleGetAllLetterPairs)
 	http.HandleFunc("POST /migrate-letter-pairs", handleMigrateLetterPairs)
-	http.HandleFunc("PATCH /mnemonic", handlePatchMnemonic)
-	http.HandleFunc("PATCH /algorithm", handlePatchAlgorithm)
+	http.HandleFunc("POST /mnemonic", handleUpdateMnemonic)
+	http.HandleFunc("PATCH /mnemonic", handleUpdateMnemonic)
+	http.HandleFunc("POST /algorithm", handleUpdateAlgorithm)
+	http.HandleFunc("PATCH /algorithm", handleUpdateAlgorithm)
 }
 
 func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
@@ -66,7 +68,7 @@ func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
 	writer.Write(jsonBytes)
 }
 
-func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
+func handleUpdateMnemonic(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
@@ -92,7 +94,8 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updatedMnemonics, err := database.UpdateMnemonic(authenticatedUsername, speffzPair, partialMnemonic)
+	isPost := req.Method == http.MethodPost
+	updatedMnemonics, err := database.UpdateMnemonic(authenticatedUsername, speffzPair, partialMnemonic, isPost)
 	if err != nil {
 		slog.Error("error updating mnemonic",
 			"user", authenticatedUsername,
@@ -126,7 +129,7 @@ func handlePatchMnemonic(writer http.ResponseWriter, req *http.Request) {
 	writer.Write(jsonBytes)
 }
 
-func handlePatchAlgorithm(writer http.ResponseWriter, req *http.Request) {
+func handleUpdateAlgorithm(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
 	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
@@ -152,7 +155,7 @@ func handlePatchAlgorithm(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updatedAlgorithms, err := database.UpdateAlgorithm(authenticatedUsername, speffzPair, bufferLocation, partialAlgorithm)
+	updatedAlgorithms, err := database.UpdateAlgorithm(authenticatedUsername, speffzPair, bufferLocation, partialAlgorithm, false)
 	if err != nil {
 		slog.Error("error updating algorithm",
 			"user", authenticatedUsername,
@@ -209,19 +212,20 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	for _, flashCard := range allFlashCards {
-		newMnemonic := database.Mnemonic{
-			Owner:        authenticatedUsername,
-			SpeffzPair:   flashCard.LetterPair,
-			Words:        &flashCard.Memo,
-			Image:        &flashCard.Image,
-			Sm2N:         0,
-			Sm2Ef:        2.5,
-			Sm2I:         0,
-			IsPublic:     flashCard.IsPublic,
-			LastReviewAt: time.Unix(flashCard.LastQuizUnix, 0),
-			NextReviewAt: time.Now(),
+		partialMnemonic := map[string]any{
+			"owner":       authenticatedUsername,
+			"speffz_pair": flashCard.LetterPair,
+			"words":       &flashCard.Memo,
+			"image":       &flashCard.Image,
+			"is_public":   flashCard.IsPublic,
 		}
-		err := database.PutMnemonic(newMnemonic)
+
+		_, err := database.UpdateMnemonic(
+			authenticatedUsername,
+			flashCard.LetterPair,
+			partialMnemonic,
+			true,
+		)
 		if err != nil {
 			writer.Write(fmt.Appendf(
 				[]byte{},
@@ -233,19 +237,19 @@ func handleMigrateLetterPairs(writer http.ResponseWriter, req *http.Request) {
 		}
 
 		if len(flashCard.Commutator) > 2 {
-			newAlgorithm := database.Algorithm{
-				Owner:        authenticatedUsername,
-				SpeffzPair:   flashCard.LetterPair,
-				Buffer:       "UFR",
-				Moves:        flashCard.Commutator,
-				Sm2N:         0,
-				Sm2Ef:        2.5,
-				Sm2I:         0,
-				LastReviewAt: time.Unix(flashCard.LastQuizUnix, 0),
-				LastDrillAt:  time.Unix(flashCard.LastDrillUnix, 0),
-				NextReviewAt: time.Now(),
+			partialAlgorithm := map[string]any{
+				"owner":       authenticatedUsername,
+				"speffz_pair": flashCard.LetterPair,
+				"buffer":      "UFR",
+				"moves":       flashCard.Commutator,
 			}
-			err := database.PutAlgorithm(newAlgorithm)
+			_, err := database.UpdateAlgorithm(
+				authenticatedUsername,
+				flashCard.LetterPair,
+				"UFR",
+				partialAlgorithm,
+				true,
+			)
 			if err != nil {
 				writer.Write(fmt.Appendf(
 					[]byte{},

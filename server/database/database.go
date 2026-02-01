@@ -1011,7 +1011,7 @@ func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	return &mnemonic, err
 }
 
-func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]any) ([]Mnemonic, error) {
+func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]any, upsert bool) ([]Mnemonic, error) {
 	if len(owner) == 0 || len(speffzPair) != 2 {
 		return nil, nil
 	}
@@ -1027,48 +1027,18 @@ func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]
 		return nil, err
 	}
 
+	if upsert && len(mnemonics) == 0 {
+		slog.Info("need to create",
+			"partialMnemonic", partialMnemonic,
+		)
+
+		a = orm.Model(&mnemonics).Clauses(clause.Returning{}).Create(partialMnemonic)
+		if a.Error != nil {
+			return nil, err
+		}
+	}
+
 	return mnemonics, nil
-}
-
-func PutMnemonic(newMnemonic Mnemonic) error {
-	if len(newMnemonic.Owner) == 0 {
-		return errors.New("no owner")
-	}
-
-	if len(newMnemonic.SpeffzPair) != 2 {
-		return errors.New("invalid speffz pair")
-	}
-
-	orm, ctx, err := GetOrm()
-	if err != nil {
-		return err
-	}
-
-	err = orm.Transaction(func(tx *gorm.DB) error {
-		rowsAffected, err := gorm.G[Mnemonic](tx).Where(&Mnemonic{
-			Owner:      newMnemonic.Owner,
-			SpeffzPair: newMnemonic.SpeffzPair,
-		}).Updates(*ctx, newMnemonic)
-		if err != nil {
-			return err
-		}
-
-		if rowsAffected == 0 {
-			result := gorm.WithResult()
-			err := gorm.G[Mnemonic](tx, result).Create(*ctx, &newMnemonic)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func GetAllAlgorithms(owner string) ([]Algorithm, error) {
@@ -1085,7 +1055,7 @@ func GetAllAlgorithms(owner string) ([]Algorithm, error) {
 	return algorithms, nil
 }
 
-func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgorithm map[string]any) ([]Algorithm, error) {
+func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgorithm map[string]any, upsert bool) ([]Algorithm, error) {
 	if len(owner) == 0 || len(speffzPair) != 2 || len(buffer) == 0 {
 		return nil, nil
 	}
@@ -1101,51 +1071,16 @@ func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgo
 		return nil, err
 	}
 
+	if upsert && len(algorithms) == 0 {
+		slog.Info("need to create",
+			"partialAlgorithm", partialAlgorithm,
+		)
+
+		a = orm.Model(&algorithms).Clauses(clause.Returning{}).Create(partialAlgorithm)
+		if a.Error != nil {
+			return nil, err
+		}
+	}
+
 	return algorithms, nil
-}
-
-func PutAlgorithm(newAlgorithm Algorithm) error {
-	if len(newAlgorithm.Owner) == 0 {
-		return errors.New("no owner")
-	}
-
-	if len(newAlgorithm.SpeffzPair) != 2 {
-		return errors.New("invalid speffz pair")
-	}
-
-	if len(newAlgorithm.Buffer) == 0 {
-		return errors.New("no buffer")
-	}
-
-	orm, ctx, err := GetOrm()
-	if err != nil {
-		return err
-	}
-
-	err = orm.Transaction(func(tx *gorm.DB) error {
-		rowsAffected, err := gorm.G[Algorithm](tx).Where(&Algorithm{
-			Owner:      newAlgorithm.Owner,
-			SpeffzPair: newAlgorithm.SpeffzPair,
-			Buffer:     newAlgorithm.Buffer,
-		}).Updates(*ctx, newAlgorithm)
-		if err != nil {
-			return err
-		}
-
-		if rowsAffected == 0 {
-			result := gorm.WithResult()
-			err := gorm.G[Algorithm](tx, result).Create(*ctx, &newAlgorithm)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
