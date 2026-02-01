@@ -15,6 +15,8 @@ const letterPairsResponseSchema = z.object({
 	mnemonics: z.array(mnemonicSchema),
 });
 
+const mnemonicSaveResponseSchema = z.array(mnemonicSchema);
+
 export const letterPairStore = writable<LetterPairStoreType>({});
 export const letterPairStoreStatus = writable<{
 	status: string;
@@ -25,7 +27,6 @@ export const letterPairStoreStatus = writable<{
 }>({ status: "empty", source: "empty", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
 
 export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
-	const fetchStartMs = Date.now();
 	try {
 		letterPairStoreStatus.update((prev) => ({
 			...prev,
@@ -130,7 +131,7 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 		console.error("error when fetching letter pairs", err);
 		letterPairStoreStatus.update((prev) => ({
 			...prev,
-			status: `error`,
+			status: "error",
 			message: `Error when fetching letter pairs: ${err}`,
 			fetchEndMs: Date.now(),
 		}));
@@ -143,8 +144,72 @@ if (browser) {
 }
 
 export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<string | void> => {
-	// @todo(nick-ng): implement
-	console.log("trying to save partialMnemonic", partialMnemonic);
+	letterPairStoreStatus.update((prev) => ({
+		...prev,
+		status: "loaded",
+		source: "cache",
+		message: "",
+		fetchStartMs: Date.now(),
+	}));
+	try {
+		const res = await authFetch(joinServerPath("/mnemonic"), {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(partialMnemonic),
+		});
+
+		if (!res || !res.ok) {
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error",
+				fetchEndMs: Date.now(),
+			}));
+			return partialMnemonic.speffz_pair;
+		}
+
+		const contentType = res.headers.get("Content-Type")?.toLowerCase();
+		if (!contentType?.includes("application/json")) {
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error, unexpected content type",
+				fetchEndMs: Date.now(),
+			}));
+			return partialMnemonic.speffz_pair;
+		}
+
+		const unknownMnemonic = await res.json();
+		const newMnemonics = mnemonicSaveResponseSchema.safeParse(unknownMnemonic);
+		if (!newMnemonics.success) {
+			console.error("error, unexpected response when saving mnemonic", newMnemonics.error);
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error, unexpected response when saving mnemonic",
+				fetchEndMs: Date.now(),
+			}));
+			return;
+		}
+
+		newMnemonics.data.forEach((mem) => {
+			letterPairStore.update((prev) => {
+				prev[mem.speffz_pair] = { ...prev[mem.speffz_pair], ...mem };
+				return prev;
+			});
+		});
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
+			status: "loaded",
+			source: "server",
+			message: "",
+			fetchEndMs: Date.now(),
+		}));
+	} catch (err) {
+		console.error("error saving mnemonic", err);
+
+		return partialMnemonic.speffz_pair;
+	}
 };
 
 export const saveAlgorithm = async (
