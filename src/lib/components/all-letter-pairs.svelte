@@ -2,10 +2,10 @@
 	import { onMount } from "svelte";
 	import { goto, replaceState } from "$app/navigation";
 	import { page } from "$app/state";
+	import { getDefaultMnemonic } from "$lib/types";
 	import { letterPairStore } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import { isSpeffzPairValid, getTrueKeys } from "$lib/utils";
-	import { getDefaultMnemonic } from "$lib/types";
 	import LetterPairChooser from "$lib/components/letter-pair-chooser.svelte";
 	import LetterPair from "$lib/components/letter-pair.svelte";
 

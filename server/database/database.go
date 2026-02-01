@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -47,12 +48,12 @@ type Mnemonic struct {
 	SpeffzPair   string `gorm:"index:idx_owner_speffz,unique,primaryKey"`
 	Words        *string
 	Image        *string
-	Sm2N         int
-	Sm2Ef        float32
-	Sm2I         float32
+	Sm2N         int     `gorm:"default:0"`
+	Sm2Ef        float32 `gorm:"default:2.5"`
+	Sm2I         float32 `gorm:"default:0.0"`
 	IsPublic     bool
 	LastReviewAt time.Time
-	NextReviewAt time.Time
+	NextReviewAt time.Time `gorm:"autoCreateTime"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -64,13 +65,13 @@ type Algorithm struct {
 	SpeffzPair   string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
 	Buffer       string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
 	Moves        string
-	Sm2N         int
-	Sm2Ef        float32
-	Sm2I         float32
-	DrillTimeMs  int
+	Sm2N         int     `gorm:"default:0"`
+	Sm2Ef        float32 `gorm:"default:2.5"`
+	Sm2I         float32 `gorm:"default:0.0"`
+	DrillTimeMs  int     `gorm:"default:20000"`
 	LastDrillAt  time.Time
 	LastReviewAt time.Time
-	NextReviewAt time.Time
+	NextReviewAt time.Time `gorm:"autoCreateTime"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
