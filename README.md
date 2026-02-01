@@ -66,8 +66,7 @@ css:
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
-- src/lib/stores/letter-pairs.ts:146: @todo(nick-ng): implement
-- src/lib/stores/letter-pairs.ts:153: @todo(nick-ng): implement
+- src/lib/stores/letter-pairs.ts:218: @todo(nick-ng): implement
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:48: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
@@ -77,7 +76,8 @@ css:
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/letter-pair/edit/+page.svelte:51: @todo(nick-ng): handle error saving changes
-- src/routes/letter-pair/edit/+page.svelte:54: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/+page.svelte:74: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/+page.svelte:77: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/+page.svelte:150: @todo(nick-ng): implement reset
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
