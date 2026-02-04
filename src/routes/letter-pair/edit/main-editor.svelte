@@ -4,6 +4,7 @@
 	import { optionsStore } from "$lib/stores/options";
 	import { getTrueKeys } from "$lib/utils";
 	import ImageEditor from "./image-editor.svelte";
+	import AlgEditor from "./alg-editor.svelte";
 
 	interface Props {
 		letterPair: LetterPair;
@@ -79,10 +80,13 @@
 					}
 				} catch (err) {
 					// @todo(nick-ng): handle error saving changes
+					console.error("error saving", err);
 				}
 			}}
 		>
-			<table class="flash-card-editor mx-auto border-separate border-spacing-x-1">
+			<table
+				class="flash-card-editor mx-auto border-separate border-spacing-x-1 border-spacing-y-0.5"
+			>
 				<tbody>
 					<tr>
 						<td class="text-right"
@@ -90,7 +94,7 @@
 						>
 						<td class="flex flex-row"
 							><input
-								class={`shrink ${typeof mnemonicChanges.words === "string" ? "rounded-r-none border-r-0" : ""}`}
+								class={`w-full px-0.5 ${typeof mnemonicChanges.words === "string" ? "rounded-r-none border-r-0" : ""}`}
 								type="text"
 								autocomplete="off"
 								name="memo"
@@ -100,21 +104,27 @@
 										mnemonicChanges.words = newWords;
 									}
 								}
-							/><button
-								class={`${typeof mnemonicChanges.words === "string" ? "" : "opacity-0"} rounded-l-none border-gray-300 dark:border-gray-500`}
-								type="button"
-								onclick={() => {
-									delete mnemonicChanges.words;
-								}}>X</button
-							></td
+							/></td
 						>
 					</tr>
 					{#each getTrueKeys($optionsStore.chosenBuffers) as bufferLocation (bufferLocation)}
-						<tr><td>{bufferLocation}</td><td>todo: make algorithm editor</td></tr>
+						<AlgEditor
+							speffzPair={letterPair.speffz_pair}
+							buffer={bufferLocation}
+							moves={algorithmsChanges[bufferLocation]?.moves ??
+								(letterPair.algorithms[bufferLocation]?.moves || "")}
+							movesChanged={(newMoves) => {
+								algorithmsChanges[bufferLocation] = {
+									speffz_pair: letterPair.speffz_pair,
+									buffer: bufferLocation,
+									moves: newMoves,
+								};
+							}}
+						/>
 					{/each}
 					<ImageEditor
 						speffzPair={letterPair.speffz_pair}
-						imageUri={mnemonicChanges.image ?? letterPair.image}
+						imageUri={mnemonicChanges.image ?? (letterPair.image || "")}
 						imageChanged={(newUri) => {
 							mnemonicChanges.image = newUri;
 						}}
@@ -155,9 +165,14 @@
 					type="button"
 					onclick={() => {
 						mnemonicChanges = {};
+						algorithmsChanges = {};
 					}}>Reset</button
 				>
-				<button class="flex-grow" disabled={Object.keys(mnemonicChanges).length === 0}>Save</button>
+				<button
+					class="flex-grow"
+					disabled={Object.keys(mnemonicChanges).length === 0 &&
+						Object.keys(algorithmsChanges).length === 0}>Save</button
+				>
 			</div>
 			<details class="can-hover:block hidden">
 				<summary>Debug</summary>

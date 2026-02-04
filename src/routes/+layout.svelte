@@ -25,7 +25,7 @@
 
 {#if showNav}
 	<div class="m-1 flex flex-row items-start gap-2">
-		<a class="like-button grow lg:grow-0" href={`/`}
+		<a class="like-button grow lg:grow-0" href="/"
 			><span class="hidden lg:inline">Browse</span><span class="lg:hidden">📖</span></a
 		>
 		<a class="like-button grow lg:grow-0" href="/quiz"

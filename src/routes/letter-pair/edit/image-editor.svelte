@@ -12,13 +12,15 @@
 	let isImageEmoji = $derived(imageUri.endsWith(".emoji"));
 	let previousEmoji = $state(".emoji");
 	let previousImage = $state("");
-	let emojiShortcut = "Enter an Emoji";
+	let emojiShortcut = $state("Enter an Emoji");
 	switch (getOperatingSystem()) {
 		case "win": {
 			emojiShortcut = "Win + . or Win + ;";
+			break;
 		}
 		case "mac": {
 			emojiShortcut = "Control + Command + Space";
+			break;
 		}
 	}
 </script>
@@ -50,7 +52,7 @@
 	<td>
 		{#if isImageEmoji}
 			<input
-				class="w-full"
+				class="w-full px-0.5"
 				type="text"
 				id={`${speffzPair}-image`}
 				placeholder={emojiShortcut}
@@ -58,6 +60,7 @@
 				name="emoji"
 				value={imageUri.replace(/\.emoji$/, "")}
 				oninput={(event) => {
+					// @todo(nick-ng): use 2 argument bind:value style?
 					imageChanged(`${event.currentTarget.value}.emoji`);
 				}}
 			/>

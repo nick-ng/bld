@@ -217,4 +217,11 @@ export const saveAlgorithm = async (
 ): Promise<string | void> => {
 	// @todo(nick-ng): implement
 	console.log("trying to save partialAlgorithm", partialAlgorithm);
+	letterPairStoreStatus.update((prev) => ({
+		...prev,
+		status: "saving",
+		source: "cache",
+		message: "",
+		fetchStartMs: Date.now(),
+	}));
 };

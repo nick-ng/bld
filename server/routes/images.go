@@ -46,6 +46,7 @@ func handleGetImage(writer http.ResponseWriter, req *http.Request) {
 	writer.Write(imageBytes)
 }
 
+// @todo(nick-ng): clean up unused images
 func handlePostImage(writer http.ResponseWriter, req *http.Request) {
 	utils.AddCorsHeaders(writer)
 
@@ -90,7 +91,6 @@ func handlePostImage(writer http.ResponseWriter, req *http.Request) {
 	}
 
 	filename := fmt.Sprintf("%s_%s_%s.jpg", authenticatedUsername, speffzPair, utils.RandomId0(2))
-	// imageChanged = true
 	filePath, err := GetImageFullPath(filename)
 	if err != nil {
 		writer.WriteHeader(http.StatusInternalServerError)
