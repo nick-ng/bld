@@ -763,7 +763,7 @@ export function cornerSpeffzToLocation(speffzLetters: string): string[] {
 }
 
 export function getBlddbUrl(speffzPair: string, bufferLocation: string) {
-	if (speffzPair.length !== 2) {
+	if (!isSpeffzPairValid1(speffzPair, bufferLocation)) {
 		return null;
 	}
 
