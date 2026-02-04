@@ -64,7 +64,8 @@ css:
 - server/routes/flash-cards.go:82: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:128: @todo(nick-ng): only show default user's flash cards if no user provided
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
-- server/routes/images.go:17: @todo(nick-ng): pre-signed urls for retrieving images?
+- server/routes/images.go:27: @todo(nick-ng): pre-signed urls for retrieving images?
+- server/routes/images.go:28: @todo(nick-ng): use cookies?
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/stores/letter-pairs.ts:218: @todo(nick-ng): implement
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
@@ -76,8 +77,7 @@ css:
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/letter-pair/edit/+page.svelte:74: @todo(nick-ng): handle error saving changes
-- src/routes/letter-pair/edit/+page.svelte:77: @todo(nick-ng): handle error saving changes
-- src/routes/letter-pair/edit/+page.svelte:150: @todo(nick-ng): implement reset
+- src/routes/letter-pair/edit/main-editor.svelte:78: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/main-editor.svelte:81: @todo(nick-ng): handle error saving changes
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

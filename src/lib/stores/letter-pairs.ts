@@ -19,7 +19,7 @@ const mnemonicSaveResponseSchema = z.array(mnemonicSchema);
 
 export const letterPairStore = writable<LetterPairStoreType>({});
 export const letterPairStoreStatus = writable<{
-	status: string;
+	status: "empty" | "loading" | "loaded" | "saving" | "error";
 	source: string;
 	message: string;
 	fetchStartMs: number;
@@ -146,7 +146,7 @@ if (browser) {
 export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<string | void> => {
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
-		status: "loaded",
+		status: "saving",
 		source: "cache",
 		message: "",
 		fetchStartMs: Date.now(),
