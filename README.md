@@ -66,18 +66,21 @@ css:
 - server/routes/flash-cards.go:404: @todo(nick-ng): handle cleaning up images
 - server/routes/images.go:27: @todo(nick-ng): pre-signed urls for retrieving images?
 - server/routes/images.go:28: @todo(nick-ng): use cookies?
+- server/routes/images.go:49: @todo(nick-ng): clean up unused images
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
 - src/lib/stores/letter-pairs.ts:218: @todo(nick-ng): implement
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:48: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
-- src/lib/utils.ts:309: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
-- src/lib/utils.ts:458: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:621: @todo(nick-ng): is the loop necessary?
+- src/lib/utils.ts:303: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
+- src/lib/utils.ts:452: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:615: @todo(nick-ng): is the loop necessary?
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/letter-pair/edit/main-editor.svelte:78: @todo(nick-ng): handle error saving changes
-- src/routes/letter-pair/edit/main-editor.svelte:81: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/alg-editor.svelte:30: @todo(nick-ng): use 2 argument bind:value style?
+- src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
+- src/routes/letter-pair/edit/main-editor.svelte:79: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/main-editor.svelte:82: @todo(nick-ng): handle error saving changes
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
