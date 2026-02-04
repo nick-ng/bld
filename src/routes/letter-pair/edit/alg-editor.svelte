@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getBlddbUrl } from "$lib/utils";
+
 	interface Props {
 		speffzPair: string;
 		buffer: string;

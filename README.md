@@ -78,7 +78,7 @@ css:
 - src/routes/drill/+page.svelte:13: @todo(nick-ng): make drill aware of flash card type
 - src/routes/drill/+page.svelte:15: @todo(nick-ng): save these to local storage
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
-- src/routes/letter-pair/edit/alg-editor.svelte:30: @todo(nick-ng): use 2 argument bind:value style?
+- src/routes/letter-pair/edit/alg-editor.svelte:31: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:79: @todo(nick-ng): handle error saving changes
 - src/routes/letter-pair/edit/main-editor.svelte:82: @todo(nick-ng): handle error saving changes

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LetterPair as LetterPairType } from "$lib/types";
 
-	import { isSpeffzPairValid } from "$lib/utils";
+	import { isSpeffzPairValid, getBlddbUrl } from "$lib/utils";
 
 	interface Props {
 		letterPair: LetterPairType;
@@ -12,7 +12,10 @@
 	let isValid = $derived(isSpeffzPairValid(letterPair.speffz_pair, selectedBuffers));
 	let indicators = $derived([
 		isValid && !letterPair.words ? "#ff0000ff" : "#ffffff00",
-		isValid && !selectedBuffers.every((buf) => letterPair.algorithms[buf]?.moves)
+		isValid &&
+		!selectedBuffers.every(
+			(buf) => !getBlddbUrl(letterPair.speffz_pair, buf) || letterPair.algorithms[buf]?.moves
+		)
 			? "#00aa00ff"
 			: "#ffffff00",
 		isValid && !letterPair.image ? "#0000ffff" : "#ffffff00",

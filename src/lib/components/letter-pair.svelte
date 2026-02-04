@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { LetterPair as LetterPairType } from "$lib/types";
-	import { parseCommutator, simplifyAlgorithm, isSpeffzPairValid1 } from "$lib/utils";
+	import { parseCommutator, simplifyAlgorithm, getBlddbUrl } from "$lib/utils";
 	import { optionsStore } from "$lib/stores/options";
 	import { authenticationStore } from "$lib/stores/authentication";
 	import Image from "$lib/components/image.svelte";
@@ -56,7 +56,7 @@
 			</div>
 		{/if}
 		{#each selectedBuffers as bufferLocation (bufferLocation)}
-			{#if isSpeffzPairValid1(letterPair.speffz_pair, bufferLocation)}
+			{#if getBlddbUrl(letterPair.speffz_pair, bufferLocation)}
 				{#if letterPair.algorithms[bufferLocation]?.moves}
 					{@const algorithmDetails = parseCommutator(letterPair.algorithms[bufferLocation]?.moves)}
 					{@const simplification = simplifyAlgorithm(algorithmDetails.expansion)}
