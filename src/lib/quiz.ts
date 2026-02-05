@@ -1,4 +1,4 @@
-import type { FlashCard } from "$lib/types";
+import type { FlashCard, LetterPair } from "$lib/types";
 
 import { get } from "svelte/store";
 import { goto } from "$app/navigation";
@@ -186,3 +186,123 @@ export const makeLeitnerQuiz = (settings: {
 
 	return shuffleArray(quizDeck);
 };
+
+export function getVisibleFlashCardComponents(
+	category: string,
+	hideAnswer: boolean
+): {
+	hideWords: boolean;
+	hideImage: boolean;
+	selectedBuffers: string[];
+	title: string;
+} {
+	switch (category) {
+		case "memo": {
+			return {
+				hideWords: hideAnswer,
+				hideImage: hideAnswer,
+				selectedBuffers: [],
+				title: "Quiz",
+			};
+		}
+		default: {
+			return {
+				hideWords: false,
+				hideImage: false,
+				selectedBuffers: hideAnswer ? [] : [category],
+				title: `${category} Quiz`,
+			};
+		}
+	}
+}
+
+export function getQuizKit(
+	category: string,
+	subcategory: string
+): { filterFunc: (lp: LetterPair) => boolean; getNextReview: (lp: LetterPair) => Date } {
+	switch (category) {
+		case "UF": {
+			switch (subcategory) {
+				default: {
+					return {
+						filterFunc: (lp: LetterPair) => lp?.algorithms?.UF.moves?.length > 2,
+						getNextReview: (lp: LetterPair) => lp?.algorithms?.UF.next_review_at || new Date(),
+					};
+				}
+			}
+		}
+		case "UFR": {
+			switch (subcategory) {
+				default: {
+					return {
+						filterFunc: (lp: LetterPair) => lp?.algorithms?.UFR.moves?.length > 2,
+						getNextReview: (lp: LetterPair) => lp?.algorithms?.UFR.next_review_at || new Date(),
+					};
+				}
+			}
+		}
+		default: {
+			// memo
+			return {
+				filterFunc: (lp: LetterPair) => lp.words.length > 0 || lp.image.length > 0,
+				getNextReview: (lp: LetterPair) => lp.next_review_at,
+			};
+		}
+	}
+}
+
+export function getNextLetters(
+	category: string,
+	subcategory: string,
+	letterPairs: LetterPair[],
+	randH = 1
+): LetterPair[] {
+	const { filterFunc, getNextReview } = getQuizKit(category, subcategory);
+	const now = new Date();
+	const sortCache: Record<string, number> = {};
+	const possibleCards = letterPairs
+		.filter((lp) => lp.next_review_at <= now && filterFunc(lp))
+		.sort((a, b) => {
+			// randomise the next review time slightly so they aren't always in the same order
+			// store in a cache so the sort works
+			if (!sortCache[a.speffz_pair]) {
+				sortCache[a.speffz_pair] =
+					getNextReview(a).valueOf() + Math.random() * randH * 3_600_000 + 1;
+			}
+			if (!sortCache[b.speffz_pair]) {
+				sortCache[b.speffz_pair] =
+					getNextReview(b).valueOf() + Math.random() * randH * 3_600_000 + 1;
+			}
+			return sortCache[a.speffz_pair] - sortCache[b.speffz_pair];
+		});
+
+	return possibleCards;
+}
+
+export function superMemo2(
+	userGradeQ: number,
+	sm2N: number,
+	sm2EF: number,
+	sm2I: number
+): { sm2N: number; sm2EF: number; sm2I: number } {
+	const output = { sm2N, sm2EF, sm2I };
+	if (userGradeQ >= 3) {
+		if (sm2N === 0) {
+			output.sm2I = 1;
+		} else if (sm2N === 1) {
+			output.sm2I = 6;
+		} else {
+			output.sm2I = Math.round(sm2I * sm2EF);
+		}
+	} else {
+		output.sm2N = 0;
+		output.sm2I = 1;
+	}
+
+	output.sm2EF = sm2EF + (0.1 - (5 - userGradeQ) * (0.08 + (5 - userGradeQ) * 0.02));
+	if (output.sm2EF < 1.3) {
+		output.sm2EF = 1.3;
+	}
+
+	return output;
+}
