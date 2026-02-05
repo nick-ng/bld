@@ -5,14 +5,27 @@
 	import Quiz from "./quiz.svelte";
 	import SuperMemoQuiz from "./super-memo-quiz.svelte";
 
-	let currentSpeffzPair = page.url.searchParams.get("sp");
-	let quizCategory = page.url.searchParams.get("category");
-	let quizSubcategory = page.url.searchParams.get("subcategory");
+	let currentSpeffzPair = $derived(page.url.searchParams.get("sp"));
+	let quizCategory = $derived(page.url.searchParams.get("category"));
+	let quizSubcategory = $derived(page.url.searchParams.get("subcategory"));
+	let quizCount = $derived.by(() => {
+		const temp = page.url.searchParams.get("quizcount");
+		if (typeof temp === "string") {
+			return parseInt(temp);
+		}
+
+		return null;
+	});
 </script>
 
 <div class="mx-auto max-w-prose">
 	{#if currentSpeffzPair && quizCategory}
-		<SuperMemoQuiz {currentSpeffzPair} category={quizCategory} subcategory={quizSubcategory} />
+		<SuperMemoQuiz
+			{currentSpeffzPair}
+			category={quizCategory}
+			subcategory={quizSubcategory}
+			{quizCount}
+		/>
 	{:else if $quizStore.length > 0}
 		<Quiz />
 	{:else}
