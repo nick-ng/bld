@@ -94,7 +94,7 @@
 						>
 						<td class="flex flex-row"
 							><input
-								class={`w-full px-0.5 ${typeof mnemonicChanges.words === "string" ? "rounded-r-none border-r-0" : ""}`}
+								class="w-full px-0.5"
 								type="text"
 								autocomplete="off"
 								name="memo"
