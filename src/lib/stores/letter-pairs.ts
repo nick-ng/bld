@@ -197,7 +197,11 @@ export const saveMnemonic = async (
 
 		newMnemonics.data.forEach((mem) => {
 			letterPairStore.update((prev) => {
-				prev[mem.speffz_pair] = { ...prev[mem.speffz_pair], ...mem };
+				const tempLetterPair: Partial<LetterPair> = {
+					algorithms: {},
+					...mem,
+				};
+				prev[mem.speffz_pair] = { ...prev[mem.speffz_pair], ...tempLetterPair };
 				return prev;
 			});
 		});

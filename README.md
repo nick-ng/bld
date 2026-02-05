@@ -82,4 +82,5 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:80: @todo(nick-ng): handle error saving changes
 - src/routes/letter-pair/edit/main-editor.svelte:87: @todo(nick-ng): handle error saving changes
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
+- src/routes/quiz/super-memo-quiz.svelte:4: @todo(nick-ng): 10 store state in search params
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
