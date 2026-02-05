@@ -1,7 +1,6 @@
 <script lang="ts">
 	import type { LetterPair as LetterPairType } from "$lib/types";
 	import { parseCommutator, simplifyAlgorithm, getBlddbUrl } from "$lib/utils";
-	import { optionsStore } from "$lib/stores/options";
 	import { authenticationStore } from "$lib/stores/authentication";
 	import Image from "$lib/components/image.svelte";
 	import Step from "$lib/components/step.svelte";
