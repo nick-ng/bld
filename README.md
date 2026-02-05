@@ -68,6 +68,7 @@ css:
 - server/routes/images.go:28: @todo(nick-ng): use cookies?
 - server/routes/images.go:49: @todo(nick-ng): clean up unused images
 - server/utils/password.go:38: @todo(nick-ng): does this actually help?
+- src/lib/stores/letter-pairs.ts:9: @todo(nick-ng): use storage events to keep different tabs synced https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:48: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations

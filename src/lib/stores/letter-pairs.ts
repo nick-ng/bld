@@ -6,6 +6,8 @@ import { browser } from "$app/environment";
 import { algorithmSchema, mnemonicSchema } from "$lib/types";
 import { authFetch, joinServerPath } from "$lib/utils";
 
+// @todo(nick-ng): use storage events to keep different tabs synced https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event
+
 export type LetterPairStoreType = {
 	[speffzPair: string]: LetterPair;
 };
