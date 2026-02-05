@@ -8,7 +8,7 @@
 	interface Props {
 		letterPair: LetterPairType;
 		quizLeft?: number;
-		hideMemo?: boolean;
+		hideWords?: boolean;
 		selectedBuffers: string[];
 		hideImage?: boolean;
 		isQuiz?: boolean;
@@ -19,7 +19,7 @@
 	let {
 		letterPair,
 		quizLeft = 0,
-		hideMemo,
+		hideWords,
 		selectedBuffers,
 		hideImage,
 		isQuiz,
@@ -47,7 +47,7 @@
 				onclick={onQuizEnd}>End Quiz</button
 			>
 		{/if}
-		{#if !hideMemo}
+		{#if !hideWords}
 			<div class="max-w-64 truncate text-center text-2xl">
 				{letterPair.words}
 			</div>
