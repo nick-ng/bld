@@ -79,7 +79,7 @@ css:
 - src/routes/flash-cards/edit/letter-pair-editor.svelte:127: @todo(nick-ng): you can just do `new FormData(event.currentTarget)`?
 - src/routes/letter-pair/edit/alg-editor.svelte:31: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
-- src/routes/letter-pair/edit/main-editor.svelte:79: @todo(nick-ng): handle error saving changes
-- src/routes/letter-pair/edit/main-editor.svelte:82: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/main-editor.svelte:80: @todo(nick-ng): handle error saving changes
+- src/routes/letter-pair/edit/main-editor.svelte:87: @todo(nick-ng): handle error saving changes
 - src/routes/quiz/quiz-home.svelte:17: @todo(nick-ng): move these to the options store
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

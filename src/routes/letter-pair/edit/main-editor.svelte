@@ -75,8 +75,13 @@
 						);
 					}
 					const saveResult = await Promise.all(pendingChanges);
-					if (saveResult.some((r) => typeof r === "string")) {
+					const unsuccessfulSaves = saveResult.filter((r) => typeof r === "string");
+					if (unsuccessfulSaves.length > 0) {
 						// @todo(nick-ng): handle error saving changes
+						console.error("error saving these items:", unsuccessfulSaves);
+					} else {
+						algorithmsChanges = {};
+						history.back();
 					}
 				} catch (err) {
 					// @todo(nick-ng): handle error saving changes
