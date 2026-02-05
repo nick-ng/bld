@@ -59,7 +59,7 @@ var validAlgorithmKeys = []string{
 	"owner",
 	"speffz_pair",
 	"buffer",
-	"algorithm",
+	"moves",
 	"sm2_n",
 	"sm2_ef",
 	"sm2_i",

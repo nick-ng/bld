@@ -16,6 +16,7 @@ const letterPairsResponseSchema = z.object({
 });
 
 const mnemonicSaveResponseSchema = z.array(mnemonicSchema);
+const algorithmSaveResponseSchema = z.array(algorithmSchema);
 
 export const letterPairStore = writable<LetterPairStoreType>({});
 export const letterPairStoreStatus = writable<{
@@ -143,7 +144,9 @@ if (browser) {
 	fetchLetterPairs();
 }
 
-export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<string | void> => {
+export const saveMnemonic = async (
+	partialMnemonic: Partial<Mnemonic> & { speffz_pair: string }
+): Promise<string | void> => {
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
 		status: "saving",
@@ -189,7 +192,7 @@ export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<
 				message: "Error, unexpected response when saving mnemonic",
 				fetchEndMs: Date.now(),
 			}));
-			return;
+			return partialMnemonic.speffz_pair;
 		}
 
 		newMnemonics.data.forEach((mem) => {
@@ -213,10 +216,9 @@ export const saveMnemonic = async (partialMnemonic: Partial<Mnemonic>): Promise<
 };
 
 export const saveAlgorithm = async (
-	partialAlgorithm: Partial<Algorithm>
+	partialAlgorithm: Partial<Algorithm> & { speffz_pair: string; buffer: string }
 ): Promise<string | void> => {
-	// @todo(nick-ng): implement
-	console.log("trying to save partialAlgorithm", partialAlgorithm);
+	const algId = `${partialAlgorithm.buffer}:${partialAlgorithm.speffz_pair}`;
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
 		status: "saving",
@@ -224,4 +226,78 @@ export const saveAlgorithm = async (
 		message: "",
 		fetchStartMs: Date.now(),
 	}));
+	try {
+		const res = await authFetch(joinServerPath("/algorithm"), {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify(partialAlgorithm),
+		});
+
+		if (!res || !res.ok) {
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error",
+				fetchEndMs: Date.now(),
+			}));
+			return algId;
+		}
+
+		const contentType = res.headers.get("Content-Type")?.toLowerCase();
+		if (!contentType?.includes("application/json")) {
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error, unexpected content type",
+				fetchEndMs: Date.now(),
+			}));
+			return algId;
+		}
+
+		const unknownAlgorithm = await res.json();
+		const newAlgorithm = algorithmSaveResponseSchema.safeParse(unknownAlgorithm);
+		if (!newAlgorithm.success) {
+			console.error("error, unexpected response when saving algorithm", newAlgorithm.error);
+			letterPairStoreStatus.update((prev) => ({
+				...prev,
+				status: "error",
+				message: "Error, unexpected response when saving algorithm",
+				fetchEndMs: Date.now(),
+			}));
+			return algId;
+		}
+
+		newAlgorithm.data.forEach((alg) => {
+			letterPairStore.update((prev) => {
+				if (!prev[alg.speffz_pair]) {
+					prev[alg.speffz_pair] = {
+						speffz_pair: alg.speffz_pair,
+						words: "",
+						image: "",
+						sm2_n: 0,
+						sm2_ef: 2.5,
+						sm2_i: 0,
+						is_public: false,
+						last_review_at: new Date(0),
+						next_review_at: new Date(),
+						algorithms: { [alg.buffer]: alg },
+					};
+				} else {
+					prev[alg.speffz_pair].algorithms[alg.buffer] = alg;
+				}
+
+				return prev;
+			});
+		});
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
+			status: "loaded",
+			source: "server",
+			message: "",
+			fetchEndMs: Date.now(),
+		}));
+	} catch (err) {
+		console.error("error saving mnemonic", err);
+		return algId;
+	}
 };

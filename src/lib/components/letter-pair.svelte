@@ -27,8 +27,6 @@
 		onQuizEnd,
 		extraClass = "",
 	}: Props = $props();
-
-	console.log("options", $optionsStore);
 </script>
 
 <div class="mx-auto max-w-prose">

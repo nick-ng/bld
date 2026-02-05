@@ -155,7 +155,8 @@ func handleUpdateAlgorithm(writer http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	updatedAlgorithms, err := database.UpdateAlgorithm(authenticatedUsername, speffzPair, bufferLocation, partialAlgorithm, false)
+	isPost := req.Method == http.MethodPost
+	updatedAlgorithms, err := database.UpdateAlgorithm(authenticatedUsername, speffzPair, bufferLocation, partialAlgorithm, isPost)
 	if err != nil {
 		slog.Error("error updating algorithm",
 			"user", authenticatedUsername,

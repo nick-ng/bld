@@ -19,32 +19,5 @@
 	>
 		Migrate Data
 	</button>
-	<button
-		onclick={async () => {
-			const a = { speffz_pair: "sx", words: "wife", sm2_i: 3 };
-			authFetch(joinServerPath("/mnemonic"), {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(a),
-			});
-		}}>Patch Mnemonic</button
-	>
-	<button
-		onclick={async () => {
-			const newDate = new Date().toISOString();
-			console.log("newDate", newDate);
-			const a = {
-				speffz_pair: "bk",
-				buffer: "UFR",
-				sm2_i: 3,
-				last_drill_at: newDate,
-			};
-			authFetch(joinServerPath("/algorithm"), {
-				method: "PATCH",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify(a),
-			});
-		}}>Patch Algorithm</button
-	>
 	<p>{message}</p>
 </div>
