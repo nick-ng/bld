@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { migrateLetterPairs } from "$lib/letter-pair";
-	import { authFetch, joinServerPath } from "$lib/utils";
 
 	let message = $state("");
 </script>
