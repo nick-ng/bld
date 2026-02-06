@@ -22,7 +22,7 @@
 
 <div class="mx-auto max-w-prose">
 	{#if nextLetters.length === 0}
-		<div>All done!</div>
+		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
 			<div class="absolute top-0 left-0">
@@ -48,64 +48,66 @@
 			<h3>Loading...</h3>
 		{/if}
 		{#if !hideAnswer}
-			<div class="absolute bottom-3 left-0 z-1 w-full px-2 lg:relative lg:w-full lg:px-0">
+			<div class="absolute bottom-3 left-0 z-1 flex w-full flex-col px-2 lg:relative lg:px-0">
+				<div class="mx-1">
+					<button
+						class="w-full"
+						type="button"
+						disabled={selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+							if (selectedGradeQ < 0) {
+								return;
+							}
+							const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
+							switch (quizType) {
+								case "alg": {
+									await saveAlgorithm({
+										speffz_pair: currentSpeffzPair,
+										buffer: category,
+										...newSMStats,
+									});
+									break;
+								}
+								case "memo": {
+									await saveMnemonic({
+										speffz_pair: currentSpeffzPair,
+										...newSMStats,
+									});
+									break;
+								}
+								default: {
+									console.error("unexpected quiz type");
+									return;
+								}
+							}
+
+							const freshNextLetters = getNextLetters(Object.values($letterPairStore));
+							const nextLetter = freshNextLetters.shift();
+							const nextQuizCount = (quizCount || 0) + 1;
+							if (!nextLetter) {
+								alert(`All done! Reviewed ${nextQuizCount} cards`);
+								goto("/quiz");
+								return;
+							}
+
+							hideAnswer = true;
+							selectedGradeQ = -1;
+							setTimeout(() => {
+								const searchParams = new URLSearchParams(location.search);
+								searchParams.set("sp", nextLetter.speffz_pair);
+								searchParams.set("quizcount", nextQuizCount.toString());
+								goto(`/quiz?${searchParams.toString()}`);
+							}, 0);
+						}}
+					>
+						Submit
+					</button>
+				</div>
 				<table class="mb-2 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
-							<td colspan="3">
-								<button
-									type="button"
-									disabled={selectedGradeQ < 0}
-									onclick={async (mouseEvent) => {
-										mouseEvent.preventDefault();
-										if (selectedGradeQ < 0) {
-											return;
-										}
-										const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
-										switch (quizType) {
-											case "alg": {
-												await saveAlgorithm({
-													speffz_pair: currentSpeffzPair,
-													buffer: category,
-													...newSMStats,
-												});
-												break;
-											}
-											case "memo": {
-												await saveMnemonic({
-													speffz_pair: currentSpeffzPair,
-													...newSMStats,
-												});
-												break;
-											}
-											default: {
-												console.error("unexpected quiz type");
-												return;
-											}
-										}
-
-										const freshNextLetters = getNextLetters(Object.values($letterPairStore));
-										const nextLetter = freshNextLetters.shift();
-										const nextQuizCount = (quizCount || 0) + 1;
-										if (!nextLetter) {
-											alert(`All done! Reviewed ${nextQuizCount} cards`);
-											goto("/quiz");
-											return;
-										}
-
-										hideAnswer = true;
-										selectedGradeQ = -1;
-										setTimeout(() => {
-											const searchParams = new URLSearchParams(location.search);
-											searchParams.set("sp", nextLetter.speffz_pair);
-											searchParams.set("quizcount", nextQuizCount.toString());
-											goto(`/quiz?${searchParams.toString()}`);
-										}, 0);
-									}}
-								>
-									Submit
-								</button>
-							</td>
+							<td class="flex flex-row justify-end" colspan="3"> </td>
 						</tr>
 						<tr>
 							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "Easy", q: 2 }] as grade (grade.q)}
