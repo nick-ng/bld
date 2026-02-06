@@ -12,11 +12,6 @@ export type LetterPairStoreType = {
 	[speffzPair: string]: LetterPair;
 };
 
-const letterPairsResponseSchema = z.object({
-	algorithms: z.array(algorithmSchema),
-	mnemonics: z.array(mnemonicSchema),
-});
-
 const mnemonicSaveResponseSchema = z.array(mnemonicSchema);
 const algorithmSaveResponseSchema = z.array(algorithmSchema);
 
