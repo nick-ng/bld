@@ -161,3 +161,21 @@ export const authenticationOptionsSchema = z.object({
 });
 
 export type AuthenticationOptions = z.infer<typeof authenticationOptionsSchema>;
+
+export const mbldCubeSchema = z.object({
+	scramble: z.string(),
+	pack: z.string(),
+	exec_split_s: z.number(),
+	is_dnf: z.boolean(),
+	dnf_reason: z.string(),
+});
+
+export type MbldCube = z.infer<typeof mbldCubeSchema>;
+
+export const mbldSessionSchema = z.object({
+	date: dateOrDateStringSchema,
+	scrambles: z.array(z.string()), // scrambles for the attempt. need to be matched to cubes after attempt.
+	cubes: z.array(mbldCubeSchema), // if the cube was solved, it might not need to be matched to its scramble.
+});
+
+export type MbldSession = z.infer<typeof mbldSessionSchema>;
