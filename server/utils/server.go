@@ -10,7 +10,7 @@ import (
 func AddCorsHeaders(writer http.ResponseWriter) {
 	writer.Header().Add("Access-Control-Allow-Origin", "*")
 	writer.Header().Add("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, OPTIONS")
-	writer.Header().Add("Access-Control-Allow-Headers", "x-username,x-password,x-access-token")
+	writer.Header().Add("Access-Control-Allow-Headers", "content-type,x-username,x-password,x-access-token")
 	writer.Header().Add("Access-Control-Expose-Headers", "x-access-token")
 }
 

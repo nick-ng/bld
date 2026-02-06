@@ -68,25 +68,25 @@ const cornerSpeffzLocationMap: Record<string, string> = {
 
 const edgeSpeffzLocationMap: Record<string, string> = {
 	a: "UB",
-	b: "UL",
+	b: "UR",
 	c: "UF",
-	d: "UR",
-	e: "RU",
-	f: "RF",
-	g: "RD",
-	h: "RB",
+	d: "UL",
+	e: "LU",
+	f: "LF",
+	g: "LD",
+	h: "LB",
 	i: "FU",
-	j: "FL",
+	j: "FR",
 	k: "FD",
-	l: "FR",
-	m: "LU",
-	n: "LB",
-	o: "LD",
-	p: "LF",
+	l: "FL",
+	m: "RU",
+	n: "RB",
+	o: "RD",
+	p: "RF",
 	q: "BU",
-	r: "BR",
+	r: "BL",
 	s: "BD",
-	t: "BL",
+	t: "BR",
 	u: "DF",
 	v: "DR",
 	w: "DB",
@@ -94,38 +94,36 @@ const edgeSpeffzLocationMap: Record<string, string> = {
 	y: "DL",
 	z: "DL",
 	UB: "a",
-	UL: "b",
+	UR: "b",
 	UF: "c",
-	UR: "d",
-	RU: "e",
-	RF: "f",
-	RD: "g",
-	RB: "h",
+	UL: "d",
+	LU: "e",
+	LF: "f",
+	LD: "g",
+	LB: "h",
 	FU: "i",
-	FL: "j",
+	FR: "j",
 	FD: "k",
-	FR: "l",
-	LU: "m",
-	LB: "n",
-	LD: "o",
-	LF: "p",
+	FL: "l",
+	RU: "m",
+	RB: "n",
+	RD: "o",
+	RF: "p",
 	BU: "q",
-	BR: "r",
+	BL: "r",
 	BD: "s",
-	BL: "t",
+	BR: "t",
 	DF: "u",
 	DR: "v",
 	DB: "w",
 	DL: "x",
 };
 
-export const getTrueKeys = (obj: Record<string, boolean>): string[] => {
-	const temp = Object.keys(obj).filter((k) => obj[k]);
+export function getTrueKeys(obj: Record<string, boolean>): string[] {
+	return Object.keys(obj).filter((k) => obj[k]);
+}
 
-	return temp;
-};
-
-export const getRandomSequence = (seed: number, count: number) => {
+export function getRandomSequence(seed: number, count: number) {
 	const randomNumbers: number[] = [];
 	for (let i = 0; i < count; i++) {
 		const temp = Math.floor(Math.abs((Math.sin(seed + i) * RANDOM_LIMIT) % RANDOM_LIMIT));
@@ -134,13 +132,13 @@ export const getRandomSequence = (seed: number, count: number) => {
 	}
 
 	return randomNumbers;
-};
+}
 
-export const capFirst = (str: string) => {
+export function capFirst(str: string) {
 	return `${str[0].toUpperCase()}${str.slice(1)}`;
-};
+}
 
-export const joinUrl = (...args: string[]) => {
+export function joinUrl(...args: string[]) {
 	return args
 		.map((fragment, i) => {
 			if (typeof fragment !== "string") {
@@ -157,25 +155,27 @@ export const joinUrl = (...args: string[]) => {
 		})
 		.filter((f) => f.length > 0)
 		.join("/");
-};
+}
 
-export const joinServerPath = (...args: string[]) => {
+export function joinServerPath(...args: string[]) {
 	return joinUrl(import.meta.env.VITE_SERVER_URL, ...args);
-};
+}
 
-export const upperCaseFirst = (str: string) => {
+export function upperCaseFirst(str: string) {
+	if (str.length === 0) {
+		return "";
+	}
+
 	const [first, ...rest] = str.split("");
 
 	return [first.toLocaleUpperCase(), ...rest].join("");
-};
+}
 
-export const addCredentialsToHeaders = (
-	originalHeaders?: HeadersInit
-): {
+export function addCredentialsToHeaders(originalHeaders?: HeadersInit): {
 	headers: Headers;
 	isValid: boolean;
 	previousAccessToken: string | null;
-} => {
+} {
 	const headers = originalHeaders ? new Headers(originalHeaders) : new Headers();
 
 	const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY);
@@ -200,9 +200,9 @@ export const addCredentialsToHeaders = (
 		isValid: true,
 		previousAccessToken: accessToken,
 	};
-};
+}
 
-export const daysAgo = (date: Date | number) => {
+export function daysAgo(date: Date | number) {
 	const startOfToday = new Date();
 	startOfToday.setHours(0);
 	startOfToday.setMinutes(0);
@@ -223,9 +223,9 @@ export const daysAgo = (date: Date | number) => {
 	}
 
 	return `${differenceDays.toFixed(0)} Days ago`;
-};
+}
 
-export const authFetch = (url: string, init?: RequestInit) => {
+export function authFetch(url: string, init?: RequestInit) {
 	const newInit = { ...init };
 	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);
 
@@ -251,9 +251,9 @@ export const authFetch = (url: string, init?: RequestInit) => {
 	});
 
 	return response;
-};
+}
 
-export const positionSortIndex = (positionLetter: string) => {
+export function positionSortIndex(positionLetter: string) {
 	const uppercaseLetter = positionLetter.toUpperCase();
 	switch (uppercaseLetter) {
 		case "U":
@@ -271,11 +271,9 @@ export const positionSortIndex = (positionLetter: string) => {
 		default:
 			return 7;
 	}
-};
+}
 
-export const locationType = (
-	location: string
-):
+export function locationType(location: string):
 	| {
 			isValid: true;
 			name: string;
@@ -283,7 +281,7 @@ export const locationType = (
 			samePieces: string[][];
 			speffzLocationMap: Record<string, string>;
 	  }
-	| { isValid: false } => {
+	| { isValid: false } {
 	if (location.toUpperCase() === location) {
 		// all letters are uppercase e.g. UF, UFR
 		if (location.length === 3) {
@@ -310,24 +308,24 @@ export const locationType = (
 	return {
 		isValid: false,
 	};
-};
+}
 
-export const normalisePosition = (rawPosition: string) => {
+export function normalisePosition(rawPosition: string) {
 	const [firstLetter, ...otherLetters] = rawPosition.split("");
 
 	otherLetters.sort((a, b) => positionSortIndex(a) - positionSortIndex(b));
 
 	return [firstLetter, ...otherLetters].join("");
-};
+}
 
-export const areLocationsSame = (locationA: string, locationB: string) => {
+export function areLocationsSame(locationA: string, locationB: string) {
 	const tempA = locationA.split("").sort().join("");
 	const tempB = locationB.split("").sort().join("");
 
 	return tempA === tempB;
-};
+}
 
-export const isTwist = (speffzPair: string, samePieces: string[][]) => {
+export function isTwist(speffzPair: string, samePieces: string[][]) {
 	const letters = speffzPair.split("");
 	if (letters.length !== 2) {
 		return false;
@@ -345,9 +343,9 @@ export const isTwist = (speffzPair: string, samePieces: string[][]) => {
 	}
 
 	return false;
-};
+}
 
-export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
+export function isBuffer(letterPair: string, bufferPiece: string[]) {
 	const letters = letterPair.split("");
 
 	for (let i = 0; i < letters.length; i++) {
@@ -357,9 +355,9 @@ export const isBuffer = (letterPair: string, bufferPiece: string[]) => {
 	}
 
 	return false;
-};
+}
 
-export const isSpeffzPairValid = (speffzPair: string, bufferLocation: string) => {
+export function isSpeffzPairValid1(speffzPair: string, bufferLocation: string) {
 	if (speffzPair.length !== 2) {
 		// a speffz pair contains exactly 2 letters
 		return false;
@@ -388,9 +386,17 @@ export const isSpeffzPairValid = (speffzPair: string, bufferLocation: string) =>
 	}
 
 	return true;
-};
+}
 
-export const getOperatingSystem = (): string => {
+export function isSpeffzPairValid(speffzPair: string, bufferLocations: string[]) {
+	if (bufferLocations.length === 0) {
+		return true;
+	}
+
+	return bufferLocations.some((buf) => isSpeffzPairValid1(speffzPair, buf));
+}
+
+export function getOperatingSystem(): string {
 	if (navigator.userAgent.includes("Win")) {
 		return "win";
 	}
@@ -398,9 +404,9 @@ export const getOperatingSystem = (): string => {
 		return "mac";
 	}
 	return "";
-};
+}
 
-export const normaliseCommutator = (rawCommutator: string): string => {
+export function normaliseCommutator(rawCommutator: string): string {
 	return rawCommutator
 		.replaceAll(/  +/g, " ")
 		.replaceAll(/ *([ufrdlb])/gi, " $1")
@@ -410,9 +416,9 @@ export const normaliseCommutator = (rawCommutator: string): string => {
 		.replaceAll(/ *: */g, ":")
 		.replaceAll(/ *\/ */g, "/")
 		.trim();
-};
+}
 
-export const reverseMoves = (moves: string): string => {
+export function reverseMoves(moves: string): string {
 	const moveList = moves
 		.split(" ")
 		.filter((a) => a)
@@ -428,14 +434,14 @@ export const reverseMoves = (moves: string): string => {
 	}
 
 	return moveList.join(" ");
-};
+}
 
 const jbPerm = "R U R' F' R U R' U' R' F R2 U' R' U'";
 const tPerm = "R U R' U' R' F R2 U' R' U' R U R' F'";
 const opSwap = "R' F R2 U' R' U' R U R' F' R U R' U'";
 const leftJbPerm = "L' U' L F L' U' L U L F' L2 U L U";
 const yPerm = `F ${opSwap} F'`;
-export const hydrateAlgorithms = (rawAlg: string) => {
+export function hydrateAlgorithms(rawAlg: string) {
 	const hydratedAlg = rawAlg
 		.replaceAll(/<jb-perm>/gi, jbPerm)
 		.replaceAll(/<op-swap>/gi, opSwap)
@@ -445,10 +451,10 @@ export const hydrateAlgorithms = (rawAlg: string) => {
 		.replaceAll(/<y-perm>/gi, yPerm);
 
 	return hydratedAlg;
-};
+}
 
 // @todo(nick-ng): handle cube rotations (x y z)
-export const parseCommutator = (rawCommutator: string) => {
+export function parseCommutator(rawCommutator: string) {
 	const hydratedCommutator = hydrateAlgorithms(rawCommutator);
 	const neededHydration = rawCommutator !== hydratedCommutator;
 	let regripEmoji = "";
@@ -589,9 +595,9 @@ export const parseCommutator = (rawCommutator: string) => {
 		interchange: "",
 		expansion: hydratedCommutator,
 	};
-};
+}
 
-export const simplifyAlgorithm = (alg: string) => {
+export function simplifyAlgorithm(alg: string) {
 	const moves = alg.split(" ").filter((a) => a);
 	const originalMoves = moves.map((move) => ({ move, type: "normal" }));
 	const tempSimplified: {
@@ -711,9 +717,9 @@ export const simplifyAlgorithm = (alg: string) => {
 		originalCount: moves.length,
 		simplifiedCount: simplifiedMoves.length,
 	};
-};
+}
 
-export const sortAlgs = (a: string, b: string): number => {
+export function sortAlgs(a: string, b: string): number {
 	const aMoves = a
 		.trim()
 		.split(" ")
@@ -728,9 +734,9 @@ export const sortAlgs = (a: string, b: string): number => {
 	}
 
 	return a.localeCompare(b);
-};
+}
 
-export const shuffleArray = <T>(arr: T[]): T[] => {
+export function shuffleArray<T>(arr: T[]): T[] {
 	const temp = arr
 		.map((v) => {
 			return {
@@ -746,21 +752,48 @@ export const shuffleArray = <T>(arr: T[]): T[] => {
 		});
 
 	return temp;
-};
-export const oneCornerSpeffzToLocation = (speffzLetter: string): string => {
+}
+export function oneCornerSpeffzToLocation(speffzLetter: string): string {
 	const letter = speffzLetter[0].toLowerCase();
 	if (letter && letter in cornerSpeffzLocationMap) {
 		return cornerSpeffzLocationMap[<keyof typeof cornerSpeffzLocationMap>letter];
 	}
 
 	return "";
-};
+}
 
-export const cornerSpeffzToLocation = (speffzLetters: string): string[] => {
+export function cornerSpeffzToLocation(speffzLetters: string): string[] {
 	return speffzLetters.split("").map(oneCornerSpeffzToLocation);
-};
+}
 
-export const arrayToCsvRow = (items: string[]): string => {
+export function getBlddbUrl(speffzPair: string, bufferLocation: string) {
+	if (!isSpeffzPairValid1(speffzPair, bufferLocation)) {
+		return null;
+	}
+
+	const a = locationType(bufferLocation);
+	if (!a.isValid) {
+		return null;
+	}
+
+	if (speffzPair[0] === speffzPair[1]) {
+		if (a.name === "edge") {
+			return null;
+		}
+
+		const position = `UF-UR-${bufferLocation}-${a.speffzLocationMap[speffzPair[0]]}`;
+
+		return `https://v2.blddb.net/parity?position=${position}&mode=manmade`;
+	}
+
+	const position = [
+		bufferLocation,
+		...speffzPair.split("").map((s) => a.speffzLocationMap[s.toLowerCase()]),
+	].join("-");
+	return `https://v2.blddb.net/${a.name}?position=${position}&mode=manmade`;
+}
+
+export function arrayToCsvRow(items: string[]): string {
 	return items
 		.map((i) => {
 			const tempI = i.replaceAll("\n", "\\n");
@@ -771,9 +804,9 @@ export const arrayToCsvRow = (items: string[]): string => {
 			return tempI;
 		})
 		.join(",");
-};
+}
 
-export const updateTags = (previousTags: string, tagPrefix: string, newFullTag: string) => {
+export function updateTags(previousTags: string, tagPrefix: string, newFullTag: string) {
 	const splitTags = previousTags
 		.split(";")
 		.map((a) => a.trim())
@@ -782,7 +815,7 @@ export const updateTags = (previousTags: string, tagPrefix: string, newFullTag: 
 	newTags.push(newFullTag);
 
 	return newTags.join("; ");
-};
+}
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -790,10 +823,10 @@ const WEEK_MS = 7 * DAY_MS;
 const MONTH_MS = 30 * DAY_MS;
 const YEAR_MS = 365 * DAY_MS;
 
-export const summariseFlashCards = (
+export function summariseFlashCards(
 	flashCards: FlashCard[],
 	chosenBuffers: Record<string, boolean>
-) => {
+) {
 	const inserts: { [insert: string]: string[] } = {};
 	const interchanges: { [interchange: string]: string[] } = {};
 	const setups: { [setup: string]: string[] } = {};
@@ -932,7 +965,7 @@ export const summariseFlashCards = (
 	for (let letter0 = 0; letter0 < 24; letter0++) {
 		for (let letter1 = 0; letter1 < 24; letter1++) {
 			const letterPair = `${String.fromCharCode(97 + letter0)}${String.fromCharCode(97 + letter1)}`;
-			if (!getTrueKeys(chosenBuffers).some((buf) => isSpeffzPairValid(letterPair, buf))) {
+			if (!getTrueKeys(chosenBuffers).some((buf) => isSpeffzPairValid1(letterPair, buf))) {
 				continue;
 			}
 
@@ -982,7 +1015,7 @@ export const summariseFlashCards = (
 				setups[setup].push(flashCard.letterPair);
 			} else {
 				missingMemos.push(letterPair);
-				if (isSpeffzPairValid(letterPair, "UFR")) {
+				if (isSpeffzPairValid1(letterPair, "UFR")) {
 					missingComms.push(letterPair);
 				}
 			}
@@ -1042,4 +1075,4 @@ export const summariseFlashCards = (
 		drillAges,
 		total,
 	};
-};
+}

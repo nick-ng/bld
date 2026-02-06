@@ -56,6 +56,7 @@ if (browser) {
 		authenticationStore.update((prev) => ({
 			...prev,
 			isGuest: true,
+			isUserAuthenticated: false,
 		}));
 	} else {
 		// only check access token if guest is false

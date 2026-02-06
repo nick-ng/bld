@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { migrateLetterPairs } from "$lib/letter-pair";
+	import { authFetch, joinServerPath } from "$lib/utils";
 
 	let message = $state("");
 </script>
@@ -18,5 +19,17 @@
 	>
 		Migrate Data
 	</button>
+	<button
+		onclick={async () => {
+			const res1 = await authFetch(`${joinServerPath("mnemonic")}?offset=0`);
+			const json1 = await res1.json();
+
+			console.log("res2.json", json1);
+			const newOffset = json1.length;
+			console.log("new offset", newOffset);
+			const res2 = await authFetch(`${joinServerPath("mnemonic")}?offset=${newOffset}`);
+			console.log("res2.json", await res2.json());
+		}}>Test</button
+	>
 	<p>{message}</p>
 </div>

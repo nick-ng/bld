@@ -19,9 +19,9 @@ func init() {
 	randomGenerator = rand.New(rand.NewSource(time.Now().UnixNano()))
 }
 
-func RandomId() string {
+func RandomId0(l int) string {
 	randomId := ""
-	for i := 1; i < 32; i++ {
+	for range l {
 		indexF := randomGenerator.Float64() * float64(len(ID_CHARACTER_SET))
 		indexI := int(indexF)
 
@@ -29,4 +29,8 @@ func RandomId() string {
 	}
 
 	return randomId
+}
+
+func RandomId() string {
+	return RandomId0(31)
 }

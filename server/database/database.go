@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -19,6 +20,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type FlashCard struct {
@@ -41,36 +43,37 @@ type FlashCard struct {
 
 type Mnemonic struct {
 	gorm.Model
-	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_speffz,unique,primaryKey"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_speffz,unique,primaryKey"`
-	Words        *string   `json:"words"`
-	Image        *string   `json:"image"`
-	Sm2N         int       `json:"sm_2_n"`
-	Sm2Ef        float32   `json:"sm_2_ef"`
-	Sm2I         float32   `json:"sm_2_i"`
-	LastReviewAt time.Time `json:"last_review_at"`
-	NextReviewAt time.Time `json:"next_review_at"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint
+	Owner        string `gorm:"index:idx_owner_speffz,unique,primaryKey"`
+	SpeffzPair   string `gorm:"index:idx_owner_speffz,unique,primaryKey"`
+	Words        *string
+	Image        *string
+	Sm2N         int     `gorm:"default:0"`
+	Sm2Ef        float32 `gorm:"default:2.5"`
+	Sm2I         float32 `gorm:"default:0.0"`
+	IsPublic     bool
+	LastReviewAt time.Time
+	NextReviewAt time.Time `gorm:"autoCreateTime"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type Algorithm struct {
 	gorm.Model
-	ID           uint      `json:"id"`
-	Owner        string    `json:"owner" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Buffer       string    `json:"buffer" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Algorithm    string    `json:"algorithm"`
-	SpeffzPair   string    `json:"speffz_pair" gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
-	Sm2N         int       `json:"sm_2_n"`
-	Sm2Ef        float32   `json:"sm_2_ef"`
-	Sm2I         float32   `json:"sm_2_i"`
-	DrillTimeMs  int       `json:"drillTimeMs"`
-	LastReviewAt time.Time `json:"last_review_at"`
-	NextReviewAt time.Time `json:"next_review_at"`
-	LastDrillAt  time.Time `json:"last_drill_at"`
-	CreatedAt    time.Time `json:"created_at"`
-	UpdatedAt    time.Time `json:"updated_at"`
+	ID           uint
+	Owner        string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	SpeffzPair   string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Buffer       string `gorm:"index:idx_owner_buffer_speffz,unique,primaryKey"`
+	Moves        string
+	Sm2N         int     `gorm:"default:0"`
+	Sm2Ef        float32 `gorm:"default:2.5"`
+	Sm2I         float32 `gorm:"default:0.0"`
+	DrillTimeMs  int     `gorm:"default:20000"`
+	LastDrillAt  time.Time
+	LastReviewAt time.Time
+	NextReviewAt time.Time `gorm:"autoCreateTime"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 const VERSION_PREFIX = "v2"
@@ -994,6 +997,20 @@ func GetAllMnemonics(owner string) ([]Mnemonic, error) {
 	return mnemonics, nil
 }
 
+func GetSomeMnemonics(owner string, limit int, offset int) ([]Mnemonic, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	mnemonics, err := gorm.G[Mnemonic](orm).Where("owner = ?", owner).Limit(limit).Offset(offset).Find(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return mnemonics, nil
+}
+
 func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	orm, ctx, err := GetOrm()
 	if err != nil {
@@ -1008,45 +1025,44 @@ func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	return &mnemonic, err
 }
 
-func PutMnemonic(newMnemonic Mnemonic) error {
-	if len(newMnemonic.Owner) == 0 {
-		return errors.New("no owner")
+func UpdateMnemonic(owner string, speffzPair string, partialMnemonic map[string]any, upsert bool) ([]Mnemonic, error) {
+	if len(owner) == 0 || len(speffzPair) != 2 {
+		return nil, nil
 	}
 
-	if len(newMnemonic.SpeffzPair) != 2 {
-		return errors.New("invalid speffz pair")
-	}
-
-	orm, ctx, err := GetOrm()
+	orm, _, err := GetOrm()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = orm.Transaction(func(tx *gorm.DB) error {
-		rowsAffected, err := gorm.G[Mnemonic](tx).Where(&Mnemonic{
-			Owner:      newMnemonic.Owner,
-			SpeffzPair: newMnemonic.SpeffzPair,
-		}).Updates(*ctx, newMnemonic)
-		if err != nil {
-			return err
+	var mnemonics []Mnemonic
+	a := orm.Model(&mnemonics).Clauses(clause.Returning{}).Where("owner = ? AND speffz_pair = ?", owner, speffzPair).Updates(partialMnemonic)
+	if a.Error != nil {
+		return nil, err
+	}
+
+	if upsert && len(mnemonics) == 0 {
+		partialMnemonic["owner"] = owner
+		partialMnemonic["speffz_pair"] = speffzPair
+		slog.Info("need to create",
+			"partialMnemonic", partialMnemonic,
+		)
+
+		a = orm.Model(&Mnemonic{}).Create(partialMnemonic)
+		if a.Error != nil {
+			return nil, err
 		}
 
-		if rowsAffected == 0 {
-			result := gorm.WithResult()
-			err := gorm.G[Mnemonic](tx, result).Create(*ctx, &newMnemonic)
-			if err != nil {
-				return err
-			}
+		var mnemonic Mnemonic
+		a = orm.Where("owner = ? AND speffz_pair = ?", owner, speffzPair).First(&mnemonic)
+		if a.Error != nil {
+			return nil, err
 		}
 
-		return nil
-	})
-
-	if err != nil {
-		return err
+		return []Mnemonic{mnemonic}, nil
 	}
 
-	return nil
+	return mnemonics, nil
 }
 
 func GetAllAlgorithms(owner string) ([]Algorithm, error) {
@@ -1063,48 +1079,57 @@ func GetAllAlgorithms(owner string) ([]Algorithm, error) {
 	return algorithms, nil
 }
 
-func PutAlgorithm(newAlgorithm Algorithm) error {
-	if len(newAlgorithm.Owner) == 0 {
-		return errors.New("no owner")
-	}
-
-	if len(newAlgorithm.SpeffzPair) != 2 {
-		return errors.New("invalid speffz pair")
-	}
-
-	if len(newAlgorithm.Buffer) == 0 {
-		return errors.New("no buffer")
-	}
-
+func GetSomeAlgorithms(owner string, limit int, offset int) ([]Algorithm, error) {
 	orm, ctx, err := GetOrm()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = orm.Transaction(func(tx *gorm.DB) error {
-		rowsAffected, err := gorm.G[Algorithm](tx).Where(&Algorithm{
-			Owner:      newAlgorithm.Owner,
-			SpeffzPair: newAlgorithm.SpeffzPair,
-			Buffer:     newAlgorithm.Buffer,
-		}).Updates(*ctx, newAlgorithm)
-		if err != nil {
-			return err
-		}
-
-		if rowsAffected == 0 {
-			result := gorm.WithResult()
-			err := gorm.G[Algorithm](tx, result).Create(*ctx, &newAlgorithm)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
-	})
-
+	algorithms, err := gorm.G[Algorithm](orm).Where("owner = ?", owner).Limit(limit).Offset(offset).Find(*ctx)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return algorithms, nil
+}
+
+func UpdateAlgorithm(owner string, speffzPair string, buffer string, partialAlgorithm map[string]any, upsert bool) ([]Algorithm, error) {
+	if len(owner) == 0 || len(speffzPair) != 2 || len(buffer) == 0 {
+		return nil, nil
+	}
+
+	orm, _, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	var algorithms []Algorithm
+	a := orm.Model(&algorithms).Clauses(clause.Returning{}).Where("owner = ? AND speffz_pair = ? AND buffer = ?", owner, speffzPair, buffer).Updates(partialAlgorithm)
+	if a.Error != nil {
+		return nil, err
+	}
+
+	if upsert && len(algorithms) == 0 {
+		partialAlgorithm["owner"] = owner
+		partialAlgorithm["speffz_pair"] = speffzPair
+		partialAlgorithm["buffer"] = buffer
+		slog.Info("need to create",
+			"partialAlgorithm", partialAlgorithm,
+		)
+
+		a = orm.Model(&algorithms).Create(partialAlgorithm)
+		if a.Error != nil {
+			return nil, err
+		}
+
+		var algorithm Algorithm
+		a = orm.Where("owner = ? AND speffz_pair = ? AND buffer = ?", owner, speffzPair, buffer).First(&algorithm)
+		if a.Error != nil {
+			return nil, err
+		}
+
+		return []Algorithm{algorithm}, nil
+	}
+
+	return algorithms, nil
 }
