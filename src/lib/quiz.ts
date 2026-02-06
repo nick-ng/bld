@@ -284,7 +284,7 @@ export function getGetNextLetters(
 		const now = new Date();
 		const sortCache: Record<string, number> = {};
 		const possibleCards = letterPairs
-			.filter((lp) => lp.next_review_at <= now && filterFunc(lp))
+			.filter((lp) => getNextReview(lp) <= now && filterFunc(lp))
 			.sort((a, b) => {
 				// randomise the next review time slightly so they aren't always in the same order
 				// store in a cache so the sort works
