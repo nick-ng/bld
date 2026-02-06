@@ -29,79 +29,30 @@ export const letterPairStoreStatus = writable<{
 	fetchEndMs: number;
 }>({ status: "empty", source: "empty", message: "stand by", fetchStartMs: 0, fetchEndMs: 0 });
 
-export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
-	try {
-		letterPairStoreStatus.update((prev) => ({
-			...prev,
-			status: "loading",
-			message: "Loading",
-			fetchStartMs: Date.now(),
-			fetchEndMs: 0,
-		}));
-		const res = await authFetch(joinServerPath("letter-pairs"), {
-			cache: "default",
+// @todo(nick-ng): should these load methods take unknown input and do the schema parsing?
+export const loadMnemonics = (newMemos: Mnemonic[]) => {
+	letterPairStore.update((letterPairs) => {
+		newMemos.forEach((memo) => {
+			if (letterPairs[memo["speffz_pair"]]) {
+				letterPairs[memo["speffz_pair"]] = {
+					...letterPairs[memo["speffz_pair"]],
+					...memo,
+				};
+			} else {
+				letterPairs[memo["speffz_pair"]] = {
+					algorithms: {},
+					...memo,
+				};
+			}
 		});
 
-		if (!res) {
-			letterPairStoreStatus.update((prev) => ({
-				...prev,
-				status: "error",
-				message: "No response",
-				fetchEndMs: Date.now(),
-			}));
+		return letterPairs;
+	});
+};
 
-			return {};
-		}
-
-		if (!res.ok && res.status !== 401) {
-			const message = `Couldn't get letter pairs: ${res.status}, ${res.statusText}`;
-			console.warn(message);
-			letterPairStoreStatus.update((prev) => ({
-				...prev,
-				status: "error",
-				message,
-				fetchEndMs: Date.now(),
-			}));
-
-			return {};
-		}
-
-		const contentType = res.headers.get("Content-Type")?.toLowerCase();
-		if (!contentType?.includes("application/json")) {
-			const resText = await res.text();
-			console.warn("Incorrect letter pair content type:", contentType);
-			letterPairStoreStatus.update((prev) => ({
-				...prev,
-				status: "error",
-				message: `Incorrect letter pair content type: ${contentType}, instead, got: ${resText}`,
-				fetchEndMs: Date.now(),
-			}));
-
-			return {};
-		}
-
-		const unknownLetterPairs = await res.json();
-		const letterPairResult = letterPairsResponseSchema.safeParse(unknownLetterPairs);
-		if (!letterPairResult.success) {
-			console.error("unexpected response", letterPairResult.error);
-			letterPairStoreStatus.update((prev) => ({
-				...prev,
-				status: "error",
-				message: `Invalid letter pair response`,
-				fetchEndMs: Date.now(),
-			}));
-
-			return {};
-		}
-
-		const { algorithms, mnemonics } = letterPairResult.data;
-		const letterPairs = mnemonics.reduce<Record<string, LetterPair>>((prev, curr) => {
-			prev[curr["speffz_pair"]] = { ...curr, algorithms: {} };
-
-			return prev;
-		}, {});
-
-		algorithms.forEach((alg) => {
+export const loadAlgorithms = (newAlgs: Algorithm[]) => {
+	letterPairStore.update((letterPairs) => {
+		newAlgs.forEach((alg) => {
 			if (!letterPairs[alg["speffz_pair"]]) {
 				letterPairs[alg["speffz_pair"]] = {
 					speffz_pair: alg["speffz_pair"],
@@ -120,30 +71,91 @@ export const fetchLetterPairs = async (): Promise<LetterPairStoreType> => {
 			letterPairs[alg["speffz_pair"]].algorithms[alg["buffer"]] = alg;
 		});
 
-		letterPairStore.set(letterPairs);
-		letterPairStoreStatus.update((prev) => ({
-			...prev,
-			status: "loaded",
-			source: "kerver",
-			message: "",
-			fetchEndMs: Date.now(),
-		}));
-
 		return letterPairs;
-	} catch (err) {
-		console.error("error when fetching letter pairs", err);
-		letterPairStoreStatus.update((prev) => ({
-			...prev,
-			status: "error",
-			message: `Error when fetching letter pairs: ${err}`,
-			fetchEndMs: Date.now(),
-		}));
-		return {};
+	});
+};
+
+const fetchAndLoadMnemonics = async (): Promise<void> => {
+	let keepGoing = true;
+	let offset = 0;
+	for (let i = 0; i < 20; i++) {
+		if (!keepGoing) {
+			return;
+		}
+
+		try {
+			const res = await authFetch(`${joinServerPath("mnemonic")}?offset=${offset}`);
+			const unknownMnemonics = await res.json();
+			const parseRes = mnemonicSaveResponseSchema.safeParse(unknownMnemonics);
+			if (!parseRes.success) {
+				console.error("error: unexpected mnemonic response", parseRes.error);
+				keepGoing = false;
+				break;
+			}
+
+			// @todo(nick-ng): put data into session storage
+			loadMnemonics(parseRes.data);
+			if (parseRes.data.length < 50) {
+				// done
+				keepGoing = false;
+			}
+
+			offset = offset + parseRes.data.length;
+		} catch (err) {
+			console.error("error when fetching mnemonics", err);
+			keepGoing = false;
+			break;
+		}
+	}
+
+	if (keepGoing) {
+		alert("Not enough loops to load all mnemonics");
+	}
+};
+
+const fetchAndLoadAlgorithms = async (): Promise<void> => {
+	let keepGoing = true;
+	let offset = 0;
+	for (let i = 0; i < 100; i++) {
+		if (!keepGoing) {
+			break;
+		}
+
+		try {
+			const res = await authFetch(`${joinServerPath("algorithm")}?offset=${offset}`);
+			const unknownMnemonics = await res.json();
+			const parseRes = algorithmSaveResponseSchema.safeParse(unknownMnemonics);
+			if (!parseRes.success) {
+				console.error("error: unexpected algorithm response", parseRes.error);
+				keepGoing = false;
+				break;
+			}
+
+			// @todo(nick-ng): put data into session storage
+			loadAlgorithms(parseRes.data);
+			if (parseRes.data.length < 50) {
+				// done
+				keepGoing = false;
+			}
+
+			offset = offset + parseRes.data.length;
+		} catch (err) {
+			console.error("error when fetching algorithms", err);
+			keepGoing = false;
+			break;
+		}
+	}
+
+	if (keepGoing) {
+		alert("Not enough loops to load all algorithms");
 	}
 };
 
 if (browser) {
-	fetchLetterPairs();
+	(async () => {
+		await fetchAndLoadMnemonics();
+		await fetchAndLoadAlgorithms();
+	})();
 }
 
 export const saveMnemonic = async (
@@ -197,16 +209,9 @@ export const saveMnemonic = async (
 			return partialMnemonic.speffz_pair;
 		}
 
-		newMnemonics.data.forEach((mem) => {
-			letterPairStore.update((prev) => {
-				const tempLetterPair: Partial<LetterPair> = {
-					algorithms: {},
-					...mem,
-				};
-				prev[mem.speffz_pair] = { ...prev[mem.speffz_pair], ...tempLetterPair };
-				return prev;
-			});
-		});
+		// @todo(nick-ng): put data into session storage
+		loadMnemonics(newMnemonics.data);
+
 		letterPairStoreStatus.update((prev) => ({
 			...prev,
 			status: "loaded",
@@ -273,28 +278,9 @@ export const saveAlgorithm = async (
 			return algId;
 		}
 
-		newAlgorithm.data.forEach((alg) => {
-			letterPairStore.update((prev) => {
-				if (!prev[alg.speffz_pair]) {
-					prev[alg.speffz_pair] = {
-						speffz_pair: alg.speffz_pair,
-						words: "",
-						image: "",
-						sm2_n: 0,
-						sm2_ef: 2.5,
-						sm2_i: 0,
-						is_public: false,
-						last_review_at: new Date(0),
-						next_review_at: new Date(),
-						algorithms: { [alg.buffer]: alg },
-					};
-				} else {
-					prev[alg.speffz_pair].algorithms[alg.buffer] = alg;
-				}
+		// @todo(nick-ng): put data into session storage
+		loadAlgorithms(newAlgorithm.data);
 
-				return prev;
-			});
-		});
 		letterPairStoreStatus.update((prev) => ({
 			...prev,
 			status: "loaded",
