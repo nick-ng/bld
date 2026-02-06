@@ -8,7 +8,7 @@
 	import { getQuizKit } from "$lib/quiz";
 
 	const quizCategories = [
-		{ category: "memo", subcategory: null },
+		{ category: "memo", subcategory: getTrueKeys($optionsStore.chosenBuffers).join(",") },
 		...getTrueKeys($optionsStore.chosenBuffers).map((buf) => ({
 			category: buf,
 			subcategory: null,

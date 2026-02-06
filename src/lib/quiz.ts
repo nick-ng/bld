@@ -5,7 +5,7 @@ import { goto } from "$app/navigation";
 import { updateFlashCard } from "$lib/stores/flash-cards";
 import { optionsStore } from "$lib/stores/options";
 import { quizStore, touchCurrentQuiz } from "$lib/stores/quiz";
-import { authFetch, joinServerPath, shuffleArray } from "$lib/utils";
+import { authFetch, isSpeffzPairValid, joinServerPath, shuffleArray } from "$lib/utils";
 import { flashCardSchema } from "$lib/types";
 
 export const patchQuiz = async (letterPair: string, formData: FormData, skipRedirect = false) => {
@@ -262,16 +262,24 @@ export function getQuizKit(
 		}
 		default: {
 			// memo
-			const filterFunc = (lp: LetterPair) => lp.words.length > 0 || lp.image.length > 0;
-			const getNextReview = (lp: LetterPair) => lp.next_review_at;
-			return {
-				filterFunc,
-				getNextReview,
-				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-				getSMStats: (lp) => lp || defaultSMStats,
-				title: "Images",
-				quizType: "memo",
-			};
+			switch (subcategory) {
+				default: {
+					// subcategory is buffers separated by ,
+					const buffers = (subcategory || "").split(",");
+					const filterFunc = (lp: LetterPair) =>
+						(lp.words.length > 0 || lp.image.length > 0) &&
+						isSpeffzPairValid(lp.speffz_pair, buffers);
+					const getNextReview = (lp: LetterPair) => lp.next_review_at;
+					return {
+						filterFunc,
+						getNextReview,
+						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getSMStats: (lp) => lp || defaultSMStats,
+						title: "Images",
+						quizType: "memo",
+					};
+				}
+			}
 		}
 	}
 }
