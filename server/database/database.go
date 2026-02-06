@@ -997,6 +997,20 @@ func GetAllMnemonics(owner string) ([]Mnemonic, error) {
 	return mnemonics, nil
 }
 
+func GetSomeMnemonics(owner string, limit int, offset int) ([]Mnemonic, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	mnemonics, err := gorm.G[Mnemonic](orm).Where("owner = ?", owner).Limit(limit).Offset(offset).Find(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return mnemonics, nil
+}
+
 func GetMnemonic(owner string, speffzPair string) (*Mnemonic, error) {
 	orm, ctx, err := GetOrm()
 	if err != nil {
@@ -1058,6 +1072,20 @@ func GetAllAlgorithms(owner string) ([]Algorithm, error) {
 	}
 
 	algorithms, err := gorm.G[Algorithm](orm).Where("owner = ?", owner).Find(*ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return algorithms, nil
+}
+
+func GetSomeAlgorithms(owner string, limit int, offset int) ([]Algorithm, error) {
+	orm, ctx, err := GetOrm()
+	if err != nil {
+		return nil, err
+	}
+
+	algorithms, err := gorm.G[Algorithm](orm).Where("owner = ?", owner).Limit(limit).Offset(offset).Find(*ctx)
 	if err != nil {
 		return nil, err
 	}

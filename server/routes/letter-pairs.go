@@ -7,14 +7,17 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func AddLetterPairsRoutes() {
 	http.HandleFunc("GET /letter-pairs", handleGetAllLetterPairs)
 	http.HandleFunc("POST /migrate-letter-pairs", handleMigrateLetterPairs)
+	http.HandleFunc("GET /mnemonic", handleGetMnemonics)
 	http.HandleFunc("POST /mnemonic", handleUpdateMnemonic)
 	http.HandleFunc("PATCH /mnemonic", handleUpdateMnemonic)
+	http.HandleFunc("GET /algorithm", handleGetAlgorithms)
 	http.HandleFunc("POST /algorithm", handleUpdateAlgorithm)
 	http.HandleFunc("PATCH /algorithm", handleUpdateAlgorithm)
 }
@@ -57,6 +60,54 @@ func handleGetAllLetterPairs(writer http.ResponseWriter, req *http.Request) {
 	jsonBytes, err := utils.MnemonicsAndAlgorithmsResponseJsonBytes(mnemonics, algorithms)
 	if err != nil {
 		slog.Error("error converting mnemonics and algorithms",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"err", err,
+		)
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.Write(jsonBytes)
+}
+
+func handleGetMnemonics(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		writer.WriteHeader(http.StatusUnauthorized)
+		return
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
+	}
+
+	offset := 0
+	searchParams := req.URL.Query()
+	offsetStrings, ok := searchParams["offset"]
+	if ok {
+		offsetString := offsetStrings[0]
+		offsetA, err := strconv.ParseInt(offsetString, 10, 0)
+		if err == nil {
+			offset = int(offsetA)
+		}
+	}
+
+	mnemonics, err := database.GetSomeMnemonics(authenticatedUsername, 50, offset)
+	if err != nil {
+		slog.Error("error getting mnemonics",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"err", err,
+		)
+
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonBytes, err := utils.MnemonicsToResponseJsonBytes(mnemonics)
+	if err != nil {
+		slog.Error("error converting mnemonics to json",
 			"user", authenticatedUsername,
 			"haveAccess", haveAccess,
 			"err", err,
@@ -122,6 +173,53 @@ func handleUpdateMnemonic(writer http.ResponseWriter, req *http.Request) {
 		)
 		writer.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
+	writer.Header().Add("Cache-Control", "no-store")
+	writer.Write(jsonBytes)
+}
+
+func handleGetAlgorithms(writer http.ResponseWriter, req *http.Request) {
+	utils.AddCorsHeaders(writer)
+
+	haveAccess, authenticatedUsername, accessToken := utils.CheckCredentials(req.Header)
+	if !haveAccess {
+		authenticatedUsername = utils.GetDefaultUser()
+	} else {
+		writer.Header().Add("X-Access-Token", accessToken)
+	}
+
+	offset := 0
+	searchParams := req.URL.Query()
+	offsetStrings, ok := searchParams["offset"]
+	if ok {
+		offsetString := offsetStrings[0]
+		offsetA, err := strconv.ParseInt(offsetString, 10, 0)
+		if err == nil {
+			offset = int(offsetA)
+		}
+	}
+
+	algorithms, err := database.GetSomeAlgorithms(authenticatedUsername, 50, offset)
+	if err != nil {
+		slog.Error("error getting algorithms",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"err", err,
+		)
+
+		writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	jsonBytes, err := utils.AlgorithmsToResponseJsonBytes(algorithms)
+	if err != nil {
+		slog.Error("error converting algorithms to json",
+			"user", authenticatedUsername,
+			"haveAccess", haveAccess,
+			"err", err,
+		)
 	}
 
 	writer.Header().Add("Content-Type", "application/json; charset=utf-8")
