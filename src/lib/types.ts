@@ -174,6 +174,9 @@ export type MbldCube = z.infer<typeof mbldCubeSchema>;
 
 export const mbldSessionSchema = z.object({
 	date: dateOrDateStringSchema,
+	youtube_link: z.string().optional(),
+	offset_s: z.number(),
+	time_s: z.number(),
 	scrambles: z.array(z.string()), // scrambles for the attempt. need to be matched to cubes after attempt.
 	cubes: z.array(mbldCubeSchema), // if the cube was solved, it might not need to be matched to its scramble.
 });
