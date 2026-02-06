@@ -48,8 +48,42 @@
 				<option value={i + 1}>{mbldAttempt.date}</option>
 			{/each}
 		</select>
+		<button
+			onclick={async () => {
+				message = "Please wait";
+				await navigator.clipboard.writeText(scrambles.join("\n"));
+				message = `${scrambles.length} copied to clipboard`;
+			}}>Copy Scrambles</button
+		>
 	</div>
 	<div class="mb-3 flex flex-col items-center">
+		{#if scrambles.length > 0 && selectedAttempt === -1}
+			<button
+				class="mb-1"
+				type="button"
+				onclick={() => {
+					$mbldStore = [
+						{
+							date: new Date(),
+							youtube_link: "",
+							offset_s: 0,
+							time_s: 0,
+							scrambles: generatedScrambles,
+							cubes: generatedScrambles.map(() => ({
+								dnf_reason: "",
+								exec_split_s: 0,
+								is_dnf: false,
+								pack: "",
+								scramble: "",
+							})),
+						},
+						...$mbldStore,
+					];
+
+					selectedAttempt = 1;
+				}}>Save</button
+			>
+		{/if}
 		<table>
 			<tbody>
 				{#each scrambles as scramble, i (`${scramble}`)}
