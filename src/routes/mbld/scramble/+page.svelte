@@ -49,6 +49,7 @@
 			{/each}
 		</select>
 		<button
+			disabled={!selectedAttempt}
 			onclick={async () => {
 				message = "Please wait";
 				await navigator.clipboard.writeText(scrambles.join("\n"));
