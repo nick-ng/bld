@@ -87,5 +87,6 @@ css:
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:80: @todo(nick-ng): handle error saving changes
 - src/routes/letter-pair/edit/main-editor.svelte:87: @todo(nick-ng): handle error saving changes
+- src/routes/mbld/analyse/+page.svelte:11: @todo(nick-ng): shorten date in <select>
 - src/routes/mbld/scramble/+page.svelte:15: @todo(nick-ng): shorten date in <select>
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
