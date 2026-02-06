@@ -17,7 +17,7 @@ const algorithmSaveResponseSchema = z.array(algorithmSchema);
 
 export const letterPairStore = writable<LetterPairStoreType>({});
 export const letterPairStoreStatus = writable<{
-	status: "empty" | "loading" | "loaded" | "saving" | "error";
+	status: string;
 	source: string;
 	message: string;
 	fetchStartMs: number;
@@ -148,8 +148,21 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 
 if (browser) {
 	(async () => {
-		await fetchAndLoadMnemonics();
-		await fetchAndLoadAlgorithms();
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
+			status: "loading",
+			source: "server",
+			message: "Loading...",
+			fetchEndMs: Date.now(),
+		}));
+		await Promise.all([fetchAndLoadMnemonics(), fetchAndLoadAlgorithms()]);
+		letterPairStoreStatus.update((prev) => ({
+			...prev,
+			status: "loaded",
+			source: "server",
+			message: "Done",
+			fetchEndMs: Date.now(),
+		}));
 	})();
 }
 

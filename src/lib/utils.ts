@@ -162,6 +162,10 @@ export function joinServerPath(...args: string[]) {
 }
 
 export function upperCaseFirst(str: string) {
+	if (str.length === 0) {
+		return "";
+	}
+
 	const [first, ...rest] = str.split("");
 
 	return [first.toLocaleUpperCase(), ...rest].join("");
