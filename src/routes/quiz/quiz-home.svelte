@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LetterPair } from "$lib/types";
 
-	import { fetchFlashCards, getAllFlashCardsOfType, flashCardStore } from "$lib/stores/flash-cards";
+	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { letterPairStore, letterPairStoreStatus } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
@@ -20,7 +20,7 @@
 			return "";
 		}
 
-		const searchParams = new URLSearchParams();
+		const searchParams = new SvelteURLSearchParams();
 		searchParams.set("sp", nextLetters[0].speffz_pair);
 		searchParams.set("category", category);
 		if (subcategory) {
