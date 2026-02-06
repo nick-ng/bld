@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { quizStore } from "$lib/stores/quiz";
 	import QuizHome from "./quiz-home.svelte";
-	import Quiz from "./quiz.svelte";
 	import SuperMemoQuiz from "./super-memo-quiz.svelte";
 
 	let currentSpeffzPair = $derived(page.url.searchParams.get("sp"));
@@ -26,8 +24,6 @@
 			subcategory={quizSubcategory}
 			{quizCount}
 		/>
-	{:else if $quizStore.length > 0}
-		<Quiz />
 	{:else}
 		<QuizHome />
 	{/if}
