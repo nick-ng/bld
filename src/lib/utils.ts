@@ -1125,18 +1125,21 @@ export const hhmmssToSeconds = (hhmmss: string) => {
 			if (hours) {
 				seconds = seconds + parseInt(hours, 10) * 3600;
 			}
+			// fall through
 		}
 		case 2: {
 			const minutes = temp.shift();
 			if (minutes) {
 				seconds = seconds + parseInt(minutes, 10) * 60;
 			}
+			// fall through
 		}
 		case 1: {
 			const tempSeconds = temp.shift();
 			if (tempSeconds) {
 				seconds = seconds + parseInt(tempSeconds, 10);
 			}
+			// fall through
 		}
 	}
 

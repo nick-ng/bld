@@ -10,10 +10,15 @@
 		children?: Snippet;
 	}
 
+	const noNavRoutes = ["big-scramble", "clock"];
+	const noLoginRoutes = ["/big-scramble", "/clock", "/mbld/scramble", "/mbld/analyse"];
+
 	let { children }: Props = $props();
-	let showNav = $derived(["big-scramble", "clock"].every((a) => page.route.id !== `/${a}`));
+	let showNav = $derived(noNavRoutes.every((a) => page.route.id !== `/${a}`));
 	let showLogin = $derived(
-		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest && showNav
+		!$authenticationStore.isUserAuthenticated &&
+			!$authenticationStore.isGuest &&
+			!noLoginRoutes.includes(page.route.id || "")
 	);
 
 	onMount(() => {});
@@ -28,12 +33,16 @@
 		<a class="like-button grow lg:grow-0" href="/"
 			><span class="hidden lg:inline">Browse</span><span class="lg:hidden">📖</span></a
 		>
-		<a class="like-button grow lg:grow-0" href="/quiz"
-			><span class="hidden lg:inline">Study</span><span class="lg:hidden">🎓</span></a
-		>
-		<a class="like-button grow lg:grow-0" href="/flash-cards/summary"
-			><span class="hidden lg:inline">Stats</span><span class="lg:hidden">📊</span></a
-		>
+		{#if $authenticationStore.isUserAuthenticated}
+			<a class="like-button grow lg:grow-0" href="/quiz"
+				><span class="hidden lg:inline">Study</span><span class="lg:hidden">🎓</span></a
+			>
+			<a class="like-button grow lg:grow-0" href="/flash-cards/summary"
+				><span class="hidden lg:inline">Stats</span><span class="lg:hidden">📊</span></a
+			>
+		{/if}
+		<a class="like-button hidden lg:inline" href="/mbld/scramble">MBLD Scrambles</a>
+		<a class="like-button hidden lg:inline" href="/mbld/analyse">MBLD Analyse</a>
 		<div class="grow-0 lg:grow"></div>
 		<a class="like-button grow lg:grow-0" href="/settings"
 			><span class="hidden lg:inline">Settings</span><span class="lg:hidden">⚙️</span></a

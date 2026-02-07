@@ -1,6 +1,5 @@
 <script lang="ts">
 	import Cube from "cubejs";
-	import { mbldStore } from "$lib/stores/mbld";
 
 	interface Props {
 		scramble: string;
