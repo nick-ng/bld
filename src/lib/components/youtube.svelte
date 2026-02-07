@@ -3,6 +3,7 @@
 	import { onMount } from "svelte";
 
 	interface Props {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		player: any;
 		initialVideoId: string;
 	}
@@ -13,6 +14,7 @@
 
 	onMount(() => {
 		function load() {
+			// eslint-disable-next-line no-undef
 			player = new YT.Player(ytPlayerId, {
 				height: "100%",
 				width: "100%",

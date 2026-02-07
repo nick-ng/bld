@@ -165,7 +165,7 @@ export type AuthenticationOptions = z.infer<typeof authenticationOptionsSchema>;
 export const mbldCubeSchema = z.object({
 	scramble: z.string(),
 	pack: z.string(),
-	exec_split_s: z.number(),
+	exec_start_s: z.number(),
 	is_dnf: z.boolean(),
 	dnf_reason: z.string(),
 });
@@ -176,6 +176,7 @@ export const mbldSessionSchema = z.object({
 	date: dateOrDateStringSchema,
 	youtube_link: z.string().optional(),
 	offset_s: z.number(),
+	chapters: z.string(),
 	time_s: z.number(),
 	scrambles: z.array(z.string()), // scrambles for the attempt. need to be matched to cubes after attempt.
 	cubes: z.array(mbldCubeSchema), // if the cube was solved, it might not need to be matched to its scramble.
