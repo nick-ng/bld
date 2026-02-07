@@ -146,24 +146,27 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 	}
 };
 
+export async function fetchAndLoadMnemonicsAndAlgorithms() {
+	letterPairStoreStatus.update((prev) => ({
+		...prev,
+		status: "loading",
+		source: "server",
+		message: "Loading...",
+		fetchEndMs: Date.now(),
+	}));
+	await fetchAndLoadMnemonics();
+	await fetchAndLoadAlgorithms();
+	letterPairStoreStatus.update((prev) => ({
+		...prev,
+		status: "loaded",
+		source: "server",
+		message: "Done",
+		fetchEndMs: Date.now(),
+	}));
+}
+
 if (browser) {
-	(async () => {
-		letterPairStoreStatus.update((prev) => ({
-			...prev,
-			status: "loading",
-			source: "server",
-			message: "Loading...",
-			fetchEndMs: Date.now(),
-		}));
-		await Promise.all([fetchAndLoadMnemonics(), fetchAndLoadAlgorithms()]);
-		letterPairStoreStatus.update((prev) => ({
-			...prev,
-			status: "loaded",
-			source: "server",
-			message: "Done",
-			fetchEndMs: Date.now(),
-		}));
-	})();
+	fetchAndLoadMnemonicsAndAlgorithms();
 }
 
 export const saveMnemonic = async (

@@ -228,6 +228,21 @@ export function getQuizKit(
 	switch (category) {
 		case "UF": {
 			switch (subcategory) {
+				case "orozco": {
+					const filterFunc = (lp: LetterPair) =>
+						(lp.speffz_pair.includes("a") || lp.speffz_pair.includes("q")) &&
+						lp?.algorithms?.UF?.moves?.length > 2;
+					const getNextReview = (lp: LetterPair) =>
+						lp?.algorithms?.UF?.next_review_at || new Date();
+					return {
+						filterFunc,
+						getNextReview,
+						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getSMStats: (lp) => lp.algorithms?.UF || defaultSMStats,
+						title: "UF BU Orozco",
+						quizType: "alg",
+					};
+				}
 				default: {
 					const filterFunc = (lp: LetterPair) => lp?.algorithms?.UF?.moves?.length > 2;
 					const getNextReview = (lp: LetterPair) =>
