@@ -18,6 +18,32 @@
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let nextLetters = $derived(getNextLetters(Object.values($letterPairStore)));
+	let isSubmitting = $state(false);
+
+	const submitQuiz = async () => {
+		const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
+		switch (quizType) {
+			case "alg": {
+				await saveAlgorithm({
+					speffz_pair: currentSpeffzPair,
+					buffer: category,
+					...newSMStats,
+				});
+				break;
+			}
+			case "memo": {
+				await saveMnemonic({
+					speffz_pair: currentSpeffzPair,
+					...newSMStats,
+				});
+				break;
+			}
+			default: {
+				console.error("unexpected quiz type");
+				return;
+			}
+		}
+	};
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -25,12 +51,14 @@
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
-			<div class="absolute top-0 left-0">
+			<div class="absolute top-0 left-0 grid grid-cols-2 gap-x-1">
+				<div>Done:</div>
 				<div>
-					Cards done: {quizCount || 0}
+					{quizCount || 0}
 				</div>
+				<div>Left:</div>
 				<div>
-					left: {nextLetters.length}
+					{nextLetters.length}
 				</div>
 			</div>
 			<h3 class="text-center">Quiz: {title}</h3>
@@ -48,39 +76,39 @@
 			<h3>Loading...</h3>
 		{/if}
 		{#if !hideAnswer}
-			<div class="absolute bottom-3 left-0 z-1 flex w-full flex-col px-2 lg:relative lg:px-0">
-				<div class="mx-1">
+			<div
+				class="absolute bottom-3 left-0 z-1 flex w-full flex-col px-2 lg:relative lg:bottom-auto lg:left-auto lg:mt-1 lg:px-0"
+			>
+				<div class="mx-1 flex flex-row gap-1">
 					<button
-						class="w-full"
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
 						type="button"
-						disabled={selectedGradeQ < 0}
+						disabled={isSubmitting || selectedGradeQ < 0}
 						onclick={async (mouseEvent) => {
 							mouseEvent.preventDefault();
 							if (selectedGradeQ < 0) {
 								return;
 							}
-							const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
-							switch (quizType) {
-								case "alg": {
-									await saveAlgorithm({
-										speffz_pair: currentSpeffzPair,
-										buffer: category,
-										...newSMStats,
-									});
-									break;
-								}
-								case "memo": {
-									await saveMnemonic({
-										speffz_pair: currentSpeffzPair,
-										...newSMStats,
-									});
-									break;
-								}
-								default: {
-									console.error("unexpected quiz type");
-									return;
-								}
+
+							await submitQuiz();
+
+							selectedGradeQ = -1;
+							goto("/quiz");
+						}}
+					>
+						Done
+					</button>
+					<button
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
+						type="button"
+						disabled={isSubmitting || selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+							if (selectedGradeQ < 0) {
+								return;
 							}
+
+							await submitQuiz();
 
 							const freshNextLetters = getNextLetters(Object.values($letterPairStore));
 							const nextLetter = freshNextLetters.shift();
@@ -101,14 +129,11 @@
 							}, 0);
 						}}
 					>
-						Submit
+						Next
 					</button>
 				</div>
 				<table class="mb-2 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
-						<tr>
-							<td class="flex flex-row justify-end" colspan="3"> </td>
-						</tr>
 						<tr>
 							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "Easy", q: 2 }] as grade (grade.q)}
 								<td>

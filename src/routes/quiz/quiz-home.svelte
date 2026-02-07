@@ -2,7 +2,11 @@
 	import type { LetterPair } from "$lib/types";
 
 	import { SvelteURLSearchParams } from "svelte/reactivity";
-	import { letterPairStore, letterPairStoreStatus } from "$lib/stores/letter-pairs";
+	import {
+		letterPairStore,
+		letterPairStoreStatus,
+		fetchAndLoadMnemonicsAndAlgorithms,
+	} from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
@@ -13,6 +17,7 @@
 			category: buf,
 			subcategory: null,
 		})),
+		{ category: "UF", subcategory: "orozco" },
 	];
 
 	const getQuizUrl = (category: string, subcategory: string | null, nextLetters: LetterPair[]) => {
@@ -48,6 +53,17 @@
 						{quizKit.title} ({nextLetters.length} due)
 					</a>
 				{/each}
+				<button
+					class="self-start"
+					disabled={$letterPairStoreStatus.status !== "loaded"}
+					onclick={() => {
+						if ($letterPairStoreStatus.status !== "loaded") {
+							return;
+						}
+
+						fetchAndLoadMnemonicsAndAlgorithms();
+					}}>Reload</button
+				>
 			</div>
 		</div>
 	{/if}

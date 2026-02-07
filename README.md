@@ -72,8 +72,8 @@ css:
 - src/lib/stores/letter-pairs.ts:27: @todo(nick-ng): should these load methods take unknown input and do the schema parsing?
 - src/lib/stores/letter-pairs.ts:91: @todo(nick-ng): put data into session storage
 - src/lib/stores/letter-pairs.ts:129: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:220: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:289: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:223: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:292: @todo(nick-ng): put data into session storage
 - src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
 - src/lib/stores/options.ts:48: @todo(nick-ng): remove migration code later
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
