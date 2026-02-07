@@ -1,8 +1,9 @@
 <script lang="ts">
+	import { onMount } from "svelte";
+	import { goto } from "$app/navigation";
 	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
 	import LetterPair from "$lib/components/letter-pair.svelte";
-	import { goto } from "$app/navigation";
 
 	interface Props {
 		currentSpeffzPair: string;
@@ -20,7 +21,11 @@
 	let nextLetters = $derived(getNextLetters(Object.values($letterPairStore)));
 	let isSubmitting = $state(false);
 
-	const submitQuiz = async () => {
+	const submitQuiz = async (stopAfter: boolean = false) => {
+		if (selectedGradeQ < 0) {
+			return;
+		}
+
 		const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
 		switch (quizType) {
 			case "alg": {
@@ -43,7 +48,83 @@
 				return;
 			}
 		}
+
+		if (stopAfter) {
+			selectedGradeQ = -1;
+			goto("/quiz");
+			return;
+		}
+
+		const freshNextLetters = getNextLetters(Object.values($letterPairStore));
+		const nextLetter = freshNextLetters.shift();
+		const nextQuizCount = (quizCount || 0) + 1;
+		if (!nextLetter) {
+			alert(`All done! Reviewed ${nextQuizCount} cards`);
+			goto("/quiz");
+			return;
+		}
+
+		hideAnswer = true;
+		selectedGradeQ = -1;
+		setTimeout(() => {
+			const searchParams = new URLSearchParams(location.search);
+			searchParams.set("sp", nextLetter.speffz_pair);
+			searchParams.set("quizcount", nextQuizCount.toString());
+			goto(`/quiz?${searchParams.toString()}`);
+		}, 0);
 	};
+
+	onMount(() => {
+		const handleKeypress = (event: KeyboardEvent) => {
+			switch (event.key) {
+				case "1": {
+					selectedGradeQ = 0;
+					break;
+				}
+				case "2": {
+					selectedGradeQ = 1;
+					break;
+				}
+				case "3": {
+					selectedGradeQ = 2;
+					break;
+				}
+				case "3": {
+					selectedGradeQ = 2;
+					break;
+				}
+				case "4": {
+					selectedGradeQ = 3;
+					break;
+				}
+				case "5": {
+					selectedGradeQ = 4;
+					break;
+				}
+				case "6": {
+					selectedGradeQ = 5;
+					break;
+				}
+				case " ": {
+					hideAnswer = false;
+					break;
+				}
+				case "Enter": {
+					submitQuiz(false);
+					break;
+				}
+				default: {
+					console.info("unhandled key pressed", event.key);
+				}
+			}
+		};
+
+		document.addEventListener("keypress", handleKeypress);
+
+		return () => {
+			document.removeEventListener("keypress", handleKeypress);
+		};
+	});
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -75,64 +156,11 @@
 		{:else}
 			<h3>Loading...</h3>
 		{/if}
-		{#if !hideAnswer}
-			<div
-				class="absolute bottom-3 left-0 z-1 flex w-full flex-col px-2 lg:relative lg:bottom-auto lg:left-auto lg:mt-1 lg:px-0"
-			>
-				<div class="mx-1 flex flex-row gap-1">
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
-							if (selectedGradeQ < 0) {
-								return;
-							}
-
-							await submitQuiz();
-
-							selectedGradeQ = -1;
-							goto("/quiz");
-						}}
-					>
-						Done
-					</button>
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
-							if (selectedGradeQ < 0) {
-								return;
-							}
-
-							await submitQuiz();
-
-							const freshNextLetters = getNextLetters(Object.values($letterPairStore));
-							const nextLetter = freshNextLetters.shift();
-							const nextQuizCount = (quizCount || 0) + 1;
-							if (!nextLetter) {
-								alert(`All done! Reviewed ${nextQuizCount} cards`);
-								goto("/quiz");
-								return;
-							}
-
-							hideAnswer = true;
-							selectedGradeQ = -1;
-							setTimeout(() => {
-								const searchParams = new URLSearchParams(location.search);
-								searchParams.set("sp", nextLetter.speffz_pair);
-								searchParams.set("quizcount", nextQuizCount.toString());
-								goto(`/quiz?${searchParams.toString()}`);
-							}, 0);
-						}}
-					>
-						Next
-					</button>
-				</div>
-				<table class="mb-2 w-full border-collapse border-separate border-spacing-1">
+		<div
+			class="cannot-hover:absolute cannot-hover:bottom-8 cannot-hover:left-0 cannot-hover:px-2 z-1 mt-1 flex w-full flex-col"
+		>
+			{#if !hideAnswer}
+				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
 							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "Easy", q: 2 }] as grade (grade.q)}
@@ -166,17 +194,43 @@
 						</tr>
 					</tbody>
 				</table>
-			</div>
-		{:else}
-			<div class="w-full px-2 lg:mt-1 lg:px-0">
-				<button
-					class="cannot-hover:py-4 block w-full rounded border border-gray-600 px-2 py-0 dark:border-gray-300"
-					onclick={() => {
-						hideAnswer = false;
-					}}>Show Answer</button
-				>
-			</div>
-		{/if}
+				<div class="mx-1 flex flex-row gap-1">
+					<button
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
+						type="button"
+						disabled={isSubmitting || selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+
+							await submitQuiz(true);
+						}}
+					>
+						Done
+					</button>
+					<button
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
+						type="button"
+						disabled={isSubmitting || selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+
+							await submitQuiz(false);
+						}}
+					>
+						Submit
+					</button>
+				</div>
+			{:else}
+				<div class="">
+					<button
+						class="block w-full rounded border border-gray-600 px-2 dark:border-gray-300"
+						onclick={() => {
+							hideAnswer = false;
+						}}>Show Answer</button
+					>
+				</div>
+			{/if}
+		</div>
 	{/if}
 	<details class="can-hover:block hidden">
 		<summary>Debug</summary>
