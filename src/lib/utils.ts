@@ -202,6 +202,18 @@ export function addCredentialsToHeaders(originalHeaders?: HeadersInit): {
 	};
 }
 
+const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+export function formatDate(date: Date) {
+	const dayOfWeek = daysOfWeek[date.getDay()];
+	const dd = date.getDate();
+	const mmm = months[date.getMonth()];
+	const hh = date.getHours();
+	const minutes = date.getMinutes();
+
+	return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()} ${hh}:${minutes.toString().padStart(2, "0")}`;
+}
+
 export function daysAgo(date: Date | number) {
 	const startOfToday = new Date();
 	startOfToday.setHours(0);
@@ -1076,3 +1088,77 @@ export function summariseFlashCards(
 		total,
 	};
 }
+
+export const getVideoId = (fullUrl: string) => {
+	const u = new URL(fullUrl);
+	if (fullUrl.includes("youtube.com")) {
+		const v = u.searchParams.get("v");
+		if (typeof v === "string") {
+			return {
+				id: v,
+				platform: "youtube",
+			};
+		}
+	}
+	if (fullUrl.includes("youtu.be/")) {
+		const id = u.pathname.slice(1);
+		if (id.length > 0) {
+			return {
+				id,
+				platform: "youtube",
+			};
+		}
+	}
+
+	return {
+		id: fullUrl,
+		platform: "unknown",
+	};
+};
+
+export const hhmmssToSeconds = (hhmmss: string) => {
+	const temp = hhmmss.split(":");
+	let seconds = 0;
+	switch (temp.length) {
+		case 3: {
+			const hours = temp.shift();
+			if (hours) {
+				seconds = seconds + parseInt(hours, 10) * 3600;
+			}
+		}
+		case 2: {
+			const minutes = temp.shift();
+			if (minutes) {
+				seconds = seconds + parseInt(minutes, 10) * 60;
+			}
+		}
+		case 1: {
+			const tempSeconds = temp.shift();
+			if (tempSeconds) {
+				seconds = seconds + parseInt(tempSeconds, 10);
+			}
+		}
+	}
+
+	return seconds;
+};
+
+export const secondsToHhmmss = (seconds: number) => {
+	const hours = Math.floor(seconds / 3600);
+	let temp = seconds % 3600;
+	const minutes = Math.floor(temp / 60);
+	temp = temp % 60;
+
+	if (hours > 0) {
+		return [
+			hours.toString(),
+			minutes.toString().padStart(2, "0"),
+			temp.toString().padStart(2, "0"),
+		].join(":");
+	}
+	if (minutes > 0) {
+		return [minutes.toString(), temp.toString().padStart(2, "0")].join(":");
+	}
+
+	return temp.toString();
+};
