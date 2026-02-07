@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
+	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
 	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
@@ -67,7 +68,7 @@
 		hideAnswer = true;
 		selectedGradeQ = -1;
 		setTimeout(() => {
-			const searchParams = new URLSearchParams(location.search);
+			const searchParams = new SvelteURLSearchParams(location.search);
 			searchParams.set("sp", nextLetter.speffz_pair);
 			searchParams.set("quizcount", nextQuizCount.toString());
 			goto(`/quiz?${searchParams.toString()}`);
@@ -83,10 +84,6 @@
 				}
 				case "2": {
 					selectedGradeQ = 1;
-					break;
-				}
-				case "3": {
-					selectedGradeQ = 2;
 					break;
 				}
 				case "3": {
