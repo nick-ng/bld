@@ -349,6 +349,7 @@ export function superMemo2(
 			output.sm2_i = Math.round(input.sm2_i * input.sm2_ef);
 		}
 
+		output.sm2_n = Math.round(input.sm2_n + 1);
 		// 1 day per sm2_i minus 8 hours so you don't have to do the quiz at the exact time and it doesn't become later and later
 		output.next_review_at = new Date(
 			Date.now() + output.sm2_i * correctIncrement - correctAllowance
