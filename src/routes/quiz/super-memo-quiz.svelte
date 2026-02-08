@@ -157,6 +157,32 @@
 			class="cannot-hover:absolute cannot-hover:bottom-8 cannot-hover:left-0 cannot-hover:px-2 z-1 mt-1 flex w-full flex-col"
 		>
 			{#if !hideAnswer}
+				<div class="mx-1 mb-3 flex flex-row gap-1">
+					<button
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
+						type="button"
+						disabled={isSubmitting || selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+
+							await submitQuiz(true);
+						}}
+					>
+						Done
+					</button>
+					<button
+						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
+						type="button"
+						disabled={isSubmitting || selectedGradeQ < 0}
+						onclick={async (mouseEvent) => {
+							mouseEvent.preventDefault();
+
+							await submitQuiz(false);
+						}}
+					>
+						Submit
+					</button>
+				</div>
 				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
@@ -191,42 +217,16 @@
 						</tr>
 					</tbody>
 				</table>
-				<div class="mx-1 flex flex-row gap-1">
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
-
-							await submitQuiz(true);
-						}}
-					>
-						Done
-					</button>
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
-
-							await submitQuiz(false);
-						}}
-					>
-						Submit
-					</button>
-				</div>
-			{:else}
-				<div class="">
-					<button
-						class="block w-full rounded border border-gray-600 px-2 dark:border-gray-300"
-						onclick={() => {
-							hideAnswer = false;
-						}}>Show Answer</button
-					>
-				</div>
 			{/if}
+			<div class="mx-1 mb-3">
+				<button
+					class="block w-full rounded border border-gray-600 px-2 dark:border-gray-300"
+					disabled={!hideAnswer}
+					onclick={() => {
+						hideAnswer = false;
+					}}>Show Answer</button
+				>
+			</div>
 		</div>
 	{/if}
 	<details class="can-hover:block hidden">
