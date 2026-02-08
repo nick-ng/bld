@@ -328,7 +328,7 @@ export function getGetNextLetters(
 
 const correctIncrement = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 const correctAllowance = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-const incorrectIncrement = 1 * 60 * 60 * 1000; // 1 hour in milliseconds
+const incorrectIncrement = 2 * 60 * 1000; // 2 minutes in milliseconds
 export function superMemo2(
 	userGradeQ: number,
 	input: { sm2_n: number; sm2_ef: number; sm2_i: number }
