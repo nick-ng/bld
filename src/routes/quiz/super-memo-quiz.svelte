@@ -13,6 +13,9 @@
 		quizCount: number | null;
 	}
 
+	const fastAnswerMs = 1000;
+	const okAnswerMs = 5000;
+
 	let { currentSpeffzPair, category, subcategory, quizCount }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters } = $derived(getQuizKit(category, subcategory));
 	let hideAnswer = $state(true);
@@ -21,6 +24,7 @@
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let nextLetters = $derived(getNextLetters(Object.values($letterPairStore)));
 	let isSubmitting = $state(false);
+	let questionStartMs = $state(Date.now());
 
 	const submitQuiz = async (stopAfter: boolean = false) => {
 		if (selectedGradeQ < 0) {
@@ -157,32 +161,34 @@
 			class="cannot-hover:absolute cannot-hover:bottom-8 cannot-hover:left-0 cannot-hover:px-2 z-1 mt-1 flex w-full flex-col"
 		>
 			{#if !hideAnswer}
-				<div class="mx-1 mb-3 flex flex-row gap-1">
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
+				{#if selectedGradeQ >= 0}
+					<div class="mx-1 mb-3 flex flex-row gap-1">
+						<button
+							class={`grow ${isSubmitting ? "bg-slate-200" : "bg-white"}`}
+							type="button"
+							disabled={isSubmitting || selectedGradeQ < 0}
+							onclick={async (mouseEvent) => {
+								mouseEvent.preventDefault();
 
-							await submitQuiz(true);
-						}}
-					>
-						Done
-					</button>
-					<button
-						class={`grow ${isSubmitting ? "bg-slate-200" : ""}`}
-						type="button"
-						disabled={isSubmitting || selectedGradeQ < 0}
-						onclick={async (mouseEvent) => {
-							mouseEvent.preventDefault();
+								await submitQuiz(true);
+							}}
+						>
+							Done
+						</button>
+						<button
+							class={`grow ${isSubmitting ? "bg-slate-200" : "bg-white"}`}
+							type="button"
+							disabled={isSubmitting || selectedGradeQ < 0}
+							onclick={async (mouseEvent) => {
+								mouseEvent.preventDefault();
 
-							await submitQuiz(false);
-						}}
-					>
-						Submit
-					</button>
-				</div>
+								await submitQuiz(false);
+							}}
+						>
+							Submit
+						</button>
+					</div>
+				{/if}
 				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
@@ -218,12 +224,18 @@
 					</tbody>
 				</table>
 			{/if}
-			<div class="mx-1 mb-3">
+			<div class="mx-1">
 				<button
 					class="block w-full rounded border border-gray-600 px-2 dark:border-gray-300"
 					disabled={!hideAnswer}
 					onclick={() => {
 						hideAnswer = false;
+						const answerTimeMs = Date.now() - questionStartMs;
+						if (answerTimeMs < fastAnswerMs) {
+							selectedGradeQ = 5;
+						} else if (answerTimeMs < okAnswerMs) {
+							selectedGradeQ = 4;
+						}
 					}}>Show Answer</button
 				>
 			</div>
