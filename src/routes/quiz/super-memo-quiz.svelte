@@ -31,6 +31,8 @@
 			return;
 		}
 
+		questionStartMs = Date.now();
+
 		const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
 		switch (quizType) {
 			case "alg": {
