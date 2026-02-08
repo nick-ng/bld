@@ -158,7 +158,7 @@
 			<h3>Loading...</h3>
 		{/if}
 		<div
-			class="cannot-hover:absolute cannot-hover:bottom-8 cannot-hover:left-0 cannot-hover:px-2 z-1 mt-1 flex w-full flex-col"
+			class="cannot-hover:absolute cannot-hover:bottom-6 cannot-hover:left-0 cannot-hover:px-2 z-1 mt-1 flex w-full flex-col"
 		>
 			{#if !hideAnswer}
 				{#if selectedGradeQ >= 0}
