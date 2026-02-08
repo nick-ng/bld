@@ -134,10 +134,6 @@
 	{:else}
 		<div class="relative">
 			<div class="absolute top-0 left-0 grid grid-cols-2 gap-x-1">
-				<div>Done:</div>
-				<div>
-					{quizCount || 0}
-				</div>
 				<div>Left:</div>
 				<div>
 					{nextLetters.length}
