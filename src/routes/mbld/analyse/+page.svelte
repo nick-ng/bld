@@ -1,16 +1,21 @@
 <script lang="ts">
-	import Youtube from "$lib/components/youtube.svelte";
 	import { mbldStore } from "$lib/stores/mbld";
-	import { getVideoId, formatDate } from "$lib/utils";
+	import { formatDate } from "$lib/utils";
 	import MbldCube from "./mbld-cube.svelte";
+	import VideoPlayer from "$lib/components/video-player.svelte";
 
 	let message = $state("");
 	let selectValue = $state(1);
 	let selectedIndex = $derived(selectValue - 1);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	let player: any = $state(null);
 	let cubesEl: HTMLDivElement | null = $state(null);
 	let maxHeight = $state("50vh");
+	let seekTo: ((secs: number) => void) | null = $state(null);
+	let importScrambles = $state("");
+	let importDate = $state("");
+	let importTime = $state("");
+	let finalDate = $derived(
+		importDate ? new Date(`${importDate}T${importTime || "00:00"}:00.000`) : new Date()
+	);
 
 	$effect(() => {
 		setTimeout(() => {
@@ -24,6 +29,10 @@
 <div>
 	<div class="space-between mb-1 flex flex-row gap-1">
 		<select class="px-1" bind:value={selectValue}>
+			<option value={$mbldStore.length === 0 ? 1 : -1}>Import</option>
+			{#if $mbldStore.length === 0}
+				<option disabled value="">No attempts. Generate or import scrambles.</option>
+			{/if}
 			{#each $mbldStore.slice(-20) as mbldAttempt, i (mbldAttempt.date)}
 				<option value={i + 1}>{formatDate(mbldAttempt.date)}</option>
 			{/each}
@@ -44,11 +53,18 @@
 				message = `${$mbldStore[selectedIndex]?.scrambles.length} scrambles copied to clipboard`;
 			}}>Copy Scrambles</button
 		>
+		<button
+			onclick={() => {
+				selectValue = $mbldStore.length === 0 ? 1 : -1;
+			}}
+		>
+			Import Scrambles
+		</button>
 		<a target="_blank" href="https://namisama269.github.io/scramble-finder/">Scramble Finder</a>
 		<div>{message}</div>
 	</div>
 	<div class="flex flex-row justify-start gap-2">
-		<div bind:this={cubesEl} style={`max-height:${maxHeight};`} class="relative overflow-y-scroll">
+		<div bind:this={cubesEl} class="relative overflow-y-scroll">
 			{#if $mbldStore[selectedIndex]}
 				<table class="sticky border-separate border-spacing-2">
 					<tbody>
@@ -71,33 +87,77 @@
 								index={i}
 								{cube}
 								onSave={(newCube) => {
-									console.log("new cube", newCube);
 									$mbldStore[selectedIndex].cubes[i] = newCube;
 								}}
 								onSeekRequest={(newSec) => {
-									if (player) {
-										player.seekTo(newSec, true);
+									if (seekTo) {
+										seekTo(newSec);
 									}
 								}}
 							/>
 						{/each}
 					</tbody>
 				</table>
-			{:else if $mbldStore.length === 0}
+			{:else}
+				{@const newScrambles = importScrambles
+					.split("\n")
+					.map((s) => s.trim())
+					.filter((s) => s.length > 0)}
 				<div class="m-3">
-					<p>You need to generate and save some MBLD scrambles first.</p>
-					<p><a href="/mbld/scramble">Generate scrambles</a></p>
+					{#if $mbldStore.length === 0}
+						<p>You need to generate and save some MBLD scrambles first.</p>
+						<p><a href="/mbld/scramble">Generate scrambles</a></p>
+					{/if}
+					<h3>Import</h3>
+					<p>Enter the date of the attempt and paste scrambles then click "Import"</p>
+					<div class="flex flex-row gap-2">
+						<label>Date: <input class="" type="date" bind:value={importDate} /></label>
+						<label>Time: <input class="" type="time" bind:value={importTime} /></label>
+						<span class="grow"></span>
+						<span>{finalDate.toLocaleString()}</span>
+					</div>
+					<textarea class="mt-1 h-32 w-full resize-y px-0.5" bind:value={importScrambles}
+					></textarea>
+					<button
+						type="button"
+						disabled={newScrambles.length === 0}
+						onclick={() => {
+							if (newScrambles.length === 0) {
+								return;
+							}
+							$mbldStore = [
+								{
+									date: finalDate,
+									youtube_link: "",
+									offset_s: 0,
+									chapters: "",
+									time_s: 0,
+									scrambles: newScrambles,
+									cubes: newScrambles.map(() => ({
+										dnf_reason: "",
+										exec_start_s: 0,
+										is_dnf: false,
+										pack: "",
+										scramble: "",
+									})),
+								},
+								...$mbldStore,
+							];
+
+							selectValue = 1;
+						}}>Import</button
+					>
 				</div>
 			{/if}
 		</div>
-		<div class="max-h-[70vh] grow">
+		<div class="grow" style={`max-height:${maxHeight};`}>
 			{#if $mbldStore[selectedIndex]?.youtube_link}
-				{#key $mbldStore[selectedIndex]?.youtube_link}
-					<Youtube
-						bind:player
-						initialVideoId={getVideoId($mbldStore[selectedIndex]?.youtube_link || "").id}
-					/>
-				{/key}
+				<VideoPlayer
+					videoUrl={$mbldStore[selectedIndex].youtube_link}
+					getSeekTo={(newSeekTo) => {
+						seekTo = newSeekTo;
+					}}
+				/>
 			{/if}
 		</div>
 	</div>

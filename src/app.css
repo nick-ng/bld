@@ -14,6 +14,8 @@
 	input[type="text"],
 	input[type="password"],
 	input[type="number"],
+	input[type="date"],
+	input[type="time"],
 	select,
 	textarea,
 	.opaque {
@@ -23,6 +25,8 @@
 	input[type="text"],
 	input[type="password"],
 	input[type="number"],
+	input[type="date"],
+	input[type="time"],
 	select,
 	textarea {
 		@apply rounded border border-gray-300 dark:border-gray-500;

@@ -1100,6 +1100,7 @@ export const getVideoId = (fullUrl: string) => {
 			};
 		}
 	}
+
 	if (fullUrl.includes("youtu.be/")) {
 		const id = u.pathname.slice(1);
 		if (id.length > 0) {
@@ -1108,6 +1109,14 @@ export const getVideoId = (fullUrl: string) => {
 				platform: "youtube",
 			};
 		}
+	}
+
+	// make sure this is last so it doesn't take priority over a different video service that happens to end with .mp4
+	if (fullUrl.endsWith(".mp4")) {
+		return {
+			id: fullUrl,
+			platform: "file",
+		};
 	}
 
 	return {
