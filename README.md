@@ -88,4 +88,5 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:80: @todo(nick-ng): handle error saving changes
 - src/routes/letter-pair/edit/main-editor.svelte:87: @todo(nick-ng): handle error saving changes
 - src/routes/mbld/analyse/mbld-cube.svelte:26: @todo(nick-ng): auto-complete scrambles
+- src/routes/mbld/scramble/+page.svelte:19: @todo(nick-ng): figure out a way to put this file locally
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
