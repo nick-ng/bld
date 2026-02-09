@@ -68,9 +68,9 @@
 		<div>{message}</div>
 	</div>
 	<div class="flex flex-row justify-start gap-2">
-		<div bind:this={cubesEl} class="relative overflow-y-scroll">
+		<div bind:this={cubesEl} class="relative overflow-y-scroll" style={`max-height:${maxHeight};`}>
 			{#if $mbldStore[selectedIndex]}
-				<table class="sticky border-separate border-spacing-2">
+				<table class="border-separate border-spacing-2">
 					<tbody>
 						<tr>
 							<td>Date</td>
