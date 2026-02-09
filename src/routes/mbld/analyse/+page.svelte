@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { mbldSessionSchema } from "$lib/types";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
 	import MbldCube from "./mbld-cube.svelte";
@@ -10,12 +11,15 @@
 	let cubesEl: HTMLDivElement | null = $state(null);
 	let maxHeight = $state("50vh");
 	let seekTo: ((secs: number) => void) | null = $state(null);
-	let importScrambles = $state("");
-	let importDate = $state("");
-	let importTime = $state("");
+	let importScramblesString = $state("");
+	let importDateString = $state("");
+	let importTimeString = $state("");
 	let finalDate = $derived(
-		importDate ? new Date(`${importDate}T${importTime || "00:00"}:00.000`) : new Date()
+		importDateString
+			? new Date(`${importDateString}T${importTimeString || "00:00"}:00.000`)
+			: new Date()
 	);
+	let importAttemptString = $state("");
 
 	$effect(() => {
 		setTimeout(() => {
@@ -58,7 +62,7 @@
 				selectValue = $mbldStore.length === 0 ? 1 : -1;
 			}}
 		>
-			Import Scrambles
+			Import
 		</button>
 		<a target="_blank" href="https://namisama269.github.io/scramble-finder/">Scramble Finder</a>
 		<div>{message}</div>
@@ -99,7 +103,7 @@
 					</tbody>
 				</table>
 			{:else}
-				{@const newScrambles = importScrambles
+				{@const newScrambles = importScramblesString
 					.split("\n")
 					.map((s) => s.trim())
 					.filter((s) => s.length > 0)}
@@ -108,15 +112,15 @@
 						<p>You need to generate and save some MBLD scrambles first.</p>
 						<p><a href="/mbld/scramble">Generate scrambles</a></p>
 					{/if}
-					<h3>Import</h3>
+					<h2>Import Scrambles</h2>
 					<p>Enter the date of the attempt and paste scrambles then click "Import"</p>
 					<div class="flex flex-row gap-2">
-						<label>Date: <input class="" type="date" bind:value={importDate} /></label>
-						<label>Time: <input class="" type="time" bind:value={importTime} /></label>
+						<label>Date: <input class="" type="date" bind:value={importDateString} /></label>
+						<label>Time: <input class="" type="time" bind:value={importTimeString} /></label>
 						<span class="grow"></span>
 						<span>{finalDate.toLocaleString()}</span>
 					</div>
-					<textarea class="mt-1 h-32 w-full resize-y px-0.5" bind:value={importScrambles}
+					<textarea class="mt-1 h-32 w-full resize-y px-0.5" bind:value={importScramblesString}
 					></textarea>
 					<button
 						type="button"
@@ -144,9 +148,32 @@
 								...$mbldStore,
 							];
 
+							importDateString = "";
+							importTimeString = "";
+							importScramblesString = "";
 							selectValue = 1;
 						}}>Import</button
 					>
+					<h2>Import Attempt</h2>
+					<textarea class="mt-1 h-32 w-full resize-y px-0.5" bind:value={importAttemptString}
+					></textarea>
+					<button
+						type="button"
+						disabled={importAttemptString.length === 0}
+						onclick={() => {
+							try {
+								const unknownAttempt = JSON.parse(importAttemptString);
+								const validAttempt = mbldSessionSchema.parse(unknownAttempt);
+								$mbldStore = [validAttempt, ...$mbldStore];
+								importAttemptString = "";
+								selectValue = 1;
+							} catch (e) {
+								message = `Error importing attempt: ${e}`;
+							}
+						}}
+					>
+						Import Attempt
+					</button>
 				</div>
 			{/if}
 		</div>
