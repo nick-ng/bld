@@ -16,7 +16,9 @@
 				}
 			}}>Skip to 2:00</button
 		>
-		<video src={videoUrl} controls bind:this={videoHtml}></video>
+		<video src={videoUrl} controls bind:this={videoHtml}>
+			<track kind="captions" src="" />
+		</video>
 	</details>
 	<details>
 		<summary>Commutators</summary>
