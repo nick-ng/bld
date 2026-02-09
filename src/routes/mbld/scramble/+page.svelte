@@ -1,18 +1,25 @@
 <script lang="ts">
-	import { randomScrambleForEvent } from "cubing/scramble";
 	import CubeFace from "$lib/components/cube-face.svelte";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
+	import { onMount } from "svelte";
 
 	let scrambleCount = $state(8);
 	let message = $state("");
 	let selectedAttempt = $state(-1);
+	let randomScrambleForEvent: ((event: string) => Promise<string>) | undefined = $state();
 
 	let generatedScrambles: string[] = $state([]);
 	let scrambles = $derived(
 		selectedAttempt === -1 ? generatedScrambles : $mbldStore[selectedAttempt - 1]?.scrambles
 	);
 	const previewSize = 24;
+
+	onMount(async () => {
+		// @todo(nick-ng): figure out a way to put this file locally
+		randomScrambleForEvent = (await import("https://cdn.cubing.net/v0/js/cubing/scramble"))
+			.randomScrambleForEvent;
+	});
 </script>
 
 <div>
@@ -31,7 +38,7 @@
 				type="button"
 				disabled={selectedAttempt !== -1}
 				onclick={async () => {
-					if (selectedAttempt !== -1) {
+					if (selectedAttempt !== -1 || !randomScrambleForEvent) {
 						return;
 					}
 
