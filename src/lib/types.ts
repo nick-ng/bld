@@ -121,26 +121,9 @@ export type LetterPair = z.infer<typeof letterPairSchema>;
 const positionsSchema = z.literal([...CORNER_POSITIONS, ...EDGE_POSITIONS]);
 
 export const optionsSchema = z.object({
-	flashCardTypes: z.record(
-		z.string(),
-		z.object({
-			name: z.string(),
-			samePieces: z.array(z.array(z.string())),
-			bufferPiece: z.array(z.string()),
-			leitnerSession: z.number().optional(),
-			leitnerLastQuizUnix: z.number().optional(),
-		})
-	),
-	defaultFlashCardType: z.string(),
-
-	leitnerMinReviewStandBy: z.number(),
-	leitnerMinReviewRetired: z.number(),
-	leitnerRetiredMaxAgeDays: z.number(),
-	leitnerSessionNumbers: z.record(z.string(), z.number()).optional(),
-	leitnerQuizCooldownHours: z.number(),
-	leitnerLastQuizUnix: z.record(z.string(), z.number()).optional(),
-	leitnerBonusStandby: z.number().optional(),
-	leitnerBonusRetired: z.number().optional(),
+	targetEf: z.number().optional(),
+	auto5s: z.number().optional(),
+	auto4s: z.number().optional(),
 	chosenBuffers: z.record(positionsSchema, z.boolean()).optional().default({ UF: true, UFR: true }),
 	visibleBuffers: z
 		.record(positionsSchema, z.boolean())

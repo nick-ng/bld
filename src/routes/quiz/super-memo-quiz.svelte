@@ -4,6 +4,7 @@
 	import { goto } from "$app/navigation";
 	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
+	import { optionsStore } from "$lib/stores/options";
 	import LetterPair from "$lib/components/letter-pair.svelte";
 
 	interface Props {
@@ -12,9 +13,6 @@
 		subcategory: string | null; // default is all e.g. "q", "algs"
 		quizCount: number | null;
 	}
-
-	const fastAnswerMs = 1000;
-	const okAnswerMs = 5000;
 
 	let { currentSpeffzPair, category, subcategory, quizCount }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters } = $derived(getQuizKit(category, subcategory));
@@ -229,9 +227,9 @@
 					onclick={() => {
 						hideAnswer = false;
 						const answerTimeMs = Date.now() - questionStartMs;
-						if (answerTimeMs < fastAnswerMs) {
+						if (answerTimeMs < ($optionsStore.auto5s || 2) * 1000) {
 							selectedGradeQ = 5;
-						} else if (answerTimeMs < okAnswerMs) {
+						} else if (answerTimeMs < ($optionsStore.auto4s || 7) * 1000) {
 							selectedGradeQ = 4;
 						}
 					}}>Show Answer</button

@@ -37,9 +37,6 @@
 			<a class="like-button grow lg:grow-0" href="/quiz"
 				><span class="hidden lg:inline">Study</span><span class="lg:hidden">🎓</span></a
 			>
-			<a class="like-button grow lg:grow-0" href="/flash-cards/summary"
-				><span class="hidden lg:inline">Stats</span><span class="lg:hidden">📊</span></a
-			>
 		{/if}
 		<a class="like-button hidden lg:inline" href="/mbld/scramble">MBLD Scrambles</a>
 		<a class="like-button hidden lg:inline" href="/mbld/analyse">MBLD Analyse</a>
