@@ -146,7 +146,8 @@ const correctAllowance = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
 const incorrectIncrement = 2 * 60 * 1000; // 2 minutes in milliseconds
 export function superMemo2(
 	userGradeQ: number,
-	input: { sm2_n: number; sm2_ef: number; sm2_i: number }
+	input: { sm2_n: number; sm2_ef: number; sm2_i: number },
+	targetEf = -1
 ): { sm2_n: number; sm2_ef: number; sm2_i: number; last_review_at: Date; next_review_at: Date } {
 	const output = {
 		sm2_n: input.sm2_n,
@@ -177,6 +178,9 @@ export function superMemo2(
 	output.sm2_ef = input.sm2_ef + (0.1 - (5 - userGradeQ) * (0.08 + (5 - userGradeQ) * 0.02));
 	if (output.sm2_ef < 1.3) {
 		output.sm2_ef = 1.3;
+	} else if (targetEf > 0 && userGradeQ === 5 && output.sm2_ef < targetEf) {
+		const bonus = 0.1 * ((output.sm2_ef - 1.3) / (targetEf - 1.3));
+		output.sm2_ef = output.sm2_ef + bonus;
 	}
 
 	return output;
