@@ -31,7 +31,11 @@
 
 		questionStartMs = Date.now();
 
-		const newSMStats = superMemo2(selectedGradeQ, getSMStats(currentLetterPair));
+		const newSMStats = superMemo2(
+			selectedGradeQ,
+			getSMStats(currentLetterPair),
+			$optionsStore.targetEf
+		);
 		switch (quizType) {
 			case "alg": {
 				await saveAlgorithm({
