@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { CORNER_POSITIONS, EDGE_POSITIONS } from "$lib/constants";
 	import { optionsStore } from "$lib/stores/options";
-
-	let flashCardType = $state($optionsStore.defaultFlashCardType);
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -13,128 +11,85 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="optionsMinReviewStandBy"> Minimum Quiz Length </label>
+					<label for="targetEF"> Target EF </label>
 				</td>
 				<td class="text-right">
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerMinReviewStandBy =
-								($optionsStore.leitnerMinReviewStandBy || 0) - 1;
+							$optionsStore.targetEf = ($optionsStore.targetEf || 0) - 0.1;
 						}}>-</button
 					>
 					<input
 						class="w-16 text-right"
-						id="optionsMinReviewStandBy"
+						id="targetEF"
 						type="number"
-						bind:value={$optionsStore.leitnerMinReviewStandBy}
+						bind:value={$optionsStore.targetEf}
 					/>
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerMinReviewStandBy =
-								($optionsStore.leitnerMinReviewStandBy || 0) + 1;
+							$optionsStore.targetEf = ($optionsStore.targetEf || 0) + 0.1;
 						}}>+</button
 					>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="optionsBonusStandby">Bonus Stand By</label>
+					<label for="auto5s"> Auto Perfect (sec) </label>
 				</td>
 				<td class="text-right">
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerBonusStandby = ($optionsStore.leitnerBonusStandby || 0) - 1;
+							$optionsStore.auto5s = ($optionsStore.auto5s || 0) - 1;
 						}}>-</button
 					>
 					<input
 						class="inline-block w-16 text-right"
-						id="optionsBonusStandby"
+						id="auto5s"
 						type="number"
-						bind:value={$optionsStore.leitnerBonusStandby}
+						bind:value={$optionsStore.auto5s}
 					/>
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerBonusStandby = ($optionsStore.leitnerBonusStandby || 0) + 1;
+							$optionsStore.auto5s = ($optionsStore.auto5s || 0) + 1;
 						}}>+</button
 					>
 				</td>
 			</tr>
 			<tr>
 				<td>
-					<label for="optionsBonusRetired">Bonus Retired</label>
+					<label for="optionsBonusRetired"> Auto Hesitate (sec) </label>
 				</td>
 				<td class="text-right">
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerBonusRetired = ($optionsStore.leitnerBonusRetired || 0) - 1;
+							$optionsStore.auto4s = ($optionsStore.auto4s || 0) - 1;
 						}}>-</button
 					>
 					<input
 						class="inline-block w-16 text-right"
 						id="optionsBonusRetired"
 						type="number"
-						bind:value={$optionsStore.leitnerBonusRetired}
+						bind:value={$optionsStore.auto4s}
 					/>
 					<button
 						type="button"
 						class="inline-block py-1"
 						onclick={() => {
-							$optionsStore.leitnerBonusRetired = ($optionsStore.leitnerBonusRetired || 0) + 1;
+							$optionsStore.auto4s = ($optionsStore.auto4s || 0) + 1;
 						}}>+</button
 					>
 				</td>
 			</tr>
-			<tr>
-				<td colspan={2}>
-					<select class="w-full" bind:value={flashCardType}>
-						{#each Object.keys($optionsStore.flashCardTypes) as flashCardKey (flashCardKey)}
-							{@const flashCardDetails = $optionsStore.flashCardTypes[flashCardKey]}
-							<option value={flashCardKey}>{flashCardDetails.name} </option>
-						{/each}
-					</select>
-				</td>
-			</tr>
-			{#if $optionsStore.flashCardTypes[flashCardType]}
-				<tr>
-					<td>
-						<label for="optionsLeitnerQuizSession">Leitner Quiz Session</label>
-					</td>
-					<td class="text-right">
-						<button
-							type="button"
-							class="inline-block py-1"
-							onclick={() => {
-								$optionsStore.flashCardTypes[flashCardType].leitnerSession =
-									($optionsStore.flashCardTypes[flashCardType].leitnerSession || 0) - 1;
-							}}>-</button
-						>
-						<input
-							class="inline-block w-16 text-right"
-							id="optionsLeitnerQuizSession"
-							type="number"
-							bind:value={$optionsStore.flashCardTypes[flashCardType].leitnerSession}
-						/>
-						<button
-							type="button"
-							class="inline-block py-1"
-							onclick={() => {
-								$optionsStore.flashCardTypes[flashCardType].leitnerSession =
-									($optionsStore.flashCardTypes[flashCardType].leitnerSession || 0) + 1;
-							}}>+</button
-						>
-					</td>
-				</tr>
-			{/if}
 			<tr>
 				<td>Chosen Buffers</td>
 				<td>

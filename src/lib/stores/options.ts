@@ -4,26 +4,13 @@ import localforage from "localforage";
 
 import { browser } from "$app/environment";
 import { optionsSchema } from "$lib/types";
-import { OPTIONS_STORE_PREFIX, SPEFFZ_CORNER_SAME_PIECES, SPEFFZ_CORNER_UFR } from "$lib/constants";
+import { OPTIONS_STORE_PREFIX } from "$lib/constants";
 
 // @todo(nick-ng): store options on server
 export const optionsStore = writable<Options>({
-	flashCardTypes: {
-		corner: {
-			name: "Corner",
-			samePieces: SPEFFZ_CORNER_SAME_PIECES,
-			bufferPiece: SPEFFZ_CORNER_UFR,
-			leitnerSession: 0,
-			leitnerLastQuizUnix: 0,
-		},
-	},
-	defaultFlashCardType: "corner",
-	leitnerMinReviewStandBy: 10,
-	leitnerMinReviewRetired: 5,
-	leitnerRetiredMaxAgeDays: 60,
-	leitnerQuizCooldownHours: 12,
-	leitnerBonusStandby: 2,
-	leitnerBonusRetired: 2,
+	targetEf: 2.5,
+	auto5s: 2,
+	auto4s: 7,
 	chosenBuffers: { UF: true, UFR: true },
 	visibleBuffers: { UF: true, UFR: true },
 });
@@ -41,24 +28,10 @@ if (browser) {
 
 		if (parsedOptions.success) {
 			optionsStore.update((prev) => {
-				const { leitnerSessionNumbers, leitnerLastQuizUnix, ...newOptions } = {
+				return {
 					...prev,
 					...parsedOptions.data,
 				};
-				// @todo(nick-ng): remove migration code later
-				if (leitnerSessionNumbers) {
-					// migrate from old option schema
-					Object.keys(leitnerSessionNumbers).forEach((key) => {
-						if (typeof newOptions.flashCardTypes[key]?.leitnerSession === "number") {
-							// already migrated
-							return;
-						}
-
-						newOptions.flashCardTypes[key].leitnerSession = leitnerSessionNumbers?.[key] || 0;
-						newOptions.flashCardTypes[key].leitnerLastQuizUnix = leitnerLastQuizUnix?.[key] || 0;
-					});
-				}
-				return newOptions;
 			});
 		}
 	};
