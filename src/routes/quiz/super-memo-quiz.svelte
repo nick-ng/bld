@@ -12,10 +12,9 @@
 		currentSpeffzPair: string;
 		category: string; // e.g. "Memo", "UF", "UFR"
 		subcategory: string | null; // default is all e.g. "q", "algs"
-		quizCount: number | null;
 	}
 
-	let { currentSpeffzPair, category, subcategory, quizCount }: Props = $props();
+	let { currentSpeffzPair, category, subcategory }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
 		getQuizKit(category, subcategory)
 	);
@@ -72,7 +71,6 @@
 
 		const freshNextLetters = getNextLetters(Object.values($letterPairStore));
 		const nextLetter = freshNextLetters.shift();
-		const nextQuizCount = (quizCount || 0) + 1;
 		if (!nextLetter) {
 			const lettersInSet = Object.values($letterPairStore)
 				.filter(filterFunc)
@@ -91,7 +89,6 @@
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
 			searchParams.set("sp", nextLetter.speffz_pair);
-			searchParams.set("quizcount", nextQuizCount.toString());
 			goto(`/quiz?${searchParams.toString()}`);
 		}, 0);
 	};
