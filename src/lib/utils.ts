@@ -237,6 +237,27 @@ export function daysAgo(date: Date | number) {
 	return `${differenceDays.toFixed(0)} Days ago`;
 }
 
+export function msToLargestTime(milliseconds: number) {
+	if (milliseconds > 1000 * 60 * 60 * 24) {
+		const days = Math.round(milliseconds / (1000 * 60 * 60 * 24));
+		return `${days} day${days === 1 ? "" : "s"}`;
+	}
+	if (milliseconds > 1000 * 60 * 60) {
+		const hours = Math.round(milliseconds / (1000 * 60 * 60));
+		return `${hours} hour${hours === 1 ? "" : "s"}`;
+	}
+	if (milliseconds > 1000 * 60) {
+		const minutes = Math.round(milliseconds / (1000 * 60));
+		return `${minutes} minute${minutes === 1 ? "" : "s"}`;
+	}
+	if (milliseconds > 1000) {
+		const seconds = Math.round(milliseconds / 1000);
+		return `${seconds} second${seconds === 1 ? "" : "s"}`;
+	}
+
+	return `${milliseconds} millisecond${milliseconds === 1 ? "" : "s"}`;
+}
+
 export function authFetch(url: string, init?: RequestInit) {
 	const newInit = { ...init };
 	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);

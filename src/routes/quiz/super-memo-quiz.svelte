@@ -6,6 +6,7 @@
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import LetterPair from "$lib/components/letter-pair.svelte";
+	import { msToLargestTime } from "$lib/utils";
 
 	interface Props {
 		currentSpeffzPair: string;
@@ -15,7 +16,9 @@
 	}
 
 	let { currentSpeffzPair, category, subcategory, quizCount }: Props = $props();
-	let { title, quizType, getSMStats, getNextLetters } = $derived(getQuizKit(category, subcategory));
+	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
+		getQuizKit(category, subcategory)
+	);
 	let hideAnswer = $state(true);
 	let visibleComponents = $derived(getVisibleFlashCardComponents(category, hideAnswer));
 	let selectedGradeQ = $state(-1);
@@ -25,9 +28,10 @@
 	let questionStartMs = $state(Date.now());
 
 	const submitQuiz = async (stopAfter: boolean = false) => {
-		if (selectedGradeQ < 0) {
+		if (hideAnswer || selectedGradeQ < 0) {
 			return;
 		}
+		isSubmitting = true;
 
 		questionStartMs = Date.now();
 
@@ -54,10 +58,12 @@
 			}
 			default: {
 				console.error("unexpected quiz type");
+				isSubmitting = false;
 				return;
 			}
 		}
 
+		isSubmitting = false;
 		if (stopAfter) {
 			selectedGradeQ = -1;
 			goto("/quiz");
@@ -68,7 +74,14 @@
 		const nextLetter = freshNextLetters.shift();
 		const nextQuizCount = (quizCount || 0) + 1;
 		if (!nextLetter) {
-			alert(`All done! Reviewed ${nextQuizCount} cards`);
+			const lettersInSet = Object.values($letterPairStore)
+				.filter(filterFunc)
+				.sort((a, b) => {
+					return getNextReview(a).valueOf() - getNextReview(b).valueOf();
+				});
+
+			const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
+			alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
 			goto("/quiz");
 			return;
 		}
