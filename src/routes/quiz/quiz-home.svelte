@@ -46,15 +46,15 @@
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore))}
 					<a
-						class="like-button block w-full py-2 text-center text-xl leading-none"
-						style={`order: -${nextLetters.length};`}
+						class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block w-full py-2 text-center text-xl leading-none`}
+						style={`order: ${nextLetters.length === 0 ? 5 : 0};`}
 						href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters)}
 					>
 						{quizKit.title} ({nextLetters.length} due)
 					</a>
 				{/each}
 				<button
-					class="self-start"
+					class="order-10 self-start"
 					disabled={$letterPairStoreStatus.status !== "loaded"}
 					onclick={() => {
 						if ($letterPairStoreStatus.status !== "loaded") {
