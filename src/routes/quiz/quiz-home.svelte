@@ -37,7 +37,7 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if $letterPairStoreStatus.status !== "loaded"}
+	{#if $letterPairStoreStatus.status !== "loaded" && $letterPairStoreStatus.status !== "reloading" && $letterPairStoreStatus.status !== "saving"}
 		<div class="">{upperCaseFirst($letterPairStoreStatus.message)}</div>
 	{:else}
 		<div>
@@ -54,7 +54,7 @@
 					</a>
 				{/each}
 				<button
-					class="order-10 self-start"
+					class={`order-10 self-start ${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
 					disabled={$letterPairStoreStatus.status !== "loaded"}
 					onclick={() => {
 						if ($letterPairStoreStatus.status !== "loaded") {
