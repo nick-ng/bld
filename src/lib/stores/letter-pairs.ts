@@ -146,13 +146,13 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 	}
 };
 
-export async function fetchAndLoadMnemonicsAndAlgorithms() {
+export async function fetchAndLoadMnemonicsAndAlgorithms(firstLoad = false) {
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
-		status: "loading",
+		status: firstLoad ? "loading" : "reloading",
 		source: "server",
 		message: "Loading...",
-		fetchEndMs: Date.now(),
+		fetchStartMs: Date.now(),
 	}));
 	await fetchAndLoadMnemonics();
 	await fetchAndLoadAlgorithms();
@@ -166,7 +166,7 @@ export async function fetchAndLoadMnemonicsAndAlgorithms() {
 }
 
 if (browser) {
-	fetchAndLoadMnemonicsAndAlgorithms();
+	fetchAndLoadMnemonicsAndAlgorithms(true);
 }
 
 export const saveMnemonic = async (
