@@ -16,6 +16,9 @@
 	class={classes || ""}
 	type="text"
 	value={currentValue || secondsToHhmmss(value)}
+	onfocus={() => {
+		currentValue = secondsToHhmmss(value);
+	}}
 	onchange={(event) => {
 		currentValue = event.currentTarget.value;
 	}}
