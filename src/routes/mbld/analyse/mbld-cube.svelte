@@ -13,6 +13,10 @@
 
 	let { index, cube, onSeekRequest, onSave }: Props = $props();
 	let pendingChanges: Partial<MbldCube> = $state({});
+	let tempScramble = $derived(pendingChanges.scramble ?? cube.scramble);
+	let scrambleLink = $derived(
+		tempScramble && `https://alpha.twizzle.net/edit/?setup-alg=${encodeURIComponent(tempScramble)}`
+	);
 
 	const handleSave = () => {
 		onSave({
@@ -63,7 +67,13 @@
 	</td>
 </tr>
 <tr class="group">
-	<td>Scramble</td>
+	<td>
+		{#if tempScramble}
+			<a target="pux-mbld-scramble" href={scrambleLink}>Scramble</a>
+		{:else}
+			Scramble
+		{/if}
+	</td>
 	<td class="relative">
 		<input
 			class="w-full px-0.5"
