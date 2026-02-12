@@ -143,7 +143,6 @@ export function getGetNextLetters(
 
 const correctIncrement = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 const correctAllowance = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
-const incorrectIncrement = 2 * 60 * 1000; // 2 minutes in milliseconds
 export function superMemo2(
 	userGradeQ: number,
 	input: { sm2_n: number; sm2_ef: number; sm2_i: number },
@@ -154,7 +153,7 @@ export function superMemo2(
 		sm2_ef: input.sm2_ef,
 		sm2_i: input.sm2_i,
 		last_review_at: new Date(),
-		next_review_at: new Date(Date.now() + incorrectIncrement),
+		next_review_at: new Date(),
 	};
 	if (userGradeQ >= 3) {
 		if (input.sm2_n === 0) {
