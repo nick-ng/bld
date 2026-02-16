@@ -11,14 +11,32 @@
 	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
 
-	const quizCategories = [
-		{ category: "memo", subcategory: getTrueKeys($optionsStore.chosenBuffers).join(",") },
-		...getTrueKeys($optionsStore.chosenBuffers).map((buf) => ({
-			category: buf,
-			subcategory: null,
-		})),
-		{ category: "UF", subcategory: "orozco" },
-	];
+	let quizCategories = $derived(
+		[
+			getQuizKit("memo", getTrueKeys($optionsStore.chosenBuffers).join(",")),
+			...getTrueKeys($optionsStore.chosenBuffers).map((buf) => {
+				const startsWith = $derived(
+					Object.values($letterPairStore).reduce((prev, curr) => {
+						prev.add(curr.speffz_pair[0]);
+						return prev;
+					}, new Set())
+				);
+				return [getQuizKit(buf, null), ...[...startsWith].map((s) => getQuizKit(buf, `${s}*`))];
+			}),
+			getQuizKit("UF", "orozco"),
+			getQuizKit("UF", "algorithm"),
+		]
+			.flat()
+			.map((c) => {
+				const total = Object.values($letterPairStore).filter(c.filterFunc).length;
+				return {
+					...c,
+					total,
+				};
+			})
+			.filter((c) => c.total > 0)
+			.sort((a, b) => a.title.localeCompare(b.title))
+	);
 
 	const getQuizUrl = (category: string, subcategory: string | null, nextLetters: LetterPair[]) => {
 		if (nextLetters.length === 0) {
@@ -41,16 +59,16 @@
 		<div class="">{upperCaseFirst($letterPairStoreStatus.message)}</div>
 	{:else}
 		<div>
-			<div class="align-center mt-5 flex flex-col gap-2">
+			<div class="align-center mt-5 flex flex-col items-end gap-2">
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore))}
 					<a
-						class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block w-full py-2 text-center text-xl leading-none`}
+						class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block ${quizCategory.category !== "memo" && quizCategory.subcategory ? "w-9/10" : "w-full"} py-2 text-center text-xl leading-none`}
 						style={`order: ${nextLetters.length === 0 ? 5 : 0};`}
 						href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters)}
 					>
-						{quizKit.title} ({nextLetters.length} due)
+						{quizKit.title} ({nextLetters.length}/{quizCategory.total} due)
 					</a>
 				{/each}
 				<button
