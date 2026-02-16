@@ -32,6 +32,8 @@ export function getQuizKit(
 	category: string,
 	subcategory?: string | null
 ): {
+	category: string;
+	subcategory: string | null;
 	filterFunc: (lp: LetterPair) => boolean;
 	getNextReview: (lp: LetterPair) => Date;
 	getNextLetters: (letterPairs: LetterPair[], randH?: number) => LetterPair[];
@@ -42,49 +44,109 @@ export function getQuizKit(
 	const defaultSMStats = { sm2_n: 0, sm2_ef: 2.5, sm2_i: 0 };
 	switch (category) {
 		case "UF": {
+			const getNextReview = (lp: LetterPair) =>
+				lp?.algorithms?.[category]?.next_review_at || new Date();
+			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
 			switch (subcategory) {
 				case "orozco": {
 					const filterFunc = (lp: LetterPair) =>
 						(lp.speffz_pair.includes("a") || lp.speffz_pair.includes("q")) &&
-						lp?.algorithms?.UF?.moves?.length > 2;
-					const getNextReview = (lp: LetterPair) =>
-						lp?.algorithms?.UF?.next_review_at || new Date();
+						lp?.algorithms?.[category]?.moves?.length > 2;
 					return {
+						category,
+						subcategory: subcategory || null,
 						filterFunc,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-						getSMStats: (lp) => lp.algorithms?.UF || defaultSMStats,
-						title: "UF BU Orozco",
+						getSMStats,
+						title: "UF Buffer, Orozco",
+						quizType: "alg",
+					};
+				}
+				case "algorithm": {
+					const filterFunc = (lp: LetterPair) =>
+						lp?.algorithms?.UF?.moves?.length > 2 &&
+						!lp?.algorithms?.[category]?.moves?.includes(",");
+					return {
+						category,
+						subcategory: subcategory || null,
+						filterFunc,
+						getNextReview,
+						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getSMStats,
+						title: `${category} Buffer, Algorithms`,
 						quizType: "alg",
 					};
 				}
 				default: {
-					const filterFunc = (lp: LetterPair) => lp?.algorithms?.UF?.moves?.length > 2;
-					const getNextReview = (lp: LetterPair) =>
-						lp?.algorithms?.UF?.next_review_at || new Date();
+					if (subcategory?.length === 2 && subcategory.includes("*")) {
+						// starts with/ends with auto subcategory
+						const startsWith = subcategory[1] === "*";
+						const filterFunc = (lp: LetterPair) =>
+							(startsWith
+								? lp.speffz_pair.startsWith(subcategory[0])
+								: lp.speffz_pair.endsWith(subcategory[1])) &&
+							lp?.algorithms?.[category]?.moves?.length > 2;
+						return {
+							category,
+							subcategory: subcategory || null,
+							filterFunc,
+							getNextReview,
+							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+							getSMStats,
+							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							quizType: "alg",
+						};
+					}
+					const filterFunc = (lp: LetterPair) => lp?.algorithms?.[category]?.moves?.length > 2;
 					return {
+						category,
+						subcategory: subcategory || null,
 						filterFunc,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-						getSMStats: (lp) => lp.algorithms?.UF || defaultSMStats,
-						title: "UF Buffer",
+						getSMStats,
+						title: `${category} Buffer`,
 						quizType: "alg",
 					};
 				}
 			}
 		}
 		case "UFR": {
+			const getNextReview = (lp: LetterPair) =>
+				lp?.algorithms?.[category]?.next_review_at || new Date();
+			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
 			switch (subcategory) {
 				default: {
-					const filterFunc = (lp: LetterPair) => lp?.algorithms?.UFR?.moves?.length > 2;
-					const getNextReview = (lp: LetterPair) =>
-						lp?.algorithms?.UFR?.next_review_at || new Date();
+					if (subcategory?.length === 2 && subcategory.includes("*")) {
+						// starts with/ends with auto subcategory
+						const startsWith = subcategory[1] === "*";
+						const filterFunc = (lp: LetterPair) =>
+							(startsWith
+								? lp.speffz_pair.startsWith(subcategory[0])
+								: lp.speffz_pair.endsWith(subcategory[1])) &&
+							lp?.algorithms?.[category]?.moves?.length > 2;
+						return {
+							category,
+							subcategory: subcategory || null,
+							filterFunc,
+							getNextReview,
+							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+							getSMStats,
+							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							quizType: "alg",
+						};
+					}
+
+					const filterFunc = (lp: LetterPair) => lp?.algorithms?.[category]?.moves?.length > 2;
 					return {
+						category,
+						subcategory: subcategory || null,
 						filterFunc,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-						getSMStats: (lp) => lp.algorithms?.UF || defaultSMStats,
-						title: "UFR Buffer",
+						getSMStats,
+						title: `${category} Buffer`,
 						quizType: "alg",
 					};
 				}
@@ -92,6 +154,8 @@ export function getQuizKit(
 		}
 		default: {
 			// memo
+			const getNextReview = (lp: LetterPair) => lp.next_review_at;
+			const getSMStats = (lp: LetterPair) => lp || defaultSMStats;
 			switch (subcategory) {
 				default: {
 					// subcategory is buffers separated by ,
@@ -99,12 +163,13 @@ export function getQuizKit(
 					const filterFunc = (lp: LetterPair) =>
 						(lp.words.length > 0 || lp.image.length > 0) &&
 						isSpeffzPairValid(lp.speffz_pair, buffers);
-					const getNextReview = (lp: LetterPair) => lp.next_review_at;
 					return {
+						category,
+						subcategory: subcategory || null,
 						filterFunc,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-						getSMStats: (lp) => lp || defaultSMStats,
+						getSMStats,
 						title: "Images",
 						quizType: "memo",
 					};
