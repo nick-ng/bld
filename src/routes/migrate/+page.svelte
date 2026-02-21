@@ -24,11 +24,11 @@
 			const res1 = await authFetch(`${joinServerPath("mnemonic")}?offset=0`);
 			const json1 = await res1.json();
 
-			console.log("res2.json", json1);
+			console.info("res2.json", json1);
 			const newOffset = json1.length;
-			console.log("new offset", newOffset);
+			console.info("new offset", newOffset);
 			const res2 = await authFetch(`${joinServerPath("mnemonic")}?offset=${newOffset}`);
-			console.log("res2.json", await res2.json());
+			console.info("res2.json", await res2.json());
 		}}>Test</button
 	>
 	<p>{message}</p>

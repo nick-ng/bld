@@ -91,6 +91,20 @@
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="showImagesForAlgs"> Show Images on Algorithm Quizes </label>
+				</td>
+				<td class="text-center">
+					<label class="w-full">
+						<input
+							id="showImagesForAlgs"
+							type="checkbox"
+							bind:checked={$optionsStore.showImagesForAlgs}
+						/>
+					</label>
+				</td>
+			</tr>
+			<tr>
 				<td>Chosen Buffers</td>
 				<td>
 					<details>

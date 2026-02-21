@@ -11,6 +11,7 @@ export const optionsStore = writable<Options>({
 	targetEf: 2.5,
 	auto5s: 2,
 	auto4s: 7,
+	showImagesForAlgs: false,
 	chosenBuffers: { UF: true, UFR: true },
 	visibleBuffers: { UF: true, UFR: true },
 });
@@ -23,9 +24,7 @@ if (browser) {
 	});
 	const loadOptions = async () => {
 		const tempOptions = await optionsForage.getItem(optionsStorageKey);
-
 		const parsedOptions = optionsSchema.safeParse(tempOptions);
-
 		if (parsedOptions.success) {
 			optionsStore.update((prev) => {
 				return {

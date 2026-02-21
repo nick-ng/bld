@@ -121,12 +121,16 @@ export type LetterPair = z.infer<typeof letterPairSchema>;
 const positionsSchema = z.literal([...CORNER_POSITIONS, ...EDGE_POSITIONS]);
 
 export const optionsSchema = z.object({
-	targetEf: z.number().optional(),
-	auto5s: z.number().optional(),
-	auto4s: z.number().optional(),
-	chosenBuffers: z.record(positionsSchema, z.boolean()).optional().default({ UF: true, UFR: true }),
+	targetEf: z.number().optional().default(2.5),
+	auto5s: z.number().optional().default(2),
+	auto4s: z.number().optional().default(7),
+	showImagesForAlgs: z.boolean().optional().default(false),
+	chosenBuffers: z
+		.record(positionsSchema, z.boolean().optional().default(false))
+		.optional()
+		.default({ UF: true, UFR: true }),
 	visibleBuffers: z
-		.record(positionsSchema, z.boolean())
+		.record(positionsSchema, z.boolean().optional().default(false))
 		.optional()
 		.default({ UF: true, UFR: true }),
 });

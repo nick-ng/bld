@@ -19,7 +19,6 @@
 		getQuizKit(category, subcategory)
 	);
 	let hideAnswer = $state(true);
-	let visibleComponents = $derived(getVisibleFlashCardComponents(category, hideAnswer));
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let nextLetters = $derived(getNextLetters(Object.values($letterPairStore)));
@@ -157,6 +156,11 @@
 			<div class="absolute top-0 right-0"><a class="like-button" href="/quiz">End Quiz</a></div>
 		</div>
 		{#if currentLetterPair}
+			{@const visibleComponents = getVisibleFlashCardComponents(
+				category,
+				hideAnswer,
+				$optionsStore
+			)}
 			<LetterPair
 				letterPair={currentLetterPair}
 				selectedBuffers={visibleComponents.selectedBuffers}
@@ -202,7 +206,7 @@
 				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
-							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "Easy", q: 2 }] as grade (grade.q)}
+							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "3", q: 2 }] as grade (grade.q)}
 								<td>
 									<button
 										class={`w-full ${selectedGradeQ == grade.q ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
