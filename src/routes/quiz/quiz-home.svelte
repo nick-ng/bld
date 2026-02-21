@@ -61,6 +61,17 @@
 	{:else}
 		<div>
 			<div class="align-center mt-5 flex flex-col items-end gap-2">
+				<button
+					class={`self-start ${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
+					disabled={$letterPairStoreStatus.status !== "loaded"}
+					onclick={() => {
+						if ($letterPairStoreStatus.status !== "loaded") {
+							return;
+						}
+
+						fetchAndLoadMnemonicsAndAlgorithms();
+					}}>Reload</button
+				>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore))}
@@ -72,17 +83,6 @@
 						{quizKit.title} ({nextLetters.length}/{quizCategory.total} due)
 					</a>
 				{/each}
-				<button
-					class={`order-10 self-start ${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
-					disabled={$letterPairStoreStatus.status !== "loaded"}
-					onclick={() => {
-						if ($letterPairStoreStatus.status !== "loaded") {
-							return;
-						}
-
-						fetchAndLoadMnemonicsAndAlgorithms();
-					}}>Reload</button
-				>
 			</div>
 		</div>
 	{/if}
