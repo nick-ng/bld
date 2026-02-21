@@ -48,11 +48,14 @@
 							return;
 						}
 
-						const r = await saveAlgorithm({
-							speffz_pair: letterPair.speffz_pair,
-							buffer: buf,
-							...newAlg,
-						});
+						const r = await saveAlgorithm(
+							{
+								speffz_pair: letterPair.speffz_pair,
+								buffer: buf,
+								...newAlg,
+							},
+							false
+						);
 						if (typeof r === "string") {
 							return r;
 						}
@@ -62,10 +65,13 @@
 					if (Object.keys(mnemonicChanges).length > 0) {
 						pendingChanges.push(
 							(async () => {
-								const r = await saveMnemonic({
-									speffz_pair: letterPair.speffz_pair,
-									...mnemonicChanges,
-								});
+								const r = await saveMnemonic(
+									{
+										speffz_pair: letterPair.speffz_pair,
+										...mnemonicChanges,
+									},
+									false
+								);
 								if (typeof r === "string") {
 									return r;
 								}

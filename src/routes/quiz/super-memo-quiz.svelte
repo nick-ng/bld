@@ -31,6 +31,13 @@
 		}
 		isSubmitting = true;
 
+		let buffer = category;
+		if (category === "orozco-edges") {
+			buffer = "UF";
+		} else if (category === "orozco-corners") {
+			buffer = "UFR";
+		}
+
 		questionStartMs = Date.now();
 
 		const newSMStats = superMemo2(
@@ -40,18 +47,24 @@
 		);
 		switch (quizType) {
 			case "alg": {
-				await saveAlgorithm({
-					speffz_pair: currentSpeffzPair,
-					buffer: category,
-					...newSMStats,
-				});
+				await saveAlgorithm(
+					{
+						speffz_pair: currentSpeffzPair,
+						buffer,
+						...newSMStats,
+					},
+					true
+				);
 				break;
 			}
 			case "memo": {
-				await saveMnemonic({
-					speffz_pair: currentSpeffzPair,
-					...newSMStats,
-				});
+				await saveMnemonic(
+					{
+						speffz_pair: currentSpeffzPair,
+						...newSMStats,
+					},
+					true
+				);
 				break;
 			}
 			default: {

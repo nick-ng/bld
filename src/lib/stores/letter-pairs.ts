@@ -170,7 +170,8 @@ if (browser) {
 }
 
 export const saveMnemonic = async (
-	partialMnemonic: Partial<Mnemonic> & { speffz_pair: string }
+	partialMnemonic: Partial<Mnemonic> & { speffz_pair: string },
+	updateOnly = false
 ): Promise<string | void> => {
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
@@ -181,7 +182,7 @@ export const saveMnemonic = async (
 	}));
 	try {
 		const res = await authFetch(joinServerPath("/mnemonic"), {
-			method: "POST",
+			method: updateOnly ? "PUT" : "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(partialMnemonic),
 		});
@@ -238,7 +239,8 @@ export const saveMnemonic = async (
 };
 
 export const saveAlgorithm = async (
-	partialAlgorithm: Partial<Algorithm> & { speffz_pair: string; buffer: string }
+	partialAlgorithm: Partial<Algorithm> & { speffz_pair: string; buffer: string },
+	updateOnly = false
 ): Promise<string | void> => {
 	const algId = `${partialAlgorithm.buffer}:${partialAlgorithm.speffz_pair}`;
 	letterPairStoreStatus.update((prev) => ({
@@ -250,7 +252,7 @@ export const saveAlgorithm = async (
 	}));
 	try {
 		const res = await authFetch(joinServerPath("/algorithm"), {
-			method: "POST",
+			method: updateOnly ? "PUT" : "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(partialAlgorithm),
 		});
