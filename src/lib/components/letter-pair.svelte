@@ -40,13 +40,21 @@
 			</div>
 		{/if}
 		{#each selectedBuffers as bufferLocation (bufferLocation)}
-			{#if getBlddbUrl(letterPair.speffz_pair, bufferLocation)}
-				{#if letterPair.algorithms[bufferLocation]?.moves}
-					{@const algorithmDetails = parseCommutator(letterPair.algorithms[bufferLocation]?.moves)}
+			{@const realBufferLocation =
+				bufferLocation === "orozco-edges"
+					? "UF"
+					: bufferLocation === "orozco-corners"
+						? "UFR"
+						: bufferLocation}
+			{#if getBlddbUrl(letterPair.speffz_pair, realBufferLocation)}
+				{#if letterPair.algorithms[realBufferLocation]?.moves}
+					{@const algorithmDetails = parseCommutator(
+						letterPair.algorithms[realBufferLocation]?.moves
+					)}
 					{@const simplification = simplifyAlgorithm(algorithmDetails.expansion)}
 					<details class="text-xl">
 						<summary class="text-center"
-							>{bufferLocation}: {algorithmDetails.normalisedCommutator}</summary
+							>{realBufferLocation}: {algorithmDetails.normalisedCommutator}</summary
 						>
 						<div class="mt-2 text-center leading-none text-balance">
 							{#each simplification.original as step, i (`${step.move}${i}`)}
@@ -63,7 +71,7 @@
 					</details>
 				{:else}
 					<div class="text-xl">
-						{bufferLocation}: —
+						{realBufferLocation}: —
 					</div>
 				{/if}
 			{/if}
