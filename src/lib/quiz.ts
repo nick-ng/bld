@@ -40,33 +40,57 @@ export function getQuizKit(
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
 	title: string;
 	quizType: "memo" | "alg";
+	sortString: string;
 } {
 	const defaultSMStats = { sm2_n: 0, sm2_ef: 2.5, sm2_i: 0 };
 	switch (category) {
+		case "orozco-edges": {
+			const getNextReview = (lp: LetterPair) => lp?.algorithms?.UF?.next_review_at || new Date();
+			const getSMStats = (lp: LetterPair) => lp.algorithms?.UF || defaultSMStats;
+			const filterFunc = (lp: LetterPair) =>
+				(lp.speffz_pair.includes("a") || lp.speffz_pair.includes("q")) &&
+				lp?.algorithms?.UF?.moves?.length > 2;
+			return {
+				category,
+				subcategory: null,
+				filterFunc,
+				getNextReview,
+				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+				getSMStats,
+				title: "Orozco, Edges",
+				quizType: "alg",
+				sortString: "zz-orozco-edges",
+			};
+		}
+		case "orozco-corners": {
+			const getNextReview = (lp: LetterPair) => lp?.algorithms?.UFR?.next_review_at || new Date();
+			const getSMStats = (lp: LetterPair) => lp.algorithms?.UFR || defaultSMStats;
+			const filterFunc = (lp: LetterPair) =>
+				lp.speffz_pair.includes("b") && lp?.algorithms?.UFR?.moves?.length > 2;
+			return {
+				category,
+				subcategory: null,
+				filterFunc,
+				getNextReview,
+				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+				getSMStats,
+				title: "Orozco, Corners",
+				quizType: "alg",
+				sortString: "zz-orozco-corners",
+			};
+		}
 		case "UF": {
 			const getNextReview = (lp: LetterPair) =>
 				lp?.algorithms?.[category]?.next_review_at || new Date();
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
 			switch (subcategory) {
-				case "orozco": {
-					const filterFunc = (lp: LetterPair) =>
-						(lp.speffz_pair.includes("a") || lp.speffz_pair.includes("q")) &&
-						lp?.algorithms?.[category]?.moves?.length > 2;
-					return {
-						category,
-						subcategory: subcategory || null,
-						filterFunc,
-						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
-						getSMStats,
-						title: "UF Buffer, Orozco",
-						quizType: "alg",
-					};
-				}
 				case "algorithm": {
 					const filterFunc = (lp: LetterPair) =>
 						lp?.algorithms?.UF?.moves?.length > 2 &&
-						!lp?.algorithms?.[category]?.moves?.includes(",");
+						!(
+							lp?.algorithms?.[category]?.moves?.includes(",") ||
+							lp?.algorithms?.[category]?.moves?.includes("/")
+						);
 					return {
 						category,
 						subcategory: subcategory || null,
@@ -76,6 +100,7 @@ export function getQuizKit(
 						getSMStats,
 						title: `${category} Buffer, Algorithms`,
 						quizType: "alg",
+						sortString: "UF !algorithms",
 					};
 				}
 				default: {
@@ -96,6 +121,7 @@ export function getQuizKit(
 							getSMStats,
 							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
+							sortString: `${category} Buffer, ${subcategory.toUpperCase()}`,
 						};
 					}
 					const filterFunc = (lp: LetterPair) => lp?.algorithms?.[category]?.moves?.length > 2;
@@ -108,6 +134,7 @@ export function getQuizKit(
 						getSMStats,
 						title: `${category} Buffer`,
 						quizType: "alg",
+						sortString: `${category} !!`,
 					};
 				}
 			}
@@ -135,6 +162,7 @@ export function getQuizKit(
 							getSMStats,
 							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
+							sortString: `${category} Buffer, ${subcategory.toUpperCase()}`,
 						};
 					}
 
@@ -148,6 +176,7 @@ export function getQuizKit(
 						getSMStats,
 						title: `${category} Buffer`,
 						quizType: "alg",
+						sortString: `${category} !!`,
 					};
 				}
 			}
@@ -172,6 +201,7 @@ export function getQuizKit(
 						getSMStats,
 						title: "Images",
 						quizType: "memo",
+						sortString: "!Images",
 					};
 				}
 			}
