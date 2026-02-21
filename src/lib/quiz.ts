@@ -1,10 +1,11 @@
-import type { LetterPair } from "$lib/types";
+import type { LetterPair, Options } from "$lib/types";
 
 import { isSpeffzPairValid } from "$lib/utils";
 
 export function getVisibleFlashCardComponents(
 	category: string,
-	hideAnswer: boolean
+	hideAnswer: boolean,
+	options: Options
 ): {
 	hideWords: boolean;
 	hideImage: boolean;
@@ -20,8 +21,8 @@ export function getVisibleFlashCardComponents(
 		}
 		default: {
 			return {
-				hideWords: false,
-				hideImage: false,
+				hideWords: !options.showImagesForAlgs,
+				hideImage: !options.showImagesForAlgs,
 				selectedBuffers: hideAnswer ? [] : [category],
 			};
 		}
