@@ -8,6 +8,7 @@
 		initialVideoId: string;
 	}
 
+	// eslint-disable-next-line no-useless-assignment
 	let { player = $bindable(), initialVideoId }: Props = $props();
 
 	const ytPlayerId = "youtube-player";
