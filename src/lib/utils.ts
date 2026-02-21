@@ -514,15 +514,13 @@ export function parseCommutator(rawCommutator: string) {
 			setup = temp[0].trim();
 		}
 
-		let insert = "";
-		let interchange = "";
 		const temp = commutator
 			.replaceAll("[", "")
 			.replaceAll("]", "")
 			.split(",")
 			.map((a) => a.trim());
-		insert = temp[0];
-		interchange = temp[1];
+		let insert = temp[0];
+		let interchange = temp[1];
 		if (temp[0].match(/^[ufrdlb][2']*$/i)) {
 			interchange = temp[0];
 			insert = temp[1];

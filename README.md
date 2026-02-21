@@ -78,7 +78,7 @@ css:
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
 - src/lib/utils.ts:340: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
 - src/lib/utils.ts:489: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:652: @todo(nick-ng): is the loop necessary?
+- src/lib/utils.ts:650: @todo(nick-ng): is the loop necessary?
 - src/routes/letter-pair/edit/alg-editor.svelte:31: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:80: @todo(nick-ng): handle error saving changes
