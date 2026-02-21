@@ -23,7 +23,8 @@
 				);
 				return [getQuizKit(buf, null), ...[...startsWith].map((s) => getQuizKit(buf, `${s}*`))];
 			}),
-			getQuizKit("UF", "orozco"),
+			getQuizKit("orozco-edges", null),
+			getQuizKit("orozco-corners", null),
 			getQuizKit("UF", "algorithm"),
 		]
 			.flat()
@@ -35,7 +36,7 @@
 				};
 			})
 			.filter((c) => c.total > 0)
-			.sort((a, b) => a.title.localeCompare(b.title))
+			.sort((a, b) => a.sortString.localeCompare(b.sortString))
 	);
 
 	const getQuizUrl = (category: string, subcategory: string | null, nextLetters: LetterPair[]) => {
