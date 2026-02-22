@@ -182,7 +182,7 @@ export const saveMnemonic = async (
 	}));
 	try {
 		const res = await authFetch(joinServerPath("/mnemonic"), {
-			method: updateOnly ? "PUT" : "POST",
+			method: updateOnly ? "PATCH" : "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(partialMnemonic),
 		});
@@ -252,7 +252,7 @@ export const saveAlgorithm = async (
 	}));
 	try {
 		const res = await authFetch(joinServerPath("/algorithm"), {
-			method: updateOnly ? "PUT" : "POST",
+			method: updateOnly ? "PATCH" : "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify(partialAlgorithm),
 		});
