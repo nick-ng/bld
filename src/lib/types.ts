@@ -133,6 +133,7 @@ export const optionsSchema = z.object({
 		.record(positionsSchema, z.boolean().optional().default(false))
 		.optional()
 		.default({ UF: true, UFR: true }),
+	pinnedQuizzes: z.array(z.string()).optional().default([]),
 });
 
 export type Options = z.infer<typeof optionsSchema>;

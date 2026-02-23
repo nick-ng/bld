@@ -73,12 +73,14 @@
 				>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
+					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
+					{@const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId)}
 					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore))}
 					<div
 						class={`${
 							quizCategory.category !== "memo" && quizCategory.subcategory ? "w-9/10" : "w-full"
 						} group relative flex flex-row gap-1`}
-						style={`order: ${nextLetters.length === 0 ? 5 : 0};`}
+						style={`order: ${(nextLetters.length === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
 					>
 						<a
 							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
@@ -97,6 +99,21 @@
 									.join(", ")}
 							</div>
 						</details>
+						<button
+							type="button"
+							class={`${isPinnedQuiz ? "bg-blue-100" : ""}`}
+							onclick={() => {
+								if (isPinnedQuiz) {
+									$optionsStore.pinnedQuizzes = $optionsStore.pinnedQuizzes.filter(
+										(q) => q !== quizId
+									);
+								} else {
+									$optionsStore.pinnedQuizzes = [...$optionsStore.pinnedQuizzes, quizId];
+								}
+							}}
+						>
+							📌
+						</button>
 					</div>
 				{/each}
 			</div>

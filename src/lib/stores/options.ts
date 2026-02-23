@@ -14,6 +14,7 @@ export const optionsStore = writable<Options>({
 	showImagesForAlgs: false,
 	chosenBuffers: { UF: true, UFR: true },
 	visibleBuffers: { UF: true, UFR: true },
+	pinnedQuizzes: [],
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;
