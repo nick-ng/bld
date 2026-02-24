@@ -105,6 +105,19 @@
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="optionsMaxNewCards"> Max New Cards Per Day </label>
+				</td>
+				<td class="text-right">
+					<input
+						class="inline-block w-32 text-right"
+						id="optionsMaxNewCards"
+						type="number"
+						bind:value={$optionsStore.maxNewCardsPerDay}
+					/>
+				</td>
+			</tr>
+			<tr>
 				<td>Chosen Buffers</td>
 				<td>
 					<details>

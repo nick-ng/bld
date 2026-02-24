@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { SvelteURLSearchParams } from "svelte/reactivity";
+	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
 	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
@@ -14,6 +14,8 @@
 		subcategory: string | null; // default is all e.g. "q", "algs"
 	}
 
+	const DAY_MS = 1000 * 60 * 60 * 24;
+
 	let { currentSpeffzPair, category, subcategory }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
 		getQuizKit(category, subcategory)
@@ -21,7 +23,15 @@
 	let hideAnswer = $state(true);
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
-	let nextLetters = $derived(getNextLetters(Object.values($letterPairStore)));
+	let nextLetters = $derived(
+		getNextLetters(Object.values($letterPairStore)).filter((l) => {
+			if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
+				return true;
+			}
+
+			return getSMStats(l).sm2_i > 0.2;
+		})
+	);
 	let isSubmitting = $state(false);
 	let questionStartMs = $state(Date.now());
 
@@ -40,11 +50,8 @@
 
 		questionStartMs = Date.now();
 
-		const newSMStats = superMemo2(
-			selectedGradeQ,
-			getSMStats(currentLetterPair),
-			$optionsStore.targetEf
-		);
+		const sMStats = getSMStats(currentLetterPair);
+		const newSMStats = superMemo2(selectedGradeQ, sMStats, $optionsStore.targetEf);
 		switch (quizType) {
 			case "alg": {
 				await saveAlgorithm(
@@ -74,6 +81,19 @@
 			}
 		}
 
+		// @todo(nick-ng): refactor this into a shared function
+		const today = new SvelteDate();
+		today.setHours(5, 0, 0, 0);
+		const todayMs = today.valueOf();
+		if ($optionsStore.newCardDay + DAY_MS < todayMs) {
+			$optionsStore.newCardDay = todayMs;
+			$optionsStore.newCardsToday = 0;
+		}
+
+		if (sMStats.sm2_i < 0.2) {
+			$optionsStore.newCardsToday = $optionsStore.newCardsToday + 1;
+		}
+
 		isSubmitting = false;
 		if (stopAfter) {
 			selectedGradeQ = -1;
@@ -81,15 +101,25 @@
 			return;
 		}
 
-		const freshNextLetters = getNextLetters(Object.values($letterPairStore));
-		const nextLetter = freshNextLetters.shift();
-		if (!nextLetter) {
+		if (nextLetters.length === 0) {
 			const lettersInSet = Object.values($letterPairStore)
-				.filter(filterFunc)
+				.filter((l) => {
+					if (!filterFunc(l)) {
+						return false;
+					}
+
+					if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
+						return true;
+					}
+
+					return getSMStats(l).sm2_i > 0.2;
+				})
+
 				.sort((a, b) => {
 					return getNextReview(a).valueOf() - getNextReview(b).valueOf();
 				});
 
+			// @todo(nick-ng): figure out if a new card will be available first
 			const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
 			alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
 			goto("/quiz");
@@ -100,7 +130,7 @@
 		selectedGradeQ = -1;
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
-			searchParams.set("sp", nextLetter.speffz_pair);
+			searchParams.set("sp", nextLetters[0].speffz_pair);
 			goto(`/quiz?${searchParams.toString()}`);
 		}, 0);
 	};

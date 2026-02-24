@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { LetterPair } from "$lib/types";
 
-	import { SvelteURLSearchParams } from "svelte/reactivity";
+	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
 	import {
 		letterPairStore,
 		letterPairStoreStatus,
@@ -10,6 +10,9 @@
 	import { optionsStore } from "$lib/stores/options";
 	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
+	import { onMount } from "svelte";
+
+	const DAY_MS = 1000 * 60 * 60 * 24;
 
 	let quizCategories = $derived(
 		[
@@ -52,6 +55,17 @@
 
 		return `/quiz?${searchParams.toString()}`;
 	};
+
+	onMount(() => {
+		// @todo(nick-ng): refactor this into a shared function
+		const today = new SvelteDate();
+		today.setHours(5, 0, 0, 0);
+		const todayMs = today.valueOf();
+		if ($optionsStore.newCardDay + DAY_MS < todayMs) {
+			$optionsStore.newCardDay = todayMs;
+			$optionsStore.newCardsToday = 0;
+		}
+	});
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -69,6 +83,14 @@
 						}
 
 						fetchAndLoadMnemonicsAndAlgorithms();
+						// @todo(nick-ng): refactor this into a shared function
+						const today = new SvelteDate();
+						today.setHours(5, 0, 0, 0);
+						const todayMs = today.valueOf();
+						if ($optionsStore.newCardDay + DAY_MS < todayMs) {
+							$optionsStore.newCardDay = todayMs;
+							$optionsStore.newCardsToday = 0;
+						}
 					}}>Reload</button
 				>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}

@@ -15,6 +15,9 @@ export const optionsStore = writable<Options>({
 	chosenBuffers: { UF: true, UFR: true },
 	visibleBuffers: { UF: true, UFR: true },
 	pinnedQuizzes: [],
+	maxNewCardsPerDay: 9999,
+	newCardsToday: 0,
+	newCardDay: 0,
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;
