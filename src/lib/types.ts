@@ -162,6 +162,7 @@ export type MbldCube = z.infer<typeof mbldCubeSchema>;
 
 export const mbldSessionSchema = z.object({
 	date: dateOrDateStringSchema,
+	local_video_link: z.string().optional(),
 	youtube_link: z.string().optional(),
 	offset_s: z.number(),
 	chapters: z.string(),
