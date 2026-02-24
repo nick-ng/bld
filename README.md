@@ -85,4 +85,8 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:93: @todo(nick-ng): handle error saving changes
 - src/routes/mbld/analyse/mbld-cube.svelte:30: @todo(nick-ng): auto-complete scrambles
 - src/routes/mbld/scramble/+page.svelte:19: @todo(nick-ng): figure out a way to put this file locally
+- src/routes/quiz/quiz-home.svelte:60: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/quiz-home.svelte:86: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/super-memo-quiz.svelte:84: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/super-memo-quiz.svelte:122: @todo(nick-ng): figure out if a new card will be available first
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

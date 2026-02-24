@@ -134,6 +134,9 @@ export const optionsSchema = z.object({
 		.optional()
 		.default({ UF: true, UFR: true }),
 	pinnedQuizzes: z.array(z.string()).optional().default([]),
+	maxNewCardsPerDay: z.number().optional().default(9999),
+	newCardsToday: z.number().optional().default(0),
+	newCardDay: z.number().optional().default(0),
 });
 
 export type Options = z.infer<typeof optionsSchema>;
