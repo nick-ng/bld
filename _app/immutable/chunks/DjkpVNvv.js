@@ -1,0 +1,1 @@
+import{l as t,z as o,m}from"./WMr84jBD.js";import{w as c}from"./BpmZ3ked.js";import{M as e}from"./CEuvCyUC.js";const l=o.array(m),r=c([]);(async()=>{const s=await t.getItem(e),a=l.safeParse(JSON.parse(s||""));a.success&&r.set(a.data)})(),r.subscribe(s=>{t.setItem(e,JSON.stringify(s))});export{r as m};
