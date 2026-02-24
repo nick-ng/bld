@@ -19,6 +19,9 @@
 			? new Date(`${importDateString}T${importTimeString || "00:00"}:00.000`)
 			: new Date()
 	);
+	let videoUrl = $derived(
+		$mbldStore[selectedIndex].local_video_link || $mbldStore[selectedIndex]?.youtube_link
+	);
 	let importAttemptString = $state("");
 
 	$effect(() => {
@@ -75,6 +78,12 @@
 						<tr>
 							<td>Date</td>
 							<td>{formatDate($mbldStore[selectedIndex].date)}</td>
+						</tr>
+						<tr>
+							<td>Local Video Link</td>
+							<td>
+								<input type="text" bind:value={$mbldStore[selectedIndex].local_video_link} />
+							</td>
 						</tr>
 						<tr>
 							<td>YouTube Link</td>
@@ -178,9 +187,9 @@
 			{/if}
 		</div>
 		<div class="grow" style={`max-height:${maxHeight};`}>
-			{#if $mbldStore[selectedIndex]?.youtube_link}
+			{#if videoUrl}
 				<VideoPlayer
-					videoUrl={$mbldStore[selectedIndex].youtube_link}
+					{videoUrl}
 					getSeekTo={(newSeekTo) => {
 						seekTo = newSeekTo;
 					}}

@@ -267,7 +267,7 @@ export function superMemo2(
 		);
 	} else {
 		output.sm2_n = 0;
-		output.sm2_i = 1;
+		output.sm2_i = 0.5; // hack. if i < 0.2, card is new
 	}
 
 	output.sm2_ef = input.sm2_ef + (0.1 - (5 - userGradeQ) * (0.08 + (5 - userGradeQ) * 0.02));
