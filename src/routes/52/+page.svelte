@@ -17,6 +17,7 @@
 	let recallRank = $state(-1);
 	let recallSuit = $state("");
 	let recallIndex = $state(-1);
+	let recallProperties = $derived(getCardProperties({ rank: recallRank, suit: recallSuit }));
 
 	const shuffleDeck = () => {
 		const newDeck: FiftyTwoCard[] = [];
@@ -218,111 +219,112 @@
 			>
 		</div>
 	{:else if $fiftyTwoStore.recalling}
-		<div class="m-1">Recalling</div>
-		<div class="m-1 flex flex-row">
-			<div class="grid grid-cols-3 gap-0.5">
-				{#each [13, -1, 10, 11, 12, 7, 8, 9, 4, 5, 6, 1, 2, 3] as rank (rank)}
+		<div class="relative">
+			<div class="m-1">Recalling</div>
+			<div class="sticky top-1 m-1 flex flex-row gap-1">
+				<div class="grid grow grid-cols-3 gap-0.5">
+					{#each [13, -1, 10, 11, 12, 7, 8, 9, 4, 5, 6, 1, 2, 3] as rank (rank)}
+						<button
+							class={`px-4 py-4 ${rank === -1 ? "col-span-2" : ""} ${recallRank !== -1 && recallRank === rank ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+							type="button"
+							onclick={() => {
+								recallRank = rank;
+								if (rank === -1) {
+									recallSuit = "";
+								}
+							}}
+						>
+							{#if rank === -1}
+								Clear
+							{:else}
+								{getCardProperties({ rank, suit: "c" }).displayRank}
+							{/if}
+						</button>
+					{/each}
+				</div>
+				<div class="grid grow grid-cols-1 gap-0.5">
+					{#each SUITS as suit (suit)}
+						<button
+							class={`px-4 py-4 ${recallSuit === suit ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+							type="button"
+							onclick={() => {
+								recallSuit = suit;
+							}}>{getCardProperties({ rank: 1, suit }).symbol}</button
+						>
+					{/each}
+				</div>
+				<div class="grid grow auto-rows-[1fr] grid-cols-1 gap-0.5">
+					<button class="p-4" type="button" onclick={() => {}}> Skip </button>
 					<button
-						class={`px-6 py-4 ${rank === -1 ? "col-span-2" : ""} ${recallRank !== -1 && recallRank === rank ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+						class="p-4"
 						type="button"
 						onclick={() => {
-							recallRank = rank;
-							if (rank === -1) {
-								recallSuit = "";
+							const newCard = { rank: recallRank, suit: recallSuit };
+							if (recallIndex !== -1) {
+								const temp = [...$fiftyTwoStore.recall];
+								temp[recallIndex] = newCard;
+								$fiftyTwoStore.recall = temp;
+							} else if ($fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length) {
+								$fiftyTwoStore.recall = [...$fiftyTwoStore.recall, newCard];
 							}
+
+							recallIndex = -1;
+							recallRank = -1;
+							recallSuit = "";
 						}}
 					>
-						{#if rank === -1}
-							Clear
-						{:else}
-							{getCardProperties({ rank, suit: "c" }).displayRank}
-						{/if}
+						<div style={`color: ${recallProperties.colorHex};`}>
+							{recallProperties.displayRank}
+						</div>
+						<div>
+							{recallProperties.symbol}
+						</div>
+					</button>
+				</div>
+			</div>
+			<div class="col-auto col-span-1 m-1 mb-4 grid grid-cols-6 gap-0.5">
+				{#each $fiftyTwoStore.recall as recall, i (`${i}-${recall.rank}-${recall.suit}`)}
+					{@const cardProperties = getCardProperties(recall)}
+					<button
+						class={`${recallIndex === i ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+						onclick={() => {
+							recallIndex = i;
+							recallRank = recall.rank;
+							recallSuit = recall.suit;
+						}}
+					>
+						<span style={`color: ${cardProperties.colorHex};`}
+							>{cardProperties.displayRank}{cardProperties.symbol}</span
+						>
 					</button>
 				{/each}
-			</div>
-			<div class="grow"></div>
-			<div class="grid grid-cols-1 gap-0.5">
-				{#each SUITS as suit (suit)}
+				{#if recallIndex !== -1 && $fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length}
 					<button
-						class={`px-6 py-4 ${recallSuit === suit ? "bg-blue-300 dark:bg-blue-700" : ""}`}
-						type="button"
 						onclick={() => {
-							recallSuit = suit;
-						}}>{getCardProperties({ rank: 1, suit }).symbol}</button
-					>
-				{/each}
-			</div>
-		</div>
-		<div class="m-1">
-			<button
-				type="button"
-				class="w-full py-4"
-				onclick={() => {
-					if ($fiftyTwoStore.recall.length === $fiftyTwoStore.deck.length) {
-						return;
-					}
-
-					const newCard = { rank: recallRank, suit: recallSuit };
-					if (recallIndex === -1) {
-						$fiftyTwoStore.recall = [...$fiftyTwoStore.recall, newCard];
-					} else {
-						const temp = [...$fiftyTwoStore.recall];
-						temp[recallIndex] = newCard;
-						$fiftyTwoStore.recall = temp;
-						recallIndex = -1;
-					}
-				}}
-			>
-				{#if !recallSuit || recallRank === -1}
-					Skip
-				{:else}
-					{@const cardProperties = getCardProperties({ rank: recallRank, suit: recallSuit })}
-					<span style={`color: ${cardProperties.colorHex};`}
-						>{cardProperties.displayRank}{cardProperties.symbol}</span
+							recallIndex = -1;
+						}}>Last</button
 					>
 				{/if}
-			</button>
-		</div>
-		<div class="col-auto col-span-1 m-1 mb-4 grid grid-cols-6 gap-0.5">
-			{#each $fiftyTwoStore.recall as recall, i (`${i}-${recall.rank}-${recall.suit}`)}
-				{@const cardProperties = getCardProperties(recall)}
-				<button
-					class={`${recallIndex === i ? "bg-blue-300 dark:bg-blue-700" : ""}`}
-					onclick={() => {
-						recallIndex = i;
-					}}
-				>
-					<span style={`color: ${cardProperties.colorHex};`}
-						>{cardProperties.displayRank}{cardProperties.symbol}</span
-					>
-				</button>
-			{/each}
-			{#if $fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length}
-				<button
-					onclick={() => {
-						recallIndex = -1;
-					}}>Last</button
-				>
-			{/if}
-			<div class="flex items-center justify-center">
-				{$fiftyTwoStore.recall.length}/{$fiftyTwoStore.deck.length}
+				<div class="flex items-center justify-center">
+					{$fiftyTwoStore.recall.length}/{$fiftyTwoStore.deck.length}
+				</div>
 			</div>
-		</div>
-		<div class="m-1">
-			<button
-				type="button"
-				onclick={() => {
-					if (
-						$fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length &&
-						!confirm(
-							`Are you sure? You have only entered ${$fiftyTwoStore.recall.length}/${$fiftyTwoStore.deck.length} cards.`
-						)
-					) {
-						return;
-					}
-					$fiftyTwoStore.done = true;
-				}}>Check</button
-			>
+			<div class="m-1">
+				<button
+					type="button"
+					onclick={() => {
+						if (
+							$fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length &&
+							!confirm(
+								`Are you sure? You have only entered ${$fiftyTwoStore.recall.length}/${$fiftyTwoStore.deck.length} cards.`
+							)
+						) {
+							return;
+						}
+						$fiftyTwoStore.done = true;
+					}}>Check</button
+				>
+			</div>
 		</div>
 	{:else}
 		<div class="m-1 flex flex-row">
