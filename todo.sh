@@ -2,7 +2,7 @@
 set -euo pipefail
 IFS=$'\n\t'
 
-npm run format
+npm run format:changed
 gofmt -w ./server
 
 sed -i -e '/### ToDo Comments/q' README.md

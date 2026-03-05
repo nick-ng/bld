@@ -1,4 +1,4 @@
-import type { FlashCard } from "$lib/types";
+import type { FiftyTwoCard, FlashCard } from "$lib/types";
 
 import {
 	ACCESS_TOKEN_STORE_KEY,
@@ -1192,4 +1192,94 @@ export const secondsToHhmmss = (seconds: number) => {
 	}
 
 	return temp.toString();
+};
+
+const blackHex = "#000000";
+const redHex = "#dd0000";
+export const getCardProperties = (card?: FiftyTwoCard) => {
+	const properties = {
+		colorHex: "#888888",
+		displayRank: "",
+		red: false,
+		symbol: "",
+	};
+
+	switch (card?.suit) {
+		case "c": {
+			properties.colorHex = blackHex;
+			properties.red = false;
+			properties.symbol = "♣️";
+			break;
+		}
+		case "d": {
+			properties.colorHex = redHex;
+			properties.red = true;
+			properties.symbol = "♦️";
+			break;
+		}
+		case "h": {
+			properties.colorHex = redHex;
+			properties.red = true;
+			properties.symbol = "♥️";
+			break;
+		}
+		case "s": {
+			properties.colorHex = blackHex;
+			properties.red = false;
+			properties.symbol = "♠️";
+			break;
+		}
+		case "r": {
+			if (card?.rank === 0) {
+				return { displayRank: "Joker", symbol: "🔴", red: true, colorHex: redHex };
+			}
+
+			properties.colorHex = redHex;
+			properties.red = true;
+			properties.symbol = "🔴";
+			break;
+		}
+		case "b": {
+			if (card?.rank === 0) {
+				return { displayRank: "Joker", symbol: "⚫", red: false, colorHex: blackHex };
+			}
+
+			properties.colorHex = blackHex;
+			properties.red = false;
+			properties.symbol = "⚫";
+			break;
+		}
+		default: {
+			// noop
+		}
+	}
+
+	switch (card?.rank) {
+		case -1: {
+			properties.displayRank = "_";
+			properties.symbol = "";
+			break;
+		}
+		case 1: {
+			properties.displayRank = "A";
+			break;
+		}
+		case 11: {
+			properties.displayRank = "J";
+			break;
+		}
+		case 12: {
+			properties.displayRank = "Q";
+			break;
+		}
+		case 13: {
+			properties.displayRank = "K";
+			break;
+		}
+		default: {
+			properties.displayRank = `${card?.rank}`;
+		}
+	}
+
+	return properties;
 };

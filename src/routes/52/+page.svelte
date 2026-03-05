@@ -1,7 +1,11 @@
 <script lang="ts">
+	import type { FiftyTwoCard } from "$lib/types";
 	import Card52 from "$lib/components/card-52.svelte";
 	import { onMount } from "svelte";
+	import { fiftyTwoStore } from "$lib/stores/fifty-two";
+	import { getCardProperties, shuffleArray } from "$lib/utils";
 
+	const SUITS = ["c", "d", "h", "s"];
 	const dragThreshold = 0.3;
 	let currentCardEl: HTMLDivElement | null = $state(null);
 	let nextCardEl: HTMLDivElement | null = $state(null);
@@ -10,7 +14,27 @@
 	let currentMove = $state(0);
 	let currentLeft = $state(3);
 	let unopacity = $state(0);
-	let currentCardRank = $state(2);
+	let recallRank = $state(-1);
+	let recallSuit = $state("");
+	let recallIndex = $state(-1);
+
+	const shuffleDeck = () => {
+		const newDeck: FiftyTwoCard[] = [];
+		for (let i = 0; i < 13; i++) {
+			for (const suit of SUITS) {
+				newDeck.push({
+					rank: i + 1,
+					suit,
+				});
+			}
+		}
+
+		$fiftyTwoStore.deck = shuffleArray(newDeck);
+		$fiftyTwoStore.currentIndex = 0;
+		$fiftyTwoStore.recalling = false;
+		$fiftyTwoStore.done = false;
+		$fiftyTwoStore.recall = [];
+	};
 
 	const getCursorXY = (e: TouchEvent | MouseEvent) => {
 		// check MouseEvent because TouchEvent only exists on touch devices
@@ -57,6 +81,8 @@
 				currentLeft = 3 + currentMove;
 				if (currentMove > screenWidth * dragThreshold) {
 					unopacity = 80;
+				} else if (currentMove < -screenWidth * dragThreshold) {
+					unopacity = 30;
 				} else {
 					unopacity = 0;
 				}
@@ -64,9 +90,15 @@
 			}
 			case "touchcancel": //fallthrough
 			case "touchend": {
-				if (currentMove > screenWidth * dragThreshold) {
-					currentCardRank = currentCardRank + 1;
+				if (
+					currentMove > screenWidth * dragThreshold &&
+					$fiftyTwoStore.currentIndex < $fiftyTwoStore.deck.length
+				) {
+					$fiftyTwoStore.currentIndex = $fiftyTwoStore.currentIndex + 1;
+				} else if (currentMove < -screenWidth * dragThreshold && $fiftyTwoStore.currentIndex > 0) {
+					$fiftyTwoStore.currentIndex = $fiftyTwoStore.currentIndex - 1;
 				}
+
 				touchStartX = 0;
 				currentMove = 0;
 				currentLeft = 3;
@@ -94,17 +126,239 @@
 	});
 </script>
 
-<div class="relative overflow-x-hidden">
-	<div class="mx-[3px]" bind:this={nextCardEl}>
-		<Card52 rank={`${currentCardRank + 1}`} suit={(currentCardRank + 1) % 2 ? "c" : "h"} />
-	</div>
-	{#key `${currentCardRank}`}
-		<div
-			class={`absolute top-0 ${touchStartX === 0 ? "transition-[left]" : ""}`}
-			style={`left: ${currentLeft}px;`}
-			bind:this={currentCardEl}
+<div class="overflow-x-hidden">
+	{#if !$fiftyTwoStore.isLoaded}
+		Loading...
+	{:else if $fiftyTwoStore.deck.length === 0}
+		<button
+			type="button"
+			onclick={() => {
+				shuffleDeck();
+			}}>Shuffle</button
 		>
-			<Card52 rank={`${currentCardRank}`} suit={currentCardRank % 2 ? "c" : "h"} {unopacity} />
+	{:else if $fiftyTwoStore.done}
+		<div class="m-1">
+			<div class="flex flex-row justify-center gap-1">
+				<table>
+					<thead>
+						<tr>
+							<th class="border border-gray-600 p-1 text-right">#</th>
+							<th class="border border-gray-600 p-1 text-right">Card</th>
+							<th class="border border-gray-600 p-1 text-right">Recall</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each $fiftyTwoStore.deck.slice(0, 26) as card, i (`${card.rank}-${card.suit}`)}
+							{@const cardProperties = getCardProperties(card)}
+							{@const recalledCard = $fiftyTwoStore.recall[i]}
+							<tr
+								class={card.rank === recalledCard?.rank && card.suit === recalledCard?.suit
+									? ""
+									: "bg-yellow-200"}
+							>
+								<td class="border border-gray-600 p-1 text-right">{i + 1}</td>
+								<td class="border border-gray-600 p-1 text-right">
+									<span style={`color: ${cardProperties.colorHex};`}
+										>{cardProperties.displayRank}{cardProperties.symbol}</span
+									>
+								</td>
+								<td class="border border-gray-600 p-1 text-right">
+									{#if recalledCard}
+										{@const recalledProperties = getCardProperties(recalledCard)}
+										<span style={`color: ${recalledProperties.colorHex};`}
+											>{recalledProperties.displayRank}{recalledProperties.symbol}</span
+										>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+				<table>
+					<thead>
+						<tr>
+							<th class="border border-gray-600 p-1 text-right">#</th>
+							<th class="border border-gray-600 p-1 text-right">Card</th>
+							<th class="border border-gray-600 p-1 text-right">Recall</th>
+						</tr>
+					</thead>
+					<tbody>
+						{#each $fiftyTwoStore.deck.slice(26, 52) as card, i (`${card.rank}-${card.suit}`)}
+							{@const cardProperties = getCardProperties(card)}
+							{@const recalledCard = $fiftyTwoStore.recall[i + 26]}
+							<tr
+								class={card.rank === recalledCard?.rank && card.suit === recalledCard?.suit
+									? ""
+									: "bg-yellow-200"}
+							>
+								<td class="border border-gray-600 p-1 text-right">{i + 27}</td>
+								<td class="border border-gray-600 p-1 text-right">
+									<span style={`color: ${cardProperties.colorHex};`}
+										>{cardProperties.displayRank}{cardProperties.symbol}</span
+									>
+								</td>
+								<td class="border border-gray-600 p-1 text-right">
+									{#if recalledCard}
+										{@const recalledProperties = getCardProperties(recalledCard)}
+										<span style={`color: ${recalledProperties.colorHex};`}
+											>{recalledProperties.displayRank}{recalledProperties.symbol}</span
+										>
+									{/if}
+								</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			</div>
+			<button
+				type="button"
+				onclick={() => {
+					shuffleDeck();
+				}}>Shuffle</button
+			>
 		</div>
-	{/key}
+	{:else if $fiftyTwoStore.recalling}
+		<div class="m-1">Recalling</div>
+		<div class="m-1 flex flex-row">
+			<div class="grid grid-cols-3 gap-0.5">
+				{#each [13, -1, 10, 11, 12, 7, 8, 9, 4, 5, 6, 1, 2, 3] as rank (rank)}
+					<button
+						class={`px-6 py-4 ${rank === -1 ? "col-span-2" : ""} ${recallRank !== -1 && recallRank === rank ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+						type="button"
+						onclick={() => {
+							recallRank = rank;
+							if (rank === -1) {
+								recallSuit = "";
+							}
+						}}
+					>
+						{#if rank === -1}
+							Clear
+						{:else}
+							{getCardProperties({ rank, suit: "c" }).displayRank}
+						{/if}
+					</button>
+				{/each}
+			</div>
+			<div class="grow"></div>
+			<div class="grid grid-cols-1 gap-0.5">
+				{#each SUITS as suit (suit)}
+					<button
+						class={`px-6 py-4 ${recallSuit === suit ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+						type="button"
+						onclick={() => {
+							recallSuit = suit;
+						}}>{getCardProperties({ rank: 1, suit }).symbol}</button
+					>
+				{/each}
+			</div>
+		</div>
+		<div class="m-1">
+			<button
+				type="button"
+				class="w-full py-4"
+				onclick={() => {
+					if ($fiftyTwoStore.recall.length === $fiftyTwoStore.deck.length) {
+						return;
+					}
+
+					const newCard = { rank: recallRank, suit: recallSuit };
+					if (recallIndex === -1) {
+						$fiftyTwoStore.recall = [...$fiftyTwoStore.recall, newCard];
+					} else {
+						const temp = [...$fiftyTwoStore.recall];
+						temp[recallIndex] = newCard;
+						$fiftyTwoStore.recall = temp;
+						recallIndex = -1;
+					}
+				}}
+			>
+				{#if !recallSuit || recallRank === -1}
+					Skip
+				{:else}
+					{@const cardProperties = getCardProperties({ rank: recallRank, suit: recallSuit })}
+					<span style={`color: ${cardProperties.colorHex};`}
+						>{cardProperties.displayRank}{cardProperties.symbol}</span
+					>
+				{/if}
+			</button>
+		</div>
+		<div class="col-auto col-span-1 m-1 mb-4 grid grid-cols-6 gap-0.5">
+			{#each $fiftyTwoStore.recall as recall, i (`${i}-${recall.rank}-${recall.suit}`)}
+				{@const cardProperties = getCardProperties(recall)}
+				<button
+					class={`${recallIndex === i ? "bg-blue-300 dark:bg-blue-700" : ""}`}
+					onclick={() => {
+						recallIndex = i;
+					}}
+				>
+					<span style={`color: ${cardProperties.colorHex};`}
+						>{cardProperties.displayRank}{cardProperties.symbol}</span
+					>
+				</button>
+			{/each}
+			{#if $fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length}
+				<button
+					onclick={() => {
+						recallIndex = -1;
+					}}>Last</button
+				>
+			{/if}
+			<div class="flex items-center justify-center">
+				{$fiftyTwoStore.recall.length}/{$fiftyTwoStore.deck.length}
+			</div>
+		</div>
+		<div class="m-1">
+			<button
+				type="button"
+				onclick={() => {
+					if (
+						$fiftyTwoStore.recall.length < $fiftyTwoStore.deck.length &&
+						!confirm(
+							`Are you sure? You have only entered ${$fiftyTwoStore.recall.length}/${$fiftyTwoStore.deck.length} cards.`
+						)
+					) {
+						return;
+					}
+					$fiftyTwoStore.done = true;
+				}}>Check</button
+			>
+		</div>
+	{:else}
+		<div class="m-1 flex flex-row">
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.currentIndex = 0;
+				}}>⏪</button
+			>
+			<div class="grow"></div>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.recalling = true;
+				}}>Done</button
+			>
+		</div>
+		<div class="m-1">
+			<div
+				class="h-1 bg-slate-800 transition-[width]"
+				style={`width: ${($fiftyTwoStore.currentIndex / $fiftyTwoStore.deck.length) * 100}%;`}
+			></div>
+		</div>
+		<div class="relative">
+			<div class="mx-[3px]" bind:this={nextCardEl}>
+				<Card52 card={$fiftyTwoStore.deck[$fiftyTwoStore.currentIndex + 1]} />
+			</div>
+			{#key `${$fiftyTwoStore.currentIndex}`}
+				<div
+					class={`absolute top-0 ${touchStartX === 0 ? "transition-[left]" : ""}`}
+					style={`left: ${currentLeft}px;`}
+					bind:this={currentCardEl}
+				>
+					<Card52 card={$fiftyTwoStore.deck[$fiftyTwoStore.currentIndex]} {unopacity} />
+				</div>
+			{/key}
+		</div>
+	{/if}
 </div>
