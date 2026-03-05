@@ -175,3 +175,29 @@ export const mbldSessionSchema = z.object({
 });
 
 export type MbldSession = z.infer<typeof mbldSessionSchema>;
+
+export const fiftyTwoCardSchema = z.object({
+	rank: z.number(),
+	suit: z.string(),
+});
+
+export type FiftyTwoCard = z.infer<typeof fiftyTwoCardSchema>;
+
+export const fiftyTwoAttempt = z.object({
+	deck: z.array(fiftyTwoCardSchema),
+	recall: z.array(fiftyTwoCardSchema),
+	timestamp: z.number(),
+});
+
+export type FiftyTwoAttempt = z.infer<typeof fiftyTwoAttempt>;
+
+export const fiftyTwoSchema = z.object({
+	deck: z.array(fiftyTwoCardSchema),
+	recall: z.array(fiftyTwoCardSchema),
+	currentIndex: z.number(),
+	recalling: z.boolean().optional(),
+	done: z.boolean().optional(),
+	history: z.array(fiftyTwoAttempt),
+});
+
+export type FiftyTwo = z.infer<typeof fiftyTwoSchema>;

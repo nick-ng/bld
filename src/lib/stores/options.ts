@@ -1,7 +1,7 @@
 import type { Options } from "$lib/types";
+
 import { writable } from "svelte/store";
 import localforage from "localforage";
-
 import { browser } from "$app/environment";
 import { optionsSchema } from "$lib/types";
 import { OPTIONS_STORE_PREFIX } from "$lib/constants";

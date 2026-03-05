@@ -40,6 +40,7 @@
 		{/if}
 		<a class="like-button hidden lg:inline" href="/mbld/scramble">MBLD Scrambles</a>
 		<a class="like-button hidden lg:inline" href="/mbld/analyse">MBLD Analyse</a>
+		<a class="like-button" href="/52">🃏</a>
 		<div class="grow-0 lg:grow"></div>
 		<a class="like-button grow lg:grow-0" href="/settings"
 			><span class="hidden lg:inline">Settings</span><span class="lg:hidden">⚙️</span></a
