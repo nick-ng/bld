@@ -23,6 +23,7 @@ if (browser) {
 			const parsedFiftyTwo = fiftyTwoSchema.safeParse(JSON.parse(tempFiftyTwo));
 			if (parsedFiftyTwo.success) {
 				fiftyTwoStore.set({ ...parsedFiftyTwo.data, isLoaded: true });
+				callback();
 				return;
 			}
 		}

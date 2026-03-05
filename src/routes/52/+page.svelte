@@ -254,7 +254,19 @@
 					{/each}
 				</div>
 				<div class="grid grow auto-rows-[1fr] grid-cols-1 gap-0.5">
-					<button class="p-4" type="button" onclick={() => {}}> Skip </button>
+					<button
+						class="p-4"
+						type="button"
+						onclick={() => {
+							if ($fiftyTwoStore.recall.length >= $fiftyTwoStore.deck.length) {
+								return;
+							}
+
+							$fiftyTwoStore.recall = [...$fiftyTwoStore.recall, { rank: -1, suit: "" }];
+						}}
+					>
+						Skip
+					</button>
 					<button
 						class="p-4"
 						type="button"
