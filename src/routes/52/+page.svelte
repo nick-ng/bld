@@ -3,7 +3,7 @@
 	import Card52 from "$lib/components/card-52.svelte";
 	import { onMount } from "svelte";
 	import { fiftyTwoStore } from "$lib/stores/fifty-two";
-	import { getCardProperties, shuffleArray } from "$lib/utils";
+	import { getCardProperties, shuffleArray, msToMinAndSec } from "$lib/utils";
 
 	const SUITS = ["c", "d", "h", "s"];
 	const dragThreshold = 0.3;
@@ -18,6 +18,29 @@
 	let recallSuit = $state("");
 	let recallIndex = $state(-1);
 	let recallProperties = $derived(getCardProperties({ rank: recallRank, suit: recallSuit }));
+	let results = $derived(
+		$fiftyTwoStore.deck.map((card, i) => {
+			const recalledCard = $fiftyTwoStore.recall[i];
+			if (!recalledCard) {
+				return {
+					rank: card.rank,
+					suit: card.suit,
+					recalledRank: -1,
+					recalledSuid: "",
+					isSuccess: false,
+				};
+			}
+
+			return {
+				rank: card.rank,
+				suit: card.suit,
+				recalledRank: recalledCard.rank,
+				recalledSuit: recalledCard.suit,
+				isSuccess: recalledCard.rank === card.rank && recalledCard.suit === card.suit,
+			};
+		})
+	);
+	let firstWrongIndex = $derived(results.findIndex((r) => !r.isSuccess));
 
 	const shuffleDeck = () => {
 		const newDeck: FiftyTwoCard[] = [];
@@ -32,8 +55,8 @@
 
 		$fiftyTwoStore.deck = shuffleArray(newDeck);
 		$fiftyTwoStore.currentIndex = 0;
-		$fiftyTwoStore.recalling = false;
-		$fiftyTwoStore.done = false;
+		$fiftyTwoStore.state = "memo";
+		$fiftyTwoStore.memoStartMs = Date.now();
 		$fiftyTwoStore.recall = [];
 	};
 
@@ -130,22 +153,61 @@
 <div class="overflow-x-hidden">
 	{#if !$fiftyTwoStore.isLoaded}
 		Loading...
-	{:else if $fiftyTwoStore.deck.length === 0}
-		<button
-			type="button"
-			onclick={() => {
-				shuffleDeck();
-			}}>Shuffle</button
-		>
-	{:else if $fiftyTwoStore.done}
+	{:else if $fiftyTwoStore.deck.length === 0 || $fiftyTwoStore.state === "standby"}
 		<div class="m-1">
+			<button
+				type="button"
+				onclick={() => {
+					shuffleDeck();
+				}}>Shuffle and begin</button
+			>
+		</div>
+	{:else if $fiftyTwoStore.state === "done"}
+		<div class="m-1">
+			<div class="my-1">Results</div>
+			{#if true}
+				<table>
+					<tbody>
+						<tr>
+							<td class="border border-gray-600 px-1 py-0.5">Correct</td>
+							<td class="border border-gray-600 px-1 py-0.5 text-right"
+								>{results.filter((r) => r.isSuccess).length}/{results.length}</td
+							>
+						</tr>
+						<tr>
+							<td class="border border-gray-600 px-1 py-0.5">Until Wrong</td>
+							<td class="border border-gray-600 px-1 py-0.5 text-right"
+								>{firstWrongIndex >= 0 ? firstWrongIndex : "-"}</td
+							>
+						</tr>
+						<tr>
+							<td class="border border-gray-600 px-1 py-0.5">Memo Time</td>
+							<td class="border border-gray-600 px-1 py-0.5 text-right"
+								>{msToMinAndSec($fiftyTwoStore.recallStartMs - $fiftyTwoStore.memoStartMs)}</td
+							>
+						</tr>
+						<tr>
+							<td class="border border-gray-600 px-1 py-0.5">Recall Time</td>
+							<td class="border border-gray-600 px-1 py-0.5 text-right"
+								>{msToMinAndSec($fiftyTwoStore.doneMs - $fiftyTwoStore.recallStartMs)}</td
+							>
+						</tr>
+						<tr>
+							<td class="border border-gray-600 px-1 py-0.5">Total Time</td>
+							<td class="border border-gray-600 px-1 py-0.5 text-right"
+								>{msToMinAndSec($fiftyTwoStore.doneMs - $fiftyTwoStore.memoStartMs)}</td
+							>
+						</tr>
+					</tbody>
+				</table>
+			{/if}
 			<div class="flex flex-row justify-center gap-1">
 				<table>
 					<thead>
 						<tr>
-							<th class="border border-gray-600 p-1 text-right">#</th>
-							<th class="border border-gray-600 p-1 text-right">Card</th>
-							<th class="border border-gray-600 p-1 text-right">Recall</th>
+							<th class="border border-gray-600 p-0.5 text-right">#</th>
+							<th class="border border-gray-600 p-0.5 text-right">Card</th>
+							<th class="border border-gray-600 p-0.5 text-right">Recall</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -157,13 +219,13 @@
 									? ""
 									: "bg-yellow-200"}
 							>
-								<td class="border border-gray-600 p-1 text-right">{i + 1}</td>
-								<td class="border border-gray-600 p-1 text-right">
+								<td class="border border-gray-600 p-0.5 text-right">{i + 1}</td>
+								<td class="border border-gray-600 p-0.5 text-right">
 									<span style={`color: ${cardProperties.colorHex};`}
 										>{cardProperties.displayRank}{cardProperties.symbol}</span
 									>
 								</td>
-								<td class="border border-gray-600 p-1 text-right">
+								<td class="border border-gray-600 p-0.5 text-right">
 									{#if recalledCard}
 										{@const recalledProperties = getCardProperties(recalledCard)}
 										<span style={`color: ${recalledProperties.colorHex};`}
@@ -178,9 +240,9 @@
 				<table>
 					<thead>
 						<tr>
-							<th class="border border-gray-600 p-1 text-right">#</th>
-							<th class="border border-gray-600 p-1 text-right">Card</th>
-							<th class="border border-gray-600 p-1 text-right">Recall</th>
+							<th class="border border-gray-600 p-0.5 text-right">#</th>
+							<th class="border border-gray-600 p-0.5 text-right">Card</th>
+							<th class="border border-gray-600 p-0.5 text-right">Recall</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -192,13 +254,13 @@
 									? ""
 									: "bg-yellow-200"}
 							>
-								<td class="border border-gray-600 p-1 text-right">{i + 27}</td>
-								<td class="border border-gray-600 p-1 text-right">
+								<td class="border border-gray-600 p-0.5 text-right">{i + 27}</td>
+								<td class="border border-gray-600 p-0.5 text-right">
 									<span style={`color: ${cardProperties.colorHex};`}
 										>{cardProperties.displayRank}{cardProperties.symbol}</span
 									>
 								</td>
-								<td class="border border-gray-600 p-1 text-right">
+								<td class="border border-gray-600 p-0.5 text-right">
 									{#if recalledCard}
 										{@const recalledProperties = getCardProperties(recalledCard)}
 										<span style={`color: ${recalledProperties.colorHex};`}
@@ -214,11 +276,11 @@
 			<button
 				type="button"
 				onclick={() => {
-					shuffleDeck();
-				}}>Shuffle</button
+					$fiftyTwoStore.state = "standby";
+				}}>Done</button
 			>
 		</div>
-	{:else if $fiftyTwoStore.recalling}
+	{:else if $fiftyTwoStore.state === "recall"}
 		<div class="relative">
 			<div class="m-1">Recalling</div>
 			<div class="sticky top-1 m-1 flex flex-row gap-1">
@@ -333,7 +395,9 @@
 						) {
 							return;
 						}
-						$fiftyTwoStore.done = true;
+
+						$fiftyTwoStore.state = "done";
+						$fiftyTwoStore.doneMs = Date.now();
 					}}>Check</button
 				>
 			</div>
@@ -350,7 +414,8 @@
 			<button
 				type="button"
 				onclick={() => {
-					$fiftyTwoStore.recalling = true;
+					$fiftyTwoStore.state = "recall";
+					$fiftyTwoStore.recallStartMs = Date.now();
 				}}>Done</button
 			>
 		</div>

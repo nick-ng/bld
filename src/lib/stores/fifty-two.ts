@@ -12,8 +12,10 @@ export const fiftyTwoStore = writable<FiftyTwo & { isLoaded: boolean }>({
 	currentIndex: 0,
 	history: [],
 	isLoaded: false,
-	recalling: false,
-	done: false,
+	recallStartMs: 0,
+	memoStartMs: 0,
+	doneMs: 0,
+	state: "standby",
 });
 
 if (browser) {
