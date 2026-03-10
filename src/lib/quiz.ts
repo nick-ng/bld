@@ -37,7 +37,7 @@ export function getQuizKit(
 	subcategory: string | null;
 	filterFunc: (lp: LetterPair) => boolean;
 	getNextReview: (lp: LetterPair) => Date;
-	getNextLetters: (letterPairs: LetterPair[], randH?: number) => LetterPair[];
+	getNextLetters: (letterPairs: LetterPair[], now: Date, randH?: number) => LetterPair[];
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
 	title: string;
 	quizType: "memo" | "alg";
@@ -213,9 +213,8 @@ export function getQuizKit(
 export function getGetNextLetters(
 	filterFunc: (lp: LetterPair) => boolean,
 	getNextReview: (lp: LetterPair) => Date
-): (letterPairs: LetterPair[], randH?: number) => LetterPair[] {
-	return (letterPairs: LetterPair[], randH = 3) => {
-		const now = new Date();
+): (letterPairs: LetterPair[], now: Date, randH?: number) => LetterPair[] {
+	return (letterPairs: LetterPair[], now: Date, randH = 3) => {
 		const sortCache: Record<string, number> = {};
 		const possibleCards = letterPairs
 			.filter((lp) => getNextReview(lp) <= now && filterFunc(lp))

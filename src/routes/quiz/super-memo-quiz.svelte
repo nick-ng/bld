@@ -23,8 +23,9 @@
 	let hideAnswer = $state(true);
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
+	let cutoffNow = $state(new Date());
 	let nextLetters = $derived(
-		getNextLetters(Object.values($letterPairStore)).filter((l) => {
+		getNextLetters(Object.values($letterPairStore), cutoffNow).filter((l) => {
 			if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
 				return true;
 			}
@@ -77,9 +78,12 @@
 			default: {
 				console.error("unexpected quiz type");
 				isSubmitting = false;
+				cutoffNow = new Date();
 				return;
 			}
 		}
+
+		cutoffNow = new Date();
 
 		// @todo(nick-ng): refactor this into a shared function
 		const today = new SvelteDate();
@@ -131,6 +135,7 @@
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
 			searchParams.set("sp", nextLetters[0].speffz_pair);
+			cutoffNow = new Date();
 			goto(`/quiz?${searchParams.toString()}`);
 		}, 0);
 	};
@@ -162,6 +167,7 @@
 					selectedGradeQ = 5;
 					break;
 				}
+				case "0":
 				case " ": {
 					hideAnswer = false;
 					break;
@@ -249,21 +255,6 @@
 				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
 					<tbody>
 						<tr>
-							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "3", q: 2 }] as grade (grade.q)}
-								<td>
-									<button
-										class={`w-full ${selectedGradeQ == grade.q ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
-										type="button"
-										onclick={() => {
-											selectedGradeQ = grade.q;
-										}}
-									>
-										❌ {grade.label}
-									</button>
-								</td>
-							{/each}
-						</tr>
-						<tr>
 							{#each [{ label: "Effort", q: 3 }, { label: "Hesitation", q: 4 }, { label: "Perfect", q: 5 }] as grade (grade.q)}
 								<td>
 									<button
@@ -274,6 +265,21 @@
 										}}
 									>
 										⭕ {grade.label}
+									</button>
+								</td>
+							{/each}
+						</tr>
+						<tr>
+							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "3", q: 2 }] as grade (grade.q)}
+								<td>
+									<button
+										class={`w-full ${selectedGradeQ == grade.q ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
+										type="button"
+										onclick={() => {
+											selectedGradeQ = grade.q;
+										}}
+									>
+										❌ {grade.label}
 									</button>
 								</td>
 							{/each}

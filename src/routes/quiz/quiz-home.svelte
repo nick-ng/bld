@@ -40,6 +40,7 @@
 			.filter((c) => c.all.length > 0)
 			.sort((a, b) => a.sortString.localeCompare(b.sortString))
 	);
+	let cutoffNow = $state(new Date());
 
 	const getQuizUrl = (category: string, subcategory: string | null, nextLetters: LetterPair[]) => {
 		if (nextLetters.length === 0) {
@@ -65,6 +66,25 @@
 			$optionsStore.newCardDay = todayMs;
 			$optionsStore.newCardsToday = 0;
 		}
+
+		const cutoffUpdateInterval = setInterval(
+			() => {
+				cutoffNow = new Date();
+				const today = new SvelteDate();
+				today.setHours(5, 0, 0, 0);
+				const todayMs = today.valueOf();
+				if ($optionsStore.newCardDay + DAY_MS < todayMs) {
+					$optionsStore.newCardDay = todayMs;
+					$optionsStore.newCardsToday = 0;
+					fetchAndLoadMnemonicsAndAlgorithms();
+				}
+			},
+			1000 * 60 * 30
+		); // 30 minutes
+
+		return () => {
+			clearInterval(cutoffUpdateInterval);
+		};
 	});
 </script>
 
@@ -82,6 +102,8 @@
 							return;
 						}
 
+						cutoffNow = new Date();
+
 						fetchAndLoadMnemonicsAndAlgorithms();
 						// @todo(nick-ng): refactor this into a shared function
 						const today = new SvelteDate();
@@ -97,7 +119,7 @@
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
 					{@const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId)}
-					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore))}
+					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore), cutoffNow)}
 					<div
 						class={`${
 							quizCategory.category !== "memo" && quizCategory.subcategory ? "w-9/10" : "w-full"

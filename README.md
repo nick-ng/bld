@@ -74,7 +74,7 @@ css:
 - src/lib/stores/letter-pairs.ts:129: @todo(nick-ng): put data into session storage
 - src/lib/stores/letter-pairs.ts:224: @todo(nick-ng): put data into session storage
 - src/lib/stores/letter-pairs.ts:294: @todo(nick-ng): put data into session storage
-- src/lib/stores/options.ts:9: @todo(nick-ng): store options on server
+- src/lib/stores/options.ts:8: @todo(nick-ng): store options on server
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
 - src/lib/utils.ts:352: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
 - src/lib/utils.ts:501: @todo(nick-ng): handle cube rotations (x y z)
@@ -85,8 +85,8 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:93: @todo(nick-ng): handle error saving changes
 - src/routes/mbld/analyse/mbld-cube.svelte:30: @todo(nick-ng): auto-complete scrambles
 - src/routes/mbld/scramble/+page.svelte:19: @todo(nick-ng): figure out a way to put this file locally
-- src/routes/quiz/quiz-home.svelte:60: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/quiz-home.svelte:86: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/super-memo-quiz.svelte:84: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/super-memo-quiz.svelte:122: @todo(nick-ng): figure out if a new card will be available first
+- src/routes/quiz/quiz-home.svelte:61: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/quiz-home.svelte:108: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/super-memo-quiz.svelte:88: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/super-memo-quiz.svelte:126: @todo(nick-ng): figure out if a new card will be available first
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
