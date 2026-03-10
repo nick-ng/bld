@@ -175,9 +175,9 @@
 							>
 						</tr>
 						<tr>
-							<td class="border border-gray-600 px-1 py-0.5">Until Wrong</td>
+							<td class="border border-gray-600 px-1 py-0.5">Correct Streak</td>
 							<td class="border border-gray-600 px-1 py-0.5 text-right"
-								>{firstWrongIndex >= 0 ? firstWrongIndex : "-"}</td
+								>{firstWrongIndex >= 0 ? firstWrongIndex : results.length}</td
 							>
 						</tr>
 						<tr>
@@ -282,7 +282,7 @@
 		</div>
 	{:else if $fiftyTwoStore.state === "recall"}
 		<div class="relative">
-			<div class="m-1">Recalling</div>
+			<div class="m-1">Recalling {$fiftyTwoStore.recall.length}/{$fiftyTwoStore.deck.length}</div>
 			<div class="sticky top-1 m-1 flex flex-row gap-1">
 				<div class="grid grow grid-cols-3 gap-0.5">
 					{#each [13, -1, 10, 11, 12, 7, 8, 9, 4, 5, 6, 1, 2, 3] as rank (rank)}
@@ -379,9 +379,6 @@
 						}}>Last</button
 					>
 				{/if}
-				<div class="flex items-center justify-center">
-					{$fiftyTwoStore.recall.length}/{$fiftyTwoStore.deck.length}
-				</div>
 			</div>
 			<div class="m-1">
 				<button
