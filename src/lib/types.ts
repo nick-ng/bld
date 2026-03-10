@@ -195,8 +195,10 @@ export const fiftyTwoSchema = z.object({
 	deck: z.array(fiftyTwoCardSchema),
 	recall: z.array(fiftyTwoCardSchema),
 	currentIndex: z.number(),
-	recalling: z.boolean().optional(),
-	done: z.boolean().optional(),
+	state: z.literal(["standby", "memo", "recall", "done"]).default("standby"),
+	memoStartMs: z.number(),
+	recallStartMs: z.number(),
+	doneMs: z.number(),
 	history: z.array(fiftyTwoAttempt),
 });
 

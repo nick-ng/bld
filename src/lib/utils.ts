@@ -258,6 +258,18 @@ export function msToLargestTime(milliseconds: number) {
 	return `${milliseconds} millisecond${milliseconds === 1 ? "" : "s"}`;
 }
 
+export function msToMinAndSec(milliseconds: number) {
+	const totalSeconds = Math.round(milliseconds / 1000);
+	const minutes = Math.floor(totalSeconds / 60);
+	const seconds = totalSeconds % 60;
+
+	if (minutes > 0) {
+		return `${minutes}m ${seconds}s`;
+	}
+
+	return `${seconds}s`;
+}
+
 export function authFetch(url: string, init?: RequestInit) {
 	const newInit = { ...init };
 	const { headers, isValid, previousAccessToken } = addCredentialsToHeaders(init?.headers);
