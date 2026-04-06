@@ -1,8 +1,8 @@
 <script lang="ts">
-	import CubeFace from "$lib/components/cube-face.svelte";
+	import { onMount } from "svelte";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
-	import { onMount } from "svelte";
+	import CubeFace from "$lib/components/cube-face.svelte";
 
 	let scrambleCount = $state(8);
 	let message = $state("");
