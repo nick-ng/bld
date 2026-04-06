@@ -79,6 +79,7 @@ css:
 - src/lib/utils.ts:352: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
 - src/lib/utils.ts:501: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:662: @todo(nick-ng): is the loop necessary?
+- src/routes/2x2/+page.svelte:9: @todo(nick-ng): figure out a way to put this file locally
 - src/routes/letter-pair/edit/alg-editor.svelte:31: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:86: @todo(nick-ng): handle error saving changes
