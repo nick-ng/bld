@@ -203,3 +203,21 @@ export const fiftyTwoSchema = z.object({
 });
 
 export type FiftyTwo = z.infer<typeof fiftyTwoSchema>;
+
+export const twoByTwoAttemptSchema = z.object({
+	date: dateOrDateStringSchema,
+	scramble: z.string(),
+	inspect: z.string(),
+	bottomFaceColour: z.string(),
+	guessBottomLayerResult: z.string(),
+	guessBottomLayerMoves: z.string(),
+	realBottomLayerResult: z.string(),
+	realBottomLayerMoves: z.string(),
+	guessOLLCase: z.string(),
+	guessOLLPreAuf: z.string(),
+	realOLLCase: z.string(),
+	realOLLPreAuf: z.string(),
+	inspectMs: z.number(),
+});
+
+export type TwoByTwoAttempt = z.infer<typeof twoByTwoAttemptSchema>;

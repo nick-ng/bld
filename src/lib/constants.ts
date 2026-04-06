@@ -17,6 +17,7 @@ export const CURRENT_QUIZ_TYPE_STORE_KEY = "PUX_BLD_CURRENT_QUIZ_TYPE";
 export const OPTIONS_STORE_PREFIX = "PUX_OPTIONS";
 export const MBLD_STORE_KEY = "PUX_MBLD";
 export const FIFTY_TWO_STORE_KEY = "PUX_FIFTY_TWO";
+export const TWO_BY_TWO_STORE_KEY = "PUX_TWO_BY_TWO";
 
 export const EDGE_POSITIONS = [
 	"UB",
