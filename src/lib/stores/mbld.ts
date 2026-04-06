@@ -24,7 +24,14 @@ if (browser) {
 
 	loadMbld();
 
+	let debounceId: ReturnType<typeof setTimeout> | null = null;
 	mbldStore.subscribe((newMbld) => {
-		localforage.setItem(MBLD_STORE_KEY, JSON.stringify(newMbld));
+		if (typeof debounceId === "number") {
+			clearTimeout(debounceId);
+		}
+
+		debounceId = setTimeout(() => {
+			localforage.setItem(MBLD_STORE_KEY, JSON.stringify(newMbld));
+		}, 100);
 	});
 }

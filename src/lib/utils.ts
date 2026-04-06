@@ -204,14 +204,19 @@ export function addCredentialsToHeaders(originalHeaders?: HeadersInit): {
 
 const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-export function formatDate(date: Date) {
+export function formatDate(date: Date, showSeconds = false) {
 	const dayOfWeek = daysOfWeek[date.getDay()];
 	const dd = date.getDate();
 	const mmm = months[date.getMonth()];
 	const hh = date.getHours();
 	const minutes = date.getMinutes();
 
-	return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()} ${hh}:${minutes.toString().padStart(2, "0")}`;
+	if (!showSeconds) {
+		return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()}, ${hh}:${minutes.toString().padStart(2, "0")}`;
+	}
+
+	const seconds = date.getSeconds();
+	return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()}, ${hh}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
 export function daysAgo(date: Date | number) {
