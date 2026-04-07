@@ -5,6 +5,7 @@
 		scramble: string;
 		size: number;
 		face: string;
+		twoByTwo?: boolean;
 	}
 
 	const cubeFaceRange = (face: string) => {
@@ -33,7 +34,7 @@
 		}
 	};
 
-	let { scramble, size, face }: Props = $props();
+	let { scramble, size, face, twoByTwo }: Props = $props();
 	const cube = new Cube();
 	//
 	// U...UR...RF...FD...DL...LB...B
@@ -52,10 +53,14 @@
 	});
 </script>
 
-<div class="grid grid-cols-3 place-content-center justify-center gap-0.5">
+<div
+	class={`grid ${
+		twoByTwo ? "grid-cols-2" : "grid-cols-3"
+	} place-content-center justify-center gap-0.5`}
+>
 	{#each cubeFacesString.slice(cubeFaceRange(face)[0], cubeFaceRange(face)[1]) as cubeFace, i (`${face}-${i}`)}
 		<div
-			class={`flex items-center justify-center font-bold ${cubeFace.toLowerCase()} border border-black`}
+			class={`flex items-center justify-center font-bold ${cubeFace.toLowerCase()} border border-black ${twoByTwo && [1, 3, 4, 5, 7].includes(i) ? "hidden" : ""}`}
 			style={`width:${size}px;height:${size}px;`}
 		>
 			{#if i === 4}
