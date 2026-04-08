@@ -254,7 +254,9 @@ export function superMemo2(
 		if (input.sm2_n === 0) {
 			output.sm2_i = 1;
 		} else if (input.sm2_n === 1) {
-			output.sm2_i = 6;
+			output.sm2_i = 2;
+		} else if (input.sm2_n === 2) {
+			output.sm2_i = 5;
 		} else {
 			output.sm2_i = Math.round(input.sm2_i * input.sm2_ef);
 		}
