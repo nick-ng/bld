@@ -6,11 +6,17 @@
 	let currentSpeffzPair = $derived(page.url.searchParams.get("sp"));
 	let quizCategory = $derived(page.url.searchParams.get("category"));
 	let quizSubcategory = $derived(page.url.searchParams.get("subcategory"));
+	let unlimited = $derived(page.url.searchParams.get("unlimited") === "yes");
 </script>
 
 <div class="mx-auto max-w-prose">
 	{#if currentSpeffzPair && quizCategory}
-		<SuperMemoQuiz {currentSpeffzPair} category={quizCategory} subcategory={quizSubcategory} />
+		<SuperMemoQuiz
+			{currentSpeffzPair}
+			category={quizCategory}
+			subcategory={quizSubcategory}
+			{unlimited}
+		/>
 	{:else}
 		<QuizHome />
 	{/if}

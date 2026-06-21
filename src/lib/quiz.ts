@@ -36,6 +36,7 @@ export function getQuizKit(
 	category: string;
 	subcategory: string | null;
 	filterFunc: (lp: LetterPair) => boolean;
+	getLastReview: (lp: LetterPair) => Date;
 	getNextReview: (lp: LetterPair) => Date;
 	getNextLetters: (letterPairs: LetterPair[], now: Date, randH?: number) => LetterPair[];
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
@@ -46,6 +47,7 @@ export function getQuizKit(
 	const defaultSMStats = { sm2_n: 0, sm2_ef: 2.5, sm2_i: 0 };
 	switch (category) {
 		case "orozco-edges": {
+			const getLastReview = (lp: LetterPair) => lp?.algorithms?.UF?.last_review_at || new Date();
 			const getNextReview = (lp: LetterPair) => lp?.algorithms?.UF?.next_review_at || new Date();
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.UF || defaultSMStats;
 			const filterFunc = (lp: LetterPair) =>
@@ -55,6 +57,7 @@ export function getQuizKit(
 				category,
 				subcategory: null,
 				filterFunc,
+				getLastReview,
 				getNextReview,
 				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 				getSMStats,
@@ -64,6 +67,7 @@ export function getQuizKit(
 			};
 		}
 		case "orozco-corners": {
+			const getLastReview = (lp: LetterPair) => lp?.algorithms?.UFR?.last_review_at || new Date();
 			const getNextReview = (lp: LetterPair) => lp?.algorithms?.UFR?.next_review_at || new Date();
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.UFR || defaultSMStats;
 			const filterFunc = (lp: LetterPair) =>
@@ -72,6 +76,7 @@ export function getQuizKit(
 				category,
 				subcategory: null,
 				filterFunc,
+				getLastReview,
 				getNextReview,
 				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 				getSMStats,
@@ -81,6 +86,8 @@ export function getQuizKit(
 			};
 		}
 		case "UF": {
+			const getLastReview = (lp: LetterPair) =>
+				lp?.algorithms?.[category]?.last_review_at || new Date();
 			const getNextReview = (lp: LetterPair) =>
 				lp?.algorithms?.[category]?.next_review_at || new Date();
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
@@ -96,6 +103,7 @@ export function getQuizKit(
 						category,
 						subcategory: subcategory || null,
 						filterFunc,
+						getLastReview,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
@@ -117,6 +125,7 @@ export function getQuizKit(
 							category,
 							subcategory: subcategory || null,
 							filterFunc,
+							getLastReview,
 							getNextReview,
 							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 							getSMStats,
@@ -130,6 +139,7 @@ export function getQuizKit(
 						category,
 						subcategory: subcategory || null,
 						filterFunc,
+						getLastReview,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
@@ -141,6 +151,8 @@ export function getQuizKit(
 			}
 		}
 		case "UFR": {
+			const getLastReview = (lp: LetterPair) =>
+				lp?.algorithms?.[category]?.last_review_at || new Date();
 			const getNextReview = (lp: LetterPair) =>
 				lp?.algorithms?.[category]?.next_review_at || new Date();
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
@@ -158,6 +170,7 @@ export function getQuizKit(
 							category,
 							subcategory: subcategory || null,
 							filterFunc,
+							getLastReview,
 							getNextReview,
 							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 							getSMStats,
@@ -172,6 +185,7 @@ export function getQuizKit(
 						category,
 						subcategory: subcategory || null,
 						filterFunc,
+						getLastReview,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
@@ -184,6 +198,7 @@ export function getQuizKit(
 		}
 		default: {
 			// memo
+			const getLastReview = (lp: LetterPair) => lp.last_review_at;
 			const getNextReview = (lp: LetterPair) => lp.next_review_at;
 			const getSMStats = (lp: LetterPair) => lp || defaultSMStats;
 			switch (subcategory) {
@@ -197,6 +212,7 @@ export function getQuizKit(
 						category,
 						subcategory: subcategory || null,
 						filterFunc,
+						getLastReview,
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
@@ -280,4 +296,11 @@ export function superMemo2(
 	}
 
 	return output;
+}
+
+export function getStartOfTodayMs() {
+	const today = new Date();
+	today.setHours(5, 0, 0, 0);
+	const todayMs = today.valueOf();
+	return todayMs;
 }

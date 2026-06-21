@@ -135,6 +135,7 @@ export const optionsSchema = z.object({
 		.default({ UF: true, UFR: true }),
 	pinnedQuizzes: z.array(z.string()).optional().default([]),
 	maxNewCardsPerDay: z.number().optional().default(9999),
+	cardsPerGroupPerDay: z.number().optional().default(30),
 	newCardsToday: z.number().optional().default(0),
 	newCardDay: z.number().optional().default(0),
 });
