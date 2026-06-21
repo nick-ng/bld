@@ -42,7 +42,12 @@
 	);
 	let cutoffNow = $state(new Date());
 
-	const getQuizUrl = (category: string, subcategory: string | null, nextLetters: LetterPair[]) => {
+	const getQuizUrl = (
+		category: string,
+		subcategory: string | null,
+		nextLetters: LetterPair[],
+		unlimited = false
+	) => {
 		if (nextLetters.length === 0) {
 			return "";
 		}
@@ -52,6 +57,9 @@
 		searchParams.set("category", category);
 		if (subcategory) {
 			searchParams.set("subcategory", subcategory);
+		}
+		if (unlimited) {
+			searchParams.set("unlimited", "yes");
 		}
 
 		return `/quiz?${searchParams.toString()}`;
@@ -127,8 +135,14 @@
 						style={`order: ${(nextLetters.length === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
 					>
 						<a
+							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
+							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters, true)}
+						>
+							♾️
+						</a>
+						<a
 							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters)}
+							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters, false)}
 						>
 							{quizKit.title} ({nextLetters.length}/{quizCategory.all.length} due)
 						</a>
