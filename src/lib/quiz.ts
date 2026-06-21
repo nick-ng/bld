@@ -61,7 +61,7 @@ export function getQuizKit(
 				getNextReview,
 				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 				getSMStats,
-				title: "Orozco, Edges",
+				title: "ORZ, Edges",
 				quizType: "alg",
 				sortString: "zz-orozco-edges",
 			};
@@ -80,7 +80,7 @@ export function getQuizKit(
 				getNextReview,
 				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 				getSMStats,
-				title: "Orozco, Corners",
+				title: "ORZ, Corners",
 				quizType: "alg",
 				sortString: "zz-orozco-corners",
 			};
@@ -107,7 +107,7 @@ export function getQuizKit(
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
-						title: `${category} Buffer, Algorithms`,
+						title: `${category} Buf, Algs`,
 						quizType: "alg",
 						sortString: "UF !algorithms",
 					};
@@ -129,9 +129,9 @@ export function getQuizKit(
 							getNextReview,
 							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 							getSMStats,
-							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							title: `${category} Buf, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
-							sortString: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							sortString: `${category} Buf, ${subcategory.toUpperCase()}`,
 						};
 					}
 					const filterFunc = (lp: LetterPair) => lp?.algorithms?.[category]?.moves?.length > 2;
@@ -143,7 +143,7 @@ export function getQuizKit(
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
-						title: `${category} Buffer`,
+						title: `${category} Buf`,
 						quizType: "alg",
 						sortString: `${category} !!`,
 					};
@@ -174,9 +174,9 @@ export function getQuizKit(
 							getNextReview,
 							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 							getSMStats,
-							title: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							title: `${category} Buf, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
-							sortString: `${category} Buffer, ${subcategory.toUpperCase()}`,
+							sortString: `${category} Buf, ${subcategory.toUpperCase()}`,
 						};
 					}
 
@@ -189,7 +189,7 @@ export function getQuizKit(
 						getNextReview,
 						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
 						getSMStats,
-						title: `${category} Buffer`,
+						title: `${category} Buf`,
 						quizType: "alg",
 						sortString: `${category} !!`,
 					};

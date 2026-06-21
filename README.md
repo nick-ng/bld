@@ -72,8 +72,8 @@ css:
 - src/lib/stores/letter-pairs.ts:27: @todo(nick-ng): should these load methods take unknown input and do the schema parsing?
 - src/lib/stores/letter-pairs.ts:91: @todo(nick-ng): put data into session storage
 - src/lib/stores/letter-pairs.ts:129: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:242: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:312: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:224: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:294: @todo(nick-ng): put data into session storage
 - src/lib/stores/options.ts:8: @todo(nick-ng): store options on server
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
 - src/lib/utils.ts:357: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
