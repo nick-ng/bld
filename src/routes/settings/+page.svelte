@@ -118,6 +118,19 @@
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="optionsCardsPerGroup"> Cards Per Group Per Day </label>
+				</td>
+				<td class="text-right">
+					<input
+						class="inline-block w-32 text-right"
+						id="optionsCardsPerGroup"
+						type="number"
+						bind:value={$optionsStore.cardsPerGroupPerDay}
+					/>
+				</td>
+			</tr>
+			<tr>
 				<td>Chosen Buffers</td>
 				<td>
 					<details>

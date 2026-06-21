@@ -1,8 +1,13 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
+	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
-	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
+	import {
+		getVisibleFlashCardComponents,
+		getQuizKit,
+		superMemo2,
+		getStartOfTodayMs,
+	} from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import LetterPair from "$lib/components/letter-pair.svelte";
@@ -12,26 +17,38 @@
 		currentSpeffzPair: string;
 		category: string; // e.g. "Memo", "UF", "UFR"
 		subcategory: string | null; // default is all e.g. "q", "algs"
+		unlimited: boolean;
 	}
 
 	const DAY_MS = 1000 * 60 * 60 * 24;
 
-	let { currentSpeffzPair, category, subcategory }: Props = $props();
-	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
-		getQuizKit(category, subcategory)
-	);
+	let { currentSpeffzPair, category, subcategory, unlimited = false }: Props = $props();
+	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview, getLastReview } =
+		$derived(getQuizKit(category, subcategory));
 	let hideAnswer = $state(true);
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let cutoffNow = $state(new Date());
-	let nextLetters = $derived(
-		getNextLetters(Object.values($letterPairStore), cutoffNow).filter((l) => {
-			if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
-				return true;
-			}
+	let limitedLettersLeft = $derived(
+		$optionsStore.cardsPerGroupPerDay -
+			Object.values($letterPairStore).filter((lp) => {
+				if (!filterFunc(lp)) {
+					return false;
+				}
 
-			return getSMStats(l).sm2_i > 0.2;
-		})
+				return getLastReview(lp).valueOf() > getStartOfTodayMs();
+			}).length
+	);
+	let nextLetters = $derived(
+		getNextLetters(Object.values($letterPairStore), cutoffNow)
+			.filter((l) => {
+				if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
+					return true;
+				}
+
+				return getSMStats(l).sm2_i > 0.2;
+			})
+			.slice(0, unlimited ? 9999 : limitedLettersLeft)
 	);
 	let isSubmitting = $state(false);
 	let questionStartMs = $state(Date.now());
@@ -85,10 +102,7 @@
 
 		cutoffNow = new Date();
 
-		// @todo(nick-ng): refactor this into a shared function
-		const today = new SvelteDate();
-		today.setHours(5, 0, 0, 0);
-		const todayMs = today.valueOf();
+		const todayMs = getStartOfTodayMs();
 		if ($optionsStore.newCardDay + DAY_MS < todayMs) {
 			$optionsStore.newCardDay = todayMs;
 			$optionsStore.newCardsToday = 0;
@@ -252,7 +266,7 @@
 						</button>
 					</div>
 				{/if}
-				<table class="mb-3 w-full border-collapse border-separate border-spacing-1">
+				<table class="mb-3 w-full border-separate border-spacing-1">
 					<tbody>
 						<tr>
 							{#each [{ label: "Effort", q: 3 }, { label: "Hesitation", q: 4 }, { label: "Perfect", q: 5 }] as grade (grade.q)}

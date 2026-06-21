@@ -15,6 +15,7 @@ export const optionsStore = writable<Options>({
 	visibleBuffers: { UF: true, UFR: true },
 	pinnedQuizzes: [],
 	maxNewCardsPerDay: 50,
+	cardsPerGroupPerDay: 30,
 	newCardsToday: 0,
 	newCardDay: 0,
 });
