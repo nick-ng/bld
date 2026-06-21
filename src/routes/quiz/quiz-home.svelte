@@ -144,7 +144,7 @@
 							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
 							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters, false)}
 						>
-							{quizKit.title} ({nextLetters.length}/{quizCategory.all.length} due)
+							{quizKit.title} ({nextLetters.length}/{quizCategory.all.length})
 						</a>
 						<details class="hidden lg:block">
 							<summary class="like-button py-2">🔍</summary>
