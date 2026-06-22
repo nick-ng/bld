@@ -242,8 +242,8 @@ export function getQuizKit(
 
 export function getGetNextLetters(
 	filterFunc: (lp: LetterPair) => boolean,
-	getNextReview: (lp: LetterPair) => Date,
 	getLastReview: (lp: LetterPair) => Date,
+	getNextReview: (lp: LetterPair) => Date,
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number }
 ): (
 	letterPairs: LetterPair[],
@@ -293,9 +293,17 @@ export function getGetNextLetters(
 		});
 
 		if (limit > 0) {
-			const quizzedToday = filteredLetters.filter(
-				(lp) => getLastReview(lp).valueOf() > getStartOfTodayMs()
+			const quizzedToday = letterPairs.filter(
+				(lp) => filterFunc(lp) && getLastReview(lp).valueOf() > getStartOfTodayMs()
 			).length;
+			if (limit - quizzedToday < 1) {
+				return {
+					next: [],
+					retry: retryLetters,
+					total: retryLetters.length,
+				};
+			}
+
 			const actualNext = nextLetters.slice(0, limit - quizzedToday);
 			return {
 				next: actualNext,
@@ -303,6 +311,7 @@ export function getGetNextLetters(
 				total: actualNext.length + retryLetters.length,
 			};
 		}
+
 		return {
 			next: nextLetters,
 			retry: retryLetters,
