@@ -23,33 +23,22 @@
 	const DAY_MS = 1000 * 60 * 60 * 24;
 
 	let { currentSpeffzPair, category, subcategory, unlimited = false }: Props = $props();
-	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview, getLastReview } =
-		$derived(getQuizKit(category, subcategory));
+	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
+		getQuizKit(category, subcategory)
+	);
 	let hideAnswer = $state(true);
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let cutoffNow = $state(new Date());
-	let limitedLettersLeft = $derived(
-		$optionsStore.cardsPerGroupPerDay -
-			Object.values($letterPairStore).filter((lp) => {
-				if (!filterFunc(lp)) {
-					return false;
-				}
-
-				return getLastReview(lp).valueOf() > getStartOfTodayMs();
-			}).length
+	let tempLetters = $derived(
+		getNextLetters(
+			Object.values($letterPairStore),
+			cutoffNow,
+			unlimited ? -1 : $optionsStore.cardsPerGroupPerDay
+		)
 	);
-	let nextLetters = $derived(
-		getNextLetters(Object.values($letterPairStore), cutoffNow)
-			.filter((l) => {
-				if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
-					return true;
-				}
-
-				return getSMStats(l).sm2_i > 0.2;
-			})
-			.slice(0, unlimited ? 9999 : limitedLettersLeft)
-	);
+	let nextLetters = $derived(tempLetters.next);
+	let retryLetters = $derived(tempLetters.retry);
 	let isSubmitting = $state(false);
 	let questionStartMs = $state(Date.now());
 
@@ -119,7 +108,7 @@
 			return;
 		}
 
-		if (nextLetters.length === 0) {
+		if (nextLetters.length === 0 && retryLetters.length === 0) {
 			const lettersInSet = Object.values($letterPairStore)
 				.filter((l) => {
 					if (!filterFunc(l)) {
@@ -139,7 +128,12 @@
 
 			// @todo(nick-ng): figure out if a new card will be available first
 			const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
-			alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
+			if (unlimited) {
+				alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
+			} else {
+				alert("All done for today!");
+			}
+
 			goto("/quiz");
 			return;
 		}
@@ -148,7 +142,11 @@
 		selectedGradeQ = -1;
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
-			searchParams.set("sp", nextLetters[0].speffz_pair);
+			if (nextLetters.length) {
+				searchParams.set("sp", nextLetters[0].speffz_pair);
+			} else {
+				searchParams.set("sp", retryLetters[0].speffz_pair);
+			}
 			cutoffNow = new Date();
 			goto(`/quiz?${searchParams.toString()}`);
 		}, 0);
@@ -205,7 +203,7 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if nextLetters.length === 0}
+	{#if nextLetters.length === 0 && retryLetters.length === 0}
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
@@ -213,6 +211,7 @@
 				<div>Left:</div>
 				<div>
 					{nextLetters.length}
+					{#if retryLetters.length > 0}<span> + {retryLetters.length}</span>{/if}
 				</div>
 			</div>
 			<h3 class="text-center">Quiz: {title}</h3>
