@@ -30,15 +30,13 @@
 	let selectedGradeQ = $state(-1);
 	let currentLetterPair = $derived($letterPairStore[currentSpeffzPair]);
 	let cutoffNow = $state(new Date());
-	let tempLetters = $derived(
+	let letters = $derived(
 		getNextLetters(
 			Object.values($letterPairStore),
 			cutoffNow,
 			unlimited ? -1 : $optionsStore.cardsPerGroupPerDay
 		)
 	);
-	let nextLetters = $derived(tempLetters.next);
-	let retryLetters = $derived(tempLetters.retry);
 	let isSubmitting = $state(false);
 	let questionStartMs = $state(Date.now());
 
@@ -108,7 +106,7 @@
 			return;
 		}
 
-		if (nextLetters.length === 0 && retryLetters.length === 0) {
+		if (letters.total === 0) {
 			const lettersInSet = Object.values($letterPairStore)
 				.filter((l) => {
 					if (!filterFunc(l)) {
@@ -142,10 +140,10 @@
 		selectedGradeQ = -1;
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
-			if (nextLetters.length) {
-				searchParams.set("sp", nextLetters[0].speffz_pair);
+			if (letters.next.length) {
+				searchParams.set("sp", letters.next[0].speffz_pair);
 			} else {
-				searchParams.set("sp", retryLetters[0].speffz_pair);
+				searchParams.set("sp", letters.retry[0].speffz_pair);
 			}
 			cutoffNow = new Date();
 			goto(`/quiz?${searchParams.toString()}`);
@@ -203,15 +201,15 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if nextLetters.length === 0 && retryLetters.length === 0}
+	{#if letters.total === 0}
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
 			<div class="absolute top-0 left-0 grid grid-cols-2 gap-x-1">
 				<div>Left:</div>
 				<div>
-					{nextLetters.length}
-					{#if retryLetters.length > 0}<span> + {retryLetters.length}</span>{/if}
+					{letters.next.length}
+					{#if letters.retry.length > 0}<span> + {letters.retry.length}</span>{/if}
 				</div>
 			</div>
 			<h3 class="text-center">Quiz: {title}</h3>

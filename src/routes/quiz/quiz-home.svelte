@@ -145,7 +145,12 @@
 					>
 						<a
 							class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, letters, true)}
+							href={getQuizUrl(
+								quizCategory.category,
+								quizCategory.subcategory,
+								unlimitedLetters,
+								true
+							)}
 						>
 							♾️
 						</a>
