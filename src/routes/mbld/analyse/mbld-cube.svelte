@@ -113,8 +113,7 @@
 				onchange={(event) => {
 					pendingChanges.dnf_reason = event.currentTarget.value;
 				}}
-				onblur={handleSave}
-			></textarea>
+				onblur={handleSave}></textarea>
 		</td>
 	</tr>
 {/if}
