@@ -143,17 +143,19 @@
 						} group relative flex flex-row gap-1`}
 						style={`order: ${(letters.total === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
 					>
-						<a
-							class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(
-								quizCategory.category,
-								quizCategory.subcategory,
-								unlimitedLetters,
-								true
-							)}
-						>
-							♾️
-						</a>
+						{#if quizCategory.all.length > $optionsStore.cardsPerGroupPerDay}
+							<a
+								class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
+								href={getQuizUrl(
+									quizCategory.category,
+									quizCategory.subcategory,
+									unlimitedLetters,
+									true
+								)}
+							>
+								♾️
+							</a>
+						{/if}
 						<a
 							class={`${letters.total === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
 							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, letters, false)}
