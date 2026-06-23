@@ -45,15 +45,15 @@
 	const getQuizUrl = (
 		category: string,
 		subcategory: string | null,
-		nextLetters: LetterPair[],
+		letters: { next: LetterPair[]; retry: LetterPair[]; total: number },
 		unlimited = false
 	) => {
-		if (nextLetters.length === 0) {
+		if (letters.total === 0) {
 			return "";
 		}
 
 		const searchParams = new SvelteURLSearchParams();
-		searchParams.set("sp", nextLetters[0].speffz_pair);
+		searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
 		searchParams.set("category", category);
 		if (subcategory) {
 			searchParams.set("subcategory", subcategory);
@@ -127,24 +127,38 @@
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
 					{@const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId)}
-					{@const nextLetters = quizKit.getNextLetters(Object.values($letterPairStore), cutoffNow)}
+					{@const letters = quizKit.getNextLetters(
+						Object.values($letterPairStore),
+						cutoffNow,
+						$optionsStore.cardsPerGroupPerDay
+					)}
+					{@const unlimitedLetters = quizKit.getNextLetters(
+						Object.values($letterPairStore),
+						cutoffNow,
+						-1
+					)}
 					<div
 						class={`${
 							quizCategory.category !== "memo" && quizCategory.subcategory ? "w-9/10" : "w-full"
 						} group relative flex flex-row gap-1`}
-						style={`order: ${(nextLetters.length === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
+						style={`order: ${(letters.total === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
 					>
 						<a
-							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters, true)}
+							class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
+							href={getQuizUrl(
+								quizCategory.category,
+								quizCategory.subcategory,
+								unlimitedLetters,
+								true
+							)}
 						>
 							♾️
 						</a>
 						<a
-							class={`${nextLetters.length === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, nextLetters, false)}
+							class={`${letters.total === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
+							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, letters, false)}
 						>
-							{quizKit.title} ({nextLetters.length}/{quizCategory.all.length})
+							{quizKit.title} ({unlimitedLetters.total}/{quizCategory.all.length})
 						</a>
 						<details class="hidden lg:block">
 							<summary class="like-button py-2">🔍</summary>

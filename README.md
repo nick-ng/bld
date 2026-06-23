@@ -88,5 +88,5 @@ css:
 - src/routes/mbld/scramble/+page.svelte:19: @todo(nick-ng): figure out a way to put this file locally
 - src/routes/quiz/quiz-home.svelte:69: @todo(nick-ng): refactor this into a shared function
 - src/routes/quiz/quiz-home.svelte:116: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/super-memo-quiz.svelte:140: @todo(nick-ng): figure out if a new card will be available first
+- src/routes/quiz/super-memo-quiz.svelte:127: @todo(nick-ng): figure out if a new card will be available first
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

@@ -38,7 +38,11 @@ export function getQuizKit(
 	filterFunc: (lp: LetterPair) => boolean;
 	getLastReview: (lp: LetterPair) => Date;
 	getNextReview: (lp: LetterPair) => Date;
-	getNextLetters: (letterPairs: LetterPair[], now: Date, randH?: number) => LetterPair[];
+	getNextLetters: (
+		letterPairs: LetterPair[],
+		now: Date,
+		limit: number
+	) => { next: LetterPair[]; retry: LetterPair[]; total: number };
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
 	title: string;
 	quizType: "memo" | "alg";
@@ -59,7 +63,7 @@ export function getQuizKit(
 				filterFunc,
 				getLastReview,
 				getNextReview,
-				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+				getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 				getSMStats,
 				title: "ORZ, Edges",
 				quizType: "alg",
@@ -78,7 +82,7 @@ export function getQuizKit(
 				filterFunc,
 				getLastReview,
 				getNextReview,
-				getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+				getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 				getSMStats,
 				title: "ORZ, Corners",
 				quizType: "alg",
@@ -105,7 +109,7 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 						getSMStats,
 						title: `${category} Buf, Algs`,
 						quizType: "alg",
@@ -127,7 +131,12 @@ export function getQuizKit(
 							filterFunc,
 							getLastReview,
 							getNextReview,
-							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+							getNextLetters: getGetNextLetters(
+								filterFunc,
+								getLastReview,
+								getNextReview,
+								getSMStats
+							),
 							getSMStats,
 							title: `${category} Buf, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
@@ -141,7 +150,7 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 						getSMStats,
 						title: `${category} Buf`,
 						quizType: "alg",
@@ -172,7 +181,12 @@ export function getQuizKit(
 							filterFunc,
 							getLastReview,
 							getNextReview,
-							getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+							getNextLetters: getGetNextLetters(
+								filterFunc,
+								getLastReview,
+								getNextReview,
+								getSMStats
+							),
 							getSMStats,
 							title: `${category} Buf, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
@@ -187,7 +201,7 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 						getSMStats,
 						title: `${category} Buf`,
 						quizType: "alg",
@@ -214,7 +228,7 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getNextReview),
+						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
 						getSMStats,
 						title: "Images",
 						quizType: "memo",
@@ -228,27 +242,85 @@ export function getQuizKit(
 
 export function getGetNextLetters(
 	filterFunc: (lp: LetterPair) => boolean,
-	getNextReview: (lp: LetterPair) => Date
-): (letterPairs: LetterPair[], now: Date, randH?: number) => LetterPair[] {
-	return (letterPairs: LetterPair[], now: Date, randH = 3) => {
+	getLastReview: (lp: LetterPair) => Date,
+	getNextReview: (lp: LetterPair) => Date,
+	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number }
+): (
+	letterPairs: LetterPair[],
+	now: Date,
+	limit: number
+) => { next: LetterPair[]; retry: LetterPair[]; total: number } {
+	return (letterPairs: LetterPair[], now: Date, limit: number) => {
 		const sortCache: Record<string, number> = {};
-		const possibleCards = letterPairs
+		const filteredLetters = letterPairs
 			.filter((lp) => getNextReview(lp) <= now && filterFunc(lp))
 			.sort((a, b) => {
-				// randomise the next review time slightly so they aren't always in the same order
-				// store in a cache so the sort works
-				if (!sortCache[a.speffz_pair]) {
-					sortCache[a.speffz_pair] =
-						getNextReview(a).valueOf() + Math.random() * randH * 3_600_000 + 1;
+				const sm2A = getSMStats(a);
+				const sm2B = getSMStats(b);
+				if (sm2A.sm2_i === sm2B.sm2_i) {
+					// randomise the next review time slightly so they aren't always in the same order
+					// store in a cache so the sort works
+					if (!sortCache[a.speffz_pair]) {
+						sortCache[a.speffz_pair] = Math.random();
+					}
+					if (!sortCache[b.speffz_pair]) {
+						sortCache[b.speffz_pair] = Math.random();
+					}
+					return sortCache[a.speffz_pair] - sortCache[b.speffz_pair];
 				}
-				if (!sortCache[b.speffz_pair]) {
-					sortCache[b.speffz_pair] =
-						getNextReview(b).valueOf() + Math.random() * randH * 3_600_000 + 1;
-				}
-				return sortCache[a.speffz_pair] - sortCache[b.speffz_pair];
+
+				return sm2B.sm2_i - sm2A.sm2_i;
 			});
 
-		return possibleCards;
+		const nextLetters = filteredLetters.filter((lp) => {
+			const smStats = getSMStats(lp);
+			// sm2_i = 0.5 if we got the card wrong (Q < 3)
+			if (smStats.sm2_i > 0.2 && smStats.sm2_i < 0.8) {
+				return false;
+			}
+
+			return true;
+		});
+
+		const retryLetters = filteredLetters
+			.filter((lp) => {
+				const smStats = getSMStats(lp);
+				// sm2_i = 0.5 if we got the card wrong (Q < 3)
+				if (smStats.sm2_i > 0.2 && smStats.sm2_i < 0.8) {
+					return true;
+				}
+
+				return false;
+			})
+			.sort((a, b) => {
+				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
+			});
+
+		if (limit > 0) {
+			const quizzedToday = letterPairs.filter(
+				(lp) => filterFunc(lp) && getLastReview(lp).valueOf() > getStartOfTodayMs()
+			).length;
+			if (limit - quizzedToday < 1) {
+				return {
+					next: [],
+					retry: retryLetters,
+					total: retryLetters.length,
+				};
+			}
+
+			const actualNext = nextLetters.slice(0, limit - quizzedToday);
+			return {
+				next: actualNext,
+				retry: retryLetters,
+				total: actualNext.length + retryLetters.length,
+			};
+		}
+
+		return {
+			next: nextLetters,
+			retry: retryLetters,
+			total: nextLetters.length + retryLetters.length,
+		};
 	};
 }
 
