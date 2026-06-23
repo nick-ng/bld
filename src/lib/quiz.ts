@@ -282,15 +282,19 @@ export function getGetNextLetters(
 			return true;
 		});
 
-		const retryLetters = filteredLetters.filter((lp) => {
-			const smStats = getSMStats(lp);
-			// sm2_i = 0.5 if we got the card wrong (Q < 3)
-			if (smStats.sm2_i > 0.2 && smStats.sm2_i < 0.8) {
-				return true;
-			}
+		const retryLetters = filteredLetters
+			.filter((lp) => {
+				const smStats = getSMStats(lp);
+				// sm2_i = 0.5 if we got the card wrong (Q < 3)
+				if (smStats.sm2_i > 0.2 && smStats.sm2_i < 0.8) {
+					return true;
+				}
 
-			return false;
-		});
+				return false;
+			})
+			.sort((a, b) => {
+				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
+			});
 
 		if (limit > 0) {
 			const quizzedToday = letterPairs.filter(
