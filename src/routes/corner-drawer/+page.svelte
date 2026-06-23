@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { run } from "svelte/legacy";
-
 	import { onMount } from "svelte";
 	import { COLOURS, getSpeffzCornerColour, makeHtmlString } from "$lib/components/corner-colour";
 	import Corners from "$lib/components/corners.svelte";
@@ -57,23 +55,19 @@
 		});
 	}
 
-	let htmlString = $state("");
-	run(() => {
-		htmlString = getHtmlStringForLetterPair(letterPair);
-	});
-
-	function focusLetterPairInput(event?: KeyboardEvent): void {
-		if (event && event.key !== "Enter") {
-			return;
-		}
-
-		if (letterPairInput) {
-			letterPairInput.select();
-		}
-	}
+	let htmlString = $derived(getHtmlStringForLetterPair(letterPair));
 
 	onMount(() => {
-		focusLetterPairInput();
+		const focusLetterPairInput = (event: KeyboardEvent | null): void => {
+			if (event && event.key !== "Enter") {
+				return;
+			}
+
+			if (letterPairInput) {
+				letterPairInput.select();
+			}
+		};
+		focusLetterPairInput(null);
 
 		document.addEventListener("keyup", focusLetterPairInput);
 
