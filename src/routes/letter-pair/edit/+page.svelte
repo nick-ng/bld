@@ -5,12 +5,11 @@
 	import MainEditor from "./main-editor.svelte";
 
 	let chosenSpeffzPair = $derived(page.url.searchParams.get("sp") || "");
-	let letterPair = $derived(
-		$letterPairStore[chosenSpeffzPair] ?? {
-			...getDefaultMnemonic(chosenSpeffzPair),
-			algorithms: {},
-		}
-	);
 </script>
 
-<MainEditor {letterPair} />
+<MainEditor
+	letterPair={$letterPairStore[chosenSpeffzPair] ?? {
+		...getDefaultMnemonic(chosenSpeffzPair),
+		algorithms: {},
+	}}
+/>

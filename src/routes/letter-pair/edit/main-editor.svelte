@@ -120,6 +120,7 @@
 								class="grow-0 hidden lg:block"
 								type="button"
 								onclick={() => {
+									// @todo(nick-ng): handle reseting fresh mnemonic
 									saveMnemonic(
 										{
 											speffz_pair: letterPair.speffz_pair,
@@ -137,6 +138,7 @@
 								class="grow-0 hidden lg:block"
 								type="button"
 								onclick={() => {
+									// @todo(nick-ng): handle reseting fresh mnemonic
 									saveMnemonic(
 										{
 											speffz_pair: letterPair.speffz_pair,
@@ -158,33 +160,51 @@
 							buffer={bufferLocation}
 							moves={algorithmsChanges[bufferLocation]?.moves ??
 								(letterPair.algorithms[bufferLocation]?.moves || "")}
-							zeroSM={() => {
-								saveAlgorithm(
-									{
-										speffz_pair: letterPair.speffz_pair,
-										buffer: bufferLocation,
-										sm2_n: 0,
-										sm2_ef: 2.5,
-										sm2_i: 0,
-										last_review_at: new Date(0),
-										next_review_at: new Date(),
-									},
-									true
-								);
+							zeroSM={async () => {
+								const newAlgStats = {
+									speffz_pair: letterPair.speffz_pair,
+									buffer: bufferLocation,
+									sm2_n: 0,
+									sm2_ef: 2.5,
+									sm2_i: 0,
+									last_review_at: new Date(0),
+									next_review_at: new Date(),
+								};
+								if (!letterPair.algorithms[bufferLocation]?.moves) {
+									const r = await saveAlgorithm(
+										{ ...newAlgStats, moves: algorithmsChanges[bufferLocation]?.moves || "" },
+										false
+									);
+
+									if (typeof r !== "string") {
+										delete algorithmsChanges[bufferLocation];
+									}
+								} else {
+									saveAlgorithm(newAlgStats, true);
+								}
 							}}
-							nextSM={() => {
-								saveAlgorithm(
-									{
-										speffz_pair: letterPair.speffz_pair,
-										buffer: bufferLocation,
-										sm2_n: 0,
-										sm2_ef: 2.5,
-										sm2_i: 1,
-										last_review_at: new Date(0),
-										next_review_at: new Date(),
-									},
-									true
-								);
+							nextSM={async () => {
+								const newAlgStats = {
+									speffz_pair: letterPair.speffz_pair,
+									buffer: bufferLocation,
+									sm2_n: 0,
+									sm2_ef: 2.5,
+									sm2_i: 1,
+									last_review_at: new Date(0),
+									next_review_at: new Date(),
+								};
+								if (!letterPair.algorithms[bufferLocation]?.moves) {
+									const r = await saveAlgorithm(
+										{ ...newAlgStats, moves: algorithmsChanges[bufferLocation]?.moves || "" },
+										false
+									);
+
+									if (typeof r !== "string") {
+										delete algorithmsChanges[bufferLocation];
+									}
+								} else {
+									saveAlgorithm(newAlgStats, true);
+								}
 							}}
 							movesChanged={(newMoves) => {
 								algorithmsChanges[bufferLocation] = {
