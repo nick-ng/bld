@@ -151,14 +151,14 @@
 				{/each}
 			</div>
 		</details>
-		<div class="grow-1"></div>
+		<div class="grow"></div>
 	</div>
 	{#if filteredSpeffzPairs.length === 0}
 		<div class="w-prose max-w-full">
 			No flash cards match the filter "{speffzPairFilter}"
 		</div>
 	{:else if filteredSpeffzPairs.length <= 25}
-		<div class="flashCards lg:min-w-120">
+		<div class="flashCards lg:min-w-120 mb-1">
 			{#each filteredSpeffzPairs as speffzPair, i (`${speffzPair}-${i}`)}
 				{@const letterPair = $letterPairStore[speffzPair] || {
 					...getDefaultMnemonic(speffzPair),
