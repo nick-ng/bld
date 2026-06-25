@@ -6,9 +6,11 @@
 		buffer: string;
 		moves: string;
 		movesChanged: (newMoves: string) => void | Promise<void>;
+		zeroSM: () => void | Promise<void>;
+		nextSM: () => void | Promise<void>;
 	}
 
-	let { speffzPair, buffer, moves, movesChanged }: Props = $props();
+	let { speffzPair, buffer, moves, movesChanged, zeroSM, nextSM }: Props = $props();
 
 	let blddbUrl = $derived(getBlddbUrl(speffzPair, buffer));
 </script>
@@ -20,9 +22,9 @@
 				{buffer}
 			</a>
 		</td>
-		<td>
+		<td class="flex flex-row gap-1">
 			<input
-				class="w-full px-0.5"
+				class="grow px-0.5"
 				type="text"
 				autocomplete="off"
 				name={`${buffer}-moves`}
@@ -32,6 +34,20 @@
 					movesChanged(event.currentTarget.value);
 				}}
 			/>
+			<button
+				class="grow-0 hidden lg:block"
+				type="button"
+				onclick={() => {
+					zeroSM();
+				}}>0</button
+			>
+			<button
+				class="grow-0 hidden lg:block"
+				type="button"
+				onclick={() => {
+					nextSM();
+				}}>1</button
+			>
 		</td>
 	</tr>
 {/if}

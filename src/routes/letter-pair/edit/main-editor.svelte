@@ -96,16 +96,16 @@
 			}}
 		>
 			<table
-				class="flash-card-editor mx-auto border-separate border-spacing-x-1 border-spacing-y-0.5"
+				class="flash-card-editor mx-auto border-separate border-spacing-x-1 border-spacing-y-1"
 			>
 				<tbody>
 					<tr>
 						<td class="text-right"
 							><a href="https://bestsiteever.net/colpi/" target="pux_bld_colpi">Memo</a></td
 						>
-						<td class="flex flex-row"
+						<td class="flex flex-row gap-1"
 							><input
-								class="w-full px-0.5"
+								class="grow px-0.5"
 								type="text"
 								autocomplete="off"
 								name="memo"
@@ -115,8 +115,42 @@
 										mnemonicChanges.words = newWords;
 									}
 								}
-							/></td
-						>
+							/>
+							<button
+								class="grow-0 hidden lg:block"
+								type="button"
+								onclick={() => {
+									saveMnemonic(
+										{
+											speffz_pair: letterPair.speffz_pair,
+											sm2_n: 0,
+											sm2_ef: 2.5,
+											sm2_i: 0,
+											last_review_at: new Date(0),
+											next_review_at: new Date(),
+										},
+										true
+									);
+								}}>0</button
+							>
+							<button
+								class="grow-0 hidden lg:block"
+								type="button"
+								onclick={() => {
+									saveMnemonic(
+										{
+											speffz_pair: letterPair.speffz_pair,
+											sm2_n: 0,
+											sm2_ef: 2.5,
+											sm2_i: 1,
+											last_review_at: new Date(0),
+											next_review_at: new Date(),
+										},
+										true
+									);
+								}}>1</button
+							>
+						</td>
 					</tr>
 					{#each getTrueKeys($optionsStore.chosenBuffers) as bufferLocation (bufferLocation)}
 						<AlgEditor
@@ -124,6 +158,34 @@
 							buffer={bufferLocation}
 							moves={algorithmsChanges[bufferLocation]?.moves ??
 								(letterPair.algorithms[bufferLocation]?.moves || "")}
+							zeroSM={() => {
+								saveAlgorithm(
+									{
+										speffz_pair: letterPair.speffz_pair,
+										buffer: bufferLocation,
+										sm2_n: 0,
+										sm2_ef: 2.5,
+										sm2_i: 0,
+										last_review_at: new Date(0),
+										next_review_at: new Date(),
+									},
+									true
+								);
+							}}
+							nextSM={() => {
+								saveAlgorithm(
+									{
+										speffz_pair: letterPair.speffz_pair,
+										buffer: bufferLocation,
+										sm2_n: 0,
+										sm2_ef: 2.5,
+										sm2_i: 1,
+										last_review_at: new Date(0),
+										next_review_at: new Date(),
+									},
+									true
+								);
+							}}
 							movesChanged={(newMoves) => {
 								algorithmsChanges[bufferLocation] = {
 									speffz_pair: letterPair.speffz_pair,
