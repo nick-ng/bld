@@ -238,6 +238,7 @@ export const saveMnemonic = async (
 	}
 };
 
+// returns algId on error
 export const saveAlgorithm = async (
 	partialAlgorithm: Partial<Algorithm> & { speffz_pair: string; buffer: string },
 	updateOnly = false
