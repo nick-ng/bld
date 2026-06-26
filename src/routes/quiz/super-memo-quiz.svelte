@@ -90,37 +90,36 @@
 			return;
 		}
 
-		if (letters.total === 0) {
-			if (unlimited) {
-				const lettersInSet = Object.values($letterPairStore)
-					.filter(filterFunc)
-					.sort((a, b) => {
-						return getNextReview(a).valueOf() - getNextReview(b).valueOf();
-					});
-
-				// @todo(nick-ng): figure out if a new card will be available first
-				const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
-				alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
-			} else {
-				alert("All done for today!");
-			}
-
-			goto("/quiz");
-			return;
-		}
-
 		hideAnswer = true;
 		selectedGradeQ = -1;
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
-			if (typeof old === "number" && old > 0 && letters.old.length > 0) {
-				searchParams.set("sp", letters.old[0].speffz_pair);
+			let nextSp = letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair;
+			if (typeof old === "number" && old > 0) {
+				nextSp = letters.old[0]?.speffz_pair || nextSp;
 				searchParams.set("old", (old - 1).toString());
-			} else if (letters.next.length) {
-				searchParams.set("sp", letters.next[0].speffz_pair);
-			} else {
-				searchParams.set("sp", letters.retry[0].speffz_pair);
 			}
+
+			if (!nextSp) {
+				if (unlimited) {
+					const lettersInSet = Object.values($letterPairStore)
+						.filter(filterFunc)
+						.sort((a, b) => {
+							return getNextReview(a).valueOf() - getNextReview(b).valueOf();
+						});
+
+					// @todo(nick-ng): figure out if a new card will be available first
+					const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
+					alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
+				} else {
+					alert("All done for today!");
+				}
+
+				goto("/quiz");
+				return;
+			}
+
+			searchParams.set("sp", nextSp);
 
 			if (typeof old === "number" && old <= 0) {
 				searchParams.delete("old");
