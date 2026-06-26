@@ -12,6 +12,14 @@ export type QuizLetters = {
 	total: number;
 };
 
+export type SMStats = {
+	sm2_n: number;
+	sm2_ef: number;
+	sm2_i: number;
+	last_review_at: Date;
+	next_review_at: Date;
+};
+
 export function getVisibleFlashCardComponents(
 	category: string,
 	hideAnswer: boolean,
@@ -49,12 +57,18 @@ export function getQuizKit(
 	getLastReview: (lp: LetterPair) => Date;
 	getNextReview: (lp: LetterPair) => Date;
 	getNextLetters: (letterPairs: LetterPair[], now: Date, limit: number) => QuizLetters;
-	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
+	getSMStats: (lp: LetterPair) => SMStats;
 	title: string;
 	quizType: "memo" | "alg";
 	sortString: string;
 } {
-	const defaultSMStats = { sm2_n: 0, sm2_ef: 2.5, sm2_i: 0 };
+	const defaultSMStats: SMStats = {
+		sm2_n: 0,
+		sm2_ef: 2.5,
+		sm2_i: 0,
+		last_review_at: new Date(0),
+		next_review_at: new Date(0),
+	};
 	switch (category) {
 		case "orozco-edges": {
 			const getLastReview = (lp: LetterPair) => lp?.algorithms?.UF?.last_review_at || new Date();
@@ -340,11 +354,7 @@ export function getGetNextLetters(
 
 const correctIncrement = DAY_MS; // 1 day in milliseconds
 const correctAllowance = 8 * HOUR_MS; // 8 hours in milliseconds
-export function superMemo2(
-	userGradeQ: number,
-	input: { sm2_n: number; sm2_ef: number; sm2_i: number },
-	targetEf = -1
-): { sm2_n: number; sm2_ef: number; sm2_i: number; last_review_at: Date; next_review_at: Date } {
+export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): SMStats {
 	const output = {
 		sm2_n: input.sm2_n,
 		sm2_ef: input.sm2_ef,
@@ -353,6 +363,14 @@ export function superMemo2(
 		next_review_at: new Date(),
 	};
 	if (userGradeQ >= 3) {
+		if (input.next_review_at > new Date()) {
+			// quiz wasn't due yet so don't change any stats. bump next review at and return
+			output.next_review_at = new Date(
+				Date.now() + output.sm2_i * correctIncrement - correctAllowance
+			);
+
+			return output;
+		}
 		if (input.sm2_n === 0) {
 			output.sm2_i = 1;
 		} else if (input.sm2_n === 1) {
@@ -377,6 +395,7 @@ export function superMemo2(
 	if (output.sm2_ef < 1.3) {
 		output.sm2_ef = 1.3;
 	} else if (targetEf > 0 && userGradeQ === 5 && output.sm2_ef < targetEf) {
+		// "ease hell" hack
 		const bonus = 0.1 * ((output.sm2_ef - 1.3) / (targetEf - 1.3));
 		output.sm2_ef = output.sm2_ef + bonus;
 	}
