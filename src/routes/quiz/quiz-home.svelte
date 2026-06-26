@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { LetterPair } from "$lib/types";
+	import type { QuizLetters } from "$lib/quiz";
 
 	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
 	import {
@@ -45,8 +46,9 @@
 	const getQuizUrl = (
 		category: string,
 		subcategory: string | null,
-		letters: { next: LetterPair[]; retry: LetterPair[]; total: number },
-		unlimited = false
+		letters: QuizLetters,
+		unlimited: boolean,
+		old: boolean
 	) => {
 		if (letters.total === 0) {
 			return "";
@@ -60,6 +62,10 @@
 		}
 		if (unlimited) {
 			searchParams.set("unlimited", "yes");
+		}
+		if (old && letters.old[0]?.speffz_pair) {
+			searchParams.set("old", "5");
+			searchParams.set("sp", letters.old[0].speffz_pair);
 		}
 
 		return `/quiz?${searchParams.toString()}`;
@@ -102,27 +108,32 @@
 	{:else}
 		<div>
 			<div class="align-center mt-5 mb-2 flex flex-col items-end gap-2">
-				<button
-					class={`self-start ${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
-					disabled={$letterPairStoreStatus.status !== "loaded"}
-					onclick={() => {
-						if ($letterPairStoreStatus.status !== "loaded") {
-							return;
-						}
+				<div class="flex flex-row justify-between self-stretch">
+					<button
+						class={`${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
+						disabled={$letterPairStoreStatus.status !== "loaded"}
+						onclick={() => {
+							if ($letterPairStoreStatus.status !== "loaded") {
+								return;
+							}
 
-						cutoffNow = new Date();
+							cutoffNow = new Date();
 
-						fetchAndLoadMnemonicsAndAlgorithms();
-						// @todo(nick-ng): refactor this into a shared function
-						const today = new SvelteDate();
-						today.setHours(5, 0, 0, 0);
-						const todayMs = today.valueOf();
-						if ($optionsStore.newCardDay + DAY_MS < todayMs) {
-							$optionsStore.newCardDay = todayMs;
-							$optionsStore.newCardsToday = 0;
-						}
-					}}>Reload</button
-				>
+							fetchAndLoadMnemonicsAndAlgorithms();
+							// @todo(nick-ng): refactor this into a shared function
+							const today = new SvelteDate();
+							today.setHours(5, 0, 0, 0);
+							const todayMs = today.valueOf();
+							if ($optionsStore.newCardDay + DAY_MS < todayMs) {
+								$optionsStore.newCardDay = todayMs;
+								$optionsStore.newCardsToday = 0;
+							}
+						}}>Reload</button
+					>
+					<button>
+						Limit: {$optionsStore.cardsPerGroupPerDay}
+					</button>
+				</div>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
 					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
 					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
@@ -143,6 +154,18 @@
 						} group relative flex flex-row gap-1`}
 						style={`order: ${(letters.total === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
 					>
+						<a
+							class={`${letters.old.length === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
+							href={getQuizUrl(
+								quizCategory.category,
+								quizCategory.subcategory,
+								letters,
+								false,
+								true
+							)}
+						>
+							🧓
+						</a>
 						{#if quizCategory.all.length > $optionsStore.cardsPerGroupPerDay}
 							<a
 								class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
@@ -150,7 +173,8 @@
 									quizCategory.category,
 									quizCategory.subcategory,
 									unlimitedLetters,
-									true
+									true,
+									false
 								)}
 							>
 								♾️
@@ -158,7 +182,13 @@
 						{/if}
 						<a
 							class={`${letters.total === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(quizCategory.category, quizCategory.subcategory, letters, false)}
+							href={getQuizUrl(
+								quizCategory.category,
+								quizCategory.subcategory,
+								letters,
+								false,
+								false
+							)}
 						>
 							{quizKit.title} ({unlimitedLetters.total}/{quizCategory.all.length})
 						</a>

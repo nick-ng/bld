@@ -2,6 +2,16 @@ import type { LetterPair, Options } from "$lib/types";
 
 import { isSpeffzPairValid } from "$lib/utils";
 
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+
+export type QuizLetters = {
+	next: LetterPair[];
+	retry: LetterPair[];
+	old: LetterPair[];
+	total: number;
+};
+
 export function getVisibleFlashCardComponents(
 	category: string,
 	hideAnswer: boolean,
@@ -38,11 +48,7 @@ export function getQuizKit(
 	filterFunc: (lp: LetterPair) => boolean;
 	getLastReview: (lp: LetterPair) => Date;
 	getNextReview: (lp: LetterPair) => Date;
-	getNextLetters: (
-		letterPairs: LetterPair[],
-		now: Date,
-		limit: number
-	) => { next: LetterPair[]; retry: LetterPair[]; total: number };
+	getNextLetters: (letterPairs: LetterPair[], now: Date, limit: number) => QuizLetters;
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number };
 	title: string;
 	quizType: "memo" | "alg";
@@ -245,11 +251,7 @@ export function getGetNextLetters(
 	getLastReview: (lp: LetterPair) => Date,
 	getNextReview: (lp: LetterPair) => Date,
 	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number }
-): (
-	letterPairs: LetterPair[],
-	now: Date,
-	limit: number
-) => { next: LetterPair[]; retry: LetterPair[]; total: number } {
+): (letterPairs: LetterPair[], now: Date, limit: number) => QuizLetters {
 	return (letterPairs: LetterPair[], now: Date, limit: number) => {
 		const sortCache: Record<string, number> = {};
 		const filteredLetters = letterPairs
@@ -296,6 +298,15 @@ export function getGetNextLetters(
 				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
 			});
 
+		const oldLetters = filteredLetters
+			.filter((lp) => {
+				// old is reviewed over 5 days ago
+				return Date.now() - getLastReview(lp).valueOf() > 5 * DAY_MS;
+			})
+			.sort((a, b) => {
+				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
+			});
+
 		if (limit > 0) {
 			const quizzedToday = letterPairs.filter(
 				(lp) => filterFunc(lp) && getLastReview(lp).valueOf() > getStartOfTodayMs()
@@ -304,6 +315,7 @@ export function getGetNextLetters(
 				return {
 					next: [],
 					retry: retryLetters,
+					old: oldLetters,
 					total: retryLetters.length,
 				};
 			}
@@ -312,6 +324,7 @@ export function getGetNextLetters(
 			return {
 				next: actualNext,
 				retry: retryLetters,
+				old: oldLetters,
 				total: actualNext.length + retryLetters.length,
 			};
 		}
@@ -319,13 +332,14 @@ export function getGetNextLetters(
 		return {
 			next: nextLetters,
 			retry: retryLetters,
+			old: oldLetters,
 			total: nextLetters.length + retryLetters.length,
 		};
 	};
 }
 
-const correctIncrement = 24 * 60 * 60 * 1000; // 1 day in milliseconds
-const correctAllowance = 8 * 60 * 60 * 1000; // 8 hours in milliseconds
+const correctIncrement = DAY_MS; // 1 day in milliseconds
+const correctAllowance = 8 * HOUR_MS; // 8 hours in milliseconds
 export function superMemo2(
 	userGradeQ: number,
 	input: { sm2_n: number; sm2_ef: number; sm2_i: number },
