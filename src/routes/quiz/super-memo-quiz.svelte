@@ -31,6 +31,7 @@
 			unlimited ? -1 : getCardsPerGroupLimit($optionsStore)
 		)
 	);
+	let oldRemaining = $derived(typeof old === "number" ? Math.min(old, letters.old.length) : null);
 	let isSubmitting = $state(false);
 	let questionStartMs = $state(Date.now());
 
@@ -95,9 +96,9 @@
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
 			let nextSp = letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair;
-			if (typeof old === "number" && old > 0) {
+			if (typeof oldRemaining === "number" && oldRemaining > 0) {
 				nextSp = letters.old[0]?.speffz_pair || nextSp;
-				searchParams.set("old", (old - 1).toString());
+				searchParams.set("old", (oldRemaining - 1).toString());
 			}
 
 			if (!nextSp) {
@@ -121,7 +122,7 @@
 
 			searchParams.set("sp", nextSp);
 
-			if (typeof old === "number" && old <= 0) {
+			if (typeof oldRemaining === "number" && oldRemaining <= 0) {
 				searchParams.delete("old");
 			}
 
@@ -181,14 +182,14 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if letters.total === 0 && (typeof old !== "number" || old <= 0)}
+	{#if letters.total === 0 && !oldRemaining}
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
 			<div class="absolute top-0 left-0">
 				Left: {[
-					typeof old === "number" && old > 0 ? old : null,
-					letters.next.length - (typeof old === "number" ? old : 0),
+					oldRemaining,
+					letters.next.length - (typeof oldRemaining === "number" ? oldRemaining : 0),
 					letters.retry.length > 0 ? letters.retry.length : null,
 				]
 					.filter((a) => typeof a === "number" && a >= 0)
