@@ -49,12 +49,11 @@
 		unlimited: boolean,
 		old: boolean
 	) => {
-		if (letters.total === 0 && !old) {
+		if (letters.total === 0 && (!old || letters.old.length === 0)) {
 			return "";
 		}
 
 		const searchParams = new SvelteURLSearchParams();
-		searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
 		searchParams.set("category", category);
 		if (subcategory) {
 			searchParams.set("subcategory", subcategory);
@@ -65,6 +64,8 @@
 		if (old && letters.old[0]?.speffz_pair) {
 			searchParams.set("old", "5");
 			searchParams.set("sp", letters.old[0].speffz_pair);
+		} else {
+			searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
 		}
 
 		return `/quiz?${searchParams.toString()}`;
