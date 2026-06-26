@@ -314,8 +314,8 @@ export function getGetNextLetters(
 
 		const oldLetters = letterPairs
 			.filter((lp) => {
-				// old is reviewed over 5 days ago
-				return Date.now() - getLastReview(lp).valueOf() > 5 * DAY_MS;
+				const isOld = Date.now() - getLastReview(lp).valueOf() > 5 * DAY_MS;
+				return isOld && filterFunc(lp);
 			})
 			.sort((a, b) => {
 				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
