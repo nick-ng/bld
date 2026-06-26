@@ -16,6 +16,8 @@ export const optionsStore = writable<Options>({
 	pinnedQuizzes: [],
 	maxNewCardsPerDay: 50,
 	cardsPerGroupPerDay: 30,
+	cardsPerGroupPerWeekend: 45,
+	weekendOverrideTimeStampMs: 0,
 	newCardsToday: 0,
 	newCardDay: 0,
 });
@@ -48,4 +50,17 @@ if (browser) {
 	optionsStore.subscribe((newOptions) => {
 		localStorage.setItem(optionsStorageKey, JSON.stringify(newOptions));
 	});
+}
+
+export function getCardsPerGroupLimit(store: Options) {
+	const today = new Date();
+	if (
+		today.getDay() === 0 ||
+		today.getDay() === 6 ||
+		Date.now() <= store.weekendOverrideTimeStampMs
+	) {
+		return store.cardsPerGroupPerWeekend;
+	}
+
+	return store.cardsPerGroupPerDay;
 }

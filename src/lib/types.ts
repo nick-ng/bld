@@ -136,6 +136,8 @@ export const optionsSchema = z.object({
 	pinnedQuizzes: z.array(z.string()).optional().default([]),
 	maxNewCardsPerDay: z.number().optional().default(9999),
 	cardsPerGroupPerDay: z.number().optional().default(30),
+	cardsPerGroupPerWeekend: z.number().optional().default(45),
+	weekendOverrideTimeStampMs: z.number().optional().default(0),
 	newCardsToday: z.number().optional().default(0),
 	newCardDay: z.number().optional().default(0),
 });

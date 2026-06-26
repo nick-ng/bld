@@ -2,14 +2,9 @@
 	import { onMount } from "svelte";
 	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
-	import {
-		getVisibleFlashCardComponents,
-		getQuizKit,
-		superMemo2,
-		getStartOfTodayMs,
-	} from "$lib/quiz";
+	import { getVisibleFlashCardComponents, getQuizKit, superMemo2 } from "$lib/quiz";
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
-	import { optionsStore } from "$lib/stores/options";
+	import { optionsStore, getCardsPerGroupLimit } from "$lib/stores/options";
 	import LetterPair from "$lib/components/letter-pair.svelte";
 	import { msToLargestTime } from "$lib/utils";
 
@@ -20,8 +15,6 @@
 		unlimited: boolean;
 		old: number | null;
 	}
-
-	const DAY_MS = 1000 * 60 * 60 * 24;
 
 	let { currentSpeffzPair, category, subcategory, unlimited = false, old }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
@@ -35,7 +28,7 @@
 		getNextLetters(
 			Object.values($letterPairStore),
 			cutoffNow,
-			unlimited ? -1 : $optionsStore.cardsPerGroupPerDay
+			unlimited ? -1 : getCardsPerGroupLimit($optionsStore)
 		)
 	);
 	let isSubmitting = $state(false);
@@ -90,16 +83,6 @@
 
 		cutoffNow = new Date();
 
-		const todayMs = getStartOfTodayMs();
-		if ($optionsStore.newCardDay + DAY_MS < todayMs) {
-			$optionsStore.newCardDay = todayMs;
-			$optionsStore.newCardsToday = 0;
-		}
-
-		if (sMStats.sm2_i < 0.2) {
-			$optionsStore.newCardsToday = $optionsStore.newCardsToday + 1;
-		}
-
 		isSubmitting = false;
 		if (stopAfter) {
 			selectedGradeQ = -1;
@@ -108,26 +91,15 @@
 		}
 
 		if (letters.total === 0) {
-			const lettersInSet = Object.values($letterPairStore)
-				.filter((l) => {
-					if (!filterFunc(l)) {
-						return false;
-					}
-
-					if ($optionsStore.newCardsToday < $optionsStore.maxNewCardsPerDay) {
-						return true;
-					}
-
-					return getSMStats(l).sm2_i > 0.2;
-				})
-
-				.sort((a, b) => {
-					return getNextReview(a).valueOf() - getNextReview(b).valueOf();
-				});
-
-			// @todo(nick-ng): figure out if a new card will be available first
-			const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
 			if (unlimited) {
+				const lettersInSet = Object.values($letterPairStore)
+					.filter(filterFunc)
+					.sort((a, b) => {
+						return getNextReview(a).valueOf() - getNextReview(b).valueOf();
+					});
+
+				// @todo(nick-ng): figure out if a new card will be available first
+				const untilNext = getNextReview(lettersInSet[0]).valueOf() - Date.now();
 				alert(`All done! Next card in ${msToLargestTime(untilNext)}`);
 			} else {
 				alert("All done for today!");
