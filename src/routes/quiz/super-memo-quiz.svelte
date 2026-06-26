@@ -182,7 +182,7 @@
 </script>
 
 <div class="mx-auto max-w-prose">
-	{#if letters.total === 0}
+	{#if letters.total === 0 && (typeof old !== "number" || old <= 0)}
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
@@ -192,7 +192,7 @@
 					letters.next.length - (typeof old === "number" ? old : 0),
 					letters.retry.length > 0 ? letters.retry.length : null,
 				]
-					.filter((a) => typeof a === "number")
+					.filter((a) => typeof a === "number" && a >= 0)
 					.join(" + ")}
 			</div>
 			<h3 class="text-center">Quiz: {title}</h3>
