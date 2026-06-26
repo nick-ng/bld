@@ -1,5 +1,4 @@
 <script lang="ts">
-	import type { LetterPair } from "$lib/types";
 	import type { QuizLetters } from "$lib/quiz";
 
 	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
@@ -8,7 +7,7 @@
 		letterPairStoreStatus,
 		fetchAndLoadMnemonicsAndAlgorithms,
 	} from "$lib/stores/letter-pairs";
-	import { optionsStore } from "$lib/stores/options";
+	import { optionsStore, getCardsPerGroupLimit } from "$lib/stores/options";
 	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
 	import { onMount } from "svelte";
@@ -130,8 +129,23 @@
 							}
 						}}>Reload</button
 					>
-					<button>
-						Limit: {$optionsStore.cardsPerGroupPerDay}
+					<button
+						onclick={() => {
+							if (cutoffNow.getDay() === 0 || cutoffNow.getDay() === 6) {
+								return;
+							}
+
+							if ($optionsStore.weekendOverrideTimeStampMs < cutoffNow.valueOf()) {
+								const endOfToday = new Date();
+								endOfToday.setHours(23, 59, 59, 999);
+								$optionsStore.weekendOverrideTimeStampMs = endOfToday.valueOf();
+							} else {
+								$optionsStore.weekendOverrideTimeStampMs = 0;
+							}
+						}}
+						disabled={cutoffNow.getDay() === 0 || cutoffNow.getDay() === 6}
+					>
+						Limit: {getCardsPerGroupLimit($optionsStore)}
 					</button>
 				</div>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
@@ -141,7 +155,7 @@
 					{@const letters = quizKit.getNextLetters(
 						Object.values($letterPairStore),
 						cutoffNow,
-						$optionsStore.cardsPerGroupPerDay
+						getCardsPerGroupLimit($optionsStore)
 					)}
 					{@const unlimitedLetters = quizKit.getNextLetters(
 						Object.values($letterPairStore),
