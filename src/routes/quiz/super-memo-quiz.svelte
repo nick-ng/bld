@@ -18,11 +18,12 @@
 		category: string; // e.g. "Memo", "UF", "UFR"
 		subcategory: string | null; // default is all e.g. "q", "algs"
 		unlimited: boolean;
+		old: number | null;
 	}
 
 	const DAY_MS = 1000 * 60 * 60 * 24;
 
-	let { currentSpeffzPair, category, subcategory, unlimited = false }: Props = $props();
+	let { currentSpeffzPair, category, subcategory, unlimited = false, old }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
 		getQuizKit(category, subcategory)
 	);
@@ -140,11 +141,19 @@
 		selectedGradeQ = -1;
 		setTimeout(() => {
 			const searchParams = new SvelteURLSearchParams(location.search);
-			if (letters.next.length) {
+			if (typeof old === "number" && old > 0 && letters.old.length > 0) {
+				searchParams.set("sp", letters.old[0].speffz_pair);
+				searchParams.set("old", (old - 1).toString());
+			} else if (letters.next.length) {
 				searchParams.set("sp", letters.next[0].speffz_pair);
 			} else {
 				searchParams.set("sp", letters.retry[0].speffz_pair);
 			}
+
+			if (typeof old === "number" && old <= 0) {
+				searchParams.delete("old");
+			}
+
 			cutoffNow = new Date();
 			goto(`/quiz?${searchParams.toString()}`);
 		}, 0);
@@ -205,12 +214,14 @@
 		<div>All done! Back to <a href="/quiz">Quiz</a></div>
 	{:else}
 		<div class="relative">
-			<div class="absolute top-0 left-0 grid grid-cols-2 gap-x-1">
-				<div>Left:</div>
-				<div>
-					{letters.next.length}
-					{#if letters.retry.length > 0}<span> + {letters.retry.length}</span>{/if}
-				</div>
+			<div class="absolute top-0 left-0">
+				Left: {[
+					typeof old === "number" && old > 0 ? old : null,
+					letters.next.length - (typeof old === "number" ? old : 0),
+					letters.retry.length > 0 ? letters.retry.length : null,
+				]
+					.filter((a) => typeof a === "number")
+					.join(" + ")}
 			</div>
 			<h3 class="text-center">Quiz: {title}</h3>
 			<div class="absolute top-0 right-0"><a class="like-button" href="/quiz">End Quiz</a></div>
