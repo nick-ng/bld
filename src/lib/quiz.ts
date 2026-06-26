@@ -298,7 +298,7 @@ export function getGetNextLetters(
 				return getLastReview(a).valueOf() - getLastReview(b).valueOf();
 			});
 
-		const oldLetters = filteredLetters
+		const oldLetters = letterPairs
 			.filter((lp) => {
 				// old is reviewed over 5 days ago
 				return Date.now() - getLastReview(lp).valueOf() > 5 * DAY_MS;
