@@ -49,7 +49,7 @@
 		unlimited: boolean,
 		old: boolean
 	) => {
-		if (letters.total === 0) {
+		if (letters.total === 0 && !old) {
 			return "";
 		}
 
