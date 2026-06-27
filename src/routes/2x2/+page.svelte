@@ -4,9 +4,6 @@
 	import { onMount } from "svelte";
 	import { twoByTwoStore } from "$lib/stores/2x2";
 	import { formatDate } from "$lib/utils";
-	import CubeFace from "$lib/components/cube-face.svelte";
-
-	const drawScrambleSize = 36;
 
 	const bottomLayerOptions = ["Layer", "Bar Front", "Bar Left", "Bar Right", "Bar Back", "No Bar"];
 	const ollOptions = ["Sune", "Anti-sune", "Pi", "P (headlights)", "L", "T", "H"];
@@ -80,51 +77,16 @@
 				<div class="inline-block border border-gray-500 px-2 py-1 text-3xl">
 					{$twoByTwoStore[currentTwoByTwoIndex].scramble}
 				</div>
-				<div class="flex flex-row justify-center gap-1">
-					<div class="flex flex-col justify-center">
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="L"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-					</div>
-					<div class="flex flex-col justify-center gap-1">
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="U"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="F"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="D"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-					</div>
-					<div class="flex flex-col justify-center">
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="R"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-					</div>
-					<div class="flex flex-col justify-center">
-						<CubeFace
-							scramble={$twoByTwoStore[currentTwoByTwoIndex].scramble}
-							face="B"
-							size={drawScrambleSize}
-							twoByTwo
-						/>
-					</div>
+				<div class="">
+					<twisty-player
+						puzzle="2x2x2"
+						alg={$twoByTwoStore[currentTwoByTwoIndex].scramble}
+						visualization="2D"
+						hint-facelets="none"
+						background="none"
+						control-panel="none"
+						style="width: 500px; height: 500px;"
+					></twisty-player>
 				</div>
 				<table class="table">
 					<thead>
