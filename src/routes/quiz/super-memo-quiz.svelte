@@ -94,11 +94,12 @@
 		hideAnswer = true;
 		selectedGradeQ = -1;
 		setTimeout(() => {
+			const nextOld = (oldRemaining || 0) - 1;
 			const searchParams = new SvelteURLSearchParams(location.search);
 			let nextSp = letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair;
-			if (typeof oldRemaining === "number" && oldRemaining > 0) {
+			if (nextOld > 0) {
 				nextSp = letters.old[0]?.speffz_pair || nextSp;
-				searchParams.set("old", (oldRemaining - 1).toString());
+				searchParams.set("old", nextOld.toString());
 			}
 
 			if (!nextSp) {
@@ -122,7 +123,7 @@
 
 			searchParams.set("sp", nextSp);
 
-			if (typeof oldRemaining === "number" && oldRemaining <= 0) {
+			if (nextOld > 0) {
 				searchParams.delete("old");
 			}
 
