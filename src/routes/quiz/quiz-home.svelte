@@ -179,7 +179,7 @@
 								true
 							)}
 						>
-							🧓
+							🔕
 						</a>
 						{#if quizCategory.all.length > $optionsStore.cardsPerGroupPerDay}
 							<a
