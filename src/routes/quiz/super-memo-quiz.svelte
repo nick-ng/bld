@@ -123,7 +123,7 @@
 
 			searchParams.set("sp", nextSp);
 
-			if (nextOld > 0) {
+			if (nextOld <= 0) {
 				searchParams.delete("old");
 			}
 
