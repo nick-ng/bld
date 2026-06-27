@@ -2,7 +2,6 @@
 	import { onMount } from "svelte";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
-	import CubeFace from "$lib/components/cube-face.svelte";
 
 	let scrambleCount = $state(8);
 	let message = $state("");
@@ -13,7 +12,7 @@
 	let scrambles = $derived(
 		selectedAttempt === -1 ? generatedScrambles : $mbldStore[selectedAttempt - 1]?.scrambles
 	);
-	const previewSize = 24;
+	const previewSize = 150;
 
 	onMount(async () => {
 		// @todo(nick-ng): figure out a way to put this file locally
@@ -114,13 +113,17 @@
 								{/each}
 							</div>
 						</td>
-						<td class="border border-black p-2">
-							<div class="flex flex-row gap-3">
-								<CubeFace {scramble} face="L" size={previewSize} />
-								<CubeFace {scramble} face="F" size={previewSize} />
-								<CubeFace {scramble} face="R" size={previewSize} />
-							</div></td
-						>
+						<td class="border border-black p-2 bg-black">
+							<twisty-player
+								puzzle="3x3x3"
+								alg={scramble}
+								hint-facelets="none"
+								background="none"
+								back-view="side-by-side"
+								control-panel="none"
+								style={`width: ${previewSize * 2}px; height: ${previewSize}px;`}
+							></twisty-player>
+						</td>
 					</tr>
 				{/each}
 			</tbody>

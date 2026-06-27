@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import Cube from "cubejs";
 	import { page } from "$app/state";
 	import ClockHand from "$lib/components/clock-hand.svelte";
 	import Timer from "./timer.svelte";
+
+	let previewOnLeft = $state(false);
 
 	const scrambleToMoves = (
 		scramble: string
@@ -43,23 +44,9 @@
 	const getClockStyle = ({ size }: { size: number }) =>
 		[`height: ${size * 1.5}px`, `width: ${size * 1.5}px`].join(";");
 
-	const cube = new Cube();
 	let size: number = 120;
 	let fontOutline: number = 2;
 	let scramble = $state("L2 U L2 F2 R U' B' D R D' B2 U F2 D' F2 U' F2 D2 Rw Uw'");
-	// UuuuuuRrrrrrFfffffDdddddLlllllBbbbbb
-	let cubeFacesString = $derived.by(() => {
-		cube.identity();
-		const scramble2 = scramble
-			.replaceAll("Uw", "u")
-			.replaceAll("Rw", "r")
-			.replaceAll("Fw", "f")
-			.replaceAll("Dw", "d")
-			.replaceAll("Lw", "l")
-			.replaceAll("Bw", "b");
-		cube.move(scramble2);
-		return cube.asString();
-	});
 
 	onMount(() => {
 		const startingScramble = page.url.searchParams.get("scramble");
@@ -127,25 +114,18 @@
 			</div>
 		</div>
 	</div>
-	<div class="cube-preview">
-		<div class="mb-4 grid grid-cols-3 gap-2">
-			{#each cubeFacesString.slice(0, 9) as cubeFace, i (`U-${cubeFace}-${i}`)}
-				<div class={`flex h-16 w-16 items-center justify-center ${cubeFace.toLowerCase()}`}>
-					{#if i === 4}
-						U
-					{/if}
-				</div>
-			{/each}
-		</div>
-		<div class="grid grid-cols-3 gap-2">
-			{#each cubeFacesString.slice(18, 27) as cubeFace, i (`U-${cubeFace}-${i}`)}
-				<div class={`flex h-16 w-16 items-center justify-center ${cubeFace.toLowerCase()}`}>
-					{#if i === 4}
-						F
-					{/if}
-				</div>
-			{/each}
-		</div>
+	<label class="absolute text-white left-0 right-0 mx-auto bottom-1 text-center"
+		>Left Preview <input type="checkbox" bind:checked={previewOnLeft} /></label
+	>
+	<div class={previewOnLeft ? "cube-preview-l" : "cube-preview"}>
+		<twisty-player
+			puzzle="3x3x3"
+			alg={scramble}
+			hint-facelets="none"
+			background="none"
+			control-panel="none"
+			style="width: 500px; height: 500px;"
+		></twisty-player>
 	</div>
 </div>
 
@@ -170,6 +150,12 @@
 
 	.clock-hand {
 		border: 1px solid white;
+	}
+
+	.cube-preview-l {
+		position: absolute;
+		left: 3px;
+		bottom: 3px;
 	}
 
 	.cube-preview {
