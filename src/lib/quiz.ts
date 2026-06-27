@@ -49,7 +49,8 @@ export function getVisibleFlashCardComponents(
 
 export function getQuizKit(
 	category: string,
-	subcategory?: string | null
+	subcategory: string | null,
+	options: Options
 ): {
 	category: string;
 	subcategory: string | null;
@@ -83,7 +84,13 @@ export function getQuizKit(
 				filterFunc,
 				getLastReview,
 				getNextReview,
-				getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+				getNextLetters: getGetNextLetters(
+					filterFunc,
+					getLastReview,
+					getNextReview,
+					getSMStats,
+					options
+				),
 				getSMStats,
 				title: "ORZ, Edges",
 				quizType: "alg",
@@ -102,7 +109,13 @@ export function getQuizKit(
 				filterFunc,
 				getLastReview,
 				getNextReview,
-				getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+				getNextLetters: getGetNextLetters(
+					filterFunc,
+					getLastReview,
+					getNextReview,
+					getSMStats,
+					options
+				),
 				getSMStats,
 				title: "ORZ, Corners",
 				quizType: "alg",
@@ -129,7 +142,13 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+						getNextLetters: getGetNextLetters(
+							filterFunc,
+							getLastReview,
+							getNextReview,
+							getSMStats,
+							options
+						),
 						getSMStats,
 						title: `${category} Buf, Algs`,
 						quizType: "alg",
@@ -155,7 +174,8 @@ export function getQuizKit(
 								filterFunc,
 								getLastReview,
 								getNextReview,
-								getSMStats
+								getSMStats,
+								options
 							),
 							getSMStats,
 							title: `${category} Buf, ${subcategory.toUpperCase()}`,
@@ -170,7 +190,13 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+						getNextLetters: getGetNextLetters(
+							filterFunc,
+							getLastReview,
+							getNextReview,
+							getSMStats,
+							options
+						),
 						getSMStats,
 						title: `${category} Buf`,
 						quizType: "alg",
@@ -205,7 +231,8 @@ export function getQuizKit(
 								filterFunc,
 								getLastReview,
 								getNextReview,
-								getSMStats
+								getSMStats,
+								options
 							),
 							getSMStats,
 							title: `${category} Buf, ${subcategory.toUpperCase()}`,
@@ -221,7 +248,13 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+						getNextLetters: getGetNextLetters(
+							filterFunc,
+							getLastReview,
+							getNextReview,
+							getSMStats,
+							options
+						),
 						getSMStats,
 						title: `${category} Buf`,
 						quizType: "alg",
@@ -248,7 +281,13 @@ export function getQuizKit(
 						filterFunc,
 						getLastReview,
 						getNextReview,
-						getNextLetters: getGetNextLetters(filterFunc, getLastReview, getNextReview, getSMStats),
+						getNextLetters: getGetNextLetters(
+							filterFunc,
+							getLastReview,
+							getNextReview,
+							getSMStats,
+							options
+						),
 						getSMStats,
 						title: "Images",
 						quizType: "memo",
@@ -264,7 +303,8 @@ export function getGetNextLetters(
 	filterFunc: (lp: LetterPair) => boolean,
 	getLastReview: (lp: LetterPair) => Date,
 	getNextReview: (lp: LetterPair) => Date,
-	getSMStats: (lp: LetterPair) => { sm2_n: number; sm2_ef: number; sm2_i: number }
+	getSMStats: (lp: LetterPair) => SMStats,
+	options: Options
 ): (letterPairs: LetterPair[], now: Date, limit: number) => QuizLetters {
 	return (letterPairs: LetterPair[], now: Date, limit: number) => {
 		const sortCache: Record<string, number> = {};
@@ -314,7 +354,7 @@ export function getGetNextLetters(
 
 		const oldLetters = letterPairs
 			.filter((lp) => {
-				const isOld = Date.now() - getLastReview(lp).valueOf() > 5 * DAY_MS;
+				const isOld = Date.now() - getLastReview(lp).valueOf() > options.oldThresholdDays * DAY_MS;
 				return isOld && filterFunc(lp);
 			})
 			.sort((a, b) => {

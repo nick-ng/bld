@@ -18,7 +18,7 @@
 
 	let { currentSpeffzPair, category, subcategory, unlimited = false, old }: Props = $props();
 	let { title, quizType, getSMStats, getNextLetters, filterFunc, getNextReview } = $derived(
-		getQuizKit(category, subcategory)
+		getQuizKit(category, subcategory, $optionsStore)
 	);
 	let hideAnswer = $state(true);
 	let selectedGradeQ = $state(-1);
@@ -265,7 +265,7 @@
 							{/each}
 						</tr>
 						<tr>
-							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "3", q: 2 }] as grade (grade.q)}
+							{#each [{ label: "Nothing", q: 0 }, { label: "Familiar", q: 1 }, { label: "Almost", q: 2 }] as grade (grade.q)}
 								<td>
 									<button
 										class={`w-full ${selectedGradeQ == grade.q ? "bg-blue-300 dark:bg-blue-700" : "opaque"}`}
