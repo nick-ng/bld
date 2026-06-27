@@ -8,7 +8,7 @@
 		fetchAndLoadMnemonicsAndAlgorithms,
 	} from "$lib/stores/letter-pairs";
 	import { optionsStore, getCardsPerGroupLimit } from "$lib/stores/options";
-	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
+	import { upperCaseFirst, getTrueKeys, shuffleArray } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
 	import { onMount } from "svelte";
 
@@ -65,8 +65,9 @@
 			searchParams.set("unlimited", "yes");
 		}
 		if (old && letters.old[0]?.speffz_pair) {
-			searchParams.set("old", "5");
-			searchParams.set("sp", letters.old[0].speffz_pair);
+			const tempOld = shuffleArray(letters.old.slice(0, 5));
+			searchParams.set("old", tempOld.length.toString());
+			searchParams.set("sp", tempOld[0].speffz_pair);
 		} else {
 			searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
 		}

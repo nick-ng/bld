@@ -6,7 +6,7 @@
 	import { letterPairStore, saveAlgorithm, saveMnemonic } from "$lib/stores/letter-pairs";
 	import { optionsStore, getCardsPerGroupLimit } from "$lib/stores/options";
 	import LetterPair from "$lib/components/letter-pair.svelte";
-	import { msToLargestTime } from "$lib/utils";
+	import { msToLargestTime, shuffleArray } from "$lib/utils";
 
 	interface Props {
 		currentSpeffzPair: string;
@@ -98,7 +98,8 @@
 			const searchParams = new SvelteURLSearchParams(location.search);
 			let nextSp = letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair;
 			if (nextOld > 0) {
-				nextSp = letters.old[0]?.speffz_pair || nextSp;
+				const tempOld = shuffleArray(letters.old.slice(0, nextOld));
+				nextSp = tempOld[0]?.speffz_pair || nextSp;
 				searchParams.set("old", nextOld.toString());
 			}
 
