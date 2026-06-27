@@ -16,7 +16,7 @@
 
 	let quizCategories = $derived(
 		[
-			getQuizKit("memo", getTrueKeys($optionsStore.chosenBuffers).join(",")),
+			getQuizKit("memo", getTrueKeys($optionsStore.chosenBuffers).join(","), $optionsStore),
 			...getTrueKeys($optionsStore.chosenBuffers).map((buf) => {
 				const startsWith = $derived(
 					Object.values($letterPairStore).reduce((prev, curr) => {
@@ -24,11 +24,14 @@
 						return prev;
 					}, new Set())
 				);
-				return [getQuizKit(buf, null), ...[...startsWith].map((s) => getQuizKit(buf, `${s}*`))];
+				return [
+					getQuizKit(buf, null, $optionsStore),
+					...[...startsWith].map((s) => getQuizKit(buf, `${s}*`, $optionsStore)),
+				];
 			}),
-			getQuizKit("orozco-edges", null),
-			getQuizKit("orozco-corners", null),
-			getQuizKit("UF", "algorithm"),
+			getQuizKit("orozco-edges", null, $optionsStore),
+			getQuizKit("orozco-corners", null, $optionsStore),
+			getQuizKit("UF", "algorithm", $optionsStore),
 		]
 			.flat()
 			.map((c) => {
@@ -150,7 +153,11 @@
 					</button>
 				</div>
 				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
-					{@const quizKit = getQuizKit(quizCategory.category, quizCategory.subcategory)}
+					{@const quizKit = getQuizKit(
+						quizCategory.category,
+						quizCategory.subcategory,
+						$optionsStore
+					)}
 					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
 					{@const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId)}
 					{@const letters = quizKit.getNextLetters(

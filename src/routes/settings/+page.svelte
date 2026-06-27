@@ -131,6 +131,19 @@
 				</td>
 			</tr>
 			<tr>
+				<td>
+					<label for="optionsOldThreshold"> Old Card Threshold Days </label>
+				</td>
+				<td class="text-right">
+					<input
+						class="inline-block w-32 text-right"
+						id="optionsOldThreshold"
+						type="number"
+						bind:value={$optionsStore.oldThresholdDays}
+					/>
+				</td>
+			</tr>
+			<tr>
 				<td>Chosen Buffers</td>
 				<td>
 					<details>

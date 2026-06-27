@@ -20,6 +20,7 @@ export const optionsStore = writable<Options>({
 	weekendOverrideTimeStampMs: 0,
 	newCardsToday: 0,
 	newCardDay: 0,
+	oldThresholdDays: 5,
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;

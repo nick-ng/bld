@@ -5,6 +5,6 @@ if [[ ! $MY_SESSION ]]; then
 		tmux new-window
 		tmux send "./dev-server.sh"
 		tmux split-window -h
-		tmux send "codium . && npm start"
+		tmux send "npm start && codium ."
 fi
 tmux attach-session -d -t bld

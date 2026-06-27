@@ -140,6 +140,7 @@ export const optionsSchema = z.object({
 	weekendOverrideTimeStampMs: z.number().optional().default(0),
 	newCardsToday: z.number().optional().default(0),
 	newCardDay: z.number().optional().default(0),
+	oldThresholdDays: z.number().optional().default(5),
 });
 
 export type Options = z.infer<typeof optionsSchema>;
