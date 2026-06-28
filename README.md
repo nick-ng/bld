@@ -79,7 +79,7 @@ css:
 - src/lib/utils.ts:357: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
 - src/lib/utils.ts:506: @todo(nick-ng): handle cube rotations (x y z)
 - src/lib/utils.ts:667: @todo(nick-ng): is the loop necessary?
-- src/routes/2x2/+page.svelte:23: @todo(nick-ng): figure out a way to put this file locally
+- src/routes/2x2/+page.svelte:20: @todo(nick-ng): figure out a way to put this file locally
 - src/routes/letter-pair/edit/alg-editor.svelte:33: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:86: @todo(nick-ng): handle error saving changes
@@ -87,8 +87,8 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:123: @todo(nick-ng): handle reseting fresh mnemonic
 - src/routes/letter-pair/edit/main-editor.svelte:141: @todo(nick-ng): handle reseting fresh mnemonic
 - src/routes/mbld/analyse/mbld-cube.svelte:30: @todo(nick-ng): auto-complete scrambles
-- src/routes/mbld/scramble/+page.svelte:19: @todo(nick-ng): figure out a way to put this file locally
-- src/routes/quiz/quiz-home.svelte:75: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/quiz-home.svelte:123: @todo(nick-ng): refactor this into a shared function
-- src/routes/quiz/super-memo-quiz.svelte:113: @todo(nick-ng): figure out if a new card will be available first
+- src/routes/mbld/scramble/+page.svelte:18: @todo(nick-ng): figure out a way to put this file locally
+- src/routes/quiz/quiz-home.svelte:79: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/quiz-home.svelte:127: @todo(nick-ng): refactor this into a shared function
+- src/routes/quiz/super-memo-quiz.svelte:114: @todo(nick-ng): figure out if a new card will be available first
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable

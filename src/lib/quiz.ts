@@ -405,9 +405,7 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 	if (userGradeQ >= 3) {
 		if (input.next_review_at > new Date()) {
 			// quiz wasn't due yet so don't change any stats. bump next review at and return
-			output.next_review_at = new Date(
-				Date.now() + output.sm2_i * correctIncrement - correctAllowance
-			);
+			output.next_review_at = getNextReviewDate(output.sm2_i);
 
 			return output;
 		}
@@ -423,13 +421,7 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 
 		output.sm2_n = Math.round(input.sm2_n + 1);
 
-		let effectiveI = output.sm2_i;
-		if (output.sm2_i > 5) {
-			effectiveI = 5 + Math.round(Math.sqrt(output.sm2_i - 5));
-		}
-
-		// 1 day per sm2_i minus 8 hours so you don't have to do the quiz at the exact time and it doesn't become later and later
-		output.next_review_at = new Date(Date.now() + effectiveI * correctIncrement - correctAllowance);
+		output.next_review_at = getNextReviewDate(output.sm2_i);
 	} else {
 		output.sm2_n = 0;
 		output.sm2_i = 0.5; // hack. if i < 0.2, card is new
@@ -445,6 +437,16 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 	}
 
 	return output;
+}
+
+function getNextReviewDate(i: number) {
+	let effectiveI = i;
+	if (i > 5) {
+		effectiveI = 5 + Math.round(Math.sqrt(i - 5));
+	}
+
+	// 1 day per sm2_i minus 8 hours so you don't have to do the quiz at the exact time and it doesn't become later and later
+	return new Date(Date.now() + effectiveI * correctIncrement - correctAllowance);
 }
 
 export function getStartOfTodayMs() {
