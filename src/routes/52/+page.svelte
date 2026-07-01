@@ -55,6 +55,9 @@
 
 		$fiftyTwoStore.deck = shuffleArray(newDeck);
 		$fiftyTwoStore.currentIndex = 0;
+		$fiftyTwoStore.mark1 = 0;
+		$fiftyTwoStore.mark2 = 0;
+		$fiftyTwoStore.mark3 = 0;
 		$fiftyTwoStore.state = "memo";
 		$fiftyTwoStore.memoStartMs = Date.now();
 		$fiftyTwoStore.recall = [];
@@ -405,16 +408,35 @@
 				type="button"
 				onclick={() => {
 					$fiftyTwoStore.currentIndex = 0;
-				}}>⏪</button
+				}}
 			>
+				⏪
+			</button>
 			<div class="grow"></div>
 			<button
 				type="button"
 				onclick={() => {
-					$fiftyTwoStore.state = "recall";
-					$fiftyTwoStore.recallStartMs = Date.now();
-				}}>Done</button
+					$fiftyTwoStore.currentIndex = $fiftyTwoStore.mark1;
+				}}
 			>
+				1️⃣
+			</button>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.currentIndex = $fiftyTwoStore.mark2;
+				}}
+			>
+				2️⃣
+			</button>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.currentIndex = $fiftyTwoStore.mark3;
+				}}
+			>
+				3️⃣
+			</button>
 		</div>
 		<div class="m-1">
 			<div
@@ -423,7 +445,7 @@
 			></div>
 		</div>
 		<div class="relative">
-			<div class="mx-[3px]" bind:this={nextCardEl}>
+			<div class="mx-0.75" bind:this={nextCardEl}>
 				<Card52 card={$fiftyTwoStore.deck[$fiftyTwoStore.currentIndex + 1]} />
 			</div>
 			{#key `${$fiftyTwoStore.currentIndex}`}
@@ -435,6 +457,46 @@
 					<Card52 card={$fiftyTwoStore.deck[$fiftyTwoStore.currentIndex]} {unopacity} />
 				</div>
 			{/key}
+		</div>
+		<div class="m-1">
+			<div
+				class="h-1 bg-slate-800 transition-[width]"
+				style={`width: ${($fiftyTwoStore.currentIndex / $fiftyTwoStore.deck.length) * 100}%;`}
+			></div>
+		</div>
+		<div class="m-1 flex flex-row">
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.state = "recall";
+					$fiftyTwoStore.recallStartMs = Date.now();
+				}}>Done</button
+			>
+			<div class="grow"></div>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.mark1 = $fiftyTwoStore.currentIndex;
+				}}
+			>
+				1️⃣
+			</button>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.mark2 = $fiftyTwoStore.currentIndex;
+				}}
+			>
+				2️⃣
+			</button>
+			<button
+				type="button"
+				onclick={() => {
+					$fiftyTwoStore.mark3 = $fiftyTwoStore.currentIndex;
+				}}
+			>
+				3️⃣
+			</button>
 		</div>
 	{/if}
 </div>
