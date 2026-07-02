@@ -71,9 +71,9 @@ css:
 - src/lib/stores/letter-pairs.ts:9: @todo(nick-ng): use storage events to keep different tabs synced https://developer.mozilla.org/en-US/docs/Web/API/Window/storage_event
 - src/lib/stores/letter-pairs.ts:27: @todo(nick-ng): should these load methods take unknown input and do the schema parsing?
 - src/lib/stores/letter-pairs.ts:92: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:133: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:230: @todo(nick-ng): put data into session storage
-- src/lib/stores/letter-pairs.ts:301: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:132: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:232: @todo(nick-ng): put data into session storage
+- src/lib/stores/letter-pairs.ts:303: @todo(nick-ng): put data into session storage
 - src/lib/stores/options.ts:8: @todo(nick-ng): store options on server
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
 - src/lib/utils.ts:357: @todo(nick-ng): handle other piece types (x centre, + centre, wing)

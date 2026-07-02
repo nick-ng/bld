@@ -70,7 +70,7 @@ export const loadAlgorithms = (newAlgs: Algorithm[]) => {
 	});
 };
 
-const fetchAndLoadMnemonics = async (): Promise<void> => {
+const fetchMnemonics = async (): Promise<Mnemonic[]> => {
 	let keepGoing = true;
 	let offset = 0;
 	const mnemonics: Mnemonic[] = [];
@@ -104,14 +104,13 @@ const fetchAndLoadMnemonics = async (): Promise<void> => {
 		}
 	}
 
-	loadMnemonics(mnemonics);
-
 	if (keepGoing) {
 		alert("Not enough loops to load all mnemonics");
 	}
+	return mnemonics;
 };
 
-const fetchAndLoadAlgorithms = async (): Promise<void> => {
+const fetchAlgorithms = async (): Promise<Algorithm[]> => {
 	let keepGoing = true;
 	let offset = 0;
 	const algorithms: Algorithm[] = [];
@@ -145,11 +144,11 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 		}
 	}
 
-	loadAlgorithms(algorithms);
-
 	if (keepGoing) {
 		alert("Not enough loops to load all algorithms");
 	}
+
+	return algorithms;
 };
 
 export async function fetchAndLoadMnemonicsAndAlgorithms(firstLoad = false) {
@@ -160,8 +159,11 @@ export async function fetchAndLoadMnemonicsAndAlgorithms(firstLoad = false) {
 		message: "Loading...",
 		fetchStartMs: Date.now(),
 	}));
-	await fetchAndLoadMnemonics();
-	await fetchAndLoadAlgorithms();
+
+	const [mnemonics, algorithms] = await Promise.all([fetchMnemonics(), fetchAlgorithms()]);
+	loadMnemonics(mnemonics);
+	loadAlgorithms(algorithms);
+
 	letterPairStoreStatus.update((prev) => ({
 		...prev,
 		status: "loaded",
