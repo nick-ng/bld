@@ -73,9 +73,10 @@ export const loadAlgorithms = (newAlgs: Algorithm[]) => {
 const fetchAndLoadMnemonics = async (): Promise<void> => {
 	let keepGoing = true;
 	let offset = 0;
+	const mnemonics: Mnemonic[] = [];
 	for (let i = 0; i < 20; i++) {
 		if (!keepGoing) {
-			return;
+			break;
 		}
 
 		try {
@@ -89,7 +90,7 @@ const fetchAndLoadMnemonics = async (): Promise<void> => {
 			}
 
 			// @todo(nick-ng): put data into session storage
-			loadMnemonics(parseRes.data);
+			mnemonics.push(...parseRes.data);
 			if (parseRes.data.length < 50) {
 				// done
 				keepGoing = false;
@@ -103,6 +104,8 @@ const fetchAndLoadMnemonics = async (): Promise<void> => {
 		}
 	}
 
+	loadMnemonics(mnemonics);
+
 	if (keepGoing) {
 		alert("Not enough loops to load all mnemonics");
 	}
@@ -111,6 +114,7 @@ const fetchAndLoadMnemonics = async (): Promise<void> => {
 const fetchAndLoadAlgorithms = async (): Promise<void> => {
 	let keepGoing = true;
 	let offset = 0;
+	const algorithms: Algorithm[] = [];
 	for (let i = 0; i < 100; i++) {
 		if (!keepGoing) {
 			break;
@@ -127,7 +131,7 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 			}
 
 			// @todo(nick-ng): put data into session storage
-			loadAlgorithms(parseRes.data);
+			algorithms.push(...parseRes.data);
 			if (parseRes.data.length < 50) {
 				// done
 				keepGoing = false;
@@ -140,6 +144,8 @@ const fetchAndLoadAlgorithms = async (): Promise<void> => {
 			break;
 		}
 	}
+
+	loadAlgorithms(algorithms);
 
 	if (keepGoing) {
 		alert("Not enough loops to load all algorithms");
