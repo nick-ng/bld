@@ -150,7 +150,7 @@ export function getQuizKit(
 							options
 						),
 						getSMStats,
-						title: `${category} Buf, Algs`,
+						title: `${category}, Algs`,
 						quizType: "alg",
 						sortString: "UF !algorithms",
 					};
@@ -178,7 +178,7 @@ export function getQuizKit(
 								options
 							),
 							getSMStats,
-							title: `${category} Buf, ${subcategory.toUpperCase()}`,
+							title: `${category}, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
 							sortString: `${category} Buf, ${subcategory.toUpperCase()}`,
 						};
@@ -198,7 +198,7 @@ export function getQuizKit(
 							options
 						),
 						getSMStats,
-						title: `${category} Buf`,
+						title: `${category}`,
 						quizType: "alg",
 						sortString: `${category} !!`,
 					};
@@ -235,7 +235,7 @@ export function getQuizKit(
 								options
 							),
 							getSMStats,
-							title: `${category} Buf, ${subcategory.toUpperCase()}`,
+							title: `${category}, ${subcategory.toUpperCase()}`,
 							quizType: "alg",
 							sortString: `${category} Buf, ${subcategory.toUpperCase()}`,
 						};
@@ -256,7 +256,7 @@ export function getQuizKit(
 							options
 						),
 						getSMStats,
-						title: `${category} Buf`,
+						title: `${category}`,
 						quizType: "alg",
 						sortString: `${category} !!`,
 					};
@@ -392,6 +392,7 @@ export function getGetNextLetters(
 	};
 }
 
+const ALTERED_INTERVAL_CUTOFF = 14;
 const correctIncrement = DAY_MS; // 1 day in milliseconds
 const correctAllowance = 8 * HOUR_MS; // 8 hours in milliseconds
 export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): SMStats {
@@ -415,10 +416,13 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 			output.sm2_i = 2;
 		} else if (input.sm2_n === 2) {
 			output.sm2_i = 5;
-		} else {
+		} else if (input.sm2_i < ALTERED_INTERVAL_CUTOFF) {
 			output.sm2_i = Math.round(input.sm2_i * input.sm2_ef);
+		} else {
+			output.sm2_i = input.sm2_i * input.sm2_ef;
 		}
 
+		// +1 but round just to be sure
 		output.sm2_n = Math.round(input.sm2_n + 1);
 
 		output.next_review_at = getNextReviewDate(output.sm2_i);
@@ -441,8 +445,8 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 
 function getNextReviewDate(i: number) {
 	let effectiveI = i;
-	if (i > 5) {
-		effectiveI = 5 + Math.round(Math.sqrt(i - 5));
+	if (i > ALTERED_INTERVAL_CUTOFF) {
+		effectiveI = ALTERED_INTERVAL_CUTOFF + Math.round(Math.sqrt(i - ALTERED_INTERVAL_CUTOFF));
 	}
 
 	// 1 day per sm2_i minus 8 hours so you don't have to do the quiz at the exact time and it doesn't become later and later
