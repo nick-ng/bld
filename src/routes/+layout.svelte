@@ -41,22 +41,12 @@
 		<a class="like-button hidden lg:inline" href="/mbld/scramble">MBLD Scrambles</a>
 		<a class="like-button hidden lg:inline" href="/mbld/analyse">MBLD Analyse</a>
 		<a class="like-button hidden lg:inline" href="/2x2">2x2</a>
+		<a class="like-button can-hover:hidden" href="/drill">🏋️</a>
 		<a class="like-button can-hover:hidden" href="/52">🃏</a>
 		<div class="grow-0 lg:grow"></div>
 		<a class="like-button grow lg:grow-0" href="/settings"
 			><span class="hidden lg:inline">Settings</span><span class="lg:hidden">⚙️</span></a
 		>
-		{#if !showLogin}
-			<button
-				onclick={() => {
-					$authenticationStore.isUserAuthenticated = false;
-					$authenticationStore.isGuest = false;
-					$authenticationStore.username = "";
-					$authenticationStore.password = "";
-					$authenticationStore.accessToken = "";
-				}}><span class="hidden lg:inline">Logout</span><span class="lg:hidden">🔒</span></button
-			>
-		{/if}
 	</div>
 {/if}
 <div class={showNav ? "mx-1" : ""}>

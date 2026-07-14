@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { CORNER_POSITIONS, EDGE_POSITIONS } from "$lib/constants";
 	import { optionsStore } from "$lib/stores/options";
+	import { authenticationStore } from "$lib/stores/authentication";
+
+	let showLogin = $derived(
+		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest
+	);
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -184,6 +189,21 @@
 			</tr>
 		</tbody>
 	</table>
+
+	{#if !showLogin}
+		<button
+			class="mt-1"
+			onclick={() => {
+				if (confirm("Logout?")) {
+					$authenticationStore.isUserAuthenticated = false;
+					$authenticationStore.isGuest = false;
+					$authenticationStore.username = "";
+					$authenticationStore.password = "";
+					$authenticationStore.accessToken = "";
+				}
+			}}>🔒 Logout</button
+		>
+	{/if}
 </div>
 
 <style>
