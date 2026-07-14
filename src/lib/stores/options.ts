@@ -21,6 +21,7 @@ export const optionsStore = writable<Options>({
 	newCardsToday: 0,
 	newCardDay: 0,
 	oldThresholdDays: 5,
+	drillTarget: 5,
 });
 
 const optionsStorageKey = `${OPTIONS_STORE_PREFIX}_ALL`;

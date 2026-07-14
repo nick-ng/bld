@@ -1,4 +1,5 @@
 import type { LetterPair, Options } from "$lib/types";
+import type { LetterPairStoreType } from "$lib/stores/letter-pairs";
 
 import { isSpeffzPairValid } from "$lib/utils";
 
@@ -156,7 +157,7 @@ export function getQuizKit(
 					};
 				}
 				default: {
-					if (subcategory?.length === 2 && subcategory.includes("*")) {
+					if (subcategory?.length === 2 && subcategory.includes("*") && subcategory !== "**") {
 						// starts with/ends with auto subcategory
 						const startsWith = subcategory[1] === "*";
 						const filterFunc = (lp: LetterPair) =>
@@ -213,7 +214,7 @@ export function getQuizKit(
 			const getSMStats = (lp: LetterPair) => lp.algorithms?.[category] || defaultSMStats;
 			switch (subcategory) {
 				default: {
-					if (subcategory?.length === 2 && subcategory.includes("*")) {
+					if (subcategory?.length === 2 && subcategory.includes("*") && subcategory !== "**") {
 						// starts with/ends with auto subcategory
 						const startsWith = subcategory[1] === "*";
 						const filterFunc = (lp: LetterPair) =>
@@ -458,4 +459,31 @@ export function getStartOfTodayMs() {
 	today.setHours(5, 0, 0, 0);
 	const todayMs = today.valueOf();
 	return todayMs;
+}
+
+export function getAlgorithms(
+	letterPairs: LetterPairStoreType,
+	category: string,
+	subcategory: string | null,
+	options: Options
+) {
+	const quizKit = getQuizKit(category, subcategory, options);
+
+	if (quizKit.quizType === "memo") {
+		return [];
+	}
+
+	const algorithms: LetterPair["algorithms"][string][] = [];
+
+	Object.values(letterPairs).forEach((letterPair) => {
+		if (!quizKit.filterFunc(letterPair)) {
+			return;
+		}
+		if (!letterPair.algorithms[category]?.moves.trim()) {
+			return;
+		}
+		algorithms.push(letterPair.algorithms[category]);
+	});
+
+	return algorithms;
 }
