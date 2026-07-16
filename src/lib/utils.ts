@@ -459,7 +459,7 @@ export function getOperatingSystem(): string {
 export function normaliseCommutator(rawCommutator: string): string {
 	return rawCommutator
 		.replaceAll(/  +/g, " ")
-		.replaceAll(/ *([ufrdlb])/gi, " $1")
+		.replaceAll(/ *([ufrdlbmse])/gi, " $1")
 		.replaceAll(/ *\[ */g, "[")
 		.replaceAll(/ *\] */g, "]")
 		.replaceAll(/ *, */g, ",")
@@ -515,14 +515,14 @@ export function parseCommutator(rawCommutator: string) {
 		}
 	}
 
-	const commutatorResult = hydratedCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
+	const commutatorResult = hydratedCommutator.match(/\[[ufrdlbmse2' ]+,[ufrdlbmse2' ]+\]/i);
 	if (commutatorResult) {
 		const commutator = normaliseCommutator(commutatorResult[0]);
 		// there is at least a commutator
 		let conjugatePlusCommutator = commutator;
 		// check if there is a conjugate as well
 		const conjugatePlusCommutatorResult = hydratedCommutator.match(
-			/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
+			/[ufrdlbmse2' ]+: ?\[[ufrdlbmse2' ]+,[ufrdlbmse2' ]+\]/i
 		);
 		let setup = "";
 		if (conjugatePlusCommutatorResult) {
@@ -538,7 +538,7 @@ export function parseCommutator(rawCommutator: string) {
 			.map((a) => a.trim());
 		let insert = temp[0];
 		let interchange = temp[1];
-		if (temp[0].match(/^[ufrdlb][2']*$/i)) {
+		if (temp[0].match(/^[ufrdlbmse][2']*$/i)) {
 			interchange = temp[0];
 			insert = temp[1];
 		}
@@ -571,7 +571,7 @@ export function parseCommutator(rawCommutator: string) {
 	}
 
 	const slashCommutatorResult = hydratedCommutator.match(
-		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb]'?\/[ufrdlb2' ]+\])/i
+		/(?<setupRG>[ufrdlbmse2' ]+:)? *(?<commutatorRG>\[[ufrdlbmse]'?\/[ufrdlbmse2' ]+\])/i
 	);
 	if (slashCommutatorResult) {
 		const { setupRG, commutatorRG } = slashCommutatorResult.groups || {};
@@ -611,7 +611,7 @@ export function parseCommutator(rawCommutator: string) {
 	}
 
 	const conjugateResult = hydratedCommutator.match(
-		/(?<setupRG>[ufrdlb2' ]+) *: *(?<algorithmRG>[ufrdlb2' ]+)/i
+		/(?<setupRG>[ufrdlbmse2' ]+) *: *(?<algorithmRG>[ufrdlbmse2' ]+)/i
 	);
 	if (conjugateResult) {
 		const { setupRG, algorithmRG } = conjugateResult.groups || {};
