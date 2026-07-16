@@ -242,24 +242,39 @@ export function daysAgo(date: Date | number) {
 	return `${differenceDays.toFixed(0)} Days ago`;
 }
 
-export function msToLargestTime(milliseconds: number) {
+export function msToLargestTime(milliseconds: number, short: boolean = false) {
 	if (milliseconds > 1000 * 60 * 60 * 24) {
 		const days = Math.round(milliseconds / (1000 * 60 * 60 * 24));
+		if (short) {
+			return `${days}d`;
+		}
 		return `${days} day${days === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000 * 60 * 60) {
 		const hours = Math.round(milliseconds / (1000 * 60 * 60));
+		if (short) {
+			return `${hours}h`;
+		}
 		return `${hours} hour${hours === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000 * 60) {
 		const minutes = Math.round(milliseconds / (1000 * 60));
+		if (short) {
+			return `${minutes}m`;
+		}
 		return `${minutes} minute${minutes === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000) {
 		const seconds = Math.round(milliseconds / 1000);
+		if (short) {
+			return `${seconds}s`;
+		}
 		return `${seconds} second${seconds === 1 ? "" : "s"}`;
 	}
 
+	if (short) {
+		return `${milliseconds}ms`;
+	}
 	return `${milliseconds} millisecond${milliseconds === 1 ? "" : "s"}`;
 }
 
