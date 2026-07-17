@@ -76,10 +76,11 @@ css:
 - src/lib/stores/letter-pairs.ts:303: @todo(nick-ng): put data into session storage
 - src/lib/stores/options.ts:8: @todo(nick-ng): store options on server
 - src/lib/utils.ts:15: @todo(nick-ng): functions need to be clear whether they are operating with speffz letters or locations
-- src/lib/utils.ts:357: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
-- src/lib/utils.ts:506: @todo(nick-ng): handle cube rotations (x y z)
-- src/lib/utils.ts:667: @todo(nick-ng): is the loop necessary?
+- src/lib/utils.ts:383: @todo(nick-ng): handle other piece types (x centre, + centre, wing)
+- src/lib/utils.ts:532: @todo(nick-ng): handle cube rotations (x y z)
+- src/lib/utils.ts:693: @todo(nick-ng): is the loop necessary?
 - src/routes/2x2/+page.svelte:20: @todo(nick-ng): figure out a way to put this file locally
+- src/routes/drill/+page.svelte:158: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
 - src/routes/letter-pair/edit/alg-editor.svelte:33: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:86: @todo(nick-ng): handle error saving changes

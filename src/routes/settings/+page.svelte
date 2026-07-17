@@ -1,6 +1,11 @@
 <script lang="ts">
 	import { CORNER_POSITIONS, EDGE_POSITIONS } from "$lib/constants";
 	import { optionsStore } from "$lib/stores/options";
+	import { authenticationStore } from "$lib/stores/authentication";
+
+	let showLogin = $derived(
+		!$authenticationStore.isUserAuthenticated && !$authenticationStore.isGuest
+	);
 </script>
 
 <div class="mx-auto max-w-prose">
@@ -65,7 +70,7 @@
 			</tr>
 			<tr>
 				<td>
-					<label for="optionsBonusRetired"> Auto Hesitate (sec) </label>
+					<label for="auto4s"> Auto Hesitate (sec) </label>
 				</td>
 				<td class="text-right">
 					<button
@@ -77,7 +82,7 @@
 					>
 					<input
 						class="inline-block w-16 text-right"
-						id="optionsBonusRetired"
+						id="auto4s"
 						type="number"
 						bind:value={$optionsStore.auto4s}
 					/>
@@ -86,6 +91,33 @@
 						class="inline-block py-1"
 						onclick={() => {
 							$optionsStore.auto4s = ($optionsStore.auto4s || 0) + 1;
+						}}>+</button
+					>
+				</td>
+			</tr>
+			<tr>
+				<td>
+					<label for="drillTarget"> Drill Target (sec) </label>
+				</td>
+				<td class="text-right">
+					<button
+						type="button"
+						class="inline-block py-1"
+						onclick={() => {
+							$optionsStore.drillTarget = ($optionsStore.drillTarget || 0) - 1;
+						}}>-</button
+					>
+					<input
+						class="inline-block w-16 text-right"
+						id="drillTarget"
+						type="number"
+						bind:value={$optionsStore.drillTarget}
+					/>
+					<button
+						type="button"
+						class="inline-block py-1"
+						onclick={() => {
+							$optionsStore.drillTarget = ($optionsStore.drillTarget || 0) + 1;
 						}}>+</button
 					>
 				</td>
@@ -184,6 +216,21 @@
 			</tr>
 		</tbody>
 	</table>
+
+	{#if !showLogin}
+		<button
+			class="mt-1"
+			onclick={() => {
+				if (confirm("Logout?")) {
+					$authenticationStore.isUserAuthenticated = false;
+					$authenticationStore.isGuest = false;
+					$authenticationStore.username = "";
+					$authenticationStore.password = "";
+					$authenticationStore.accessToken = "";
+				}
+			}}>🔒 Logout</button
+		>
+	{/if}
 </div>
 
 <style>

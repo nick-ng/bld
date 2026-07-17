@@ -219,7 +219,7 @@ export function formatDate(date: Date, showSeconds = false) {
 	return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()}, ${hh}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function daysAgo(date: Date | number) {
+export function daysAgo(date: Date | number, maxDays: number = -1) {
 	const startOfToday = new Date();
 	startOfToday.setHours(0);
 	startOfToday.setMinutes(0);
@@ -236,42 +236,68 @@ export function daysAgo(date: Date | number) {
 	}
 
 	if (differenceDays < 2) {
-		return `${differenceDays.toFixed(0)} Day ago`;
+		return `${differenceDays.toFixed(0)} Day`;
 	}
 
-	return `${differenceDays.toFixed(0)} Days ago`;
+	if (maxDays > 0 && differenceDays > maxDays) {
+		return `${maxDays}+ Days`;
+	}
+
+	return `${differenceDays.toFixed(0)} Days`;
 }
 
-export function msToLargestTime(milliseconds: number) {
+export function msToLargestTime(milliseconds: number, short: boolean = false) {
 	if (milliseconds > 1000 * 60 * 60 * 24) {
 		const days = Math.round(milliseconds / (1000 * 60 * 60 * 24));
+		if (short) {
+			return `${days}d`;
+		}
 		return `${days} day${days === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000 * 60 * 60) {
 		const hours = Math.round(milliseconds / (1000 * 60 * 60));
+		if (short) {
+			return `${hours}h`;
+		}
 		return `${hours} hour${hours === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000 * 60) {
 		const minutes = Math.round(milliseconds / (1000 * 60));
+		if (short) {
+			return `${minutes}m`;
+		}
 		return `${minutes} minute${minutes === 1 ? "" : "s"}`;
 	}
 	if (milliseconds > 1000) {
 		const seconds = Math.round(milliseconds / 1000);
+		if (short) {
+			return `${seconds}s`;
+		}
 		return `${seconds} second${seconds === 1 ? "" : "s"}`;
 	}
 
+	if (short) {
+		return `${milliseconds}ms`;
+	}
 	return `${milliseconds} millisecond${milliseconds === 1 ? "" : "s"}`;
 }
 
-export function msToMinAndSec(milliseconds: number) {
+export function msToMinAndSec(milliseconds: number, showHundredths: boolean = false) {
 	const totalSeconds = Math.round(milliseconds / 1000);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = totalSeconds % 60;
+	const secondsF = ((milliseconds % 60000) / 1000).toFixed(2);
 
 	if (minutes > 0) {
+		if (showHundredths) {
+			return `${minutes}m ${secondsF}s`;
+		}
 		return `${minutes}m ${seconds}s`;
 	}
 
+	if (showHundredths) {
+		return `${secondsF}s`;
+	}
 	return `${seconds}s`;
 }
 
@@ -459,7 +485,7 @@ export function getOperatingSystem(): string {
 export function normaliseCommutator(rawCommutator: string): string {
 	return rawCommutator
 		.replaceAll(/  +/g, " ")
-		.replaceAll(/ *([ufrdlb])/gi, " $1")
+		.replaceAll(/ *([ufrdlbmse])/gi, " $1")
 		.replaceAll(/ *\[ */g, "[")
 		.replaceAll(/ *\] */g, "]")
 		.replaceAll(/ *, */g, ",")
@@ -515,14 +541,14 @@ export function parseCommutator(rawCommutator: string) {
 		}
 	}
 
-	const commutatorResult = hydratedCommutator.match(/\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i);
+	const commutatorResult = hydratedCommutator.match(/\[[ufrdlbmse2' ]+,[ufrdlbmse2' ]+\]/i);
 	if (commutatorResult) {
 		const commutator = normaliseCommutator(commutatorResult[0]);
 		// there is at least a commutator
 		let conjugatePlusCommutator = commutator;
 		// check if there is a conjugate as well
 		const conjugatePlusCommutatorResult = hydratedCommutator.match(
-			/[ufrdlb2' ]+: ?\[[ufrdlb2' ]+,[ufrdlb2' ]+\]/i
+			/[ufrdlbmse2' ]+: ?\[[ufrdlbmse2' ]+,[ufrdlbmse2' ]+\]/i
 		);
 		let setup = "";
 		if (conjugatePlusCommutatorResult) {
@@ -538,7 +564,7 @@ export function parseCommutator(rawCommutator: string) {
 			.map((a) => a.trim());
 		let insert = temp[0];
 		let interchange = temp[1];
-		if (temp[0].match(/^[ufrdlb][2']*$/i)) {
+		if (temp[0].match(/^[ufrdlbmse][2']*$/i)) {
 			interchange = temp[0];
 			insert = temp[1];
 		}
@@ -571,7 +597,7 @@ export function parseCommutator(rawCommutator: string) {
 	}
 
 	const slashCommutatorResult = hydratedCommutator.match(
-		/(?<setupRG>[ufrdlb2' ]+:)? *(?<commutatorRG>\[[ufrdlb]'?\/[ufrdlb2' ]+\])/i
+		/(?<setupRG>[ufrdlbmse2' ]+:)? *(?<commutatorRG>\[[ufrdlbmse]'?\/[ufrdlbmse2' ]+\])/i
 	);
 	if (slashCommutatorResult) {
 		const { setupRG, commutatorRG } = slashCommutatorResult.groups || {};
@@ -611,7 +637,7 @@ export function parseCommutator(rawCommutator: string) {
 	}
 
 	const conjugateResult = hydratedCommutator.match(
-		/(?<setupRG>[ufrdlb2' ]+) *: *(?<algorithmRG>[ufrdlb2' ]+)/i
+		/(?<setupRG>[ufrdlbmse2' ]+) *: *(?<algorithmRG>[ufrdlbmse2' ]+)/i
 	);
 	if (conjugateResult) {
 		const { setupRG, algorithmRG } = conjugateResult.groups || {};
