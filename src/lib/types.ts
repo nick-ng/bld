@@ -142,6 +142,7 @@ export const optionsSchema = z.object({
 	newCardDay: z.number().optional().default(0),
 	oldThresholdDays: z.number().optional().default(5),
 	drillTarget: z.number().optional().default(5),
+	solveOrientationPreMoves: z.string().optional().default(""),
 });
 
 export type Options = z.infer<typeof optionsSchema>;

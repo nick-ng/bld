@@ -219,7 +219,7 @@ export function formatDate(date: Date, showSeconds = false) {
 	return `${dayOfWeek}, ${dd} ${mmm} ${date.getFullYear()}, ${hh}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
 }
 
-export function daysAgo(date: Date | number) {
+export function daysAgo(date: Date | number, maxDays: number = -1) {
 	const startOfToday = new Date();
 	startOfToday.setHours(0);
 	startOfToday.setMinutes(0);
@@ -236,10 +236,14 @@ export function daysAgo(date: Date | number) {
 	}
 
 	if (differenceDays < 2) {
-		return `${differenceDays.toFixed(0)} Day ago`;
+		return `${differenceDays.toFixed(0)} Day`;
 	}
 
-	return `${differenceDays.toFixed(0)} Days ago`;
+	if (maxDays > 0 && differenceDays > maxDays) {
+		return `${maxDays}+ Days`;
+	}
+
+	return `${differenceDays.toFixed(0)} Days`;
 }
 
 export function msToLargestTime(milliseconds: number, short: boolean = false) {
@@ -278,15 +282,22 @@ export function msToLargestTime(milliseconds: number, short: boolean = false) {
 	return `${milliseconds} millisecond${milliseconds === 1 ? "" : "s"}`;
 }
 
-export function msToMinAndSec(milliseconds: number) {
+export function msToMinAndSec(milliseconds: number, showHundredths: boolean = false) {
 	const totalSeconds = Math.round(milliseconds / 1000);
 	const minutes = Math.floor(totalSeconds / 60);
 	const seconds = totalSeconds % 60;
+	const secondsF = ((milliseconds % 60000) / 1000).toFixed(2);
 
 	if (minutes > 0) {
+		if (showHundredths) {
+			return `${minutes}m ${secondsF}s`;
+		}
 		return `${minutes}m ${seconds}s`;
 	}
 
+	if (showHundredths) {
+		return `${secondsF}s`;
+	}
 	return `${seconds}s`;
 }
 
