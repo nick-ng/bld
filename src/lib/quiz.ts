@@ -405,8 +405,8 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 		next_review_at: new Date(),
 	};
 	if (userGradeQ >= 3) {
-		if (input.next_review_at > new Date()) {
-			// quiz wasn't due yet so don't change any stats. bump next review at and return
+		if (input.next_review_at > new Date() && input.sm2_i > ALTERED_INTERVAL_CUTOFF) {
+			// quiz wasn't due yet and the interval is long so don't change any stats. bump next review at and return
 			output.next_review_at = getNextReviewDate(output.sm2_i);
 
 			return output;
@@ -444,10 +444,14 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 	return output;
 }
 
+// was sqrt (0.5) previously which felt like too much.
+const REDUCTION_EXPONENT = 0.7;
 function getNextReviewDate(i: number) {
 	let effectiveI = i;
 	if (i > ALTERED_INTERVAL_CUTOFF) {
-		effectiveI = ALTERED_INTERVAL_CUTOFF + Math.round(Math.sqrt(i - ALTERED_INTERVAL_CUTOFF));
+		effectiveI =
+			ALTERED_INTERVAL_CUTOFF +
+			Math.round(Math.pow(i - ALTERED_INTERVAL_CUTOFF, REDUCTION_EXPONENT));
 	}
 
 	// 1 day per sm2_i minus 8 hours so you don't have to do the quiz at the exact time and it doesn't become later and later
