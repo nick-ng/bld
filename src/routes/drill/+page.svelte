@@ -64,8 +64,11 @@
 					const drillTimestamps = algorithms.map((a) => a.last_drill_at.valueOf());
 					const maxDrillTime = Math.max(...drillTimes);
 					const maxDrillTimestamps = Math.max(...drillTimestamps);
+					const meanDrillTime = drillTimes.reduce((prev, curr) => {
+						return prev + curr / drillTimes.length;
+					}, 0);
 
-					return { ...quizKit, algorithms, maxDrillTime, maxDrillTimestamps };
+					return { ...quizKit, algorithms, maxDrillTime, maxDrillTimestamps, meanDrillTime };
 				})
 				.filter((a) => a.algorithms.length > 0)
 				.sort((a, b) => {
@@ -75,6 +78,10 @@
 
 					if (a.maxDrillTime !== b.maxDrillTime) {
 						return b.maxDrillTime - a.maxDrillTime;
+					}
+
+					if (a.meanDrillTime !== b.meanDrillTime) {
+						return b.meanDrillTime - a.meanDrillTime;
 					}
 
 					return a.maxDrillTimestamps - b.maxDrillTimestamps;
@@ -340,7 +347,7 @@
 					)}
 					onclick={() => {
 						quizState = "stand-by";
-					}}>🐌 ({msToMinAndSec(slowest[0].drill_time_ms, true)})</a
+					}}>🐌 ({msToMinAndSec(slowest[0].drill_time_ms, false)})</a
 				>
 				<a
 					class="like-button block grow py-2 text-center text-xl leading-none"
@@ -365,7 +372,10 @@
 					onclick={() => {
 						quizState = "stand-by";
 					}}
-					>{drillSubcategory.title} ({msToMinAndSec(drillSubcategory.maxDrillTime, true)})
+					>{drillSubcategory.title} ({msToMinAndSec(drillSubcategory.meanDrillTime, false)}, {msToMinAndSec(
+						drillSubcategory.maxDrillTime,
+						false
+					)})
 				</a>
 			{/each}
 		</div>
