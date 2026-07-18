@@ -5,7 +5,6 @@
 	import { letterPairStore, letterPairStoreStatus, saveAlgorithm } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import {
-		daysAgo,
 		getTrueKeys,
 		msToMinAndSec,
 		parseCommutator,
@@ -15,6 +14,8 @@
 	import { getQuizKit, getAlgorithms } from "$lib/quiz";
 	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
+
+	// @todo(nick-ng): show stats after drill
 
 	const NEW_TIME_WEIGHT = 0.6;
 
@@ -116,6 +117,52 @@
 
 		return algs;
 	});
+
+	const getMixedDrill = (
+		options: Options,
+		flatAlgs: {
+			fullMoves: string;
+			speffz_pair: string;
+			buffer: string;
+			moves: string;
+			sm2_n: number;
+			sm2_ef: number;
+			sm2_i: number;
+			drill_time_ms: number;
+			last_drill_at: Date;
+			last_review_at: Date;
+			next_review_at: Date;
+		}[],
+		limit: number = 10
+	) => {
+		const nextLetterPairs = flatAlgs
+			.filter((a) => a.drill_time_ms > options.drillTarget * 1000)
+			.sort((a, b) => {
+				return b.drill_time_ms - a.drill_time_ms;
+			})
+			.slice(0, Math.ceil(limit / 2))
+			.map((a) => a.speffz_pair);
+
+		const oldAlgs = flatAlgs.sort((a, b) => {
+			return a.last_drill_at.valueOf() - b.last_drill_at.valueOf();
+		});
+
+		for (let i = 0; i < oldAlgs.length; i++) {
+			if (nextLetterPairs.length >= limit) {
+				break;
+			}
+
+			const thisSpeffzPair = oldAlgs[i].speffz_pair;
+
+			if (nextLetterPairs.includes(thisSpeffzPair)) {
+				continue;
+			}
+
+			nextLetterPairs.push(thisSpeffzPair);
+		}
+
+		return nextLetterPairs;
+	};
 
 	const getDrillUrl = (buf: string, next: string[], prev: string[]) => {
 		const searchParams = new SvelteURLSearchParams({ buf, n: next.join(" "), p: prev.join(" ") });
@@ -347,7 +394,18 @@
 					)}
 					onclick={() => {
 						quizState = "stand-by";
-					}}>🐌 ({msToMinAndSec(slowest[0].drill_time_ms, false)})</a
+					}}>🐌</a
+				>
+				<a
+					class="like-button block grow py-2 text-center text-xl leading-none"
+					href={getDrillUrl(
+						drillCategories[selectedDrillCategoryIndex][0].category,
+						shuffleArray(getMixedDrill($optionsStore, flatAlgorithms, 10)),
+						[]
+					)}
+					onclick={() => {
+						quizState = "stand-by";
+					}}>🐌 & 👴</a
 				>
 				<a
 					class="like-button block grow py-2 text-center text-xl leading-none"
@@ -358,7 +416,7 @@
 					)}
 					onclick={() => {
 						quizState = "stand-by";
-					}}>👴 ({daysAgo(oldest[0].last_drill_at, 30)})</a
+					}}>👴</a
 				>
 			</div>
 			{#each drillCategories[selectedDrillCategoryIndex] as drillSubcategory (`${drillSubcategory.category}-${drillSubcategory.subcategory || "all"}`)}
