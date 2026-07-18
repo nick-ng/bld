@@ -16,6 +16,8 @@
 	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
 
+	const NEW_TIME_WEIGHT = 0.6;
+
 	// "stand-by", "go", "review", "done"
 	let quizState = $state("stand-by");
 	let quizStartMs = $state(0);
@@ -152,7 +154,9 @@
 			return;
 		}
 
-		const newDrillTimeMs = Math.round((quizTimeMs + alg.drill_time_ms) / 2);
+		const newDrillTimeMs = Math.round(
+			quizTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
+		);
 
 		if (correct) {
 			// @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
