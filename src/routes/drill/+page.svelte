@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Options } from "$lib/types";
+	import type { Algorithm, Options } from "$lib/types";
 
 	import { page } from "$app/state";
 	import { letterPairStore, letterPairStoreStatus, saveAlgorithm } from "$lib/stores/letter-pairs";
@@ -96,19 +96,7 @@
 			return [];
 		}
 
-		const algs: {
-			fullMoves: string;
-			speffz_pair: string;
-			buffer: string;
-			moves: string;
-			sm2_n: number;
-			sm2_ef: number;
-			sm2_i: number;
-			drill_time_ms: number;
-			last_drill_at: Date;
-			last_review_at: Date;
-			next_review_at: Date;
-		}[] = [];
+		const algs: (Algorithm & { fullMoves: string })[] = [];
 		selectedDrillCategory.forEach((dc) => {
 			dc.algorithms.forEach((a) => {
 				algs.push(a);
@@ -120,19 +108,7 @@
 
 	const getMixedDrill = (
 		options: Options,
-		flatAlgs: {
-			fullMoves: string;
-			speffz_pair: string;
-			buffer: string;
-			moves: string;
-			sm2_n: number;
-			sm2_ef: number;
-			sm2_i: number;
-			drill_time_ms: number;
-			last_drill_at: Date;
-			last_review_at: Date;
-			next_review_at: Date;
-		}[],
+		flatAlgs: (Algorithm & { fullMoves: string })[],
 		limit: number = 10
 	) => {
 		const nextLetterPairs = flatAlgs
@@ -172,19 +148,7 @@
 
 	const getFullMoves = (
 		options: Options,
-		flatAlgs: {
-			fullMoves: string;
-			speffz_pair: string;
-			buffer: string;
-			moves: string;
-			sm2_n: number;
-			sm2_ef: number;
-			sm2_i: number;
-			drill_time_ms: number;
-			last_drill_at: Date;
-			last_review_at: Date;
-			next_review_at: Date;
-		}[],
+		flatAlgs: (Algorithm & { fullMoves: string })[],
 		speffzLetterPairs: string[]
 	) => {
 		const commsSoFar = speffzLetterPairs.map((sp) => {
