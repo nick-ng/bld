@@ -18,6 +18,8 @@ export const flashCardSchema = z.object({
 
 export type FlashCard = z.infer<typeof flashCardSchema>;
 
+const HOUR_MS = 1000 * 60 * 60;
+
 const dateOrDateStringSchema = z.preprocess((u) => {
 	if (typeof u === "string") {
 		return new Date(u);
@@ -74,7 +76,7 @@ export const getDefaultAlgorithm = (speffzPair: string, buffer: string): Algorit
 		sm2_n: 0,
 		sm2_ef: 2.5,
 		sm2_i: 0,
-		drill_time_ms: 20_000,
+		drill_time_ms: HOUR_MS,
 		last_drill_at: new Date(0),
 		last_review_at: new Date(0),
 		next_review_at: new Date(),
