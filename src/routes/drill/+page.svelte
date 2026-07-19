@@ -406,10 +406,11 @@
 					onclick={() => {
 						drillState = "stand-by";
 					}}
-					>{drillSubcategory.title} ({msToMinAndSec(drillSubcategory.meanDrillTime, false)}, {msToMinAndSec(
-						drillSubcategory.maxDrillTime,
-						false
-					)})
+					>{drillSubcategory.title}
+					{#if drillSubcategory.maxDrillTime < 10 * MINUTE_MS}({msToMinAndSec(
+							drillSubcategory.meanDrillTime,
+							false
+						)}, {msToMinAndSec(drillSubcategory.maxDrillTime, false)}){/if}
 				</a>
 			{/each}
 		</div>
