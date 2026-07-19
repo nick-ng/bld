@@ -2,6 +2,7 @@
 	import { letterPairStore } from "$lib/stores/letter-pairs";
 	import { optionsStore } from "$lib/stores/options";
 	import NoInverse from "./no-inverse.svelte";
+	import ResetDrill from "./reset-drill.svelte";
 
 	let buffers = $derived(
 		Object.entries($optionsStore.chosenBuffers)
@@ -14,6 +15,7 @@
 	class="mx-auto grid justify-center gap-2"
 	style={`grid-template-columns: repeat(${buffers.length},1fr);`}
 >
+	<ResetDrill />
 	{#each buffers as buffer (buffer)}
 		<div>
 			<h3>{buffer}</h3>

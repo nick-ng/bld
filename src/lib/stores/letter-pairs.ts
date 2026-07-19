@@ -110,11 +110,11 @@ const fetchMnemonics = async (): Promise<Mnemonic[]> => {
 	return mnemonics;
 };
 
-const fetchAlgorithms = async (): Promise<Algorithm[]> => {
+export const fetchAlgorithms = async (): Promise<Algorithm[]> => {
 	let keepGoing = true;
 	let offset = 0;
 	const algorithms: Algorithm[] = [];
-	for (let i = 0; i < 100; i++) {
+	for (let i = 0; i < 500; i++) {
 		if (!keepGoing) {
 			break;
 		}
