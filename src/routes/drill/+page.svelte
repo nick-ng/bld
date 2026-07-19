@@ -410,7 +410,11 @@
 					{#if drillSubcategory.maxDrillTime < 10 * MINUTE_MS}({msToMinAndSec(
 							drillSubcategory.meanDrillTime,
 							false
-						)}, {msToMinAndSec(drillSubcategory.maxDrillTime, false)}){/if}
+						)}, {msToMinAndSec(
+							drillSubcategory.maxDrillTime,
+							false
+						)}){:else}({drillSubcategory.algorithms.filter((a) => a.drill_time_ms < 10 * MINUTE_MS)
+							.length}/{drillSubcategory.algorithms.length}){/if}
 				</a>
 			{/each}
 		</div>
