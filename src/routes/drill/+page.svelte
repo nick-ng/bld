@@ -18,11 +18,12 @@
 	// @todo(nick-ng): show stats after drill
 
 	const NEW_TIME_WEIGHT = 0.6;
+	const MINUTE_MS = 1000 * 60;
 
 	// "stand-by", "go", "review", "done"
-	let quizState = $state("stand-by");
-	let quizStartMs = $state(0);
-	let quizTimeMs = $state(0);
+	let drillState = $state("stand-by");
+	let drillStartMs = $state(0);
+	let drillTimeMs = $state(0);
 	let buf = $derived(page.url.searchParams.get("buf"));
 	let next = $derived(
 		page.url.searchParams
@@ -172,9 +173,20 @@
 			return;
 		}
 
-		const newDrillTimeMs = Math.round(
-			quizTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
-		);
+		if (drillTimeMs > 10 * MINUTE_MS) {
+			alert("Took more than 10 minutes");
+			drillState = "stand-by";
+			goto("/drill");
+
+			return;
+		}
+
+		let newDrillTimeMs = drillTimeMs;
+		if (alg.drill_time_ms < 10 * MINUTE_MS) {
+			newDrillTimeMs = Math.round(
+				drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
+			);
+		}
 
 		if (correct) {
 			// @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
@@ -187,14 +199,14 @@
 		}
 
 		if (rest.length === 0) {
-			quizState = "done";
+			drillState = "done";
 			return;
 		}
 
-		quizState = "review-countdown";
+		drillState = "review-countdown";
 		setTimeout(() => {
-			quizState = "go";
-			quizStartMs = Date.now();
+			drillState = "go";
+			drillStartMs = Date.now();
 
 			if (!correct || solvedCube) {
 				prev = [];
@@ -221,39 +233,39 @@
 				<div
 					class="h-full bg-blue-800 ease-linear"
 					style={`${[
-						`width:${["countdown", "review-countdown", "go"].includes(quizState) ? "0" : "100%"}`,
-						`transition-duration:${["countdown", "review-countdown", "go"].includes(quizState) ? "1s" : "0"}`,
+						`width:${["countdown", "review-countdown", "go"].includes(drillState) ? "0" : "100%"}`,
+						`transition-duration:${["countdown", "review-countdown", "go"].includes(drillState) ? "1s" : "0"}`,
 					].join(";")};`}
 				></div>
 			</div>
 			<div>Buffer: {buf}</div>
-			{#if quizState === "stand-by" || quizState === "countdown"}
+			{#if drillState === "stand-by" || drillState === "countdown"}
 				<button
 					class="self-stretch"
 					type="button"
 					onclick={() => {
-						quizState = "countdown";
+						drillState = "countdown";
 						setTimeout(() => {
-							quizState = "go";
-							quizStartMs = Date.now();
+							drillState = "go";
+							drillStartMs = Date.now();
 						}, 1000);
 					}}
 				>
-					{#if quizState === "countdown"}
+					{#if drillState === "countdown"}
 						Get Ready
 					{:else}
 						Start
 					{/if}
 				</button>
-			{:else if quizState === "go"}
+			{:else if drillState === "go"}
 				<div class="relative self-stretch">
 					<button
 						class="absolute top-0 left-0 right-0 mx-auto bg-white z-10"
 						type="button"
 						style="width:90vw;height:70vh;"
 						onclick={() => {
-							quizState = "review";
-							quizTimeMs = Date.now() - quizStartMs;
+							drillState = "review";
+							drillTimeMs = Date.now() - drillStartMs;
 						}}
 					>
 						<div class="uppercase text-2xl">
@@ -262,11 +274,11 @@
 						<div>Done</div>
 					</button>
 				</div>
-			{:else if quizState === "review" || quizState === "review-countdown"}
-				{#if quizState === "review"}
+			{:else if drillState === "review" || drillState === "review-countdown"}
+				{#if drillState === "review"}
 					{@const alg = flatAlgorithms.find((a) => a.speffz_pair === next[0])}
 					<div>
-						<span class="uppercase">{next[0]}</span> took: {msToMinAndSec(quizTimeMs, true)}
+						<span class="uppercase">{next[0]}</span> took: {msToMinAndSec(drillTimeMs, true)}
 					</div>
 					{#if alg}
 						<div>
@@ -282,7 +294,7 @@
 									return;
 								}
 
-								quizState = "review-countdown";
+								drillState = "review-countdown";
 								// save quiz result here
 								advanceQuiz(false, true);
 							}}>Wrong</button
@@ -320,7 +332,7 @@
 			{:else}
 				<div>All done! Back to <a href="/drill">Drill</a></div>
 			{/if}
-			<div class={`${quizState === "review" ? "" : "opacity-0"}`}>
+			<div class={`${drillState === "review" ? "" : "opacity-0"}`}>
 				<twisty-player
 					puzzle="3x3x3"
 					alg={getFullMoves($optionsStore, flatAlgorithms, [...prev, next[0]])}
@@ -357,7 +369,7 @@
 						[]
 					)}
 					onclick={() => {
-						quizState = "stand-by";
+						drillState = "stand-by";
 					}}>🐌</a
 				>
 				<a
@@ -368,7 +380,7 @@
 						[]
 					)}
 					onclick={() => {
-						quizState = "stand-by";
+						drillState = "stand-by";
 					}}>🐌 & 👴</a
 				>
 				<a
@@ -379,7 +391,7 @@
 						[]
 					)}
 					onclick={() => {
-						quizState = "stand-by";
+						drillState = "stand-by";
 					}}>👴</a
 				>
 			</div>
@@ -392,7 +404,7 @@
 						[]
 					)}
 					onclick={() => {
-						quizState = "stand-by";
+						drillState = "stand-by";
 					}}
 					>{drillSubcategory.title} ({msToMinAndSec(drillSubcategory.meanDrillTime, false)}, {msToMinAndSec(
 						drillSubcategory.maxDrillTime,
