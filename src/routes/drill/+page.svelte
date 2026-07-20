@@ -39,6 +39,18 @@
 			?.split(" ")
 			.filter((a) => a) || []
 	);
+	let correctCases = $derived(
+		page.url.searchParams
+			.get("c")
+			?.split(" ")
+			.filter((a) => a) || []
+	);
+	let wrongCases = $derived(
+		page.url.searchParams
+			.get("w")
+			?.split(" ")
+			.filter((a) => a) || []
+	);
 
 	let drillCategories = $derived([
 		...getTrueKeys($optionsStore.chosenBuffers).map((category) => {
@@ -190,6 +202,17 @@
 			);
 		}
 
+		next = rest;
+		if (solvedCube) {
+			prev = [];
+		} else {
+			prev = [...prev, curr];
+		}
+
+		const searchParams = new SvelteURLSearchParams(location.search);
+		searchParams.set("n", next.join(" "));
+		searchParams.set("p", prev.join(" "));
+
 		if (correct) {
 			// @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
 			saveAlgorithm({
@@ -198,29 +221,29 @@
 				last_drill_at: new Date(),
 				drill_time_ms: newDrillTimeMs,
 			});
+			searchParams.set("c", [...correctCases, curr].join(" "));
+			searchParams.set("w", wrongCases.join(" "));
+		} else {
+			searchParams.set("c", correctCases.join(" "));
+			searchParams.set("w", [...wrongCases, curr].join(" "));
 		}
 
 		if (!keepGoing || rest.length === 0) {
 			drillState = "done";
+			drillResult = "blank";
+			fromSolved = false;
+
+			goto(`/drill?${searchParams.toString()}`);
 			return;
 		}
 
 		drillState = "review-countdown";
+		drillResult = "blank";
+		fromSolved = false;
 		setTimeout(() => {
 			drillState = "go";
 			drillStartMs = Date.now();
 
-			if (!correct || solvedCube) {
-				prev = [];
-			} else {
-				prev = [...prev, curr];
-			}
-
-			next = rest;
-
-			const searchParams = new SvelteURLSearchParams(location.search);
-			searchParams.set("n", next.join(" "));
-			searchParams.set("p", prev.join(" "));
 			goto(`/drill?${searchParams.toString()}`);
 		}, 1000);
 	};
@@ -382,6 +405,12 @@
 				></twisty-player>
 			</div>
 		</div>
+	{:else if correctCases.length + wrongCases.length > 0}
+		<div class="flex flex-col items-center gap-1">
+			<h4>Results</h4>
+			<div>{correctCases.length}/{correctCases.length + wrongCases.length} cases correct</div>
+			<div>Back to <a href="/drill">Drill</a></div>
+		</div>
 	{:else}
 		{@const slowest = flatAlgorithms.toSorted((a, b) => {
 			return b.drill_time_ms - a.drill_time_ms;
@@ -408,6 +437,8 @@
 					)}
 					onclick={() => {
 						drillState = "stand-by";
+						drillResult = "blank";
+						fromSolved = false;
 					}}>🐌</a
 				>
 				<a
@@ -419,6 +450,8 @@
 					)}
 					onclick={() => {
 						drillState = "stand-by";
+						drillResult = "blank";
+						fromSolved = false;
 					}}>🐌 & 👴</a
 				>
 				<a
@@ -430,6 +463,8 @@
 					)}
 					onclick={() => {
 						drillState = "stand-by";
+						drillResult = "blank";
+						fromSolved = false;
 					}}>👴</a
 				>
 			</div>
@@ -443,6 +478,8 @@
 					)}
 					onclick={() => {
 						drillState = "stand-by";
+						drillResult = "blank";
+						fromSolved = false;
 					}}
 					>{drillSubcategory.title}
 					{#if drillSubcategory.maxDrillTime < 10 * MINUTE_MS}({msToMinAndSec(
