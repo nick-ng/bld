@@ -24,6 +24,8 @@
 	let drillState = $state("stand-by");
 	let drillStartMs = $state(0);
 	let drillTimeMs = $state(0);
+	let drillResult = $state("blank"); // "blank", "correct", "wrong"
+	let fromSolved = $state(false);
 	let buf = $derived(page.url.searchParams.get("buf"));
 	let next = $derived(
 		page.url.searchParams
@@ -166,7 +168,7 @@
 		return allMoves;
 	};
 
-	const advanceQuiz = (correct: boolean, solvedCube: boolean = false) => {
+	const advanceQuiz = (correct: boolean, solvedCube: boolean, keepGoing: boolean) => {
 		const [curr, ...rest] = next;
 		const alg = flatAlgorithms.find((a) => a.speffz_pair === curr);
 		if (!alg || !buf) {
@@ -198,7 +200,7 @@
 			});
 		}
 
-		if (rest.length === 0) {
+		if (!keepGoing || rest.length === 0) {
 			drillState = "done";
 			return;
 		}
@@ -238,7 +240,7 @@
 					].join(";")};`}
 				></div>
 			</div>
-			<div>Buffer: {buf}</div>
+			<div class="text-2xl">Buffer: {buf}</div>
 			{#if drillState === "stand-by" || drillState === "countdown"}
 				<button
 					class="self-stretch"
@@ -268,7 +270,7 @@
 							drillTimeMs = Date.now() - drillStartMs;
 						}}
 					>
-						<div class="uppercase text-2xl">
+						<div class="uppercase text-4xl">
 							{next[0]}
 						</div>
 						<div>Done</div>
@@ -277,53 +279,89 @@
 			{:else if drillState === "review" || drillState === "review-countdown"}
 				{#if drillState === "review"}
 					{@const alg = flatAlgorithms.find((a) => a.speffz_pair === next[0])}
-					<div>
+					<div class="text-lg">
 						<span class="uppercase">{next[0]}</span> took: {msToMinAndSec(drillTimeMs, true)}
 					</div>
 					{#if alg}
-						<div>
+						<div class="text-lg">
 							{alg.moves}
 						</div>
 					{/if}
-					<div class="flex flex-row gap-1 self-stretch">
+					<div>
+						{next.length - 1} left
+					</div>
+					<div class="grid grid-cols-2 gap-1 self-stretch">
+						{#if next.length > 1}
+							<button
+								class={fromSolved ? "bg-blue-300" : ""}
+								type="button"
+								onclick={() => {
+									fromSolved = true;
+								}}
+							>
+								From Solved
+							</button>
+							<button
+								class={!fromSolved ? "bg-blue-300" : ""}
+								type="button"
+								onclick={() => {
+									fromSolved = false;
+								}}
+							>
+								As Is
+							</button>
+						{/if}
 						<button
-							class="grow"
+							class={drillResult === "wrong" ? "bg-red-300" : ""}
 							type="button"
 							onclick={() => {
-								if (!confirm("Solve the cube")) {
+								drillResult = "wrong";
+							}}
+						>
+							Wrong
+						</button>
+						<button
+							class={drillResult === "correct" ? "bg-green-300" : ""}
+							type="button"
+							onclick={() => {
+								drillResult = "correct";
+							}}
+						>
+							Correct
+						</button>
+						<button
+							type="button"
+							onclick={() => {
+								if (
+									(drillResult !== "wrong" && drillResult !== "correct") ||
+									(fromSolved && !confirm("Solve the cube"))
+								) {
 									return;
 								}
 
 								drillState = "review-countdown";
 								// save quiz result here
-								advanceQuiz(false, true);
-							}}>Wrong</button
-						>
-						{#if next.length > 1}
-							<button
-								class="grow"
-								type="button"
-								onclick={() => {
-									if (!confirm("Solve the cube")) {
-										return;
-									}
-
-									advanceQuiz(true, true);
-								}}>From Solved</button
-							>
-						{/if}
-						<button
-							class="grow"
-							type="button"
-							onclick={() => {
-								advanceQuiz(true, false);
+								advanceQuiz(drillResult === "correct", fromSolved, false);
 							}}
 						>
-							{#if next.length > 1}
-								Continue ({next.length - 1})
-							{:else}
-								Correct
-							{/if}
+							Done
+						</button>
+						<button
+							type="button"
+							onclick={() => {
+								if (
+									(drillResult !== "wrong" && drillResult !== "correct") ||
+									(fromSolved && !confirm("Solve the cube"))
+								) {
+									return;
+								}
+
+								drillState = "review-countdown";
+								// save quiz result here
+								advanceQuiz(drillResult === "correct", fromSolved, true);
+							}}
+						>
+							Next
 						</button>
 					</div>
 				{:else}

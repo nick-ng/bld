@@ -81,7 +81,7 @@ css:
 - src/lib/utils.ts:693: @todo(nick-ng): is the loop necessary?
 - src/routes/2x2/+page.svelte:20: @todo(nick-ng): figure out a way to put this file locally
 - src/routes/drill/+page.svelte:18: @todo(nick-ng): show stats after drill
-- src/routes/drill/+page.svelte:192: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
+- src/routes/drill/+page.svelte:194: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
 - src/routes/letter-pair/edit/alg-editor.svelte:33: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:86: @todo(nick-ng): handle error saving changes
