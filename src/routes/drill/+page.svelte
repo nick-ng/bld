@@ -180,7 +180,7 @@
 		return allMoves;
 	};
 
-	const advanceQuiz = (correct: boolean, solvedCube: boolean, keepGoing: boolean) => {
+	const advanceDrill = (correct: boolean, solvedCube: boolean, keepGoing: boolean) => {
 		const [curr, ...rest] = next;
 		const alg = flatAlgorithms.find((a) => a.speffz_pair === curr);
 		if (!alg || !buf) {
@@ -196,7 +196,10 @@
 		}
 
 		let newDrillTimeMs = drillTimeMs;
-		if (alg.drill_time_ms < 10 * MINUTE_MS) {
+		if (!correct) {
+			// penalty for getting the quiz wrong
+			newDrillTimeMs = Math.min(Math.round(drillTimeMs * 1.1), drillStartMs + 2000);
+		} else if (alg.drill_time_ms < 10 * MINUTE_MS) {
 			newDrillTimeMs = Math.round(
 				drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
 			);
@@ -224,6 +227,12 @@
 			searchParams.set("c", [...correctCases, curr].join(" "));
 			searchParams.set("w", wrongCases.join(" "));
 		} else {
+			// don't update last_drill_at if you get it wrong
+			saveAlgorithm({
+				speffz_pair: curr.toLocaleLowerCase(),
+				buffer: buf,
+				drill_time_ms: newDrillTimeMs,
+			});
 			searchParams.set("c", correctCases.join(" "));
 			searchParams.set("w", [...wrongCases, curr].join(" "));
 		}
@@ -311,7 +320,11 @@
 						</div>
 					{/if}
 					<div>
-						{next.length - 1} left
+						{#if next.length > 1}
+							{next.length - 1} left
+						{:else}
+							Done!
+						{/if}
 					</div>
 					<div class="grid grid-cols-2 gap-1 self-stretch">
 						{#if next.length > 1}
@@ -364,7 +377,7 @@
 
 								drillState = "review-countdown";
 								// save quiz result here
-								advanceQuiz(drillResult === "correct", fromSolved, false);
+								advanceDrill(drillResult === "correct", fromSolved, false);
 							}}
 						>
 							Done
@@ -381,7 +394,7 @@
 
 								drillState = "review-countdown";
 								// save quiz result here
-								advanceQuiz(drillResult === "correct", fromSolved, true);
+								advanceDrill(drillResult === "correct", fromSolved, true);
 							}}
 						>
 							Next
@@ -391,7 +404,7 @@
 					Get ready
 				{/if}
 			{:else}
-				<div>All done! Back to <a href="/drill">Drill</a></div>
+				<div>How did you get here? Back to <a href="/drill">Drill</a></div>
 			{/if}
 			<div class={`${drillState === "review" ? "" : "opacity-0"}`}>
 				<twisty-player
