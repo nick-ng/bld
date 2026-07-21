@@ -19,6 +19,7 @@
 
 	const NEW_TIME_WEIGHT = 0.6;
 	const MINUTE_MS = 1000 * 60;
+	const HOUR_MS = MINUTE_MS * 60;
 
 	// "stand-by", "go", "review", "done"
 	let drillState = $state("stand-by");
@@ -198,7 +199,11 @@
 		let newDrillTimeMs = drillTimeMs;
 		if (!correct) {
 			// penalty for getting the quiz wrong
-			newDrillTimeMs = Math.min(Math.round(drillTimeMs * 1.1), drillStartMs + 2000);
+			newDrillTimeMs = Math.min(
+				Math.round(alg.drill_time_ms * 1.2),
+				alg.drill_time_ms + 2000,
+				HOUR_MS
+			);
 		} else if (alg.drill_time_ms < 10 * MINUTE_MS) {
 			newDrillTimeMs = Math.round(
 				drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
@@ -227,14 +232,18 @@
 			searchParams.set("c", [...correctCases, curr].join(" "));
 			searchParams.set("w", wrongCases.join(" "));
 		} else {
-			// don't update last_drill_at if you get it wrong
-			saveAlgorithm({
-				speffz_pair: curr.toLocaleLowerCase(),
-				buffer: buf,
-				drill_time_ms: newDrillTimeMs,
-			});
 			searchParams.set("c", correctCases.join(" "));
 			searchParams.set("w", [...wrongCases, curr].join(" "));
+
+			// nothing to update if previous time is the same as new time
+			if (newDrillTimeMs !== alg.drill_time_ms) {
+				// don't update last_drill_at if you get it wrong
+				saveAlgorithm({
+					speffz_pair: curr.toLocaleLowerCase(),
+					buffer: buf,
+					drill_time_ms: newDrillTimeMs,
+				});
+			}
 		}
 
 		if (!keepGoing || rest.length === 0) {
