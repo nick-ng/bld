@@ -68,7 +68,7 @@ type Algorithm struct {
 	Sm2N         int     `gorm:"default:0"`
 	Sm2Ef        float32 `gorm:"default:2.5"`
 	Sm2I         float32 `gorm:"default:0.0"`
-	DrillTimeMs  int     `gorm:"default:20000"`
+	DrillTimeMs  int     `gorm:"default:3600000"`
 	LastDrillAt  time.Time
 	LastReviewAt time.Time
 	NextReviewAt time.Time `gorm:"autoCreateTime"`
