@@ -84,17 +84,30 @@
 					const meanDrillTime = drillTimes.reduce((prev, curr) => {
 						return prev + curr / drillTimes.length;
 					}, 0);
+					const noTimesCount = drillTimes.filter((a) => a > 10 * MINUTE_MS).length;
+					const withTimesCount = algorithms.length - noTimesCount;
 
-					return { ...quizKit, algorithms, maxDrillTime, maxDrillTimestamps, meanDrillTime };
+					return {
+						...quizKit,
+						algorithms,
+						maxDrillTime,
+						maxDrillTimestamps,
+						meanDrillTime,
+						noTimesCount,
+						withTimesCount,
+					};
 				})
 				.filter((a) => a.algorithms.length > 0)
 				.sort((a, b) => {
-					if (a.algorithms.length !== b.algorithms.length) {
-						return b.algorithms.length - a.algorithms.length;
+					if (a.withTimesCount !== b.withTimesCount) {
+						return b.withTimesCount - a.withTimesCount;
 					}
 
-					if (a.maxDrillTime !== b.maxDrillTime) {
-						return b.maxDrillTime - a.maxDrillTime;
+					const aEffectiveMaxDrillTime = Math.max(a.maxDrillTime, $optionsStore.drillTarget);
+					const bEffectiveMaxDrillTime = Math.max(b.maxDrillTime, $optionsStore.drillTarget);
+
+					if (aEffectiveMaxDrillTime !== bEffectiveMaxDrillTime) {
+						return bEffectiveMaxDrillTime - aEffectiveMaxDrillTime;
 					}
 
 					if (a.meanDrillTime !== b.meanDrillTime) {
