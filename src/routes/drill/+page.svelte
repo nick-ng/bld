@@ -211,10 +211,12 @@
 
 		let newDrillTimeMs = drillTimeMs;
 		if (!correct) {
-			// penalty for getting the quiz wrong
+			// start from the worse of the new and old drill time
+			const baseWrongDrillTimeMs = Math.max(alg.drill_time_ms, drillTimeMs);
+			// apply penalty for getting the quiz wrong
 			newDrillTimeMs = Math.min(
-				Math.round(alg.drill_time_ms * 1.2),
-				alg.drill_time_ms + 2000,
+				Math.round(baseWrongDrillTimeMs * 1.1),
+				baseWrongDrillTimeMs + 2000,
 				HOUR_MS
 			);
 		} else if (alg.drill_time_ms < 10 * MINUTE_MS) {
