@@ -338,7 +338,7 @@
 					</div>
 					{#if alg}
 						<div class="text-lg">
-							{alg.moves}
+							{parseCommutator(alg.moves).normalisedCommutator}
 						</div>
 					{/if}
 					<div>
