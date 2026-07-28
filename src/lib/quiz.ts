@@ -445,7 +445,7 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 }
 
 // was sqrt (0.5) previously which felt like too much.
-const REDUCTION_EXPONENT = 0.7;
+const REDUCTION_EXPONENT = 0.9;
 function getNextReviewDate(i: number) {
 	let effectiveI = i;
 	if (i > ALTERED_INTERVAL_CUTOFF) {
