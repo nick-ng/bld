@@ -171,6 +171,17 @@ export function upperCaseFirst(str: string) {
 	return [first.toLocaleUpperCase(), ...rest].join("");
 }
 
+export function readCookie(cookieKey: string) {
+	const cookies = document.cookie.split(";").reduce<Record<string, string>>((prev, curr) => {
+		const [key, ...rest] = curr.trim().split("=");
+		const value = rest.join("=");
+		prev[key] = value;
+		return prev;
+	}, {});
+
+	return cookies[cookieKey];
+}
+
 export function addCredentialsToHeaders(originalHeaders?: HeadersInit): {
 	headers: Headers;
 	isValid: boolean;
@@ -179,8 +190,8 @@ export function addCredentialsToHeaders(originalHeaders?: HeadersInit): {
 	const headers = originalHeaders ? new Headers(originalHeaders) : new Headers();
 
 	const accessToken = localStorage.getItem(ACCESS_TOKEN_STORE_KEY);
-	const username = localStorage.getItem(USERNAME_STORE_KEY);
-	const password = localStorage.getItem(PASSWORD_STORE_KEY);
+	const username = readCookie(USERNAME_STORE_KEY) || localStorage.getItem(USERNAME_STORE_KEY);
+	const password = readCookie(PASSWORD_STORE_KEY) || localStorage.getItem(PASSWORD_STORE_KEY);
 	if (!username || !password) {
 		return {
 			headers,

@@ -8,7 +8,9 @@ import {
 	ACCESS_TOKEN_STORE_KEY,
 	IS_GUEST_STORE_KEY,
 } from "$lib/constants";
-import { authFetch, joinServerPath } from "$lib/utils";
+import { authFetch, joinServerPath, readCookie } from "$lib/utils";
+
+const ONE_DAY_MS = 1000 * 60 * 60 * 24;
 
 export const authenticationStore = writable<AuthenticationOptions>({
 	isUserAuthenticated: false,
@@ -20,8 +22,18 @@ export const authenticationStore = writable<AuthenticationOptions>({
 	isAuthenticating: false,
 });
 
-const updateIfDifferent = (storeKey: string, value?: string) => {
-	if (typeof value === "string" && localStorage.getItem(storeKey) !== value) {
+const updateIfDifferent = (storeKey: string, value?: string, isCookie?: boolean) => {
+	if (typeof value !== "string") {
+		return;
+	}
+	if (isCookie) {
+		// update anyway since we need to bump the expiry
+		const expiryDate = new Date(Date.now() + 360 * ONE_DAY_MS); // expires in almost one year
+		document.cookie = `${storeKey}=${value}; SameSite=Lax; expires=${expiryDate.toUTCString()};`;
+		return;
+	}
+
+	if (localStorage.getItem(storeKey) !== value) {
 		localStorage.setItem(storeKey, value);
 	}
 };
@@ -36,7 +48,7 @@ export const parseAccessTokenExpiry = (accessToken?: string | null) => {
 };
 
 if (browser) {
-	const username = localStorage.getItem(USERNAME_STORE_KEY);
+	const username = readCookie(USERNAME_STORE_KEY) || localStorage.getItem(USERNAME_STORE_KEY);
 	if (username) {
 		authenticationStore.update((prev) => ({
 			...prev,
@@ -44,7 +56,7 @@ if (browser) {
 		}));
 	}
 
-	const password = localStorage.getItem(PASSWORD_STORE_KEY);
+	const password = readCookie(PASSWORD_STORE_KEY) || localStorage.getItem(PASSWORD_STORE_KEY);
 	if (password) {
 		authenticationStore.update((prev) => ({
 			...prev,
@@ -102,8 +114,8 @@ if (browser) {
 	}
 
 	authenticationStore.subscribe((newAuthOptions) => {
-		updateIfDifferent(USERNAME_STORE_KEY, newAuthOptions.username);
-		updateIfDifferent(PASSWORD_STORE_KEY, newAuthOptions.password);
+		updateIfDifferent(USERNAME_STORE_KEY, newAuthOptions.username, true);
+		updateIfDifferent(PASSWORD_STORE_KEY, newAuthOptions.password, true);
 		updateIfDifferent(ACCESS_TOKEN_STORE_KEY, newAuthOptions.accessToken);
 		updateIfDifferent(IS_GUEST_STORE_KEY, newAuthOptions.isGuest ? "yes" : "no");
 	});
