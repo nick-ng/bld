@@ -220,8 +220,10 @@
 				HOUR_MS
 			);
 		} else if (alg.drill_time_ms < 10 * MINUTE_MS) {
-			newDrillTimeMs = Math.round(
-				drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)
+			// lower of average drill time, and double the drill time just set
+			newDrillTimeMs = Math.min(
+				Math.round(drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)),
+				drillStartMs * 2
 			);
 		}
 
