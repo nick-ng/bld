@@ -213,7 +213,7 @@
 								false
 							)}
 						>
-							{quizKit.title} ({unlimitedLetters.total}/{quizCategory.all.length})
+							{quizKit.title} {unlimitedLetters.total} ({quizCategory.all.length})
 						</a>
 						<details class="hidden lg:block">
 							<summary class="like-button py-2">🔍</summary>
