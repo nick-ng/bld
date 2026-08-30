@@ -242,6 +242,8 @@
 			drillState = "done";
 			drillResult = "blank";
 			fromSolved = false;
+			next = [];
+			searchParams.set("n", "");
 
 			goto(`/drill2?${searchParams.toString()}`);
 			return;
@@ -250,7 +252,6 @@
 		drillState = "review-countdown";
 		drillResult = "blank";
 		fromSolved = false;
-		next = [];
 		setTimeout(() => {
 			drillState = "go";
 			drillStartMs = Date.now();
