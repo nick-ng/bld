@@ -197,7 +197,11 @@
 		} else if (timeDrillStatus === "over") {
 			next = [];
 		} else {
-			const nextCase = getNextTimeDrillCases(flatAlgorithms, prev);
+			const nextCase = getNextTimeDrillCases(flatAlgorithms, [
+				...correctCases,
+				...wrongCases,
+				curr,
+			]);
 			if (typeof nextCase !== "string") {
 				next = [];
 			} else {
@@ -314,6 +318,7 @@
 			{:else if drillState === "review" || drillState === "review-countdown"}
 				{#if drillState === "review"}
 					{@const alg = flatAlgorithms.find((a) => a.speffz_pair === next[0])}
+					{@const timeDrillStatus = getTimeDrillStatus(page.url.searchParams.get("e"))}
 					<div class="text-lg">
 						<span class="uppercase">{next[0]}</span> took: {msToMinAndSec(drillTimeMs, true)}
 					</div>
@@ -325,12 +330,12 @@
 					<div>
 						{#if next.length > 1}
 							{next.length - 1} left
-						{:else}
+						{:else if timeDrillStatus === "fixed"}
 							Done!
 						{/if}
 					</div>
 					<div class="grid grid-cols-2 gap-1 self-stretch">
-						{#if next.length > 1 || getTimeDrillStatus(page.url.searchParams.get("e")) === "in progress"}
+						{#if next.length > 1 || timeDrillStatus === "in progress"}
 							<button
 								class={fromSolved ? "bg-blue-300" : ""}
 								type="button"

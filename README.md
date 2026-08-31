@@ -84,7 +84,7 @@ css:
 - src/routes/drill/+page.svelte:242: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
 - src/routes/drill2/+page.svelte:27: @todo(nick-ng): show stats after drill
 - src/routes/drill2/+page.svelte:28: @todo(nick-ng): remove the old /drill and change this to /drill
-- src/routes/drill2/+page.svelte:213: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
+- src/routes/drill2/+page.svelte:217: @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
 - src/routes/letter-pair/edit/alg-editor.svelte:33: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/image-editor.svelte:63: @todo(nick-ng): use 2 argument bind:value style?
 - src/routes/letter-pair/edit/main-editor.svelte:86: @todo(nick-ng): handle error saving changes
