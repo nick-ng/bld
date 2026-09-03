@@ -10,7 +10,7 @@ import {
 } from "$lib/constants";
 import { authFetch, joinServerPath, readCookie } from "$lib/utils";
 
-const ONE_DAY_MS = 1000 * 60 * 60 * 24;
+const ONE_DAY_S = 60 * 60 * 24;
 
 export const authenticationStore = writable<AuthenticationOptions>({
 	isUserAuthenticated: false,
@@ -28,8 +28,7 @@ const updateIfDifferent = (storeKey: string, value?: string, isCookie?: boolean)
 	}
 	if (isCookie) {
 		// update anyway since we need to bump the expiry
-		const expiryDate = new Date(Date.now() + 360 * ONE_DAY_MS); // expires in almost one year
-		document.cookie = `${storeKey}=${value}; SameSite=Lax; expires=${expiryDate.toUTCString()};`;
+		document.cookie = `${storeKey}=${value}; SameSite=Lax; Max-Age=${360 * ONE_DAY_S};`;
 		return;
 	}
 
