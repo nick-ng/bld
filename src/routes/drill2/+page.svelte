@@ -443,31 +443,35 @@
 				{/each}
 			</select>
 			<div class="flex flex-row gap-1">
-				<a
-					class="like-button block grow py-2 text-center text-xl leading-none"
-					href={getFirstTimeDrillCaseUrl(
-						drillCategories[selectedDrillCategoryIndex][0].category,
-						flatAlgorithms,
-						5 * MINUTE_MS
-					)}
+				<button
+					class="block grow py-2 text-center text-xl leading-none"
 					onclick={() => {
 						drillState = "stand-by";
 						drillResult = "blank";
 						fromSolved = false;
-					}}>5 Minutes</a
+						goto(
+							getFirstTimeDrillCaseUrl(
+								drillCategories[selectedDrillCategoryIndex][0].category,
+								flatAlgorithms,
+								5 * MINUTE_MS
+							)
+						);
+					}}>5 Minutes</button
 				>
-				<a
-					class="like-button block grow py-2 text-center text-xl leading-none"
-					href={getFirstTimeDrillCaseUrl(
-						drillCategories[selectedDrillCategoryIndex][0].category,
-						flatAlgorithms,
-						10 * MINUTE_MS
-					)}
+				<button
+					class="block grow py-2 text-center text-xl leading-none"
 					onclick={() => {
 						drillState = "stand-by";
 						drillResult = "blank";
 						fromSolved = false;
-					}}>10 Minutes</a
+						goto(
+							getFirstTimeDrillCaseUrl(
+								drillCategories[selectedDrillCategoryIndex][0].category,
+								flatAlgorithms,
+								10 * MINUTE_MS
+							)
+						);
+					}}>10 Minutes</button
 				>
 			</div>
 			{#each drillCategories[selectedDrillCategoryIndex] as drillSubcategory (`${drillSubcategory.category}-${drillSubcategory.subcategory || "all"}`)}
