@@ -12,7 +12,7 @@
 	let scrambles = $derived(
 		selectedAttempt === -1 ? generatedScrambles : $mbldStore[selectedAttempt - 1]?.scrambles
 	);
-	const previewSize = 150;
+	const previewSize = 120;
 
 	onMount(async () => {
 		// @todo(nick-ng): figure out a way to put this file locally
@@ -113,15 +113,15 @@
 								{/each}
 							</div>
 						</td>
-						<td class="border border-black p-2 bg-black">
+						<td class="border border-black p-2">
 							<twisty-player
 								puzzle="3x3x3"
 								alg={scramble}
+								visualization="2D"
 								hint-facelets="none"
 								background="none"
-								back-view="side-by-side"
 								control-panel="none"
-								style={`width: ${previewSize * 2}px; height: ${previewSize}px;`}
+								style={`width: ${previewSize * (4 / 3)}px; height: ${previewSize}px;`}
 							></twisty-player>
 						</td>
 					</tr>
