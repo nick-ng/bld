@@ -29,7 +29,7 @@ export function getFullMoves(
 	speffzLetterPairs: string[]
 ) {
 	const commsSoFar = speffzLetterPairs.map((sp) => {
-		const temp = flatAlgs.find((a) => a.speffz_pair === sp);
+		const temp = flatAlgs.find((a) => a.speffz_pair.toLowerCase() === sp.toLowerCase());
 		if (!temp) {
 			return "";
 		}
