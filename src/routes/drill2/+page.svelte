@@ -424,6 +424,7 @@
 					control-panel="none"
 					style={`width: 90vw; height: ${90 * (3 / 4)}vw;`}
 				></twisty-player>
+				<div class="text-center">Check Cube</div>
 			</div>
 		</div>
 	{:else if correctCases.length + wrongCases.length > 0}
