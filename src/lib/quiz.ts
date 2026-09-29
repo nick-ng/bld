@@ -405,12 +405,6 @@ export function superMemo2(userGradeQ: number, input: SMStats, targetEf = -1): S
 		next_review_at: new Date(),
 	};
 	if (userGradeQ >= 3) {
-		if (input.next_review_at > new Date() && input.sm2_i > ALTERED_INTERVAL_CUTOFF) {
-			// quiz wasn't due yet and the interval is long so don't change any stats. bump next review at and return
-			output.next_review_at = getNextReviewDate(output.sm2_i);
-
-			return output;
-		}
 		if (input.sm2_n === 0) {
 			output.sm2_i = 1;
 		} else if (input.sm2_n === 1) {

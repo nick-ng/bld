@@ -11,7 +11,7 @@
 		shuffleArray,
 		upperCaseFirst,
 	} from "$lib/utils";
-	import { getQuizKit, getAlgorithms } from "$lib/quiz";
+	import { getQuizKit, getAlgorithms, superMemo2 } from "$lib/quiz";
 	import { SvelteURLSearchParams } from "svelte/reactivity";
 	import { goto } from "$app/navigation";
 	import {
@@ -214,12 +214,20 @@
 		searchParams.set("p", prev.join(" "));
 
 		if (correct) {
-			// @todo(nick-ng): also update the super memo parameters? if incorrect, also update?
+			let gradeQ = 3;
+			if (newDrillTimeMs < $optionsStore.drillTarget * 1000) {
+				gradeQ = 5;
+			} else if (newDrillTimeMs < $optionsStore.drillTarget * 2000) {
+				gradeQ = 4;
+			}
+
+			const newSMStats = superMemo2(gradeQ, alg, $optionsStore.targetEf);
 			saveAlgorithm({
 				speffz_pair: curr.toLocaleLowerCase(),
 				buffer: buf,
 				last_drill_at: new Date(),
 				drill_time_ms: newDrillTimeMs,
+				...newSMStats,
 			});
 			searchParams.set("c", [...correctCases, curr].join(" "));
 			searchParams.set("w", wrongCases.join(" "));
@@ -230,10 +238,12 @@
 			// nothing to update if previous time is the same as new time
 			if (newDrillTimeMs !== alg.drill_time_ms) {
 				// don't update last_drill_at if you get it wrong
+				const newSMStats = superMemo2(2, alg, $optionsStore.targetEf);
 				saveAlgorithm({
 					speffz_pair: curr.toLocaleLowerCase(),
 					buffer: buf,
 					drill_time_ms: newDrillTimeMs,
+					...newSMStats,
 				});
 			}
 		}
