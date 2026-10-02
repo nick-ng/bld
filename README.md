@@ -91,7 +91,6 @@ css:
 - src/routes/letter-pair/edit/main-editor.svelte:123: @todo(nick-ng): handle reseting fresh mnemonic
 - src/routes/letter-pair/edit/main-editor.svelte:141: @todo(nick-ng): handle reseting fresh mnemonic
 - src/routes/mbld/analyse/mbld-cube.svelte:30: @todo(nick-ng): auto-complete scrambles
-- src/routes/mbld/scramble/+page.svelte:18: @todo(nick-ng): figure out a way to put this file locally
 - src/routes/quiz/quiz-home.svelte:79: @todo(nick-ng): refactor this into a shared function
 - src/routes/quiz/quiz-home.svelte:127: @todo(nick-ng): refactor this into a shared function
 - src/routes/quiz/super-memo-quiz.svelte:114: @todo(nick-ng): figure out if a new card will be available first
