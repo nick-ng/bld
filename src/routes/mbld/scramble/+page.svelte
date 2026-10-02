@@ -1,24 +1,17 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { randomScrambleForEvent } from "cubing/scramble";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
 
 	let scrambleCount = $state(8);
 	let message = $state("");
 	let selectedAttempt = $state(-1);
-	let randomScrambleForEvent: ((event: string) => Promise<string>) | undefined = $state();
 
 	let generatedScrambles: string[] = $state([]);
 	let scrambles = $derived(
 		selectedAttempt === -1 ? generatedScrambles : $mbldStore[selectedAttempt - 1]?.scrambles
 	);
 	const previewSize = 120;
-
-	onMount(async () => {
-		// @todo(nick-ng): figure out a way to put this file locally
-		randomScrambleForEvent = (await import("https://cdn.cubing.net/v0/js/cubing/scramble"))
-			.randomScrambleForEvent;
-	});
 </script>
 
 <div>
