@@ -42,7 +42,7 @@
 </script>
 
 <h4>No Algs</h4>
-<ul class="list-disc list-inside uppercase">
+<ul class="list-inside list-disc uppercase">
 	{#each noInverse as temp (temp[0])}
 		{@const params = new URLSearchParams({ f: temp.join(" ").toUpperCase() })}
 		<li><a href={`/?${params.toString()}`}>{temp.join(", ")}</a></li>

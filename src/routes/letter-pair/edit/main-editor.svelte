@@ -117,7 +117,7 @@
 								}
 							/>
 							<button
-								class="grow-0 hidden lg:block"
+								class="hidden grow-0 lg:block"
 								type="button"
 								onclick={() => {
 									// @todo(nick-ng): handle reseting fresh mnemonic
@@ -135,7 +135,7 @@
 								}}>0</button
 							>
 							<button
-								class="grow-0 hidden lg:block"
+								class="hidden grow-0 lg:block"
 								type="button"
 								onclick={() => {
 									// @todo(nick-ng): handle reseting fresh mnemonic

@@ -114,7 +114,7 @@
 			</div>
 		</div>
 	</div>
-	<label class="absolute text-white left-0 right-0 mx-auto bottom-1 text-center"
+	<label class="absolute right-0 bottom-1 left-0 mx-auto text-center text-white"
 		>Left Preview <input type="checkbox" bind:checked={previewOnLeft} /></label
 	>
 	<div class={previewOnLeft ? "cube-preview-l" : "cube-preview"}>

@@ -289,7 +289,7 @@
 		<div class="">{upperCaseFirst($letterPairStoreStatus.message)}</div>
 	{:else if next.length > 0}
 		<div class="flex flex-col items-center gap-1">
-			<div class="self-stretch h-2 border border-gray-500">
+			<div class="h-2 self-stretch border border-gray-500">
 				<div
 					class="h-full bg-blue-800 ease-linear"
 					style={`${[
@@ -320,7 +320,7 @@
 			{:else if drillState === "go"}
 				<div class="relative self-stretch">
 					<button
-						class="absolute top-0 left-0 right-0 mx-auto bg-white z-10"
+						class="absolute top-0 right-0 left-0 z-10 mx-auto bg-white"
 						type="button"
 						style="width:90vw;height:70vh;"
 						onclick={() => {
@@ -328,7 +328,7 @@
 							drillTimeMs = Date.now() - drillStartMs;
 						}}
 					>
-						<div class="uppercase text-4xl">
+						<div class="text-4xl uppercase">
 							{next[0]}
 						</div>
 						<div>Done</div>
@@ -457,7 +457,7 @@
 		{@const oldest = flatAlgorithms.toSorted((a, b) => {
 			return a.last_drill_at.valueOf() - b.last_drill_at.valueOf();
 		})}
-		<div class="flex flex-col gap-1 my-1">
+		<div class="my-1 flex flex-col gap-1">
 			<select
 				class="like-button block grow py-2 text-center text-xl leading-none"
 				bind:value={selectedDrillCategoryIndex}
