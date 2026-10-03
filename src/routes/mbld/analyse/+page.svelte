@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { mbldSessionSchema } from "$lib/types";
 	import { mbldStore } from "$lib/stores/mbld";
-	import { formatDate } from "$lib/utils";
+	import { formatDate, requestPersistence } from "$lib/utils";
 	import MbldCube from "./mbld-cube.svelte";
 	import VideoPlayer from "$lib/components/video-player.svelte";
 
@@ -99,7 +99,9 @@
 							<MbldCube
 								index={i}
 								{cube}
-								onSave={(newCube) => {
+								onSave={async (newCube) => {
+									await requestPersistence();
+
 									$mbldStore[selectedIndex].cubes[i] = newCube;
 								}}
 								onSeekRequest={(newSec) => {
@@ -134,10 +136,13 @@
 					<button
 						type="button"
 						disabled={newScrambles.length === 0}
-						onclick={() => {
+						onclick={async () => {
 							if (newScrambles.length === 0) {
 								return;
 							}
+
+							await requestPersistence();
+
 							$mbldStore = [
 								{
 									date: finalDate,
@@ -169,10 +174,13 @@
 					<button
 						type="button"
 						disabled={importAttemptString.length === 0}
-						onclick={() => {
+						onclick={async () => {
 							try {
 								const unknownAttempt = JSON.parse(importAttemptString);
 								const validAttempt = mbldSessionSchema.parse(unknownAttempt);
+
+								await requestPersistence();
+
 								$mbldStore = [validAttempt, ...$mbldStore];
 								importAttemptString = "";
 								selectValue = 1;
