@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { mbldStore } from "$lib/stores/mbld";
-	import { formatDate } from "$lib/utils";
+	import { formatDate, requestPersistence } from "$lib/utils";
 
 	let message = $state("");
 	let selectedAttempt = $state(-1);
@@ -64,7 +64,9 @@
 			<button
 				class="mb-1"
 				type="button"
-				onclick={() => {
+				onclick={async () => {
+					await requestPersistence();
+
 					$mbldStore = [
 						{
 							date: new Date(),
@@ -126,7 +128,9 @@
 			<button
 				class="mt-1"
 				type="button"
-				onclick={() => {
+				onclick={async () => {
+					await requestPersistence();
+
 					$mbldStore = [
 						{
 							date: new Date(),
