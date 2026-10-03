@@ -1,11 +1,10 @@
 <script lang="ts">
-	import { randomScrambleForEvent } from "cubing/scramble";
 	import { mbldStore } from "$lib/stores/mbld";
 	import { formatDate } from "$lib/utils";
 
-	let scrambleCount = $state(8);
 	let message = $state("");
 	let selectedAttempt = $state(-1);
+	let rawScrambleImport = $state("");
 
 	let generatedScrambles: string[] = $state([]);
 	let scrambles = $derived(
@@ -15,36 +14,38 @@
 </script>
 
 <div>
-	<div class="space-between mb-1 flex flex-row gap-1">
-		<select class="px-1" bind:value={selectedAttempt}>
-			<option value={-1}>New</option>
-			<option disabled value="">Newer attempts at the top</option>
-			{#each $mbldStore.slice(-20) as mbldAttempt, i (mbldAttempt.date)}
-				<option value={i + 1}>{formatDate(mbldAttempt.date)}</option>
-			{/each}
-		</select>
+	<div class="space-between mb-1 flex flex-col items-start gap-1">
+		<div>
+			<select class="px-1" bind:value={selectedAttempt}>
+				<option value={-1}>New</option>
+				<option disabled value="">Newer attempts at the top</option>
+				{#each $mbldStore.slice(-20) as mbldAttempt, i (mbldAttempt.date)}
+					<option value={i + 1}>{formatDate(mbldAttempt.date)}</option>
+				{/each}
+			</select>
+		</div>
 		{#if selectedAttempt === -1}
-			<label>Scrambles <input class="w-16 px-0.5" type="number" bind:value={scrambleCount} /></label
-			><button
+			<p>
+				Import scrambles, 1 per line. You can generate them on sites like <a
+					href="https://cstimer.net/"
+					target="_blank">cstimer.net</a
+				>
+			</p>
+			<textarea class="block" bind:value={rawScrambleImport}></textarea>
+			<button
 				class="inline-block"
 				type="button"
-				disabled={selectedAttempt !== -1}
-				onclick={async () => {
-					if (selectedAttempt !== -1 || !randomScrambleForEvent) {
+				disabled={!rawScrambleImport}
+				onclick={() => {
+					if (!rawScrambleImport) {
 						return;
 					}
 
-					const newScrambles: string[] = [];
-					message = `Generating scramble 1/${scrambleCount}`;
-					for (let i = 0; i < scrambleCount; i++) {
-						message = `Generating scramble ${i + 1}/${scrambleCount}`;
-						const alg = await randomScrambleForEvent("333bf");
-						newScrambles.push(alg.toString());
-					}
-
-					generatedScrambles = newScrambles;
-					message = `Generated ${scrambleCount} scrambles`;
-				}}>Generate</button
+					generatedScrambles = rawScrambleImport
+						.split("\n")
+						.map((s) => s.replace(/^\d+\)/, "").trim());
+					message = `Imported ${generatedScrambles.length} scrambles`;
+				}}>Import Scrambles</button
 			>
 		{:else}
 			<button
