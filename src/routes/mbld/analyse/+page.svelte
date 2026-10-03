@@ -20,7 +20,7 @@
 			: new Date()
 	);
 	let videoUrl = $derived(
-		$mbldStore[selectedIndex].local_video_link || $mbldStore[selectedIndex]?.youtube_link
+		$mbldStore[selectedIndex]?.local_video_link || $mbldStore[selectedIndex]?.youtube_link
 	);
 	let importAttemptString = $state("");
 
