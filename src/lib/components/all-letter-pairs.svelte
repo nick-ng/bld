@@ -158,7 +158,7 @@
 			No flash cards match the filter "{speffzPairFilter}"
 		</div>
 	{:else if filteredSpeffzPairs.length <= 25}
-		<div class="flashCards lg:min-w-120 mb-1">
+		<div class="flashCards mb-1 lg:min-w-120">
 			{#each filteredSpeffzPairs as speffzPair, i (`${speffzPair}-${i}`)}
 				{@const letterPair = $letterPairStore[speffzPair] || {
 					...getDefaultMnemonic(speffzPair),

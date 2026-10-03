@@ -403,7 +403,7 @@
 			</div>
 		</div>
 	{:else}
-		<div class="m-1 flex flex-row gap-2 items-center">
+		<div class="m-1 flex flex-row items-center gap-2">
 			<button
 				type="button"
 				onclick={() => {
@@ -465,7 +465,7 @@
 				style={`width: ${($fiftyTwoStore.currentIndex / $fiftyTwoStore.deck.length) * 100}%;`}
 			></div>
 		</div>
-		<div class="m-1 flex flex-row gap-2 items-center">
+		<div class="m-1 flex flex-row items-center gap-2">
 			<button
 				type="button"
 				onclick={() => {

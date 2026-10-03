@@ -35,14 +35,14 @@
 				}}
 			/>
 			<button
-				class="grow-0 hidden lg:block"
+				class="hidden grow-0 lg:block"
 				type="button"
 				onclick={() => {
 					zeroSM();
 				}}>0</button
 			>
 			<button
-				class="grow-0 hidden lg:block"
+				class="hidden grow-0 lg:block"
 				type="button"
 				onclick={() => {
 					nextSM();
