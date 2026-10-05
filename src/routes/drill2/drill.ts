@@ -76,33 +76,32 @@ export function getTimeDrillStatus(endSecondsString: string | null) {
 	return "in progress";
 }
 
+const SLOW_THRESHOLD = 0.9; // fraction of slowest drill time that can be chosen for next case
 export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[]) {
 	const newAlgs =
 		previous.length === 0
 			? flatAlgs.filter((a) => a.drill_time_ms < HOUR_MS)
 			: flatAlgs.filter((a) => a.drill_time_ms < HOUR_MS && !previous.includes(a.speffz_pair));
 
-	const potentialAlgs: string[] = [];
-	// newest first, oldest last
+	// fastest first, slowest last
 	newAlgs.sort((a, b) => {
-		return b.last_drill_at.valueOf() - a.last_drill_at.valueOf();
+		return a.drill_time_ms - b.drill_time_ms;
 	});
-	for (let i = 0; i < 5; i++) {
+	const slowest = newAlgs.pop();
+	if (!slowest) {
+		// no new algs
+		return null;
+	}
+
+	const potentialAlgs: string[] = [slowest.speffz_pair];
+	// up to 11 cases within
+	for (let i = 0; i < 10; i++) {
 		const temp = newAlgs.pop();
 		if (!temp) {
 			break;
 		}
 
-		potentialAlgs.push(temp.speffz_pair);
-	}
-
-	// fastest first, slowest last
-	newAlgs.sort((a, b) => {
-		return a.drill_time_ms - b.drill_time_ms;
-	});
-	for (let i = 0; i < 5; i++) {
-		const temp = newAlgs.pop();
-		if (!temp) {
+		if (temp.drill_time_ms < slowest.drill_time_ms * SLOW_THRESHOLD) {
 			break;
 		}
 
@@ -133,11 +132,13 @@ export function getFirstTimeDrillCaseUrl(buf: string, flatAlgs: Algorithm[], dur
 		});
 	}
 
-	const firstCase = getNextTimeDrillCases(flatAlgs, []);
+	const firstCase = [...flatAlgs]
+		.sort((a, b) => b.last_drill_at.valueOf() - a.last_drill_at.valueOf())
+		.pop();
 	if (firstCase) {
 		return getDrillUrl({
 			buf,
-			next: [firstCase],
+			next: [firstCase.speffz_pair],
 			prev: [],
 			endS: Math.floor((Date.now() + durationMs) / 1000),
 		});
