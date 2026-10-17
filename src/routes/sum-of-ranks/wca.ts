@@ -1,11 +1,18 @@
 function getApiUrl(baseUrl: string) {
-	// https://www.worldcubeassociation.org/competitions/DuallinginMilford2026
-	// https://www.worldcubeassociation.org/api/v1/competitions/DuallinginMilford2026
 	return baseUrl.replace("worldcubeassociation.org/", "worldcubeassociation.org/api/v1/");
 }
 
-export async function fetchCompetitors(baseUrl: string) {
-	const apiUrl = getApiUrl(baseUrl);
+export async function fetchRegistrations(baseUrl: string | null) {
+	if (typeof baseUrl !== "string") {
+		return {};
+	}
+	const endpointUrl = `${getApiUrl(baseUrl)}/registrations`;
 
-	console.log("apiUrl", apiUrl);
+	const res = await fetch(endpointUrl);
+	if (res.ok && res.headers.get("Content-Type")?.toLowerCase().includes("application/json")) {
+		const temp = await res.json();
+		return temp;
+	}
+
+	return {};
 }
