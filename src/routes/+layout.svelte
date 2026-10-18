@@ -10,8 +10,15 @@
 		children?: Snippet;
 	}
 
-	const noNavRoutes = ["big-scramble", "clock", "52"];
-	const noLoginRoutes = ["/big-scramble", "/clock", "/mbld/scramble", "/mbld/analyse", "/52"];
+	const noNavRoutes = ["big-scramble", "clock", "52", "sum-of-ranks"];
+	const noLoginRoutes = [
+		"/big-scramble",
+		"/clock",
+		"/mbld/scramble",
+		"/mbld/analyse",
+		"/52",
+		"/sum-of-ranks",
+	];
 
 	let { children }: Props = $props();
 	let showNav = $derived(noNavRoutes.every((a) => page.route.id !== `/${a}`));

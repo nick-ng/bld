@@ -94,4 +94,7 @@ css:
 - src/routes/quiz/quiz-home.svelte:79: @todo(nick-ng): refactor this into a shared function
 - src/routes/quiz/quiz-home.svelte:127: @todo(nick-ng): refactor this into a shared function
 - src/routes/quiz/super-memo-quiz.svelte:114: @todo(nick-ng): figure out if a new card will be available first
+- src/routes/sum-of-ranks/+page.svelte:7: @todo(nick-ng): just save the competition id (e.g. DuallinginMilford2026) so the url is shorter
+- src/routes/sum-of-ranks/wca.ts:30: @todo(nick-ng): /live/ routes only available for integrated live results.
+- src/routes/sum-of-ranks/wca.ts:31: @todo(nick-ng): need to use WCA Live's GraphQL endpoint to fetch results.
 - static/cstimer-violentmonkey.js:415: @todo: make size adjustable
