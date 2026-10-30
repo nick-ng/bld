@@ -77,31 +77,64 @@ export function getTimeDrillStatus(endSecondsString: string | null) {
 }
 
 const SLOW_THRESHOLD = 0.9; // fraction of slowest drill time that can be chosen for next case
-export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[]) {
-	const newAlgs =
-		previous.length === 0
-			? flatAlgs.filter((a) => a.drill_time_ms < HOUR_MS)
-			: flatAlgs.filter((a) => a.drill_time_ms < HOUR_MS && !previous.includes(a.speffz_pair));
-
-	// fastest first, slowest last
-	newAlgs.sort((a, b) => {
-		return a.drill_time_ms - b.drill_time_ms;
-	});
-	const slowest = newAlgs.pop();
-	if (!slowest) {
-		// no new algs
-		return null;
+export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[], options: Options) {
+	const potentialAlgs: string[] = [];
+	const undrilledAlgs: Algorithm[] = [];
+	const drilledAlgs: Algorithm[] = [];
+	if (previous.length === 0) {
+		for (let i = 0; i < flatAlgs.length; i++) {
+			if (flatAlgs[i].drill_time_ms < HOUR_MS) {
+				drilledAlgs.push(flatAlgs[i]);
+			} else {
+				undrilledAlgs.push(flatAlgs[i]);
+			}
+		}
+	} else {
+		for (let i = 0; i < flatAlgs.length; i++) {
+			if (!previous.includes(flatAlgs[i].speffz_pair)) {
+				if (flatAlgs[i].drill_time_ms < HOUR_MS) {
+					drilledAlgs.push(flatAlgs[i]);
+				} else {
+					undrilledAlgs.push(flatAlgs[i]);
+				}
+			}
+		}
 	}
 
-	const potentialAlgs: string[] = [slowest.speffz_pair];
-	// up to 11 cases within
-	for (let i = 0; i < 10; i++) {
-		const temp = newAlgs.pop();
-		if (!temp) {
-			break;
-		}
+	// fastest first, slowest last
+	drilledAlgs.sort((a, b) => {
+		return a.drill_time_ms - b.drill_time_ms;
+	});
+	const slowest = drilledAlgs.pop();
+	if (slowest && slowest.drill_time_ms > options.drillTarget * 1000) {
+		potentialAlgs.push(slowest.speffz_pair);
+		// up to 6 cases within
+		for (let i = 0; i < 5; i++) {
+			const temp = drilledAlgs.pop();
+			if (!temp) {
+				break;
+			}
 
-		if (temp.drill_time_ms < slowest.drill_time_ms * SLOW_THRESHOLD) {
+			if (temp.drill_time_ms < slowest.drill_time_ms * SLOW_THRESHOLD) {
+				break;
+			}
+
+			if (temp.drill_time_ms < options.drillTarget * 1000) {
+				break;
+			}
+
+			potentialAlgs.push(temp.speffz_pair);
+		}
+	}
+
+	// most recently reviewed last
+	undrilledAlgs.sort((a, b) => {
+		return b.last_review_at.valueOf() - a.last_review_at.valueOf();
+	});
+
+	for (let i = 0; i < 5; i++) {
+		const temp = undrilledAlgs.pop();
+		if (!temp) {
 			break;
 		}
 
@@ -109,7 +142,32 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[])
 	}
 
 	if (potentialAlgs.length === 0) {
-		return null;
+		// most recently drilled last
+		// make new copy because drilledAlgs will be missing the slowest alg
+		const copiedAlgs = [...flatAlgs].sort(
+			(a, b) => b.last_drill_at.valueOf() - a.last_drill_at.valueOf()
+		);
+
+		const oldest = copiedAlgs.pop();
+		if (!oldest) {
+			return null;
+		}
+
+		potentialAlgs.push(oldest.speffz_pair);
+
+		for (let i = 0; i < 5; i++) {
+			const temp = copiedAlgs.pop();
+			if (!temp) {
+				break;
+			}
+
+			// if temp's timestamp is greater than oldest's timestamp + 48 hours, break
+			if (temp.last_drill_at.valueOf() > oldest.last_drill_at.valueOf() + 48 * HOUR_MS) {
+				break;
+			}
+
+			potentialAlgs.push(temp.speffz_pair);
+		}
 	}
 
 	const randomIndex = Math.floor(Math.random() * potentialAlgs.length);
@@ -117,32 +175,21 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[])
 	return potentialAlgs[randomIndex];
 }
 
-export function getFirstTimeDrillCaseUrl(buf: string, flatAlgs: Algorithm[], durationMs: number) {
-	const undrilledAlgs = flatAlgs.filter((a) => a.drill_time_ms >= HOUR_MS);
-
-	if (undrilledAlgs.length > 0) {
-		// most recently reviewed last
-		undrilledAlgs.sort((a, b) => b.last_review_at.valueOf() - a.last_review_at.valueOf());
-
-		return getDrillUrl({
-			buf,
-			next: [undrilledAlgs[0].speffz_pair],
-			prev: [],
-			endS: Math.floor((Date.now() + durationMs) / 1000),
-		});
+export function getFirstTimeDrillCaseUrl(
+	buf: string,
+	flatAlgs: Algorithm[],
+	options: Options,
+	durationMs: number
+) {
+	const firstCase = getNextTimeDrillCases(flatAlgs, [], options);
+	if (!firstCase) {
+		return "";
 	}
 
-	const firstCase = [...flatAlgs]
-		.sort((a, b) => b.last_drill_at.valueOf() - a.last_drill_at.valueOf())
-		.pop();
-	if (firstCase) {
-		return getDrillUrl({
-			buf,
-			next: [firstCase.speffz_pair],
-			prev: [],
-			endS: Math.floor((Date.now() + durationMs) / 1000),
-		});
-	}
-
-	return "";
+	return getDrillUrl({
+		buf,
+		next: [firstCase],
+		prev: [],
+		endS: Math.floor((Date.now() + durationMs) / 1000),
+	});
 }
