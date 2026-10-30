@@ -197,11 +197,11 @@
 		} else if (timeDrillStatus === "over") {
 			next = [];
 		} else {
-			const nextCase = getNextTimeDrillCases(flatAlgorithms, [
-				...correctCases,
-				...wrongCases,
-				curr,
-			]);
+			const nextCase = getNextTimeDrillCases(
+				flatAlgorithms,
+				[...correctCases, ...wrongCases, curr],
+				$optionsStore
+			);
 			if (typeof nextCase !== "string") {
 				next = [];
 			} else {
@@ -463,6 +463,7 @@
 							getFirstTimeDrillCaseUrl(
 								drillCategories[selectedDrillCategoryIndex][0].category,
 								flatAlgorithms,
+								$optionsStore,
 								5 * MINUTE_MS
 							)
 						);
@@ -478,6 +479,7 @@
 							getFirstTimeDrillCaseUrl(
 								drillCategories[selectedDrillCategoryIndex][0].category,
 								flatAlgorithms,
+								$optionsStore,
 								10 * MINUTE_MS
 							)
 						);
