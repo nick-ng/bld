@@ -235,17 +235,16 @@
 			searchParams.set("c", correctCases.join(" "));
 			searchParams.set("w", [...wrongCases, curr].join(" "));
 
-			// nothing to update if previous time is the same as new time
-			if (newDrillTimeMs !== alg.drill_time_ms) {
-				// don't update last_drill_at if you get it wrong
-				const newSMStats = superMemo2(2, alg, $optionsStore.targetEf);
-				saveAlgorithm({
-					speffz_pair: curr.toLocaleLowerCase(),
-					buffer: buf,
-					drill_time_ms: newDrillTimeMs,
-					...newSMStats,
-				});
-			}
+			// if you got it wrong enough that you need to solve the cube, it's probably worse
+			const newGrade = solvedCube ? 1 : 2;
+			// don't update last_drill_at if you get it wrong
+			const newSMStats = superMemo2(newGrade, alg, $optionsStore.targetEf);
+			saveAlgorithm({
+				speffz_pair: curr.toLocaleLowerCase(),
+				buffer: buf,
+				drill_time_ms: newDrillTimeMs,
+				...newSMStats,
+			});
 		}
 
 		if (
