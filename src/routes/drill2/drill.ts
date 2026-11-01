@@ -81,22 +81,12 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[],
 	const potentialAlgs: string[] = [];
 	const undrilledAlgs: Algorithm[] = [];
 	const drilledAlgs: Algorithm[] = [];
-	if (previous.length === 0) {
-		for (let i = 0; i < flatAlgs.length; i++) {
+	for (let i = 0; i < flatAlgs.length; i++) {
+		if (previous.length === 0 || !previous.includes(flatAlgs[i].speffz_pair)) {
 			if (flatAlgs[i].drill_time_ms < HOUR_MS) {
 				drilledAlgs.push(flatAlgs[i]);
 			} else {
 				undrilledAlgs.push(flatAlgs[i]);
-			}
-		}
-	} else {
-		for (let i = 0; i < flatAlgs.length; i++) {
-			if (!previous.includes(flatAlgs[i].speffz_pair)) {
-				if (flatAlgs[i].drill_time_ms < HOUR_MS) {
-					drilledAlgs.push(flatAlgs[i]);
-				} else {
-					undrilledAlgs.push(flatAlgs[i]);
-				}
 			}
 		}
 	}
@@ -132,13 +122,19 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[],
 		return b.last_review_at.valueOf() - a.last_review_at.valueOf();
 	});
 
+	const potentialUndrilled: string[] = [];
 	for (let i = 0; i < 5; i++) {
 		const temp = undrilledAlgs.pop();
 		if (!temp) {
 			break;
 		}
 
-		potentialAlgs.push(temp.speffz_pair);
+		potentialUndrilled.push(temp.speffz_pair);
+	}
+
+	const copiesCount = Math.max(1, potentialAlgs.length / potentialUndrilled.length);
+	for (let i = 0; i < copiesCount; i++) {
+		potentialAlgs.push(...potentialUndrilled);
 	}
 
 	if (potentialAlgs.length === 0) {
