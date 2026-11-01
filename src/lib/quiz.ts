@@ -1,6 +1,9 @@
 import type { LetterPair, Options } from "$lib/types";
 import type { LetterPairStoreType } from "$lib/stores/letter-pairs";
 
+import { SvelteURLSearchParams } from "svelte/reactivity";
+import { shuffleArray } from "$lib/utils";
+
 import { isSpeffzPairValid } from "$lib/utils";
 
 const HOUR_MS = 60 * 60 * 1000;
@@ -298,6 +301,35 @@ export function getQuizKit(
 			}
 		}
 	}
+}
+export function getQuizUrl(
+	category: string,
+	subcategory: string | null,
+	letters: QuizLetters,
+	unlimited: boolean,
+	old: boolean
+) {
+	if (letters.total === 0 && (!old || letters.old.length === 0)) {
+		return "";
+	}
+
+	const searchParams = new SvelteURLSearchParams();
+	searchParams.set("category", category);
+	if (subcategory) {
+		searchParams.set("subcategory", subcategory);
+	}
+	if (unlimited) {
+		searchParams.set("unlimited", "yes");
+	}
+	if (old && letters.old[0]?.speffz_pair) {
+		const tempOld = shuffleArray(letters.old.slice(0, 5));
+		searchParams.set("old", tempOld.length.toString());
+		searchParams.set("sp", tempOld[0].speffz_pair);
+	} else {
+		searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
+	}
+
+	return `/quiz?${searchParams.toString()}`;
 }
 
 export function getGetNextLetters(

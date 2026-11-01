@@ -1,19 +1,19 @@
 <script lang="ts">
-	import type { QuizLetters } from "$lib/quiz";
-
-	import { SvelteDate, SvelteURLSearchParams } from "svelte/reactivity";
+	import { SvelteDate } from "svelte/reactivity";
 	import {
 		letterPairStore,
 		letterPairStoreStatus,
 		fetchAndLoadMnemonicsAndAlgorithms,
 	} from "$lib/stores/letter-pairs";
 	import { optionsStore, getCardsPerGroupLimit } from "$lib/stores/options";
-	import { upperCaseFirst, getTrueKeys, shuffleArray } from "$lib/utils";
+	import { upperCaseFirst, getTrueKeys } from "$lib/utils";
 	import { getQuizKit } from "$lib/quiz";
 	import { onMount } from "svelte";
+	import QuizCategories from "./quiz-categories.svelte";
 
 	const DAY_MS = 1000 * 60 * 60 * 24;
 
+	const startingPinnedCount = $state($optionsStore.pinnedQuizzes.length);
 	let quizCategories = $derived(
 		[
 			getQuizKit("memo", getTrueKeys($optionsStore.chosenBuffers).join(","), $optionsStore),
@@ -44,36 +44,6 @@
 			.sort((a, b) => a.sortString.localeCompare(b.sortString))
 	);
 	let cutoffNow = $state(new Date());
-
-	const getQuizUrl = (
-		category: string,
-		subcategory: string | null,
-		letters: QuizLetters,
-		unlimited: boolean,
-		old: boolean
-	) => {
-		if (letters.total === 0 && (!old || letters.old.length === 0)) {
-			return "";
-		}
-
-		const searchParams = new SvelteURLSearchParams();
-		searchParams.set("category", category);
-		if (subcategory) {
-			searchParams.set("subcategory", subcategory);
-		}
-		if (unlimited) {
-			searchParams.set("unlimited", "yes");
-		}
-		if (old && letters.old[0]?.speffz_pair) {
-			const tempOld = shuffleArray(letters.old.slice(0, 5));
-			searchParams.set("old", tempOld.length.toString());
-			searchParams.set("sp", tempOld[0].speffz_pair);
-		} else {
-			searchParams.set("sp", letters.next[0]?.speffz_pair || letters.retry[0]?.speffz_pair);
-		}
-
-		return `/quiz?${searchParams.toString()}`;
-	};
 
 	onMount(() => {
 		// @todo(nick-ng): refactor this into a shared function
@@ -111,7 +81,7 @@
 		<div class="">{upperCaseFirst($letterPairStoreStatus.message)}</div>
 	{:else}
 		<div>
-			<div class="align-center mt-5 mb-2 flex flex-col items-end gap-2">
+			<div class="align-center mt-5 mb-2 flex flex-col items-stretch gap-2">
 				<div class="flex flex-row justify-between self-stretch">
 					<button
 						class={`${$letterPairStoreStatus.status !== "loaded" ? "bg-slate-200" : ""}`}
@@ -153,97 +123,31 @@
 						Limit: {getCardsPerGroupLimit($optionsStore)}
 					</button>
 				</div>
-				{#each quizCategories as quizCategory (`${quizCategory.category}-${quizCategory.subcategory || "*"}`)}
-					{@const quizKit = getQuizKit(
-						quizCategory.category,
-						quizCategory.subcategory,
-						$optionsStore
-					)}
-					{@const quizId = `${quizKit.category}-${quizKit.subcategory || "*"}`}
-					{@const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId)}
-					{@const letters = quizKit.getNextLetters(
-						Object.values($letterPairStore),
-						cutoffNow,
-						getCardsPerGroupLimit($optionsStore)
-					)}
-					{@const unlimitedLetters = quizKit.getNextLetters(
-						Object.values($letterPairStore),
-						cutoffNow,
-						-1
-					)}
-					<div
-						class={`${
-							quizCategory.category !== "memo" && quizCategory.subcategory ? "w-9/10" : "w-full"
-						} group relative flex flex-row gap-1`}
-						style={`order: ${(letters.total === 0 ? 15 : 10) - (isPinnedQuiz ? 10 : 0)};`}
-					>
-						<a
-							class={`${letters.old.length === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(
-								quizCategory.category,
-								quizCategory.subcategory,
-								letters,
-								false,
-								true
-							)}
-						>
-							🔕
-						</a>
-						{#if quizCategory.all.length > $optionsStore.cardsPerGroupPerDay}
-							<a
-								class={`${unlimitedLetters.total === 0 ? "bg-emerald-100" : ""} like-button block py-2 text-center text-xl leading-none`}
-								href={getQuizUrl(
-									quizCategory.category,
-									quizCategory.subcategory,
-									unlimitedLetters,
-									true,
-									false
-								)}
-							>
-								♾️
-							</a>
-						{/if}
-						<a
-							class={`${letters.total === 0 ? "bg-emerald-100" : ""} like-button block grow py-2 text-center text-xl leading-none`}
-							href={getQuizUrl(
-								quizCategory.category,
-								quizCategory.subcategory,
-								letters,
-								false,
-								false
-							)}
-						>
-							{quizKit.title}
-							{unlimitedLetters.total} ({quizCategory.all.length})
-						</a>
-						<details class="hidden lg:block">
-							<summary class="like-button py-2">🔍</summary>
-							<div
-								class="like-button absolute top-[calc(100%+0.25rem)] right-0 z-1 bg-white p-2 text-left uppercase"
-							>
-								{quizCategory.all
-									.map((a) => a.speffz_pair)
-									.sort()
-									.join(", ")}
-							</div>
-						</details>
-						<button
-							type="button"
-							class={`${isPinnedQuiz ? "bg-blue-100" : ""}`}
-							onclick={() => {
-								if (isPinnedQuiz) {
-									$optionsStore.pinnedQuizzes = $optionsStore.pinnedQuizzes.filter(
-										(q) => q !== quizId
-									);
-								} else {
-									$optionsStore.pinnedQuizzes = [...$optionsStore.pinnedQuizzes, quizId];
-								}
-							}}
-						>
-							📌
-						</button>
-					</div>
-				{/each}
+				{#if startingPinnedCount === 0}
+					<QuizCategories quizKits={quizCategories} {cutoffNow} />
+				{:else}
+					<QuizCategories
+						quizKits={quizCategories.filter((a) => {
+							const quizId = `${a.category}-${a.subcategory || "*"}`;
+							const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId);
+
+							return isPinnedQuiz;
+						})}
+						{cutoffNow}
+					/>
+					<details>
+						<summary class="mb-1 text-xl">Other Categories</summary>
+						<QuizCategories
+							quizKits={quizCategories.filter((a) => {
+								const quizId = `${a.category}-${a.subcategory || "*"}`;
+								const isPinnedQuiz = $optionsStore.pinnedQuizzes.includes(quizId);
+
+								return !isPinnedQuiz;
+							})}
+							{cutoffNow}
+						/>
+					</details>
+				{/if}
 			</div>
 		</div>
 	{/if}
