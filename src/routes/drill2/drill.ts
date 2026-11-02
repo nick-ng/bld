@@ -203,3 +203,25 @@ function getDecayedDrillTime(alg: Algorithm | undefined): number {
 
 	return alg.drill_time_ms + extraMs;
 }
+
+const NEW_TIME_WEIGHT = 0.6;
+export function getNewDrillTime(
+	oldDrillTimeMs: number,
+	newDrillTimeMs: number,
+	correct: boolean,
+	options: Options
+) {
+	if (!correct) {
+		const baseWrongDrillTimeMs = Math.max(oldDrillTimeMs, newDrillTimeMs);
+		if (baseWrongDrillTimeMs < options.drillTarget * 1000) {
+			return options.drillTarget * 1000 * 1.01;
+		}
+
+		return Math.min(Math.round(baseWrongDrillTimeMs * 1.1), baseWrongDrillTimeMs + 2000, HOUR_MS);
+	}
+
+	return Math.min(
+		Math.round(newDrillTimeMs * NEW_TIME_WEIGHT + oldDrillTimeMs * (1 - NEW_TIME_WEIGHT)),
+		newDrillTimeMs * 2
+	);
+}
