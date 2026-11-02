@@ -132,9 +132,11 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[],
 		potentialUndrilled.push(temp.speffz_pair);
 	}
 
-	const copiesCount = Math.max(1, potentialAlgs.length / potentialUndrilled.length);
-	for (let i = 0; i < copiesCount; i++) {
-		potentialAlgs.push(...potentialUndrilled);
+	if (potentialUndrilled.length >= 1) {
+		const copiesCount = Math.max(1, potentialAlgs.length / potentialUndrilled.length);
+		for (let i = 0; i < copiesCount; i++) {
+			potentialAlgs.push(...potentialUndrilled);
+		}
 	}
 
 	if (potentialAlgs.length === 0) {
