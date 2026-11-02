@@ -16,18 +16,16 @@
 	import { goto } from "$app/navigation";
 	import {
 		MINUTE_MS,
-		HOUR_MS,
 		getDrillUrl,
 		getFullMoves,
 		getNextTimeDrillCases,
 		getFirstTimeDrillCaseUrl,
 		getTimeDrillStatus,
+		getNewDrillTime,
 	} from "./drill";
 
 	// @todo(nick-ng): show stats after drill
 	// @todo(nick-ng): remove the old /drill and change this to /drill
-
-	const NEW_TIME_WEIGHT = 0.6;
 
 	// "stand-by", "go", "review", "done"
 	let drillState = $state("stand-by");
@@ -168,24 +166,6 @@
 			return;
 		}
 
-		let newDrillTimeMs = drillTimeMs;
-		if (!correct) {
-			// start from the worse of the new and old drill time
-			const baseWrongDrillTimeMs = Math.max(alg.drill_time_ms, drillTimeMs);
-			// apply penalty for getting the quiz wrong
-			newDrillTimeMs = Math.min(
-				Math.round(baseWrongDrillTimeMs * 1.1),
-				baseWrongDrillTimeMs + 2000,
-				HOUR_MS
-			);
-		} else if (alg.drill_time_ms < 10 * MINUTE_MS) {
-			// lower of average drill time, and double the drill time just set
-			newDrillTimeMs = Math.min(
-				Math.round(drillTimeMs * NEW_TIME_WEIGHT + alg.drill_time_ms * (1 - NEW_TIME_WEIGHT)),
-				drillStartMs * 2
-			);
-		}
-
 		if (solvedCube) {
 			prev = [];
 		} else {
@@ -213,6 +193,7 @@
 		searchParams.set("n", next.join(" "));
 		searchParams.set("p", prev.join(" "));
 
+		const newDrillTimeMs = getNewDrillTime(alg.drill_time_ms, drillTimeMs, correct, $optionsStore);
 		if (correct) {
 			let gradeQ = 3;
 			if (newDrillTimeMs < $optionsStore.drillTarget * 1000) {
@@ -328,10 +309,21 @@
 				{#if drillState === "review"}
 					{@const alg = flatAlgorithms.find((a) => a.speffz_pair === next[0])}
 					{@const timeDrillStatus = getTimeDrillStatus(page.url.searchParams.get("e"))}
-					<div class="text-lg">
-						<span class="uppercase">{next[0]}</span> took: {msToMinAndSec(drillTimeMs, true)}
-					</div>
 					{#if alg}
+						<div class="text-lg">
+							<span class="uppercase">{next[0]}</span>: {msToMinAndSec(drillTimeMs, true)} ({msToMinAndSec(
+								alg.drill_time_ms,
+								true
+							)} ⇨ {msToMinAndSec(
+								getNewDrillTime(
+									alg.drill_time_ms,
+									drillTimeMs,
+									drillResult !== "wrong",
+									$optionsStore
+								),
+								true
+							)})
+						</div>
 						<div class="text-lg">
 							{parseCommutator(alg.moves).normalisedCommutator}
 						</div>
