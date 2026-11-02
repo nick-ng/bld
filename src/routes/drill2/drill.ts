@@ -93,10 +93,11 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[],
 
 	// fastest first, slowest last
 	drilledAlgs.sort((a, b) => {
-		return a.drill_time_ms - b.drill_time_ms;
+		return getDecayedDrillTime(a) - getDecayedDrillTime(b);
 	});
 	const slowest = drilledAlgs.pop();
-	if (slowest && slowest.drill_time_ms > options.drillTarget * 1000) {
+	const slowestDecayedDrillTimeMs = getDecayedDrillTime(slowest);
+	if (slowest && slowestDecayedDrillTimeMs > options.drillTarget * 1000) {
 		potentialAlgs.push(slowest.speffz_pair);
 		// up to 6 cases within
 		for (let i = 0; i < 5; i++) {
@@ -105,11 +106,11 @@ export function getNextTimeDrillCases(flatAlgs: Algorithm[], previous: string[],
 				break;
 			}
 
-			if (temp.drill_time_ms < slowest.drill_time_ms * SLOW_THRESHOLD) {
+			if (getDecayedDrillTime(temp) < options.drillTarget * 1000) {
 				break;
 			}
 
-			if (temp.drill_time_ms < options.drillTarget * 1000) {
+			if (getDecayedDrillTime(temp) < slowestDecayedDrillTimeMs * SLOW_THRESHOLD) {
 				break;
 			}
 
@@ -190,4 +191,15 @@ export function getFirstTimeDrillCaseUrl(
 		prev: [],
 		endS: Math.floor((Date.now() + durationMs) / 1000),
 	});
+}
+
+const DAYS_PER_MS = 30 / 10; // 30 days per 0.01 s
+function getDecayedDrillTime(alg: Algorithm | undefined): number {
+	if (!alg) {
+		return 0;
+	}
+	const ageDays = (Date.now() - alg.last_drill_at.valueOf()) / (1000 * 60 * 60 * 24);
+	const extraMs = Math.floor(ageDays / DAYS_PER_MS);
+
+	return alg.drill_time_ms + extraMs;
 }
