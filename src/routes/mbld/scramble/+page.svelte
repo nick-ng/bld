@@ -10,7 +10,7 @@
 	let scrambles = $derived(
 		selectedAttempt === -1 ? generatedScrambles : $mbldStore[selectedAttempt - 1]?.scrambles
 	);
-	const previewSize = 120;
+	const previewSize = 115;
 </script>
 
 <div>
@@ -93,6 +93,19 @@
 		<table>
 			<tbody>
 				{#each scrambles as scramble, i (`${scramble}`)}
+					{@const moveChunks = scramble.split(" ").reduce<string[][]>((prev, curr) => {
+						if (prev.length === 0) {
+							prev.push([]);
+						}
+
+						if (prev[prev.length - 1].length < 9) {
+							prev[prev.length - 1].push(curr);
+						} else {
+							prev.push([curr]);
+						}
+
+						return prev;
+					}, [])}
 					{#if i % 7 === 0}
 						<tr class="bg-slate-200">
 							<td class="border border-black px-2 text-right">#</td>
@@ -102,23 +115,34 @@
 					{/if}
 					<tr>
 						<td class="border border-black px-2 text-right">{i + 1}</td>
-						<td class="border border-black px-2">
-							<div class="grid grid-cols-9 gap-2">
-								{#each scramble.split(" ") as move, i (`${move}-${i}`)}
-									<div>{move}</div>
-								{/each}
-							</div>
+						<td class="border border-black">
+							<table class="w-full">
+								<tbody>
+									{#each moveChunks as moveChunk, i (`move-chunk-${i}`)}
+										<tr class="odd-rows m-0 w-full">
+											{#each moveChunk as move, i (`move-${move}-${i}`)}
+												<td class="p-2 text-center text-xl">{move}</td>
+											{/each}
+											{#if moveChunk.length < 9}
+												<td colspan={9 - moveChunk.length}> </td>
+											{/if}
+										</tr>
+									{/each}
+								</tbody>
+							</table>
 						</td>
 						<td class="border border-black p-2">
-							<twisty-player
-								puzzle="3x3x3"
-								alg={scramble}
-								visualization="2D"
-								hint-facelets="none"
-								background="none"
-								control-panel="none"
-								style={`width: ${previewSize * (4 / 3)}px; height: ${previewSize}px;`}
-							></twisty-player>
+							<div class="flex flex-row items-center justify-center">
+								<twisty-player
+									puzzle="3x3x3"
+									alg={scramble}
+									visualization="2D"
+									hint-facelets="none"
+									background="none"
+									control-panel="none"
+									style={`width: ${previewSize * (4 / 3)}px; height: ${previewSize}px;`}
+								></twisty-player>
+							</div>
 						</td>
 					</tr>
 				{/each}
