@@ -6,6 +6,8 @@
 
 	let previewOnLeft = $state(false);
 
+	const previewSize = 400;
+
 	const scrambleToMoves = (
 		scramble: string
 	): { move: string; isPrime: boolean; isDouble: boolean; isWide: boolean; side: string }[] => {
@@ -121,10 +123,11 @@
 		<twisty-player
 			puzzle="3x3x3"
 			alg={scramble}
+			visualization="2D"
 			hint-facelets="none"
 			background="none"
 			control-panel="none"
-			style="width: 500px; height: 500px;"
+			style={`width: ${previewSize * (4 / 3)}px; height: ${previewSize}px;`}
 		></twisty-player>
 	</div>
 </div>
